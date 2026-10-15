@@ -4,6 +4,21 @@ Quick reference for the Methodology Reviewer when evaluating statistical rigor a
 
 ---
 
+## Field-Norm Calibration (read first)
+
+Apply these standards in proportion to the experiment's scale and the field's practice:
+
+| Setting | Realistic expectation |
+|---------|-----------------------|
+| Small/medium experiments (CIFAR-scale, few-shot, fine-tuning, RL, medical datasets of hundreds to thousands of samples) | Multiple seeds (≥ 3, ideally 5) with mean ± std or CIs. Missing variance is a real weakness. |
+| Large-scale training (ImageNet-scale pretraining, COCO/ADE20K detection or segmentation, video, large generative models) | A single run per configuration is common practice. Ask for variance when the claimed gain is small relative to known run-to-run noise (detection/segmentation: often ~0.2–0.5 AP/mIoU), or ask for variance on a reduced-scale proxy. Don't treat a single run alone as a High-severity flag. |
+| Foundation-model / API evaluation | Variance over prompts, sampling seeds and decoding settings matters more than training seeds. |
+| Theory with illustrative experiments | Statistical rigor matters less than the experiments actually testing the theory's prediction. |
+
+The guiding question: **"Could the claimed improvement plausibly be noise?"** If yes, and the paper gives no evidence that it isn't, that is a weakness, whatever the field's norms.
+
+---
+
 ## Minimum Reporting Requirements by Study Type
 
 ### Supervised Learning Experiments
@@ -29,6 +44,16 @@ Quick reference for the Methodology Reviewer when evaluating statistical rigor a
 | Qualitative results | Yes | Cherry-picked + random samples |
 | User study (for perceptual quality) | Recommended | Especially if claiming perceptual improvement |
 | Diversity metrics | Recommended | Mode collapse detection |
+
+### Foundation Model / LLM / VLM Evaluation
+
+| Item | Required? | Notes |
+|------|-----------|-------|
+| Exact model versions (and API dates for closed models) | Yes | Closed APIs change silently over time |
+| Prompts, few-shot exemplars, decoding parameters | Yes | Release them; report sensitivity to prompt variation |
+| Contamination analysis | Yes for public benchmarks | Overlap of the test set with pretraining or fine-tuning data; prefer post-cutoff or held-out sets |
+| LLM-as-judge validation | If used | Agreement with human judgments, position/length-bias controls, judge model version |
+| Number of samples / attempts (pass@k, best-of-n) | Yes | Compare methods with equal sampling budgets |
 
 ### Reinforcement Learning Experiments
 
@@ -82,11 +107,14 @@ Quick reference for the Methodology Reviewer when evaluating statistical rigor a
 
 | Situation | Recommended Test |
 |-----------|-----------------|
-| Comparing 2 models, normally distributed results | Paired t-test |
+| Comparing 2 classifiers on the same test set | McNemar's test (per-sample correctness), or paired bootstrap |
+| Comparing 2 models on mAP / mIoU / FID on the same test set | Paired bootstrap over test images (resample images, recompute the metric), report a 95% CI of the difference |
+| Comparing 2 models across seeds, normally distributed results | Paired t-test (pair by seed or by dataset) |
 | Comparing 2 models, non-normal or small N | Wilcoxon signed-rank test |
 | Comparing 3+ models | Friedman test + post-hoc Nemenyi |
 | Comparing across multiple datasets | Two-way ANOVA or Friedman test |
-| Results from single run | Cannot do significance testing — this is a red flag |
+| Results from single run | Seed-level significance testing impossible; test-set bootstrap still possible. Flag only per the Field-Norm Calibration above |
+| Human preference studies (e.g., A/B for generation quality) | Binomial/sign test on preferences; report rater count, items per rater and inter-rater agreement |
 
 ### Multiple Comparison Correction
 
@@ -104,12 +132,14 @@ If a paper makes 10+ pairwise comparisons without correction, flag this.
 These are common statistical problems to watch for:
 
 ### High-Severity Red Flags
-- [ ] **Single-run results without variance**: Results reported from a single random seed
+- [ ] **Single-run results without variance where gains are small**: see the Field-Norm Calibration above
 - [ ] **Test set contamination**: Evidence that hyperparameters were tuned on the test set
 - [ ] **Missing obvious baselines**: No comparison with the most cited recent method
 - [ ] **Selective reporting**: Results on some datasets/metrics omitted without explanation
 - [ ] **p-hacking signals**: Many comparisons, only significant ones reported
 - [ ] **Training details inconsistency**: Different training budgets for proposed method vs baselines
+- [ ] **Data leakage**: Near-duplicate images across splits, subject/patient/scene overlap, temporal leakage in video, pretraining data containing the test set
+- [ ] **Prompt / checkpoint selection on test data**: Choosing the prompt, checkpoint or threshold that maximizes test performance
 
 ### Medium-Severity Red Flags
 - [ ] **Insufficient runs**: Only 2 runs (3 is minimum, 5 is preferred)
@@ -126,25 +156,23 @@ These are common statistical problems to watch for:
 
 ---
 
-## APA 7th Edition Quick Reference (for Reporting)
+## Reporting Conventions (Tables and Figures)
 
-### Numbers and Statistics
-- Use numerals for: statistical values (M = 4.5), measurements, percentages, ratios
-- Report exact p-values (p = .032), not just p < .05
-- Report effect sizes alongside significance tests
-- Use consistent decimal places (2 for correlations, 3 for p-values)
+### Numbers
+- Report the same number of decimals per metric throughout (e.g., mIoU to 1 decimal, PSNR to 2).
+- Report mean ± std (state *n*) or 95% CIs. For significance tests, give the test name, the statistic and the exact p-value.
+- Give relative and absolute improvements unambiguously: "+1.2 mIoU (absolute)" and not "+3% improvement".
 
-### Table Formatting
-- Title above, notes below
-- Horizontal rules only (top, header separator, bottom — no vertical lines)
-- Bold the best result in comparison tables
-- Use * for statistical significance markers, defined in table notes
+### Tables
+- Caption above (or below, following the venue template), and say what is bold or underlined (best / second best).
+- Group rows by comparable settings (backbone, pretraining data, resolution, extra data). Mark rows reproduced by the authors (†) versus copied from papers.
+- Make the efficiency columns (params, FLOPs, latency) and their measurement conditions explicit.
 
-### Figure Formatting
-- Label all axes with units
-- Include error bars when showing means
-- Use colorblind-friendly palettes
-- Ensure readability in grayscale (for print)
+### Figures
+- Label all axes with units. Show error bars or shaded regions for means.
+- Use colorblind-friendly palettes that still read in grayscale.
+- Qualitative comparisons: same input, crop and resolution for every method; state how the examples were selected (random vs. curated).
+- Don't use truncated y-axes that exaggerate small gains without saying so.
 
 ---
 
@@ -161,3 +189,7 @@ When assessing whether baselines are fairly compared:
 | Correct implementation | Official code or verified reimplementation |
 | Recent versions | Latest available version of baseline methods |
 | Same evaluation protocol | Identical test conditions (resolution, batch size, etc.) |
+| Same backbone & pretraining data | Gains from a stronger backbone or more pretraining data (e.g., ImageNet-22k vs. 1k, web-scale vs. curated) are not method gains |
+| Same test-time tricks | TTA, multi-scale testing, ensembling, sliding window applied to all methods or none |
+| Same extra data / labels | Extra training data, pseudo-labels or additional annotation types disclosed and matched |
+| Efficiency measured identically | Same hardware, batch size, precision (FP32/FP16/INT8), resolution and software stack for latency |

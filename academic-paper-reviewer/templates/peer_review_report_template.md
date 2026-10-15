@@ -8,7 +8,7 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 # Peer Review Report
 
 ## Paper: [Full paper title]
-## Reviewer: [Name] — [Role] ([Affiliation])
+## Reviewer: [Name], [Role] ([descriptive affiliation]; fictional persona)
 ## Expertise: [2–3 specific areas]
 ## Date: [YYYY-MM-DD]
 
@@ -44,7 +44,19 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 [2–4 sentences.]
 - **Suggested Fix**: [Suggestion.]
 
-[Add more if warranted. Minimum 2 weaknesses. Every weakness MUST have a suggested fix.]
+[Add more if warranted. Minimum 2 weaknesses. Every weakness MUST have a suggested fix. Order by severity, most severe first.]
+
+---
+
+## Missing References (Domain Reviewer: required; others: optional)
+
+*Follow the citation-integrity rule: only references you are confident exist; otherwise describe the line of work or mark `[verify]`.*
+
+| Priority | Reference (authors, title, venue/year) | Why it matters |
+|----------|----------------------------------------|----------------|
+| Critical | | |
+| Important | | |
+| Helpful | | |
 
 ---
 
@@ -96,6 +108,12 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 
 ---
 
+## Ethics Review Flag
+
+**[No / Yes]**: [If Yes: the specific concern (e.g., consent for face data, misuse potential, data licensing) and why it needs ethics review]
+
+---
+
 ## Overall Score
 
 **[1–6]**: [1–2 sentence justification]
@@ -129,3 +147,5 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 - **Suggested Fixes are mandatory.** Every weakness must include at least one concrete suggestion. "Do better" is not a suggestion.
 - **Scores must be consistent with text.** If you list serious weaknesses, don't give a score of 4/4 on Quality. If you praise the writing, don't give Clarity 1/4.
 - **Questions should be strategic.** Ask things where the answer would genuinely change your assessment.
+- **Use the 0–100 → 1–4 mapping** in `references/quality_rubrics.md` so the two score sets agree.
+- **No fabricated content.** Every cited location must exist in the manuscript; every recommended reference must follow the citation-integrity rule.

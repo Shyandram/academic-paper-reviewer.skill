@@ -71,12 +71,12 @@ This matrix helps map reviewer consensus to editorial decisions.
 | All 5 reviewers: Accept (5–6) | Strong Accept (6) |
 | 4 Accept + 1 Borderline | Accept (5) |
 | 3 Accept + 2 Borderline | Accept (5) |
-| Majority Accept + DA-CRITICAL | Borderline Accept (4) at best |
+| Majority Accept + upheld DA-CRITICAL | Borderline Accept (4) at best; Borderline Reject (3) if the fix needs new data/experiments |
 | Mixed: 2 Accept + 2 Reject + 1 Borderline | Requires arbitration → typically Borderline (3–4) |
 | Majority Borderline (3–4) | Borderline Accept (4) or Borderline Reject (3) based on DA |
 | 3+ Reject (1–2) | Reject (2) |
 | Any reviewer: Strong Reject + valid justification | Discuss carefully; likely Reject (2) |
-| DA-CRITICAL present | Cannot be Accept (5–6); maximum is Borderline Accept (4) |
+| Upheld DA-CRITICAL present | Cannot be Accept (5–6); see the DA-CRITICAL Ceiling below |
 
 ### Weighted Score Thresholds (Guideline, Not Absolute)
 
@@ -89,7 +89,28 @@ This matrix helps map reviewer consensus to editorial decisions.
 | 35–49 | Reject (2) |
 | < 35 | Strong Reject (1) |
 
-These thresholds are guidelines. The decision should be justified by the review content, not just the numbers. A paper with a weighted average of 72 but a DA-CRITICAL issue should not be scored Accept.
+These thresholds are guidelines. The decision should be justified by the review content, not just the numbers. A paper with a weighted average of 72 and an upheld DA-CRITICAL issue is never Accept.
+
+### DA-CRITICAL Ceiling (hard rule)
+
+| Upheld DA-CRITICAL issues | Maximum decision |
+|---------------------------|------------------|
+| None | No ceiling (decide on content and composite) |
+| All resolvable by clarification or minor additions (rewording claims, adding existing details, small analyses on existing results) | **Borderline Accept (4)** |
+| At least one needs new data, new experiments or a redesign | **Borderline Reject (3)** |
+
+The synthesizer may downgrade a DA-CRITICAL issue to MAJOR only with a written justification tied to the manuscript. The decision may always be *lower* than the ceiling.
+
+### Conference ↔ Journal Mapping
+
+| Overall (1–6) | Journal recommendation | Notes |
+|---------------|------------------------|-------|
+| 6 Strong Accept | Accept (as is or with trivial edits) | |
+| 5 Accept | Minor Revision | Journals rarely accept without any revision |
+| 4 Borderline Accept | Minor Revision, or Major Revision if Priority 1 items need new experiments | |
+| 3 Borderline Reject | Major Revision | Journals give a revision path where a conference would reject |
+| 2 Reject | Reject (resubmission possible after substantial new work) | Major Revision only if the fix path is clear and bounded |
+| 1 Strong Reject | Reject | |
 
 ---
 
@@ -99,12 +120,15 @@ These thresholds are guidelines. The decision should be justified by the review 
 
 Different venues have different acceptance standards:
 
-| Venue Tier | Typical Accept Rate | Calibration |
-|-----------|-------------------|-------------|
-| Top-tier (CVPR, NeurIPS, ICML, Nature) | 20–25% | High bar: need clear novelty + strong evaluation |
-| Strong (ECCV, ICCV, AAAI, IJCAI) | 25–30% | Similar to top-tier, slightly more tolerance for niche contributions |
-| Mid-tier (BMVC, WACV, domain-specific) | 30–40% | Sound work with clear contribution suffices |
-| Workshop | 50–70% | Work in progress acceptable if direction is promising |
+| Venue Tier | Examples | Typical Accept Rate (approx.) | Calibration |
+|-----------|----------|-------------------|-------------|
+| Top-tier conference | CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML | ~20–30% | High bar: clear novelty, strong controlled evaluation, convincing ablations |
+| Top-tier journal | TPAMI, IJCV, Nature-family journals | Selective | Top-conference bar *plus* completeness, depth and long-term value; extended versions of conference papers need substantial new content |
+| Strong | AAAI, IJCAI, TIP, TMLR, MICCAI (for medical imaging) | ~25–35% | Sound and clearly useful; more tolerance for niche or application contributions (TMLR explicitly emphasizes correctness over novelty) |
+| Mid-tier | BMVC, WACV, ACCV, domain journals | ~30–45% | Sound work with a clear contribution suffices |
+| Workshop | CVPR/ICCV/NeurIPS workshops | ~50–70% | Work in progress is acceptable if the direction is promising |
+
+Acceptance rates vary by year; treat them as orientation, not targets. See `references/venue_profiles.md` for review-form conventions.
 
 ### Rebuttal Potential
 

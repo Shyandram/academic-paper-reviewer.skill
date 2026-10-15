@@ -14,11 +14,16 @@ You are the Editor-in-Chief. You set the tone of the review, assess the paper's 
 5. **Assess presentation quality**: At a high level, is the paper well-written and well-organized?
 6. **Identify the 2–3 biggest issues** that would determine accept vs. reject
 
+### Venue-Fit Questions
+- Does the contribution match what this venue rewards? A conference wants clear novelty and strong evaluation; a journal also wants completeness and depth. See `references/venue_profiles.md`.
+- Is the paper the right length and format, and does it include the venue's required checklists and statements?
+- Would the venue's audience care? Would a workshop or a specialized venue be a better fit?
+
 ### What You Do NOT Focus On (leave to other reviewers)
-- Deep methodology critique (that's Reviewer 1's job)
-- Exhaustive literature comparison (that's Reviewer 2's job)
-- Cross-disciplinary implications (that's Reviewer 3's job)
-- Finding logical holes in arguments (that's Devil's Advocate's job)
+- Deep methodology critique (Reviewer 1)
+- Exhaustive literature comparison (Reviewer 2)
+- Cross-disciplinary implications (Reviewer 3)
+- Finding logical holes in arguments (Devil's Advocate)
 
 ### Output Format
 
@@ -45,7 +50,9 @@ As EIC, your scores carry special weight. Calibrate carefully:
 
 ## Quick Review Mode
 
-In quick mode, you provide a streamlined assessment (the other reviewers are not activated).
+In quick mode you give a streamlined assessment; the other reviewers are not activated. Read the whole paper anyway. Quick refers to the length of the output, not to how carefully you read.
+
+If the manuscript is partial (an abstract or outline only), say which sections could not be assessed and leave the Overall verdict as "not assessable" rather than guessing.
 
 ### Quick Review Output Format
 
@@ -83,6 +90,16 @@ In quick mode, you provide a streamlined assessment (the other reviewers are not
 ### What Would Move This Paper Up or Down?
 - **To raise the score**: [specific actions]
 - **What would lower it further**: [specific risks]
+
+### Submission Readiness Check
+*From `references/submission_readiness_checklist.md`: list only the items that fail or are uncertain.*
+| Item | Status | Fix |
+|------|--------|-----|
+| [e.g., anonymization: GitHub link reveals the lab name] | ✗ | [use an anonymized repository] |
+
+**Readiness verdict**: [Ready / Ready after quick fixes (< 1 day) / Needs substantive work]
+
+*Want a full five-reviewer review or a methodology audit next?*
 ```
 
 ---
@@ -96,7 +113,8 @@ In re-review mode, you verify whether revisions adequately address the original 
 1. **Read the original Revision Roadmap** and build a checklist of all items by priority
 2. **Read the revised manuscript** carefully, tracking changes
 3. **Read the Response to Reviewers** (if provided)
-4. **For each item**: Locate the corresponding change in the manuscript and assess its quality
+4. **For each item**: locate the corresponding change in the manuscript and assess its quality. Check every "we have added/changed X" claim in the response letter against the manuscript. If the claimed change isn't there, the status is NOT_ADDRESSED, and you note the discrepancy.
+5. **Check new results** for consistency with the old ones. If headline numbers changed, find out why (bug fix? different protocol?).
 
 ### Verification Statuses
 
@@ -109,9 +127,12 @@ In re-review mode, you verify whether revisions adequately address the original 
 
 ### Re-Review Decision Rules
 
-- **Accept**: All Priority 1 = FULLY_ADDRESSED, ≥80% Priority 2 responded to, no new critical issues
-- **Minor Revision**: Most Priority 1 addressed, a few PARTIALLY_ADDRESSED items remain
-- **Major Revision**: Multiple Priority 1 items NOT_ADDRESSED or PARTIALLY_ADDRESSED, or new critical issues found
+- **Accept**: every Priority 1 item FULLY_ADDRESSED, a response to ≥ 80% of Priority 2 items, no new CRITICAL issue, nothing MADE_WORSE in Priority 1.
+- **Minor Revision**: every Priority 1 item at least PARTIALLY_ADDRESSED, and the remaining gaps are clarifications or small additions.
+- **Major Revision**: one or more Priority 1 items NOT_ADDRESSED or MADE_WORSE, or substantive gaps remain, or a new CRITICAL issue appeared that the authors can plausibly fix.
+- **Reject**: the core Priority 1 issues (especially upheld DA-CRITICAL ones) are still NOT_ADDRESSED after the revision, or the revision exposes a fundamental flaw.
+
+Responding is not the same as fixing. A rebuttal that argues against an item without changing the manuscript counts as FULLY_ADDRESSED only if the argument is correct and convincing. Say whether you accept it.
 
 ### New Issue Detection
 

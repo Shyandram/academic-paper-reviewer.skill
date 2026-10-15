@@ -136,6 +136,23 @@ Structured review criteria differentiated by paper type. Reviewers should identi
 | Practical Implications | Medium | Does the insight lead to actionable recommendations? |
 | Scope | Medium | How broadly does the insight apply? |
 
+### Position / Vision Papers
+
+**Quality Criteria:**
+| Criterion | Weight | What to Check |
+|-----------|--------|---------------|
+| Clarity of Thesis | High | Is the position stated precisely enough to be wrong? |
+| Argument Quality | High | Is the reasoning sound? Are counter-positions engaged fairly? |
+| Evidence | Medium | Are claims supported by literature, data or case studies, even if no new experiments are run? |
+| Significance | High | If adopted, would the position change what the community does? |
+| Actionability | Medium | Concrete research agenda, benchmarks or recommendations? |
+
+**Common Pitfalls:**
+- A survey disguised as a position paper (no actual position)
+- Straw-manning the opposing view
+- Sweeping claims without evidence
+- No concrete implications for research practice
+
 ---
 
 ## Cross-Cutting Considerations
@@ -161,3 +178,7 @@ Structured review criteria differentiated by paper type. Reviewers should identi
 - Self-plagiarism or recycled content from prior publications
 - Inconsistency between abstract claims and experimental results
 - Missing related work that directly competes with the paper
+- Gains that disappear once backbone, pretraining data or resolution are matched
+- Benchmark contamination (test data seen during pretraining) not discussed for foundation-model results
+- Numbers in the abstract that don't match the tables
+- Figures with signs of duplication or manipulation (report factually to the editor; never accuse)

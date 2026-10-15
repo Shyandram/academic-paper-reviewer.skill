@@ -8,7 +8,8 @@
 ## Paper: [Full title]
 ## Submission ID: [if available]
 ## Date: [YYYY-MM-DD]
-## Review Team: [List 5 reviewers with roles]
+## Target Venue: [venue] | Paper Type: [type]
+## Review Team (fictional personas): [5 reviewers with roles]
 
 ---
 
@@ -20,6 +21,8 @@
 
 ### Aggregated Dimension Scores (Confidence-Weighted)
 
+*Paste the markdown output of `python3 scripts/aggregate_scores.py scores.json` here, or fill in the table by hand with the same formulas.*
+
 | Dimension | EIC | R1 (Meth.) | R2 (Domain) | R3 (Persp.) | DA | Weighted Avg | Spread |
 |-----------|-----|------------|-------------|-------------|-----|-------------|--------|
 | Technical Rigor | | | | | | | |
@@ -30,6 +33,9 @@
 | Reproducibility | | | | | | | |
 | Ethical Compliance | | | | | | | |
 | **Composite** | | | | | | **[avg]** | |
+
+**Composite-implied decision**: [n] | **DA cap**: [none / 4 / 3] | **Final decision**: [n] ([reason if it differs from the composite band])
+**Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
 
 ### NeurIPS-Style Scores (EIC Final)
 
@@ -98,11 +104,14 @@ Editor-in-Chief
 |-------|-----|---------|-------------|
 | [issue] | [reviewers] | [reviewers] | [EIC's reasoning] |
 
+### Score Spread Discussion
+[For each dimension flagged ⚠ (spread > 20): which reviewers diverge, why, and which view the editor adopts]
+
 ### Devil's Advocate Highlights
-| Issue ID | Severity | Issue | Addressed by Others? |
-|----------|----------|-------|---------------------|
-| DA-C1 | CRITICAL | [issue] | [Yes/No — if yes, which reviewer] |
-| DA-M1 | MAJOR | [issue] | [Yes/No] |
+| Issue ID | Severity | Issue | Raised by Others? | Ruling | Resolvable by |
+|----------|----------|-------|-------------------|--------|---------------|
+| DA-C1 | CRITICAL | [issue] | [Yes/No; which reviewer] | [Upheld / Downgraded to MAJOR: reason] | [Clarification/minor additions / New data/experiments] |
+| DA-M1 | MAJOR | [issue] | [Yes/No] | n/a | n/a |
 
 ---
 
@@ -111,17 +120,17 @@ Editor-in-Chief
 ### Priority 1 — Required (Must Fix)
 *All Priority 1 items must be addressed for acceptance.*
 
-| # | Issue | Source | Location | Suggested Fix | Effort |
-|---|-------|--------|----------|---------------|--------|
-| R1 | [issue] | [reviewer(s)] | [Section/Table/Fig] | [fix] | [Low/Med/High] |
-| R2 | [issue] | [reviewer(s)] | [location] | [fix] | [effort] |
+| # | Issue | Source IDs | Location | Suggested Fix | Effort | Rebuttal-feasible? |
+|---|-------|-----------|----------|---------------|--------|--------------------|
+| R1 | [issue] | [e.g., DA-C1, R1-W2] | [Section/Table/Fig] | [fix] | [Low/Med/High; GPU-h] | [Yes/No] |
+| R2 | [issue] | [IDs] | [location] | [fix] | [effort] | [Yes/No] |
 
 ### Priority 2 — Strongly Suggested (Should Fix)
 *Addressing these significantly strengthens the paper.*
 
-| # | Issue | Source | Suggested Fix | Effort |
-|---|-------|--------|---------------|--------|
-| S1 | [issue] | [reviewer(s)] | [fix] | [effort] |
+| # | Issue | Source IDs | Suggested Fix | Effort | Rebuttal-feasible? |
+|---|-------|-----------|---------------|--------|--------------------|
+| S1 | [issue] | [IDs] | [fix] | [effort] | [Yes/No] |
 
 ### Priority 3 — Nice to Fix (Optional)
 *Would improve the paper but not required for acceptance.*
@@ -153,7 +162,7 @@ Editor-in-Chief
 
 ---
 
-## Decision: [Accept / Minor Revision / Major Revision]
+## Decision: [Accept / Minor Revision / Major Revision / Reject]
 
 ---
 
@@ -177,6 +186,13 @@ Editor-in-Chief
 | # | Original Comment | Status |
 |---|-----------------|--------|
 | N1 | [Original text] | [Status] |
+
+---
+
+## Response Letter Verification
+| Claim in response letter | Found in manuscript? | Location | Note |
+|--------------------------|---------------------|----------|------|
+| [e.g., "Added a matched-backbone comparison"] | [Yes / No / Partially] | [Table X] | [..] |
 
 ---
 
@@ -212,31 +228,6 @@ Editor-in-Chief
 
 ---
 
-## Revision Response Template (for Authors)
+## Response Letter (for Authors)
 
-```markdown
-# Response to Reviewers
-
-## Paper: [Title]
-## Date: [YYYY-MM-DD]
-
----
-
-We thank the reviewers for their thorough and constructive feedback. Below we address each comment point by point. Changes in the revised manuscript are highlighted in blue.
-
----
-
-## Response to [Reviewer Role]: [Reviewer Name]
-
-### [R/S/N]-[#]: [Brief issue title]
-
-**Reviewer Comment**: [Original comment — keep brief]
-
-**Author Response**: [Your response]
-
-**Changes Made**: [Specific changes, with locations: "Section X.X, paragraph Y" or "Table Z, row W"]
-
----
-
-[Repeat for each comment from each reviewer]
-```
+Authors' response letters use `templates/revision_response_template.md` (journals) or `templates/rebuttal_template.md` (conference rebuttals).

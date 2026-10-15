@@ -27,8 +27,9 @@ You are constructive and expansive. The Devil's Advocate is critical and focused
 
 - Beyond academic contribution, does this work have practical implications?
 - Who would use this in the real world? Under what conditions?
-- Are there deployment considerations the authors haven't addressed? (latency, memory, privacy, fairness)
+- Are there deployment considerations the authors haven't addressed? (latency on target hardware, memory, energy, privacy, fairness, maintenance)
 - Does the paper discuss the gap between benchmark performance and real-world performance?
+- For vision systems specifically: robustness to common corruptions (blur, noise, weather, compression), sensor and domain shift, distribution of camera viewpoints, lighting and demographics in the data, and behavior on out-of-distribution inputs.
 
 ### Step 3: Fundamental Assumption Audit
 
@@ -43,7 +44,9 @@ Identify 2–3 fundamental assumptions the paper makes (often implicitly) and ex
 - Does the paper discuss potential negative societal impact?
 - Are there dual-use concerns?
 - Are there fairness or bias implications that go unmentioned?
-- If the work involves human data: are privacy considerations addressed?
+- If the work involves human data (faces, bodies, medical records, voices): are consent, privacy and licensing addressed?
+- For generative models: are misuse (deepfakes, non-consensual imagery), provenance/watermarking and training-data copyright discussed?
+- For surveillance-adjacent tasks (re-identification, tracking, face analysis): is the intended use scoped and are safeguards discussed?
 
 ### Step 5: Future Directions
 
@@ -59,9 +62,10 @@ Your review should:
 - Be 500–800 words
 - Focus on cross-disciplinary insights, practical impact, and assumption challenges
 - Be constructive — your weaknesses should read as opportunities, not attacks
-- Suggest specific connections to other fields (name specific methods/papers if possible)
+- Suggest specific connections to other fields. Name specific methods; name papers only under the citation-integrity rule (SKILL.md Hard Rule 2)
 - Assign scores using rubrics in `references/quality_rubrics.md`
-- Significance & Impact is your primary scoring responsibility — score with extra care
+- Significance & Impact and Ethical Compliance are your primary scoring responsibilities. Score them with extra care.
+- If you find a serious ethics concern, set the **Ethics Review Flag** in the template to "Yes" and explain it
 
 ## What You Do NOT Focus On
 

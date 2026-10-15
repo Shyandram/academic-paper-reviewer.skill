@@ -29,6 +29,10 @@ Therefore: [Conclusion/Main Claim]
 
 This forces clarity about what exactly you're challenging.
 
+### Step 1b: Steelman First
+
+In 2–3 sentences, state the strongest version of the paper's case. You may only attack the argument after you can state it at its best. This prevents straw-man critiques.
+
 ### Step 2: Strongest Counter-Argument (200–300 words)
 
 Write the single strongest objection to the paper's main claim. This should be:
@@ -68,6 +72,16 @@ Systematically check for these patterns:
 - Are there confounding factors that aren't controlled for?
 - Could a simpler method achieve similar results?
 
+#### Numerical Sanity Check
+- Recompute at least two headline numbers: improvements claimed in the abstract, averages in tables, percentage gains.
+- Do numbers in the abstract, text, tables and figures agree?
+- Do reported baseline numbers match what those baselines report in their own papers under the same protocol? If not, is the discrepancy explained?
+
+#### Visual Evidence Check (CV papers)
+- Are qualitative comparisons on the same inputs, crops and resolution for all methods?
+- Are the qualitative examples random or selected? Is the selection procedure stated?
+- Are there signs of duplicated or manipulated figure panels? Report these factually as integrity concerns, never as accusations.
+
 #### "So What?" Test
 - Even if everything in the paper is correct, does it matter?
 - Is the problem important enough to warrant a publication?
@@ -79,6 +93,13 @@ Systematically check for these patterns:
 - If this technology were deployed, who might be negatively affected?
 - Are there failure modes that would matter to practitioners but not to benchmark designers?
 
+## Calibration
+
+- CRITICAL is for issues that genuinely invalidate a central claim. Most papers have 0–1 CRITICAL issues. If you find none, say so explicitly. Do not promote a MAJOR issue to CRITICAL just to have one.
+- Every issue needs a location and a concrete suggested fix.
+- Separate "the evidence doesn't support the claim as stated" (fixable by narrowing the claim) from "the evidence contradicts the claim" (much more serious). Mark which applies.
+- For each CRITICAL issue, say whether it could be resolved **by clarification or minor additions** or whether it **needs new data, experiments or a redesign**. The synthesizer uses this to set the decision cap.
+
 ## Output Format
 
 **The Devil's Advocate does NOT use the standard peer review template.** Use this format instead:
@@ -88,6 +109,11 @@ Systematically check for these patterns:
 
 ## Paper: [title]
 ## Reviewer: [name, affiliation]
+
+---
+
+## Steelman
+[2–3 sentences: the strongest version of the paper's case]
 
 ---
 
@@ -110,9 +136,11 @@ N. [PN]
 ### CRITICAL Issues
 *Issues that fundamentally undermine the paper's claims. If not addressed, the paper should not be accepted.*
 
-| # | Dimension | Location | Issue | Suggested Fix |
-|---|-----------|----------|-------|---------------|
-| DA-C1 | [Logic/Evidence/Scope/Ethics] | [Section X.X / Table Y / Eq. Z] | [Description] | [How to address] |
+| # | Dimension | Location | Issue | Suggested Fix | Resolvable by |
+|---|-----------|----------|-------|---------------|---------------|
+| DA-C1 | [Logic/Evidence/Scope/Ethics/Integrity] | [Section X.X / Table Y / Eq. Z] | [Description] | [How to address] | [Clarification/minor additions — OR — New data/experiments/redesign] |
+
+*If none: write "No CRITICAL issues found." and explain in one sentence why the core claim survives.*
 
 ### MAJOR Issues
 *Significant concerns that weaken the paper but don't invalidate it.*
@@ -129,6 +157,10 @@ N. [PN]
 | DA-m1 | [Dimension] | [Location] | [Description] |
 
 ---
+
+## Numerical Sanity Check
+| Claim | Reported | Recomputed | Match? |
+|-------|----------|------------|--------|
 
 ## Ignored Alternative Explanations
 [List alternative explanations for the results that the authors haven't considered]
@@ -153,6 +185,8 @@ N. [PN]
 | Experimental Validation | [0–100] | [brief] |
 | Reproducibility | [0–100] | [brief] |
 | Ethical Compliance | [0–100] | [brief] |
+
+## Overall: [1–6] | Confidence: [1–5]
 ```
 
 ## CRITICAL Issue Criteria
@@ -162,9 +196,10 @@ An issue is CRITICAL (not just MAJOR) if it meets ANY of these criteria:
 2. **Fundamental methodological flaw**: The experiment can't test what it claims to test
 3. **Reproducibility impossibility**: Missing information makes reproduction impossible
 4. **Ethical violation**: Unaddressed harm, data misuse, or undisclosed conflicts
-5. **Fabrication/manipulation signal**: Evidence of data manipulation or p-hacking
+5. **Fabrication/manipulation signal**: Evidence of data manipulation, image manipulation or p-hacking (stated factually, as a concern for the editor)
+6. **Undisclosed evaluation leakage**: test data used for training, tuning or prompt selection in a way that inflates the main result
 
-**If you find CRITICAL issues, the Editorial Decision cannot be Accept.** This is a hard constraint.
+**Upheld CRITICAL issues cap the Editorial Decision**: at Borderline Accept (4) if every one is resolvable by clarification or minor additions, and at Borderline Reject (3) otherwise. This is a hard constraint (see `references/editorial_decision_standards.md`).
 
 ## Tone
 

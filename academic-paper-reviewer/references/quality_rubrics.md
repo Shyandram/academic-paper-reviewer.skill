@@ -11,6 +11,14 @@ Calibrated 0–100 scoring rubrics for the 7 review dimensions. All reviewers mu
 3. **Assign a score within that band** — use the full range, not just the midpoint
 4. **Write a brief rationale** referencing specific evidence from the paper
 
+### Calibration Guidance
+
+- **Anchor on the venue.** "Strong" means strong *for the target venue tier*. A solid workshop paper is not a 75 on Novelty against a CVPR bar.
+- **Avoid compression.** Panels tend to put everything at 60–75. Use the full range when the evidence supports it, and make sure the scores separate the paper's best dimension from its worst.
+- **Score the paper, not its potential.** Promised code does not earn Reproducibility points as if it were released (cap at the *Strong* band).
+- **Ethics with nothing at stake.** For a paper with no human data, no deployment risk and no misuse potential, score Ethical Compliance on how honestly limitations are discussed. Typical range: 60–80.
+- **Respect field norms.** Single-seed results on very large benchmarks (e.g., COCO, ImageNet-scale pretraining) are common practice. Penalize them in Experimental Validation only when gains are small relative to known run-to-run variance. See `references/statistical_reporting_standards.md`.
+
 ---
 
 ## Dimension 1: Technical Rigor
@@ -135,6 +143,41 @@ Composite = 0.20 × Technical_Rigor
           + 0.10 × Ethical_Compliance
 ```
 
+#### Benchmark / Survey Papers
+```
+Composite = 0.15 × Technical_Rigor
+          + 0.15 × Clarity
+          + 0.10 × Novelty
+          + 0.20 × Significance
+          + 0.20 × Experimental_Validation
+          + 0.15 × Reproducibility
+          + 0.05 × Ethical_Compliance
+```
+
+#### Analysis / Insight Papers
+```
+Composite = 0.25 × Technical_Rigor
+          + 0.10 × Clarity
+          + 0.20 × Novelty
+          + 0.20 × Significance
+          + 0.15 × Experimental_Validation
+          + 0.05 × Reproducibility
+          + 0.05 × Ethical_Compliance
+```
+
+#### Position / Vision Papers
+```
+Composite = 0.15 × Technical_Rigor      (soundness of argument)
+          + 0.20 × Clarity
+          + 0.25 × Novelty
+          + 0.25 × Significance
+          + 0.05 × Experimental_Validation (supporting evidence, if any)
+          + 0.00 × Reproducibility
+          + 0.10 × Ethical_Compliance
+```
+
+All weight sets sum to 1.00 and are implemented in `scripts/aggregate_scores.py` (paper types `empirical`, `theoretical`, `dataset`, `system`, `benchmark`, `analysis`, `position`; aliases `survey`, `application`, `insight`, `vision`).
+
 ### Decision Mapping
 
 | Composite Score | Typical Decision |
@@ -146,7 +189,26 @@ Composite = 0.20 × Technical_Rigor
 | 35–49 | Reject (2) |
 | < 35 | Strong Reject (1) |
 
-**Important**: These are guidelines, not hard rules. The Editorial Synthesizer should use judgment and the qualitative content of reviews to make the final decision. A paper with a composite of 72 but a DA-CRITICAL issue should not be scored Accept.
+**Important**: These are guidelines, not hard rules. The Editorial Synthesizer uses judgment and the content of the reviews to make the final decision. Upheld DA-CRITICAL issues impose a hard ceiling: 4 if all are resolvable by clarification or minor additions, otherwise 3. A paper with a composite of 72 and an upheld DA-CRITICAL issue is never Accept.
+
+---
+
+## Mapping 0–100 Dimension Scores to NeurIPS-Style 1–4 Scores
+
+Use this mapping so a reviewer's two score sets agree:
+
+| NeurIPS-style score | Derived from | Typical 0–100 range |
+|---------------------|--------------|---------------------|
+| **Quality** | Technical Rigor + Experimental Validation (avg) | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
+| **Clarity** | Clarity & Presentation | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
+| **Significance** | Significance & Impact | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
+| **Originality** | Novelty & Originality | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
+
+A deviation of one step is acceptable when the rationale explains it, e.g., "Quality 2 despite Technical Rigor 72 because the main ablation is missing". Anything larger signals a calibration error.
+
+## Overall (1–6) vs. Own Composite
+
+A reviewer's Overall should usually fall within ±1 of the band implied by their own composite. `scripts/aggregate_scores.py` warns at a gap of ≥ 2. Overall may legitimately sit below the composite band when one decisive flaw dominates. It should not sit above it.
 
 ---
 
