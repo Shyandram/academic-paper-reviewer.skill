@@ -46,6 +46,8 @@ The script implements the formulas in `references/quality_rubrics.md`:
 - Composite-implied decision and the DA-CRITICAL cap.
 - Consistency warnings when a reviewer's Overall differs by ≥ 2 from the band implied by their own composite. Resolve each warning: either the text justifies the score, or the score was miscalibrated. Say which.
 
+Add `--venue <target>` for the target venue, and `--all-venues` (or several `--venue` flags) when the user asked to compare venues. Each venue view re-weights the panel averages with the venue's emphasis vector, applies its bar offset and the DA cap, and translates the result into the venue's own scale and sub-scores (`scripts/venues.json`).
+
 If you can't run code, compute the same quantities by hand and show the composite arithmetic.
 
 ### Step 4: Decision
@@ -68,6 +70,12 @@ Then apply the **ceiling**: the decision may not exceed the DA cap. You may deci
 | **Strong Reject (1)** | Fundamental flaws, known results presented as new, or serious ethical violations |
 
 For journal targets, add the journal recommendation (Accept / Minor Revision / Major Revision / Reject) using the mapping in the standards file.
+
+### Step 4b: Venue Translation and Cross-Venue Outlook
+
+- **Target venue:** report the decision in the venue's own terms (e.g., "ICLR rating 6; Soundness 3, Presentation 3, Contribution 2"), and state the scale's verification status.
+- **Cross-venue outlook (on request):** paste the script's table, then add 2–4 sentences of *content-based* venue advice. For example: "The confound in DA-C1 blocks every venue. Once it is fixed, the paper's correctness-focused profile suits TMLR better than ICLR, where Contribution is the weak sub-score." Use venue-specific rules from `references/venue_profiles.md`: ECCV contribution types, the ACM MM multimedia-scope gate, AAAI Phase-1 risk, and the TPAMI completeness bar for extended conference papers.
+- The table is a heuristic. Never claim it predicts acceptance.
 
 ### Step 5: Revision Roadmap
 

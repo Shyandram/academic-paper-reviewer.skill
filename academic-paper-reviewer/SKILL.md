@@ -1,12 +1,12 @@
 ---
 name: academic-paper-reviewer
-description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five dynamically configured reviewer personas: Editor-in-Chief, Methodology, Domain, Cross-disciplinary Perspective, and Devil's Advocate. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use whenever the user wants to review, critique or score a paper, simulate referee reports or an area-chair decision, check whether a paper is ready for CVPR/ICCV/ECCV/NeurIPS/ICLR/ICML/TPAMI or a similar venue, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, critique this manuscript, is my paper ready, paper feedback, rebuttal, respond to reviewers, check my experiments, re-review."
+description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five dynamically configured reviewer personas: Editor-in-Chief, Methodology, Domain, Cross-disciplinary Perspective, and Devil's Advocate. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use whenever the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.0"
+  version: "2.1"
   last_updated: "2026-10-15"
 ---
 
-# Academic Paper Reviewer v2.0
+# Academic Paper Reviewer v2.1
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (venue fit, methodology, domain positioning, cross-disciplinary impact, and adversarial challenge to the core claim), and consolidates their reports into an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
@@ -49,7 +49,9 @@ Default output (`full` mode):
 3. Editorial Decision Letter, aggregated scores, consensus map and Revision Roadmap (Phase 2)
 4. Optional Socratic revision coaching (Phase 2.5)
 
-Useful modifiers: `target venue: CVPR`, `journal: TPAMI`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
+Useful modifiers: `target venue: CVPR`, `journal: TPAMI`, `compare venues` (or `venues: CVPR, ICLR, TMLR`), `venue format`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
+
+**Supported venue profiles:** CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM Multimedia, TMLR, IEEE TPAMI, IEEE TIP (`references/venue_profiles.md`). Any other venue is reviewed against the closest profile's tier.
 
 ---
 
@@ -116,6 +118,10 @@ Follow `agents/editorial_synthesizer_agent.md`:
 
 For a journal target, also report the journal-style recommendation (Accept / Minor Revision / Major Revision / Reject) using the mapping in `references/editorial_decision_standards.md`.
 
+**Venue translation (always for the target venue; for all venues on `compare venues`).** Run the aggregation with `--venue <key>` (or `--all-venues`). This produces the target venue's own scores (e.g., ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria) and, on request, a **Cross-Venue Outlook**: how the same paper would likely fare at each venue, and why. Present each venue's scale with its verification status. Never present an `assumed`, `secondary` or `unpublished` label as official wording.
+
+**Venue format.** If the user asks for `venue format`, also render each reviewer's report using the target venue's form fields (listed in `scripts/venues.json`) instead of the generic template, keeping the same content.
+
 ### Phase 2.5: Revision Coaching (only if the decision is below Accept)
 
 A Socratic dialogue led by the EIC (see `agents/eic_agent.md`): open with agreed strengths, ask what surprised the author, steer toward consensus issues, ask "If you could change only three things, which three?", rehearse a response to the DA's strongest challenge, then plan the revision. One question per turn, 200–400 words per turn, at most 8 rounds. "Just fix it" skips straight to the final Roadmap.
@@ -173,7 +179,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | Confidence 1–5 | Reviewer certainty | Weights the aggregation |
 | Dimension scores 0–100 | Technical Rigor, Clarity & Presentation, Novelty & Originality, Significance & Impact, Experimental Validation, Reproducibility, Ethical Compliance | Fine-grained, calibrated, aggregated by paper type |
 
-Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue-specific scales (ICLR 1/3/5/6/8/10, journal recommendations) are translated in `references/venue_profiles.md`.
+Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue scales are produced from these internal scores, not scored separately: the script applies each venue's emphasis weights, bar offset and scale (CVF 6-point, ICLR {0,2,4,6,8,10}, ICML 1–5, TMLR Yes/No criteria, IEEE journal recommendations). See `references/venue_profiles.md`.
 
 ---
 
@@ -227,13 +233,14 @@ Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue-
 | `references/editorial_decision_standards.md` | Before deciding: Overall definitions, DA cap, journal mapping |
 | `references/statistical_reporting_standards.md` | Methodology review of quantitative work |
 | `references/cv_review_checklist.md` | Any CV / ML / multimodal paper |
-| `references/venue_profiles.md` | When a target venue is known; rebuttal limits |
+| `references/venue_profiles.md` | Always in Phase 0 and Phase 2: venue forms, scales (with verification status), emphasis, rebuttal rules |
 | `references/submission_readiness_checklist.md` | Quick mode; pre-submission checks |
 | `templates/peer_review_report_template.md` | Phase 1 reports (not DA) |
 | `templates/editorial_decision_template.md` | Phase 2 and re-review |
 | `templates/rebuttal_template.md` | Rebuttal mode (conference) |
 | `templates/revision_response_template.md` | Journal response letters |
-| `scripts/aggregate_scores.py` | Phase 2 score aggregation (`python3 scripts/aggregate_scores.py scores.json`) |
+| `scripts/aggregate_scores.py` | Phase 2 score aggregation (`python3 scripts/aggregate_scores.py scores.json --venue cvpr` / `--all-venues`) |
+| `scripts/venues.json` | Venue profiles used by the script (emphasis, bar offset, scale, form fields) |
 | `examples/cv_paper_review_example.md` | Worked full-mode example (CV) |
 | `examples/interdisciplinary_review_example.md` | Worked example (medical imaging × clinical practice) |
 

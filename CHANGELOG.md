@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.1 (2026-10-15)
+
+### Added
+- **Venue-aware scoring for 11 venues**: CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM Multimedia, TMLR, IEEE TPAMI and IEEE TIP. `scripts/venues.json` holds each venue's emphasis weights, bar offset, scale and form fields.
+- `aggregate_scores.py --venue <key>` / `--all-venues` produces the venue's own scores (ICLR sub-scores and rating, NeurIPS sub-scores, ICML 1–5, TMLR Yes/No criteria, IEEE journal recommendations) and a Cross-Venue Outlook with bands before and after the DA cap.
+- A verification status for every venue scale (official / secondary / assumed / unpublished), with sources in `references/venue_profiles.md`.
+- Venue-specific rules wired into the workflow: ECCV contribution types and "not beating SOTA is not grounds for rejection", the ACM MM multimedia-scope gate, AAAI Phase-1 risk, the TPAMI conference-extension check, and TMLR's correctness-over-novelty criteria.
+- `compare venues` and `venue format` modifiers; a Cross-Venue Outlook section in the decision template and the CV example; tests for venue views.
+
 ## 2.0 (2026-10-15)
 
 ### Added

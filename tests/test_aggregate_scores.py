@@ -74,6 +74,39 @@ class AggregateTests(unittest.TestCase):
         data = {"paper_type": "survey", "reviewers": [uniform(70)]}
         self.assertEqual(agg.aggregate(data)["paper_type"], "benchmark")
 
+    def test_venue_profiles_are_complete(self):
+        venues = agg.load_venues()
+        expected = {"cvpr", "iccv", "eccv", "neurips", "iclr", "icml", "aaai",
+                    "acmmm", "tmlr", "tpami", "tip"}
+        self.assertEqual(set(venues), expected)
+        for key, v in venues.items():
+            self.assertEqual(len(v["emphasis"]), len(agg.DIMENSIONS), key)
+            self.assertIn(v["scale"]["status"],
+                          {"official", "secondary", "assumed", "unpublished"}, key)
+            if v["scale"]["type"] != "tmlr":
+                self.assertEqual(set(v["scale"]["map"]), {str(i) for i in range(1, 7)}, key)
+
+    def test_example_venue_views(self):
+        res = agg.aggregate(copy.deepcopy(EXAMPLE))
+        venues = agg.load_venues()
+        views = {k: agg.venue_view(res, k, venues[k]) for k in venues}
+        for v in views.values():
+            self.assertEqual(v["final"], 3)          # DA cap applies everywhere
+        self.assertEqual(views["cvpr"]["label"], "3 Borderline Reject")
+        self.assertEqual(views["icml"]["label"], "2 Weak reject (leaning reject)")
+        self.assertEqual(views["tpami"]["label"], "Major Revision")
+        self.assertEqual(views["iclr"]["subscores"],
+                         {"Soundness": 2, "Presentation": 3, "Contribution": 2})
+        self.assertEqual(views["tmlr"]["subscores"]["Claims & evidence"], "No")
+
+    def test_bar_offset_and_tmlr_without_cap(self):
+        res = agg.aggregate({"reviewers": [uniform(72)]})
+        venues = agg.load_venues()
+        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"])["band"], 4)  # 72 < 70+3
+        self.assertEqual(agg.venue_view(res, "neurips", venues["neurips"])["band"], 5)
+        tmlr = agg.venue_view(res, "tmlr", venues["tmlr"])
+        self.assertEqual(tmlr["label"], "Accept")
+
     def test_invalid_input_exits(self):
         with self.assertRaises(SystemExit):
             agg.aggregate({"reviewers": [uniform(70, confidence=9)]})

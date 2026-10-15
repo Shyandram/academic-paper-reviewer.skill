@@ -37,6 +37,17 @@
 **Composite-implied decision**: [n] | **DA cap**: [none / 4 / 3] | **Final decision**: [n] ([reason if it differs from the composite band])
 **Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
 
+### Target-Venue Scores ([venue], scale status: [official / secondary / assumed / unpublished])
+
+| Venue field | Score |
+|-------------|-------|
+| [e.g., Soundness / Presentation / Contribution, or Claims & evidence / Audience] | [..] |
+| [Venue overall rating / recommendation] | [..] |
+
+### Cross-Venue Outlook (if requested)
+
+[Paste the `--all-venues` table from `scripts/aggregate_scores.py`, then 2–4 sentences of content-based venue advice. Heuristic, not a prediction.]
+
 ### NeurIPS-Style Scores (EIC Final)
 
 | Dimension | Score |

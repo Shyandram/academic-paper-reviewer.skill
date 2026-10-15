@@ -28,6 +28,7 @@ What sets it apart:
 - **CV/ML depth.** Task-specific checklists cover detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models. They target the confounds that matter in practice: backbone, pretraining data, resolution, schedule, TTA and latency methodology.
 - **Devil's Advocate with teeth.** It steelmans the paper, then gives the strongest counter-argument and recomputes headline numbers. An upheld CRITICAL issue caps the decision.
 - **Reproducible scoring.** `scripts/aggregate_scores.py` computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.
+- **Venue-aware scoring.** It covers 11 venues: **CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP**. Scores are translated into each venue's own form, for example ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria, or IEEE journal recommendations. A **Cross-Venue Outlook** shows how the same paper would likely fare at each venue. Every scale is labeled *official*, *secondary*, *assumed* or *unpublished*, so nothing unverified is presented as official.
 - **Integrity guardrails.** No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the manuscript.
 
 ---
@@ -91,15 +92,34 @@ Here are my three CVPR reviews. Help me write the one-page rebuttal. [paste revi
 Re-review: here is the revised manuscript and our response letter. [attach both]
 Review this paper in English, anonymous reviewers, skip confirmation.
 Guide me through reviewing this paper — I'm learning to review.
+Compare this paper across CVPR, ICLR and TMLR — which venue fits best?
+Review for ICLR in venue format.
 ```
 
-Useful modifiers: `target venue: …`, `journal: TPAMI`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
+Useful modifiers: `target venue: …`, `journal: TPAMI`, `compare venues`, `venue format`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
+
+### Supported venues
+
+| Key | Venue | Scale used | Status |
+|-----|-------|-----------|--------|
+| `cvpr` / `iccv` / `eccv` | CVPR, ICCV, ECCV | CVF-style 6-point (Accept … Reject); ECCV judged against the declared contribution type | secondary / secondary / assumed |
+| `neurips` | NeurIPS | Quality/Clarity/Significance/Originality 1–4, Overall 1–6 | secondary |
+| `iclr` | ICLR | Soundness/Presentation/Contribution 1–4, rating {0,2,4,6,8,10} (legacy {1,3,5,6,8,10}) | secondary |
+| `icml` | ICML | Overall recommendation 1–5 (2025) | official |
+| `aaai` | AAAI | Generic + Phase-1 early-rejection risk | unpublished |
+| `acmmm` | ACM Multimedia | Generic + multimedia-scope gate | unpublished |
+| `tmlr` | TMLR | Claims & evidence / Audience interest (Yes/No) | official |
+| `tpami` / `tip` | IEEE TPAMI / TIP | Accept · Minor · Major · (Revise &) Resubmit · Reject | secondary / assumed |
+
+Venue forms change every year. Check `references/venue_profiles.md` and the venue's current guidelines, and update `scripts/venues.json` when a form changes.
 
 ### Scoring by hand or in CI
 
 ```bash
 python3 academic-paper-reviewer/scripts/aggregate_scores.py academic-paper-reviewer/scripts/example_scores.json
 python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --json
+python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --venue cvpr --venue tmlr
+python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --all-venues
 ```
 
 ---
@@ -121,7 +141,8 @@ academic-paper-reviewer/               ← skill source
 │   └── rebuttal_strategist_agent.md   (rebuttal mode)
 ├── references/                        ← rubrics, standards, checklists, venue profiles
 ├── templates/                         ← report, decision, rebuttal, response-letter formats
-├── scripts/aggregate_scores.py        ← score aggregation (+ example_scores.json)
+├── scripts/aggregate_scores.py        ← score aggregation + venue views (+ example_scores.json)
+├── scripts/venues.json                ← venue profiles (emphasis, bar, scale, form fields)
 └── examples/                          ← worked, fully fictional examples
 tools/build_skill.py                   ← validate + package the skill
 tests/                                 ← unit tests for the scoring script

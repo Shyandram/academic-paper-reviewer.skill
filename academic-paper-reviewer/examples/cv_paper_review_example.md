@@ -81,6 +81,21 @@
 **DA-CRITICAL cap**: DA-C1 upheld; it needs new experiments → cap = 3 (Borderline Reject)
 **Final decision**: **3, Borderline Reject**. The composite alone would suggest 4, but the headline claim is not yet separable from the resolution and schedule confounds. Experimental Validation has the largest spread (20): R1 and the DA weigh the confound heavily, while the EIC and R3 credit the trade-off curve. The editor sides with R1 and the DA, because C3 is the paper's main claim.
 
+### Cross-Venue Outlook (user asked "compare venues")
+
+Output of `python3 scripts/aggregate_scores.py scripts/example_scores.json --venue cvpr --venue iclr --venue icml --venue acmmm --venue tmlr --venue tpami`:
+
+| Venue | Venue-weighted composite | Bar offset | Band before → after DA cap | Venue recommendation | Venue sub-scores | Scale status |
+|---|---|---|---|---|---|---|
+| CVPR (2026) | 62.7 | +0 | 4 → 3 | 3 Borderline Reject | — | secondary |
+| ICLR (2026) | 63.3 | +0 | 4 → 3 | 4 on {0,2,4,6,8,10} (5 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 2 | secondary |
+| ICML (2025) | 63.0 | +0 | 4 → 3 | 2 Weak reject (leaning reject) | — | official |
+| ACM Multimedia (2026) | 63.3 | +0 | 4 → 3 | Weak reject | — | unpublished |
+| TMLR (2025) | 63.2 | -5 | 4 → 3 | Reject (or major changes: narrow claims / add evidence) | Claims & evidence No, Audience interest Yes | official |
+| IEEE TPAMI (2025) | 63.0 | +3 | 4 → 3 | Major Revision | — | secondary |
+
+**Editor's venue advice**: DA-C1 blocks every venue; no choice of venue gets around it. Once a matched-setting comparison is added, the "before cap" column applies: band 4 at every venue, though only just at TPAMI (63.0 against a raised bar of 63). CVPR and ICCV remain the natural fit for a segmentation-efficiency paper. TMLR becomes attractive if the authors narrow C3 to what the matched comparison supports, because TMLR doesn't penalize modest gains. ACM MM would need a multimedia angle (e.g., video streaming or on-device AR) to pass its scope gate. A TPAMI submission would need the edge-device study and a broader set of backbones.
+
 ### DA-CRITICAL ruling
 DA-C1 is **upheld**. Verified against Table 2 and Appendix B. R1-W1 independently raised the resolution part (merged: DA-C1 + R1-W1).
 

@@ -1,0 +1,210 @@
+{
+  "_comment": "Venue profiles used by aggregate_scores.py --venue / --all-venues. 'emphasis' multiplies the paper-type weights (order: technical_rigor, clarity, novelty, significance, experimental_validation, reproducibility, ethics) and is renormalized; these multipliers are this skill's heuristics, not official venue weights. 'bar_offset' shifts the composite thresholds (positive = harder). 'scale.status' records how well the scale is verified: official | secondary | assumed | unpublished. 'as_of' is the review cycle the information describes. Verify against the venue's current reviewer guidelines before relying on labels.",
+  "dimension_order": ["technical_rigor", "clarity", "novelty", "significance",
+                      "experimental_validation", "reproducibility", "ethics"],
+  "venues": {
+    "cvpr": {
+      "name": "CVPR",
+      "kind": "conference",
+      "family": "cvf",
+      "as_of": "2026",
+      "emphasis": [1.0, 1.0, 1.1, 1.0, 1.3, 1.0, 0.8],
+      "bar_offset": 0,
+      "scale": {
+        "status": "secondary",
+        "type": "ordinal6",
+        "note": "Recent CVPR forms use labels including 'Weak Accept' and 'Borderline'; the 6-point CVF-style mapping below is assumed from ICCV 2025 and must be checked against the current form.",
+        "map": {"6": "6 Accept", "5": "5 Weak Accept", "4": "4 Borderline Accept",
+                "3": "3 Borderline Reject", "2": "2 Weak Reject", "1": "1 Reject"}
+      },
+      "fields": ["Summary", "Strengths", "Weaknesses", "Preliminary/Final rating", "Justification of rating", "Confidence"],
+      "focus": "Clear technical novelty, strong controlled experiments on standard benchmarks, ablations, visual results; the final justification must be explicitly tied to the rating and explain any post-rebuttal change.",
+      "rebuttal": "One-page PDF in the CVPR template (check current rules on new results)."
+    },
+    "iccv": {
+      "name": "ICCV",
+      "kind": "conference",
+      "family": "cvf",
+      "as_of": "2025",
+      "emphasis": [1.0, 1.0, 1.1, 1.0, 1.3, 1.0, 0.8],
+      "bar_offset": 0,
+      "scale": {
+        "status": "secondary",
+        "type": "ordinal6",
+        "note": "Community reports for ICCV 2025: 6 Accept, 5 Weak Accept, 4 Borderline Accept; labels 3-1 inferred by symmetry.",
+        "map": {"6": "6 Accept", "5": "5 Weak Accept", "4": "4 Borderline Accept",
+                "3": "3 Borderline Reject", "2": "2 Weak Reject", "1": "1 Reject"}
+      },
+      "fields": ["Summary", "Strengths", "Weaknesses", "Rating", "Justification of rating", "Confidence"],
+      "focus": "Same bar as CVPR; irresponsible or LLM-generated reviews are penalized by the venue.",
+      "rebuttal": "One-page PDF (check current rules)."
+    },
+    "eccv": {
+      "name": "ECCV",
+      "kind": "conference",
+      "family": "cvf",
+      "as_of": "2026",
+      "emphasis": [1.0, 1.0, 1.2, 1.1, 1.1, 1.0, 0.8],
+      "bar_offset": 0,
+      "scale": {
+        "status": "assumed",
+        "type": "ordinal6",
+        "note": "Exact ECCV 2026 scale not confirmed; CVF-style 6-point mapping assumed.",
+        "map": {"6": "6 Accept", "5": "5 Weak Accept", "4": "4 Borderline Accept",
+                "3": "3 Borderline Reject", "2": "2 Weak Reject", "1": "1 Reject"}
+      },
+      "fields": ["Summary", "Contribution Type (as declared by authors)", "Strengths", "Weaknesses", "Rating", "Justification", "Confidence"],
+      "focus": "Judge the paper against its declared Contribution Type; not beating SOTA on an existing benchmark is not by itself grounds for rejection; failing to cite or beat an arXiv paper must not be the sole reason to reject.",
+      "rebuttal": "One-page PDF (check current rules)."
+    },
+    "neurips": {
+      "name": "NeurIPS",
+      "kind": "conference",
+      "family": "neurips",
+      "as_of": "2025",
+      "emphasis": [1.1, 1.0, 1.1, 1.1, 1.0, 1.0, 1.0],
+      "bar_offset": 0,
+      "scale": {
+        "status": "secondary",
+        "type": "ordinal6",
+        "note": "Quality/Clarity/Significance/Originality on 1-4, Overall 1-6 with Borderline accept/reject, Confidence 1-5 (2025 form). The skill's internal scales follow this form.",
+        "map": {"6": "6 Strong Accept", "5": "5 Accept", "4": "4 Borderline accept",
+                "3": "3 Borderline reject", "2": "2 Reject", "1": "1 Strong Reject"}
+      },
+      "subscores": {
+        "Quality": ["technical_rigor", "experimental_validation"],
+        "Clarity": ["clarity"],
+        "Significance": ["significance"],
+        "Originality": ["novelty"]
+      },
+      "fields": ["Summary", "Strengths and Weaknesses", "Quality", "Clarity", "Significance", "Originality", "Questions", "Limitations", "Overall", "Confidence", "Ethical concerns"],
+      "focus": "Technically sound, complete work; originality need not mean an entirely new method; honest limitations are rewarded; the paper checklist is a tool, not grounds for rejection.",
+      "rebuttal": "OpenReview comments with character limits, then discussion."
+    },
+    "iclr": {
+      "name": "ICLR",
+      "kind": "conference",
+      "family": "iclr",
+      "as_of": "2026",
+      "emphasis": [1.2, 1.1, 1.1, 1.1, 1.0, 1.0, 0.8],
+      "bar_offset": 0,
+      "scale": {
+        "status": "secondary",
+        "type": "iclr",
+        "note": "Soundness/Presentation/Contribution 1-4 and Confidence 1-5 are long-standing. Overall rating reported as {0,2,4,6,8,10} for ICLR 2026; earlier cycles used {1,3,5,6,8,10}. Both are shown.",
+        "map": {"6": "10", "5": "8", "4": "6", "3": "4", "2": "2", "1": "0"},
+        "legacy_map": {"6": "10", "5": "8", "4": "6", "3": "5", "2": "3", "1": "1"}
+      },
+      "subscores": {
+        "Soundness": ["technical_rigor", "experimental_validation"],
+        "Presentation": ["clarity"],
+        "Contribution": ["novelty", "significance"]
+      },
+      "fields": ["Summary", "Soundness", "Presentation", "Contribution", "Strengths", "Weaknesses", "Questions", "Rating", "Confidence"],
+      "focus": "Reviews and submissions are public; authors can revise the PDF during discussion, so distinguish fixable from fundamental issues.",
+      "rebuttal": "Public OpenReview discussion with PDF revisions."
+    },
+    "icml": {
+      "name": "ICML",
+      "kind": "conference",
+      "family": "icml",
+      "as_of": "2025",
+      "emphasis": [1.3, 1.0, 1.0, 1.0, 1.1, 1.0, 0.8],
+      "bar_offset": 0,
+      "scale": {
+        "status": "official",
+        "type": "icml5",
+        "note": "ICML 2025: Overall Recommendation 1-5. ICML 2026 reportedly moved to a 6-point scale (Weak Accept = 4, Weak Reject = 3); use the 1-6 internal score with those labels if targeting 2026.",
+        "map": {"6": "5 Strong accept", "5": "4 Accept", "4": "3 Weak accept (leaning accept)",
+                "3": "2 Weak reject (leaning reject)", "2": "1 Reject", "1": "1 Reject"}
+      },
+      "fields": ["Summary", "Claims and Evidence", "Relation to Prior Works", "Other Aspects (originality, significance, clarity)", "Questions for Authors", "Ethical Issues", "Overall Recommendation"],
+      "focus": "Whether claims are supported by evidence comes first; every strength or weakness must be substantiated.",
+      "rebuttal": "OpenReview author response."
+    },
+    "aaai": {
+      "name": "AAAI",
+      "kind": "conference",
+      "family": "aaai",
+      "as_of": "2026",
+      "emphasis": [1.1, 1.0, 1.1, 1.1, 1.0, 0.9, 0.9],
+      "bar_offset": 0,
+      "scale": {
+        "status": "unpublished",
+        "type": "generic",
+        "note": "AAAI does not publish its rating scale. Reported criteria: clarity, technical/experimental soundness, novelty, relevance. Two-phase review: papers with sufficiently negative Phase-1 reviews can be rejected before author feedback.",
+        "map": {"6": "Strong accept", "5": "Accept", "4": "Weak accept", "3": "Weak reject", "2": "Reject", "1": "Strong reject"}
+      },
+      "fields": ["Summary", "Strengths", "Weaknesses", "Clarity", "Soundness", "Novelty", "Relevance", "Overall rating", "Confidence"],
+      "focus": "Broad AI audience; papers must survive Phase 1 on three reviews, so first-impression clarity and an obvious contribution matter.",
+      "rebuttal": "Short author feedback (Phase 2 only)."
+    },
+    "acmmm": {
+      "name": "ACM Multimedia",
+      "kind": "conference",
+      "family": "acmmm",
+      "as_of": "2026",
+      "emphasis": [1.0, 1.0, 1.2, 1.2, 1.0, 1.1, 0.9],
+      "bar_offset": 0,
+      "scale": {
+        "status": "unpublished",
+        "type": "generic",
+        "note": "Rating scale not confirmed. Guidelines stress novelty, rigor, claims supported by evidence, code/data release, and multimedia scope: papers on a narrow single modality without contributing to the human use of multimedia may be out of scope.",
+        "map": {"6": "Strong accept", "5": "Accept", "4": "Weak accept", "3": "Weak reject", "2": "Reject", "1": "Strong reject"}
+      },
+      "fields": ["Summary", "Relevance to multimedia", "Novelty", "Technical quality", "Presentation", "Reproducibility (code/data)", "Overall rating", "Confidence"],
+      "focus": "Multimodal/multimedia relevance is a gate; distinguish minor camera-ready fixes from major flaws.",
+      "rebuttal": "Optional OpenReview rebuttal; must stay anonymous and cannot link to external material (code, videos)."
+    },
+    "tmlr": {
+      "name": "TMLR",
+      "kind": "journal",
+      "family": "tmlr",
+      "as_of": "2025",
+      "emphasis": [1.5, 1.3, 0.4, 0.5, 1.3, 1.1, 1.0],
+      "bar_offset": -5,
+      "scale": {
+        "status": "official",
+        "type": "tmlr",
+        "note": "Two criteria answered Yes/No with explanation: (1) Are the claims supported by accurate, convincing and clear evidence? (most important) (2) Would some individuals in TMLR's audience be interested in the findings? (if unsure, assume yes). Papers meeting both are accepted even if the contribution is modest; lack of SOTA or perceived novelty is not grounds for rejection."
+      },
+      "fields": ["Summary of contributions", "Strengths and weaknesses", "Requested changes (critical vs. strengthening)", "Claims and evidence (Yes/No)", "Audience (Yes/No)"],
+      "focus": "Correctness and clarity of claims over novelty; over-claiming is fixed by narrowing claims or adding evidence.",
+      "rebuttal": "Open discussion with revisions; Action Editor decides."
+    },
+    "tpami": {
+      "name": "IEEE TPAMI",
+      "kind": "journal",
+      "family": "ieee",
+      "as_of": "2025",
+      "emphasis": [1.3, 1.1, 1.0, 1.1, 1.3, 1.1, 0.9],
+      "bar_offset": 3,
+      "scale": {
+        "status": "secondary",
+        "type": "journal",
+        "note": "IEEE Computer Society recommendation options: Accept / Minor Revision / Major Revision / Revise and Resubmit / Reject; a second major revision is generally not granted.",
+        "map": {"6": "Accept", "5": "Minor Revision", "4": "Minor Revision", "3": "Major Revision", "2": "Revise and Resubmit / Reject", "1": "Reject"}
+      },
+      "fields": ["Summary", "Significance & novelty", "Technical soundness", "Experimental validation", "Clarity", "Relation to prior work (incl. authors' conference version)", "Recommendation", "Comments to authors", "Confidential comments to editor"],
+      "focus": "Top-conference bar plus completeness and depth; extended conference versions need substantial new content; comprehensive comparisons and analysis.",
+      "rebuttal": "Point-by-point response letter (R-A-C)."
+    },
+    "tip": {
+      "name": "IEEE TIP",
+      "kind": "journal",
+      "family": "ieee",
+      "as_of": "2025",
+      "emphasis": [1.2, 1.1, 1.0, 1.0, 1.3, 1.1, 0.8],
+      "bar_offset": -2,
+      "scale": {
+        "status": "assumed",
+        "type": "journal",
+        "note": "Exact TIP recommendation menu not confirmed; IEEE-style options assumed (Accept / Minor Revision / Major Revision / Reject & Resubmit / Reject).",
+        "map": {"6": "Accept", "5": "Minor Revision", "4": "Minor Revision", "3": "Major Revision", "2": "Reject & Resubmit / Reject", "1": "Reject"}
+      },
+      "fields": ["Summary", "Novelty", "Technical correctness", "Experimental validation", "Clarity", "Recommendation", "Comments to authors"],
+      "focus": "Image-processing scope; fair baselines and ablations that separate the contribution from architecture size, data and tuning; reproducibility.",
+      "rebuttal": "Point-by-point response letter (R-A-C)."
+    }
+  }
+}

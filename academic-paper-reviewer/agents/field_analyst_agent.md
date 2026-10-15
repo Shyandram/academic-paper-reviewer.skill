@@ -13,7 +13,10 @@ Read the whole paper, including the appendix and supplementary material, and ide
 2. **Secondary discipline(s)**: supporting or interdisciplinary fields.
 3. **Paper type**: one of Empirical, Theoretical, Benchmark/Survey, System/Application, Dataset, Analysis/Insight, Position/Vision. See `references/review_criteria_framework.md`. This choice selects the composite weights in `references/quality_rubrics.md`.
 4. **Core technique(s)**, e.g., diffusion models, ViTs, 3D Gaussian splatting, contrastive pretraining, vision-language models.
-5. **Target venue and tier.** Use the venue named by the user if given. Otherwise infer it from the template (CVPR/ICCV/ECCV LaTeX style, NeurIPS checklist, IEEE journal format) and mark it as *inferred*. If nothing can be inferred, assume a top-tier venue in the field. See `references/venue_profiles.md`.
+5. **Target venue and tier.** Use the venue named by the user if given. Otherwise infer it from the template (CVPR/ICCV/ECCV LaTeX style, NeurIPS/ICML/ICLR style files and checklists, AAAI or ACM `acmart` format, IEEE journal format, TMLR style) and mark it as *inferred*. If nothing can be inferred, assume a top-tier venue in the field. Map it to a profile key in `scripts/venues.json` (`cvpr`, `iccv`, `eccv`, `neurips`, `iclr`, `icml`, `aaai`, `acmmm`, `tmlr`, `tpami`, `tip`) or to the closest one. Read that venue's section of `references/venue_profiles.md`.
+   - **ECCV:** record the authors' declared Contribution Type. Reviewers judge the paper against it.
+   - **ACM MM:** record whether the work contributes to multimedia / multimodal use. A narrow single-modality paper is a scope risk.
+   - **TPAMI:** record whether this is an extension of a conference paper. If so, the new content must be substantial.
 6. **Paper maturity**: Early draft / Submission-ready / Rebuttal stage / Post-revision.
 7. **Claimed contributions**: list them as the paper states them (usually the bullet list at the end of the introduction). Every reviewer will check these.
 8. **Ethics-relevant content**: human subjects, faces or biometrics, medical data, web-scraped data, generative models with misuse potential, surveillance applications.
@@ -67,7 +70,8 @@ If the user asks for **anonymous reviewers**, keep the expertise and style but l
 | Secondary Discipline(s) | [field(s)] |
 | Paper Type | [type] (composite weights: [type]) |
 | Core Technique(s) | [techniques] |
-| Target Venue | [venue/tier] ([stated / inferred from template / assumed]) |
+| Target Venue | [venue/tier] ([stated / inferred from template / assumed]); profile key `[key]` |
+| Venue-Specific Notes | [ECCV contribution type / ACM MM scope / TPAMI extension status / none] |
 | Paper Maturity | [level] |
 | Ethics-Relevant Content | [none / list] |
 

@@ -12,10 +12,15 @@ not have to do weighted averages by hand:
   * DA-CRITICAL cap (upheld critical issues cap the decision at 4 or 3)
   * consistency warnings when a reviewer's Overall (1-6) disagrees with the
     band implied by their own composite by 2 or more points
+  * optional venue views (--venue / --all-venues): venue-emphasis weights,
+    the venue's own score fields and scale, and a cross-venue outlook, using
+    the profiles in scripts/venues.json
 
 Usage:
     python3 scripts/aggregate_scores.py scores.json            # markdown
     python3 scripts/aggregate_scores.py scores.json --json     # machine-readable
+    python3 scripts/aggregate_scores.py scores.json --venue cvpr --venue iclr
+    python3 scripts/aggregate_scores.py scores.json --all-venues
 
 Input format: see scripts/example_scores.json. Standard library only.
 """
@@ -23,6 +28,9 @@ Input format: see scripts/example_scores.json. Standard library only.
 import argparse
 import json
 import sys
+from pathlib import Path
+
+VENUES_FILE = Path(__file__).resolve().parent / "venues.json"
 
 DIMENSIONS = [
     ("technical_rigor", "Technical Rigor"),
@@ -67,18 +75,39 @@ DECISIONS = {
 HIGH_SPREAD = 20
 
 
-def composite_to_overall(composite):
-    if composite >= 85:
-        return 6
-    if composite >= 70:
-        return 5
-    if composite >= 60:
+def composite_to_overall(composite, offset=0):
+    """Map a 0-100 composite to the 1-6 Overall band; offset raises the bar."""
+    for threshold, band in ((85, 6), (70, 5), (60, 4), (50, 3), (35, 2)):
+        if composite >= threshold + offset:
+            return band
+    return 1
+
+
+def to_four(score):
+    """0-100 dimension score -> NeurIPS-style 1-4 (references/quality_rubrics.md)."""
+    if score >= 85:
         return 4
-    if composite >= 50:
+    if score >= 70:
         return 3
-    if composite >= 35:
+    if score >= 50:
         return 2
     return 1
+
+
+def da_cap(da_critical):
+    """Return (cap, reason) for upheld DA-CRITICAL issues, or (None, None)."""
+    upheld = [i for i in da_critical if i.get("upheld", True)]
+    if not upheld:
+        return None, None
+    resolvable = all(i.get("resolvable_without_new_data", False) for i in upheld)
+    cap = 4 if resolvable else 3
+    ids = ", ".join(i.get("id", "DA-C?") for i in upheld)
+    reason = (f"{len(upheld)} upheld DA-CRITICAL issue(s) ({ids}); "
+              f"cap = {cap} ({DECISIONS[cap]}) because "
+              + ("all are resolvable by clarification or minor additions"
+                 if resolvable else
+                 "at least one needs new data, experiments, or redesign"))
+    return cap, reason
 
 
 def composite(scores, weights):
@@ -148,20 +177,8 @@ def aggregate(data):
                 f"(implies {implied}). Re-check that scores match the text.")
 
     suggested = composite_to_overall(panel_composite)
-    capped = suggested
-    cap_reason = None
-    upheld = [i for i in data.get("da_critical", []) if i.get("upheld", True)]
-    if upheld:
-        resolvable = all(i.get("resolvable_without_new_data", False) for i in upheld)
-        cap = 4 if resolvable else 3
-        if suggested > cap:
-            capped = cap
-        ids = ", ".join(i.get("id", "DA-C?") for i in upheld)
-        cap_reason = (f"{len(upheld)} upheld DA-CRITICAL issue(s) ({ids}); "
-                      f"cap = {cap} ({DECISIONS[cap]}) because "
-                      + ("all are resolvable by clarification or minor additions"
-                         if resolvable else
-                         "at least one needs new data, experiments, or redesign"))
+    cap, cap_reason = da_cap(data.get("da_critical", []))
+    capped = min(suggested, cap) if cap else suggested
 
     return {
         "paper_type": paper_type,
@@ -175,7 +192,78 @@ def aggregate(data):
         "da_cap_reason": cap_reason,
         "warnings": warnings,
         "roles": [r.get("role", "?") for r in reviewers],
+        "da_cap": cap,
     }
+
+
+def load_venues(path=VENUES_FILE):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)["venues"]
+
+
+def venue_view(res, key, venue):
+    """Re-score the panel's dimension averages through one venue's lens."""
+    dims = {d["key"]: d["weighted_avg"] for d in res["dimensions"]}
+    base = [res["weights"][k] for k, _ in DIMENSIONS]
+    raw = [b * e for b, e in zip(base, venue["emphasis"])]
+    weights = [w / sum(raw) for w in raw]
+    comp = round(sum(dims[k] * w for (k, _), w in zip(DIMENSIONS, weights)), 1)
+    offset = venue.get("bar_offset", 0)
+    band = composite_to_overall(comp, offset)
+    cap = res.get("da_cap")
+    final = min(band, cap) if cap else band
+    scale = venue["scale"]
+    view = {"key": key, "name": venue["name"], "kind": venue["kind"],
+            "as_of": venue["as_of"], "scale_status": scale["status"],
+            "composite": comp, "bar_offset": offset, "band": band,
+            "final": final, "subscores": {}, "notes": [scale["note"]]}
+
+    for label, keys in venue.get("subscores", {}).items():
+        view["subscores"][label] = to_four(sum(dims[k] for k in keys) / len(keys))
+
+    if scale["type"] == "tmlr":
+        evidence = (dims["technical_rigor"] + dims["experimental_validation"]
+                    + dims["clarity"]) / 3
+        audience = (dims["novelty"] + dims["significance"]) / 2
+        claims_ok = evidence >= 60 and cap != 3
+        view["subscores"]["Claims & evidence"] = "Yes" if claims_ok else "No"
+        view["subscores"]["Audience interest"] = "Yes" if audience >= 40 else "No"
+        if not claims_ok or audience < 40:
+            view["label"] = "Reject (or major changes: narrow claims / add evidence)"
+        elif cap == 4 or evidence < 70:
+            view["label"] = "Accept with minor revision"
+        else:
+            view["label"] = "Accept"
+    else:
+        view["label"] = scale["map"][str(final)]
+        if "legacy_map" in scale:
+            view["label"] = (f"{view['label']} on {{0,2,4,6,8,10}} "
+                             f"({scale['legacy_map'][str(final)]} on {{1,3,5,6,8,10}})")
+
+    if key == "aaai" and final <= 3:
+        view["notes"].append("Phase-1 early-rejection risk: "
+                             + ("high" if final <= 2 else "moderate"))
+    return view
+
+
+def venue_markdown(views):
+    lines = ["", "### Cross-Venue Outlook", "",
+             "| Venue | Venue-weighted composite | Bar offset | Band before → after DA cap | "
+             "Venue recommendation | Venue sub-scores | Scale status |",
+             "|---|---|---|---|---|---|---|"]
+    for v in views:
+        subs = ", ".join(f"{k} {val}" for k, val in v["subscores"].items()) or "—"
+        lines.append(f"| {v['name']} ({v['as_of']}) | {v['composite']} | "
+                     f"{v['bar_offset']:+d} | {v['band']} → {v['final']} | {v['label']} | "
+                     f"{subs} | {v['scale_status']} |")
+    lines += ["", "Emphasis weights are this skill's heuristics, not official venue "
+              "weights. Scale status: official / secondary / assumed / unpublished "
+              "(see references/venue_profiles.md). Upheld DA-CRITICAL caps apply to "
+              "every venue.", ""]
+    for v in views:
+        for note in v["notes"]:
+            lines.append(f"- **{v['name']}**: {note}")
+    return "\n".join(lines)
 
 
 def to_markdown(res):
@@ -214,6 +302,10 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("path", help="JSON file with reviewer scores ('-' for stdin)")
     ap.add_argument("--json", action="store_true", help="emit JSON instead of markdown")
+    ap.add_argument("--venue", action="append", default=[],
+                    help="add a venue view (repeatable); see scripts/venues.json")
+    ap.add_argument("--all-venues", action="store_true",
+                    help="add views for every venue in scripts/venues.json")
     args = ap.parse_args()
     try:
         if args.path == "-":
@@ -224,7 +316,19 @@ def main():
     except (OSError, json.JSONDecodeError) as e:
         fail(str(e))
     res = aggregate(data)
-    print(json.dumps(res, indent=2, ensure_ascii=False) if args.json else to_markdown(res))
+    keys = [k.lower() for k in args.venue + data.get("venues", [])]
+    venues = load_venues() if (keys or args.all_venues) else {}
+    if args.all_venues:
+        keys = list(venues)
+    for k in keys:
+        if k not in venues:
+            fail(f"unknown venue '{k}'; choose from {sorted(venues)}")
+    views = [venue_view(res, k, venues[k]) for k in dict.fromkeys(keys)]
+    if args.json:
+        res["venue_views"] = views
+        print(json.dumps(res, indent=2, ensure_ascii=False))
+    else:
+        print(to_markdown(res) + (venue_markdown(views) if views else ""))
 
 
 if __name__ == "__main__":

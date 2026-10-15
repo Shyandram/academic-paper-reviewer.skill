@@ -128,7 +128,7 @@ Different venues have different acceptance standards:
 | Mid-tier | BMVC, WACV, ACCV, domain journals | ~30–45% | Sound work with a clear contribution suffices |
 | Workshop | CVPR/ICCV/NeurIPS workshops | ~50–70% | Work in progress is acceptable if the direction is promising |
 
-Acceptance rates vary by year; treat them as orientation, not targets. See `references/venue_profiles.md` for review-form conventions.
+Acceptance rates vary by year; treat them as orientation, not targets. ACM Multimedia sits with the top conferences for multimedia work but applies a multimedia-scope gate. See `references/venue_profiles.md` for each venue's form, its scale (with verification status), and the emphasis weights used by `scripts/aggregate_scores.py --venue`.
 
 ### Rebuttal Potential
 
