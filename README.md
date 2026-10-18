@@ -1,10 +1,10 @@
-# Academic Paper Reviewer: a Claude Skill
+# Academic Paper Reviewer for Codex and Claude
 
-A multi-perspective peer-review skill for Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process with five independent reviewer personas, aggregates their scores reproducibly, and turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
+A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process with five reviewer perspectives, aggregates their scores reproducibly, and turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
 
 ```
 You:    Review this paper for CVPR: [attach PDF]
-Claude: 📋 Paper analysis + 5-reviewer configuration card → 5 independent reports
+Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 role-based reports
         → Editorial decision, aggregated scores, consensus map, Revision Roadmap
 ```
 
@@ -35,6 +35,35 @@ What sets it apart:
 ## Installation
 
 The packaged skill is the file `academic-paper-reviewer.skill`, a zip archive that contains the `academic-paper-reviewer/` folder.
+
+### Codex (CLI, IDE, and cloud tasks)
+
+From the repository root, install a project-local skill:
+
+```bash
+python3 tools/install_codex_skill.py
+```
+
+This creates `.agents/skills/academic-paper-reviewer`, a relative symlink to the
+source. It is repeatable and refuses to replace existing files or another skill.
+Keep this checkout in place while using the link. For a personal installation:
+
+```bash
+python3 tools/install_codex_skill.py --skills-dir ~/.agents/skills
+```
+
+Start a new Codex session in this repository and invoke
+`$academic-paper-reviewer Review /absolute/path/paper.pdf for CVPR`.
+Discovery depends on the host; installing during a session may require a new
+session. If the host does not discover local skills, ask Codex to read
+`academic-paper-reviewer/SKILL.md` and follow it directly. Cloud tasks can use
+this fallback immediately. No API key or running server is required.
+
+PDF text extraction and page rendering are optional capabilities (for example,
+Poppler's `pdftotext` and `pdftoppm`); see
+[Codex runtime guidance](academic-paper-reviewer/references/codex_runtime.md).
+Five role-based passes work without subagents; parallel execution is used only
+when supported and permitted by the host.
 
 ### Claude apps (claude.ai web / desktop)
 
@@ -77,7 +106,7 @@ Upload the `academic-paper-reviewer/` folder through the Skills API and attach t
 ### Requirements
 
 - None for normal use. Everything is Markdown instructions.
-- `scripts/aggregate_scores.py` needs **Python 3.8+**, standard library only. Without code execution, Claude follows the same formulas by hand.
+- `scripts/aggregate_scores.py` needs **Python 3.8+**, standard library only. Without code execution, the agent follows the same formulas by hand.
 
 ---
 
@@ -123,6 +152,7 @@ academic-paper-reviewer/               ← skill source
 ├── templates/                         ← report, decision, rebuttal, response-letter formats
 ├── scripts/aggregate_scores.py        ← score aggregation (+ example_scores.json)
 └── examples/                          ← worked, fully fictional examples
+tools/install_codex_skill.py           ← safe, repeatable Codex installation
 tools/build_skill.py                   ← validate + package the skill
 tests/                                 ← unit tests for the scoring script
 ```

@@ -104,7 +104,7 @@ If the user asks for **anonymous reviewers**, keep the expertise and style but l
 - **Style**: [one line]
 
 ---
-*Personas are fictional. Proceed with this team, or adjust a reviewer, the target venue, or the paper type?*
+*Personas are fictional. Proceeding with the stated assumptions; the user can adjust the venue, paper type, or panel.*
 ```
 
 ## Important Notes

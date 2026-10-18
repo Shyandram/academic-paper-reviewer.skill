@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.1 (2026-10-18)
+
+- Added Codex project/personal installation with collision protection and an idempotent source link.
+- Added runtime guidance for PDF extraction, permission-aware tools, offline use, and review artifacts.
+- Made reviewer execution capability-aware with an explicit single-context fallback.
+- Reduced repeated reference loading; proceed after panel configuration by default and offer coaching on request.
+- Added installer regression tests and repository instructions for Codex maintenance.
+
 ## 2.0 (2026-10-15)
 
 ### Added
