@@ -2,13 +2,19 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five dynamically configured reviewer personas: Editor-in-Chief, Methodology, Domain, Cross-disciplinary Perspective, and Devil's Advocate. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use whenever the user wants to review, critique or score a paper, simulate referee reports or an area-chair decision, check whether a paper is ready for CVPR/ICCV/ECCV/NeurIPS/ICLR/ICML/TPAMI or a similar venue, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, critique this manuscript, is my paper ready, paper feedback, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.0"
-  last_updated: "2026-10-15"
+  version: "2.1"
+  last_updated: "2026-10-18"
 ---
 
-# Academic Paper Reviewer v2.0
+# Academic Paper Reviewer v2.1
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (venue fit, methodology, domain positioning, cross-disciplinary impact, and adversarial challenge to the core claim), and consolidates their reports into an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
+
+## Runtime and Resource Loading
+
+This skill works in Codex and Claude. Resolve all bundled paths relative to the directory containing this `SKILL.md`, regardless of the shell working directory. For Codex installation, PDF handling, tool fallbacks, and artifact paths, read `references/codex_runtime.md`. Follow the host's instructions and available permissions. Agent files define reviewer roles; they do not require a particular agent tool.
+
+Load only the files for the selected mode from the File Map, then the references needed for that paper type. Read shared rubrics once per review context. Keep a compact evidence ledger (claim ID, manuscript location, observation, uncertainty) across phases; never substitute the ledger for access to relevant manuscript sections.
 
 ## Persona
 
@@ -90,7 +96,7 @@ If the request is ambiguous, use `full` before submission, `rebuttal` when the u
 
 Read the complete paper, then follow `agents/field_analyst_agent.md` to identify the discipline, paper type, venue tier and maturity, and to configure five fictional reviewer personas.
 
-Present the **Reviewer Configuration Card** and ask for confirmation. If the user said "skip confirmation", or has already approved a card earlier in the conversation, proceed directly.
+Present the **Reviewer Configuration Card**, state any assumptions, and proceed with the review. Pause only if the user requests panel approval or missing input prevents a useful review. Apply later corrections without repeating completed work.
 
 ### Phase 1: Independent Multi-Perspective Review
 
@@ -102,7 +108,7 @@ Present the **Reviewer Configuration Card** and ask for confirmation. If the use
 | Reviewer 3 (Perspective) | `agents/perspective_reviewer_agent.md` | Cross-disciplinary links, deployment, assumptions, broader impact | Significance & Impact, Ethical Compliance |
 | Devil's Advocate | `agents/devils_advocate_reviewer_agent.md` | Strongest counter-argument, logic, overclaiming | CRITICAL/MAJOR/MINOR issue list |
 
-**Independence.** If you can launch subagents (e.g., an Agent/Task tool), run the five reviewers as five parallel subagents. Give each one the full paper, its own agent file, the template, and the relevant references, and nothing from the other reviewers. If you can't, write the reports one after another, and don't let a later reviewer echo an earlier one's points. Each reviewer finds issues from their own angle; overlap is resolved in Phase 2, not avoided by self-censorship.
+**Execution and independence.** Use parallel reviewers only when the host permits delegation and the tools are available. Give each reviewer the manuscript, its own role file, the template, and the relevant references, without other reviewers' reports. Otherwise perform five separate role-based passes and disclose that they share one model context; do not claim independent agents ran. Each pass examines the manuscript from its own angle. Preserve genuine agreement; merge overlap in Phase 2. Missing delegation never blocks a full review.
 
 Each report uses `templates/peer_review_report_template.md`, except the Devil's Advocate, whose format is defined in its agent file. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
 
@@ -116,7 +122,7 @@ Follow `agents/editorial_synthesizer_agent.md`:
 
 For a journal target, also report the journal-style recommendation (Accept / Minor Revision / Major Revision / Reject) using the mapping in `references/editorial_decision_standards.md`.
 
-### Phase 2.5: Revision Coaching (only if the decision is below Accept)
+### Phase 2.5: Revision Coaching (on request, if the decision is below Accept)
 
 A Socratic dialogue led by the EIC (see `agents/eic_agent.md`): open with agreed strengths, ask what surprised the author, steer toward consensus issues, ask "If you could change only three things, which three?", rehearse a response to the DA's strongest challenge, then plan the revision. One question per turn, 200–400 words per turn, at most 8 rounds. "Just fix it" skips straight to the final Roadmap.
 
@@ -222,6 +228,7 @@ Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue-
 | `agents/devils_advocate_reviewer_agent.md` | Full, guided |
 | `agents/editorial_synthesizer_agent.md` | Phase 2 |
 | `agents/rebuttal_strategist_agent.md` | Rebuttal mode |
+| `references/codex_runtime.md` | Codex runtime, input tools, permissions and output paths |
 | `references/review_criteria_framework.md` | Before any review: criteria by paper type |
 | `references/quality_rubrics.md` | Before scoring: 0–100 rubrics, weights, scale mappings |
 | `references/editorial_decision_standards.md` | Before deciding: Overall definitions, DA cap, journal mapping |
