@@ -82,7 +82,7 @@ class AggregateTests(unittest.TestCase):
         for key, v in venues.items():
             self.assertEqual(len(v["emphasis"]), len(agg.DIMENSIONS), key)
             self.assertIn(v["scale"]["status"],
-                          {"official", "secondary", "assumed", "unpublished"}, key)
+                          {"official", "confirmed", "secondary", "assumed", "unpublished"}, key)
             if v["scale"]["type"] != "tmlr":
                 self.assertEqual(set(v["scale"]["map"]), {str(i) for i in range(1, 7)}, key)
 

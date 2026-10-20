@@ -7,6 +7,7 @@ How each supported venue reviews papers, and how the skill's internal scores are
 | Status | Meaning | How to present it |
 |--------|---------|-------------------|
 | `official` | Taken from the venue's own guidelines | State it as the venue's scale |
+| `confirmed` | Verified by the skill maintainer against the current form; label wording may still need checking | State the scale structure as the venue's; quote labels with "as labeled on recent forms" |
 | `secondary` | Several consistent but non-official sources (published analyses, community reports) | "Recent forms use…; verify against the current form" |
 | `assumed` | Not found; mapped from a sibling venue | "Assumed (CVF-style); check the current form" |
 | `unpublished` | The venue does not publish its scale | Show a generic recommendation only |
@@ -27,9 +28,9 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 
 | Key | Venue | Kind | Cycle | Emphasis | Bar | Scale status |
 |-----|-------|------|-------|----------|-----|--------------|
-| `cvpr` | CVPR | Conf. | 2026 | 1.0 / 1.0 / 1.1 / 1.0 / **1.3** / 1.0 / 0.8 | +0 | secondary |
-| `iccv` | ICCV | Conf. | 2025 | 1.0 / 1.0 / 1.1 / 1.0 / **1.3** / 1.0 / 0.8 | +0 | secondary |
-| `eccv` | ECCV | Conf. | 2026 | 1.0 / 1.0 / **1.2** / 1.1 / 1.1 / 1.0 / 0.8 | +0 | assumed |
+| `cvpr` | CVPR | Conf. | 2026 | 1.0 / 1.0 / 1.1 / 1.0 / **1.3** / 1.0 / 0.8 | +0 | confirmed |
+| `iccv` | ICCV | Conf. | 2025 | 1.0 / 1.0 / 1.1 / 1.0 / **1.3** / 1.0 / 0.8 | +0 | confirmed |
+| `eccv` | ECCV | Conf. | 2026 | 1.0 / 1.0 / **1.2** / 1.1 / 1.1 / 1.0 / 0.8 | +0 | confirmed |
 | `neurips` | NeurIPS | Conf. | 2025 | 1.1 / 1.0 / 1.1 / 1.1 / 1.0 / 1.0 / 1.0 | +0 | secondary |
 | `iclr` | ICLR | Conf. | 2026 | **1.2** / 1.1 / 1.1 / 1.1 / 1.0 / 1.0 / 0.8 | +0 | secondary |
 | `icml` | ICML | Conf. | 2025 | **1.3** / 1.0 / 1.0 / 1.0 / 1.1 / 1.0 / 0.8 | +0 | official |
@@ -43,23 +44,23 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 
 ## Computer Vision Conferences (CVF / ECVA)
 
-### CVPR (`cvpr`, 2026 cycle; scale status: secondary)
+### CVPR (`cvpr`, 2026 cycle; scale status: confirmed)
 - **Form:** summary, strengths, weaknesses, a preliminary rating, then a final rating with a justification after the rebuttal and discussion. Recent training material uses labels including *Weak Accept* and *Borderline*, and requires the final justification to be specific, evidence-based and **explicitly tied to the rating**, including an explanation of any change after the rebuttal.
-- **Scale used by the skill (assumed CVF-style):** 6 Accept · 5 Weak Accept · 4 Borderline Accept · 3 Borderline Reject · 2 Weak Reject · 1 Reject.
+- **Scale:** 6-point (confirmed by the maintainer, 2026-10), shared by CVPR, ICCV and ECCV. Labels used by the skill: 6 Accept · 5 Weak Accept · 4 Borderline Accept · 3 Borderline Reject · 2 Weak Reject · 1 Reject. Check the exact label wording on the current form.
 - **Emphasis:** technical novelty plus strong, controlled experiments on standard benchmarks; ablations; visual evidence.
 - **Rebuttal:** one-page PDF in the CVPR template.
 - **Decision:** ACs, SACs and PCs decide from the reviewers' input.
 
-### ICCV (`iccv`, 2025 cycle; secondary)
-- **Scale (community reports for 2025):** 6 Accept, 5 Weak Accept, 4 Borderline Accept. Labels 3–1 inferred as Borderline Reject / Weak Reject / Reject.
+### ICCV (`iccv`, 2025 cycle; confirmed)
+- **Scale:** 6-point (confirmed). Community reports for 2025 give 6 Accept, 5 Weak Accept, 4 Borderline Accept; labels 3–1 inferred as Borderline Reject / Weak Reject / Reject.
 - **Policy:** reviews flagged as highly irresponsible (one sentence long, LLM-generated, irrelevant, or ignoring large parts of the paper) and missed review deadlines can lead to desk rejection of the reviewer's own papers.
 - **Rebuttal:** one-page PDF.
 
-### ECCV (`eccv`, 2026 cycle; scale assumed)
+### ECCV (`eccv`, 2026 cycle; confirmed)
 - **Contribution Types:** authors declare a contribution type, and reviewers and ACs judge the paper against type-specific criteria. The Field Analyst records the declared type (see `agents/field_analyst_agent.md`).
 - **Guidance:** look for what is good or stimulating and what knowledge it advances. **Not exceeding SOTA on an existing benchmark is not by itself grounds for rejection.** Failing to cite or beat an arXiv paper must not be the *sole* reason to reject.
 - **LLM policy:** LLMs may not be used to write reviews or meta-reviews (locally or via an API). Background research and grammar checks on short phrases are allowed.
-- **Scale:** not confirmed; the CVF-style 6-point scale is assumed.
+- **Scale:** 6-point (confirmed), with the same CVF-style labels as CVPR/ICCV; check the exact label wording.
 - **Rebuttal:** one-page PDF; strict deadlines.
 
 ## Machine Learning Conferences
@@ -122,7 +123,7 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 
 ## Sources (accessed 2026-10)
 
-The official pages could not be fetched directly when this file was written; details marked *secondary* come from search summaries of them and from published analyses. Re-verify before each cycle.
+The official pages could not be fetched directly when this file was written; details marked *secondary* come from search summaries of them and from published analyses. The CVPR/ICCV/ECCV 6-point scale was confirmed by the maintainer in 2026-10. Re-verify before each cycle.
 
 - CVPR 2026 Reviewer Guidelines and Reviewer Training Material: cvpr.thecvf.com/Conferences/2026/ReviewerGuidelines, …/ReviewerTrainingMaterial
 - ICCV 2025 Reviewer Guidelines and Changes: iccv.thecvf.com/Conferences/2025/ReviewerGuidelines, …/Changes

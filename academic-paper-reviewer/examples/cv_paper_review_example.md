@@ -87,7 +87,7 @@ Output of `python3 scripts/aggregate_scores.py scripts/example_scores.json --ven
 
 | Venue | Venue-weighted composite | Bar offset | Band before → after DA cap | Venue recommendation | Venue sub-scores | Scale status |
 |---|---|---|---|---|---|---|
-| CVPR (2026) | 62.7 | +0 | 4 → 3 | 3 Borderline Reject | — | secondary |
+| CVPR (2026) | 62.7 | +0 | 4 → 3 | 3 Borderline Reject | — | confirmed |
 | ICLR (2026) | 63.3 | +0 | 4 → 3 | 4 on {0,2,4,6,8,10} (5 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 2 | secondary |
 | ICML (2025) | 63.0 | +0 | 4 → 3 | 2 Weak reject (leaning reject) | — | official |
 | ACM Multimedia (2026) | 63.3 | +0 | 4 → 3 | Weak reject | — | unpublished |

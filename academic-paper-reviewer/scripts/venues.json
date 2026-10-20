@@ -1,5 +1,5 @@
 {
-  "_comment": "Venue profiles used by aggregate_scores.py --venue / --all-venues. 'emphasis' multiplies the paper-type weights (order: technical_rigor, clarity, novelty, significance, experimental_validation, reproducibility, ethics) and is renormalized; these multipliers are this skill's heuristics, not official venue weights. 'bar_offset' shifts the composite thresholds (positive = harder). 'scale.status' records how well the scale is verified: official | secondary | assumed | unpublished. 'as_of' is the review cycle the information describes. Verify against the venue's current reviewer guidelines before relying on labels.",
+  "_comment": "Venue profiles used by aggregate_scores.py --venue / --all-venues. 'emphasis' multiplies the paper-type weights (order: technical_rigor, clarity, novelty, significance, experimental_validation, reproducibility, ethics) and is renormalized; these multipliers are this skill's heuristics, not official venue weights. 'bar_offset' shifts the composite thresholds (positive = harder). 'scale.status' records how well the scale is verified: official | confirmed (verified by the skill maintainer against the current form) | secondary | assumed | unpublished. 'as_of' is the review cycle the information describes. Verify against the venue's current reviewer guidelines before relying on labels.",
   "dimension_order": ["technical_rigor", "clarity", "novelty", "significance",
                       "experimental_validation", "reproducibility", "ethics"],
   "venues": {
@@ -11,9 +11,9 @@
       "emphasis": [1.0, 1.0, 1.1, 1.0, 1.3, 1.0, 0.8],
       "bar_offset": 0,
       "scale": {
-        "status": "secondary",
+        "status": "confirmed",
         "type": "ordinal6",
-        "note": "Recent CVPR forms use labels including 'Weak Accept' and 'Borderline'; the 6-point CVF-style mapping below is assumed from ICCV 2025 and must be checked against the current form.",
+        "note": "6-point rating scale (confirmed by the maintainer, 2026-10). Label wording follows the ICCV 2025 reports (6 Accept, 5 Weak Accept, 4 Borderline Accept, 3 Borderline Reject, 2 Weak Reject, 1 Reject); check the exact label text on the current form.",
         "map": {"6": "6 Accept", "5": "5 Weak Accept", "4": "4 Borderline Accept",
                 "3": "3 Borderline Reject", "2": "2 Weak Reject", "1": "1 Reject"}
       },
@@ -29,9 +29,9 @@
       "emphasis": [1.0, 1.0, 1.1, 1.0, 1.3, 1.0, 0.8],
       "bar_offset": 0,
       "scale": {
-        "status": "secondary",
+        "status": "confirmed",
         "type": "ordinal6",
-        "note": "Community reports for ICCV 2025: 6 Accept, 5 Weak Accept, 4 Borderline Accept; labels 3-1 inferred by symmetry.",
+        "note": "6-point rating scale (confirmed by the maintainer, 2026-10). Labels from ICCV 2025 reports: 6 Accept, 5 Weak Accept, 4 Borderline Accept; labels 3-1 inferred by symmetry.",
         "map": {"6": "6 Accept", "5": "5 Weak Accept", "4": "4 Borderline Accept",
                 "3": "3 Borderline Reject", "2": "2 Weak Reject", "1": "1 Reject"}
       },
@@ -47,9 +47,9 @@
       "emphasis": [1.0, 1.0, 1.2, 1.1, 1.1, 1.0, 0.8],
       "bar_offset": 0,
       "scale": {
-        "status": "assumed",
+        "status": "confirmed",
         "type": "ordinal6",
-        "note": "Exact ECCV 2026 scale not confirmed; CVF-style 6-point mapping assumed.",
+        "note": "6-point rating scale (confirmed by the maintainer, 2026-10). Label wording follows the CVF-style labels; check the exact label text on the current form.",
         "map": {"6": "6 Accept", "5": "5 Weak Accept", "4": "4 Borderline Accept",
                 "3": "3 Borderline Reject", "2": "2 Weak Reject", "1": "1 Reject"}
       },

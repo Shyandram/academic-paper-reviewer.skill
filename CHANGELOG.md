@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.1 (2026-10-20)
+- CVPR, ICCV and ECCV are now marked as using the confirmed 6-point rating scale (new `confirmed` status). The label wording still follows the ICCV 2025 reports.
+
 ## 2.1 (2026-10-15)
 
 ### Added

@@ -257,7 +257,7 @@ def venue_markdown(views):
                      f"{v['bar_offset']:+d} | {v['band']} → {v['final']} | {v['label']} | "
                      f"{subs} | {v['scale_status']} |")
     lines += ["", "Emphasis weights are this skill's heuristics, not official venue "
-              "weights. Scale status: official / secondary / assumed / unpublished "
+              "weights. Scale status: official / confirmed / secondary / assumed / unpublished "
               "(see references/venue_profiles.md). Upheld DA-CRITICAL caps apply to "
               "every venue.", ""]
     for v in views:

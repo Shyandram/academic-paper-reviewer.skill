@@ -2,11 +2,11 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five dynamically configured reviewer personas: Editor-in-Chief, Methodology, Domain, Cross-disciplinary Perspective, and Devil's Advocate. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use whenever the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.1"
-  last_updated: "2026-10-15"
+  version: "2.1.1"
+  last_updated: "2026-10-20"
 ---
 
-# Academic Paper Reviewer v2.1
+# Academic Paper Reviewer v2.1.1
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (venue fit, methodology, domain positioning, cross-disciplinary impact, and adversarial challenge to the core claim), and consolidates their reports into an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
