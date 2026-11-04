@@ -258,7 +258,10 @@ def load_venues(path=VENUES_FILE):
         return json.load(f)["venues"]
 
 
-def venue_view(res, key, venue, final=None):
+MIN_SHIFT_GAP = 2.0   # emphasis-only composite differences smaller than this are noise
+
+
+def venue_view(res, key, venue, final=None, is_target=False):
     """Re-score the panel's dimension averages through one venue's lens."""
     dims = {d["key"]: d["weighted_avg"] for d in res["dimensions"]}
     base = [res["weights"][k] for k, _ in DIMENSIONS]
@@ -269,6 +272,10 @@ def venue_view(res, key, venue, final=None):
     # Venue adjustment: how much this venue's emphasis and bar move the
     # composite band relative to the default band, applied to the decision.
     shift = composite_to_overall(comp, offset) - res["composite_band"]
+    if is_target:
+        shift = 0   # the target venue's label always equals the EIC's decision
+    elif offset == 0 and abs(comp - res["panel_composite"]) < MIN_SHIFT_GAP:
+        shift = 0   # a band edge crossed by a tiny emphasis difference is not a venue effect
     start = final if final is not None else res["suggested_overall"]
     band = max(1, min(6, start + shift))
     cap = res.get("da_cap")
@@ -419,7 +426,9 @@ def main():
         if args.final > res["final_overall_ceiling"]:
             fail(f"--final {args.final} exceeds the DA ceiling {res['final_overall_ceiling']}")
         res["final_overall"] = args.final
-    views = [venue_view(res, k, venues[k], args.final) for k in dict.fromkeys(keys)]
+    ordered = list(dict.fromkeys(keys))
+    target = ordered[0] if args.venue or data.get("venues") else None   # first --venue = target
+    views = [venue_view(res, k, venues[k], args.final, is_target=(k == target)) for k in ordered]
     if args.json:
         res["venue_views"] = views
         print(json.dumps(res, indent=2, ensure_ascii=False))

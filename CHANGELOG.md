@@ -3,7 +3,7 @@
 ## 2.3 (2026-11-04)
 - **The decision starts from the reviewers' recommendations.** The starting point is the EIC-weighted mean of the reviewers' Overall ratings (confidence × EIC quality weight, rounded half up). The 0–100 composite becomes a cross-check: the script flags it when its band differs, and the EIC must say which signal it trusts. (On v2.2, a CVPR Highlight rated 3/4/4/4/3 got Borderline Reject because its composite was 59.4, under the cutoff of 60.)
 - **Two score lists.** Official = the plain mean of the raw ratings and scores (what authors see, never modified). EIC assessment = internal and weighted, which can be higher or lower.
-- **`--final N`** renders venue labels from the EIC's actual decision, keeping each venue's relative shift.
+- **`--final N`** renders venue labels from the EIC's actual decision. The target venue (the first `--venue`) always shows the decision itself. Other venues shift only for real bar or emphasis differences, never for a band edge crossed by less than 2 points.
 - **New-task papers** are judged on the value of the task and the evidence, not on technical novelty alone.
 
 ## 2.2 (2026-11-04)

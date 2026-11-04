@@ -119,6 +119,26 @@ class AggregateTests(unittest.TestCase):
         # TPAMI keeps its harder bar relative to the decision
         self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["final"], 3)
 
+    def test_target_venue_label_equals_decision(self):
+        # Knife-edge: panel composite exactly 60.0 (band 4); CVPR's emphasis on
+        # experimental validation nudges its composite just under 60.
+        r = uniform(60, overall=4)
+        r["scores"]["experimental_validation"], r["scores"]["technical_rigor"] = 58, 62
+        res = agg.aggregate({"reviewers": [r]})
+        self.assertEqual((res["panel_composite"], res["composite_band"]), (60.0, 4))
+        venues = agg.load_venues()
+        cvpr = venues["cvpr"]
+        self.assertLess(agg.venue_view(res, "cvpr", cvpr)["composite"], 60.0)
+        v = agg.venue_view(res, "cvpr", cvpr, final=4, is_target=True)
+        self.assertEqual((v["shift"], v["label"]), (0, "4 Borderline Accept"))
+        # As a non-target venue, a sub-2-point emphasis difference is not a shift either
+        self.assertEqual(agg.venue_view(res, "cvpr", cvpr, final=4)["shift"], 0)
+
+    def test_real_bar_difference_still_shifts(self):
+        res = agg.aggregate({"reviewers": [uniform(61, overall=4)]})   # band 4
+        venues = agg.load_venues()
+        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["shift"], -1)  # needs 63
+
     def test_eic_weight_out_of_range_exits(self):
         r = uniform(70)
         r["eic_weight"] = 3

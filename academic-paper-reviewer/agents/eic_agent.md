@@ -52,7 +52,7 @@ Decide the final Overall (1–6). The starting point is not a rule:
 - **New tasks and new problems:** judge a paper that introduces a new task or problem on whether the task is valuable and the evidence convincing for a first paper on it. Don't judge it on technical novelty alone, and don't expect the baseline coverage of a mature task.
 - Apply the venue's rules from `references/venue_profiles.md`: ECCV contribution types and "not beating SOTA is not grounds for rejection", the ACM MM scope gate, TMLR's criteria, the TPAMI completeness bar, and AAAI's Phase-1 risk.
 
-Then run the script once more with your decision, `--final <N>`, so the venue labels (e.g., the ICLR rating) reflect your decision rather than the starting point.
+Then run the script once more with your decision, `--final <N>`, so the venue labels (e.g., the ICLR rating) reflect your decision rather than the starting point. The first `--venue` is the target venue, and its label always equals your decision. Other venues shift only for real bar or emphasis differences: a venue's composite must differ by 2 or more points, or the venue must have a bar offset.
 
 The decision letter reports the official ratings and scores and explains your judgment.
 
