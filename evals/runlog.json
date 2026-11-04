@@ -112,9 +112,15 @@
  "iclr-3d-2508.13792": {
   "model": "haiku",
   "skill": "2.3.1",
-  "tool_restriction": true
+  "tool_restriction": true,
+  "stray_tool_attempt": "temporary files in /tmp and /root (removed)"
  },
  "iclr-video-2604.18367": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-lowlevel-2602.00579": {
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
