@@ -140,5 +140,10 @@
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
+ },
+ "cvpr-lowlevel-2609.15120-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
  }
 }
