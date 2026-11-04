@@ -1,6 +1,6 @@
 # Example: Full Review of a Computer Vision Paper
 
-> **Illustrative example.** The paper, reviewers, numbers and findings below are entirely fictional. They demonstrate format, depth and calibration. Baselines are described generically on purpose, so no real method's results are misrepresented. The score tables are the actual output of `scripts/aggregate_scores.py` on `scripts/example_scores.json`.
+> **Illustrative example.** The paper, reviewers, numbers and findings below are entirely fictional. They demonstrate format, depth and calibration. Baselines are described generically on purpose, so no real method's results are misrepresented. The score tables are the actual output of `scripts/aggregate_scores.py` on `examples/cv_example_scores.json`. The EIC weights there are this example's own, justified in the reviewer-weights table below. They are not defaults: every reviewer starts at 1.0.
 
 **Fictional paper**: *"AdaPrune-Seg: Content-Adaptive Token Pruning for Real-Time Semantic Segmentation with Vision Transformers"*. Target venue: CVPR (inferred from the template).
 

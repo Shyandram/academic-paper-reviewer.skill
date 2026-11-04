@@ -14,7 +14,8 @@ spec = importlib.util.spec_from_file_location("agg", SKILL / "scripts" / "aggreg
 agg = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(agg)
 
-EXAMPLE = json.loads((SKILL / "scripts" / "example_scores.json").read_text())
+EXAMPLE = json.loads((SKILL / "examples" / "cv_example_scores.json").read_text())
+FORMAT_EXAMPLE = json.loads((SKILL / "scripts" / "example_scores.json").read_text())
 
 
 def uniform(score, confidence=5, overall=None):
@@ -138,6 +139,10 @@ class AggregateTests(unittest.TestCase):
         res = agg.aggregate({"reviewers": [uniform(61, overall=4)]})   # band 4
         venues = agg.load_venues()
         self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["shift"], -1)  # needs 63
+
+    def test_format_example_has_neutral_weights(self):
+        # The format example must not suggest default EIC weights.
+        self.assertTrue(all(r["eic_weight"] == 1.0 for r in FORMAT_EXAMPLE["reviewers"]))
 
     def test_eic_weight_out_of_range_exits(self):
         r = uniform(70)

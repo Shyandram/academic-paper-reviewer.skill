@@ -31,6 +31,8 @@ Give each reviewer an **EIC quality weight** from 0.5 to 1.5, reflecting how muc
 | **0.75** | Several points overstated, or calibration clearly off for the venue (too harsh or too lenient), or largely generic |
 | **0.5** | Key claims incorrect when checked, off-topic, or scores inconsistent with the review's own text |
 
+**Start every reviewer at 1.0.** Move a weight only for a reason specific to *this* paper that you verified in Step 2 (e.g., "R2's central claim about Table 3 is incorrect"). Never copy weights from an example or a template: they are format illustrations, not defaults. On many papers all five weights stay at 1.0, or only one or two move. Don't penalize a reviewer for their role: a strict Methodology Reviewer or a positive Perspective Reviewer is doing their job, so weight what they *got right*, not how harsh or lenient they are.
+
 Judge **quality, not agreement**. A dissenting reviewer who is right gets weighted up. Give a one-line reason for every weight. Weights also correct for role bias: the Devil's Advocate is adversarial by design, so its scores count at full weight only where its arguments survived your check in Step 2.
 
 ### Step 4: Rule on DA-CRITICAL Issues

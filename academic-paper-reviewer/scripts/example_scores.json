@@ -5,7 +5,7 @@
       "role": "R1 (Meth.)",
       "confidence": 5,
       "overall": 3,
-      "eic_weight": 1.25,
+      "eic_weight": 1.0,
       "scores": {
         "technical_rigor": 58,
         "clarity": 74,
@@ -35,7 +35,7 @@
       "role": "R3 (Persp.)",
       "confidence": 3,
       "overall": 4,
-      "eic_weight": 0.75,
+      "eic_weight": 1.0,
       "scores": {
         "technical_rigor": 70,
         "clarity": 80,

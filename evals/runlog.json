@@ -1,0 +1,54 @@
+{
+ "cvpr-detseg-2604.24119-flaw": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-medical-2604.23274": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "iclr-detseg-2604.14684": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-3d-2607.02015": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-video-2605.12006": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-vlm-2605.01700": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-generation-2606.01911": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-lowlevel-2609.15120": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-detseg-2604.24119": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-efficient-2605.31124": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-representation-2607.11008": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-robustness-2604.16562": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "eccv-medical-2609.11506": {
+  "model": "sonnet",
+  "skill": "2.3"
+ }
+}
