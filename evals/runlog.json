@@ -193,9 +193,16 @@
   "model": "haiku",
   "skill": "2.5",
   "lit_mode": "strict",
-  "tool_restriction": true
+  "tool_restriction": true,
+  "stray_tool_attempt": "spawn_task (denied)"
  },
  "cvpr-detseg-2604.24119-plag-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": true
+ },
+ "cvpr-3d-2607.02015-lit26": {
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
