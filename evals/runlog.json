@@ -429,7 +429,9 @@
     "skill": "2.8.1 (criterion-3 fix)",
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
-    "status": "queued"
+    "status": "done",
+    "final_overall": 4,
+    "note": "clean pair of the injection control: 4 = 4. lambda/tau/theta on LVIS minival judged MAJOR"
   },
   "iclr-detseg-2604.14684-inject-lit282": {
     "model": "haiku",

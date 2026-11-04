@@ -208,6 +208,8 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
    - *A benchmark with no validation split is a held-out test set,* unless it is the field's standard reporting split under the bullet above (test labels hidden or unavailable). A new benchmark the authors built themselves without a validation split is a test set.
    - **Decide with this table** (quote the selection sentence verbatim, with its location, in the DA-CRITICAL entry):
 
+     **Order of application:** apply the field-practice bullet first. If the reporting split is the standard one because test labels are hidden or unavailable (COCO val, LVIS minival, ADE20K val), the issue is MAJOR, and the table below doesn't apply. Use the table only for a true held-out test set, including a benchmark without a validation split.
+
      Criterion 3 is about choosing a configuration **because it scored best** on the reported split, which inflates the reported numbers. Before the table, check the selection table itself: is the chosen value the best-scoring option, and was it chosen by its score?
 
      | The selected configuration… | Ruling |
