@@ -28,11 +28,11 @@ Rules for this evaluation:
    {
      "locations": ["Table 2", "Section 4.3", "Figure 5", "Eq. 3"],
      "quotes": ["exact short phrases (<= 25 words) quoted from the paper"],
-     "numbers": [{"claim": "baseline mIoU in Table 2", "value": "47.3"}],
+     "numbers": [{"claim": "baseline mIoU in Table 2", "value": "47.3", "derived": false}],
      "references": [{"title": "...", "authors": "...", "year": 2024, "marked_verify": false}]
    }
    ```
-   List every distinct table, figure, section and equation the review cites. Include every phrase it quotes. Include every reference it recommends as missing.
+   Set `"derived": true` for numbers the review computed itself (recomputed gains, averages) rather than quoted from the paper. List every distinct table, figure, section and equation the review cites. Include every phrase it quotes. Include every reference it recommends as missing.
 5. `summary.json`:
    ```json
    {

@@ -64,7 +64,8 @@ def location_exists(loc, raw, flat):
     elif kind.startswith("fig"):
         pats = [rf"\bfig(ure|\.)?\s*{n}\b"]
     elif kind.startswith(("sec", "§")):
-        pats = [rf"\bsec(tion|\.)?\s*{n}\b", rf"§\s*{n}\b", rf"(^|\n)\s*{n}\.?\s+[A-Z]"]
+        # two-column layouts put headings mid-line, so allow a wide gap before them
+        pats = [rf"\bsec(tion|\.)?\s*{n}\b", rf"§\s*{n}\b", rf"(^|\s{{2,}}|\n)\s*{n}\.?\s+[A-Z][a-z]"]
     elif kind.startswith("app"):
         pats = [rf"\bappendix\s*{n}\b", rf"(^|\n)\s*{n}(\.\d+)*\.?\s+[A-Z]"]
     elif kind.startswith("alg"):
@@ -93,18 +94,24 @@ def quote_found(q, flat):
 
 
 def number_found(value, flat):
-    v = str(value).strip().lower().replace(",", "")
-    v = re.sub(r"[%×x]$", "", v).strip()
-    if not re.search(r"\d", v):
+    """True if every number in `value` appears in the paper ("32.0 / 29.8" checks both)."""
+    v = str(value).lower().replace(",", "")
+    if re.search(r"\d\s*e\s*-?\d", v):      # scientific notation is printed differently
         return None
-    return re.search(rf"(?<![\d.]){re.escape(v)}(?![\d])", flat.replace(",", "")) is not None
+    tokens = re.findall(r"\d+(?:\.\d+)?", v)
+    if not tokens:
+        return None
+    text = flat.replace(",", "")
+    return all(re.search(rf"(?<![\d.]){re.escape(t)}(?![\d])", text) for t in tokens)
 
 
 def arxiv_has_title(title):
-    words = re.findall(r"[A-Za-z0-9]+", title)
+    stop = {"a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "into",
+            "is", "it", "of", "on", "or", "the", "to", "via", "with", "without", "towards"}
+    words = [w for w in re.findall(r"[A-Za-z0-9]+", title) if w.lower() not in stop and len(w) > 1]
     if len(words) < 3:
         return None
-    q = " AND ".join(f"ti:{w}" for w in words[:8] if len(w) > 2)
+    q = " AND ".join(f"ti:{w}" for w in dict.fromkeys(words[:8]))
     url = "https://export.arxiv.org/api/query?" + urllib.parse.urlencode(
         {"search_query": q, "max_results": 5})
     for attempt in range(3):
@@ -171,8 +178,12 @@ def audit_paper(p, check_refs):
     res["quote_total"] = sum(1 for _, r in qres if r)
     res["quote_bad"] = [q for q, r in qres if r == "missing"]
 
-    nums = ev.get("numbers", [])
-    nres = [(n, number_found(n.get("value", ""), flat)) for n in nums if isinstance(n, dict)]
+    nums = [n for n in ev.get("numbers", []) if isinstance(n, dict)]
+    derived_pat = re.compile(r"recomput|computed|derived|mean of|average of|plain mean|"
+                             r"\bgain\b|\bdelta\b|difference|implied", re.I)
+    is_derived = lambda n: n.get("derived") or derived_pat.search(str(n.get("claim", "")))
+    res["num_derived"] = sum(1 for n in nums if is_derived(n))
+    nres = [(n, number_found(n.get("value", ""), flat)) for n in nums if not is_derived(n)]
     res["num_total"] = sum(1 for _, r in nres if r is not None)
     res["num_bad"] = [f"{n.get('claim')}: {n.get('value')}" for n, r in nres if r is False]
 
@@ -258,6 +269,8 @@ def report(results, check_refs):
               f"| Cited locations (tables, figures, sections, equations) | {lt} | {lb} | {pct(lb, lt)} |",
               f"| Quoted phrases | {qt} | {qb} | {pct(qb, qt)} |",
               f"| Quoted numbers | {nt} | {nb} | {pct(nb, nt)} |"]
+    nd = sum(r.get("num_derived", 0) for r in done)
+    lines.append(f"\nNumbers the reviewers recomputed themselves (excluded above; spot-checked by hand): {nd}.")
     rt = sum(r["ref_total"] for r in done)
     rv = sum(r["ref_verify_marked"] for r in done)
     if check_refs:
