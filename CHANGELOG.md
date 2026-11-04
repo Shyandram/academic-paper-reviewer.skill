@@ -1,5 +1,14 @@
 # Changelog
 
+## 2.7
+Ideas adopted from ScholarPeer (arXiv 2601.22638), keeping every self-exclusion guardrail:
+- **Claim-driven searches.** The Methodology Reviewer numbers the contribution claims C1, C2, …; the literature check runs one concept query per claim (`search --purpose claim --tag C1`), and the Domain Reviewer gives each claim a novelty verdict (high / medium / incremental / known) with 2–3 verified prior papers. "Known" needs a prior paper with the same task and core mechanism.
+- **Baseline scout.** `related_search.py benchmarks` lists the public benchmarks and metrics the paper reports on; one baseline query per benchmark, then `scout --benchmark COCO --metric AP` returns kept prior work reporting on it, with the numbers in its abstract. The Domain Reviewer writes a baseline scout table, including **under-reported baselines** (a lower number than the method's own paper, same setting). A missing prior baseline is MAJOR at most; recent preprints stay discuss-only.
+- **Expansion round.** `coverage` summarizes queries by purpose and claim, kept results by label and year, and lists the gaps (years with no prior work, claims with no query, no baseline query) for a second round. Query budget: 12 per review (`MAX_QUERIES`), was 3–6.
+- **Field snapshot.** 150–250 words on the sub-field before the cutoff (paradigm shift, current state of the art, open problems, what counts as significant now), used to calibrate Significance and Novelty.
+- Ledger entries now record each query's purpose and tag; over-budget queries are refused and logged. 4 new tests (18 for the literature check).
+- Not adopted: a "when unsure, give bad scores" decision rule (a negative bias the 2.x calibration removed) and cutoff-only leak control.
+
 ## 2.6.1 (2026-11-06)
 Fixes from the literature-check evaluation (11 runs). The searches never surfaced the paper itself, but two problems showed up:
 - **Recent arXiv preprints no longer count as required comparisons.** With search on, all 4 clean papers scored one step lower: reviewers counted recent arXiv-only papers as "missing comparisons". Kept results are now labelled **prior (peer-reviewed)** (publication evidence from arXiv's journal reference or comment), **prior (arXiv-only, 6+ months before the cutoff)**, **recent preprint**, **concurrent** or **newer**. Only the two prior labels can be required comparisons; recent preprints are "worth discussing" and must not lower scores.

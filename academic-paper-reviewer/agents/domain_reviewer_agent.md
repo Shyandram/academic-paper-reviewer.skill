@@ -48,6 +48,26 @@ If a literature check ran, take the **closest prior works** from `related_search
 
 Without a literature check, build the same table from the paper's own related work and your knowledge, marking uncertain entries `[verify]`.
 
+### Step 4c: Per-Claim Novelty, Baselines and Field Snapshot (literature check only)
+
+**Per-claim novelty.** For each contribution claim (C1, C2, … from the Methodology Reviewer's map), use the results of its `--purpose claim` query:
+
+| Claim | Novelty (high / medium / incremental / known) | Supporting prior work (2–3, verified links, labels) | Reasoning |
+|-------|-----------------------------------------------|-----------------------------------------------------|-----------|
+
+"Known" needs a **prior** paper with the same task and core mechanism. With no relevant prior work found, say "no close prior work found in N results", not "novel": the search covers arXiv only.
+
+**Baseline scout.** For each external benchmark from `related_search.py benchmarks` (skip the paper's own new benchmarks), run `scout`:
+
+| Benchmark / metric | Prior method (link, label) | Its reported number | Compared in the paper? | Paper's number for it | Note |
+|--------------------|----------------------------|---------------------|------------------------|-----------------------|------|
+
+- Only **prior** rows can be *missing required baselines*. Recent preprints and concurrent work go in as "worth discussing".
+- **Under-reported baseline:** if the paper compares against a method but reports a lower number than that method's own paper for what looks like the same setting, flag it with both numbers. Check the setting first (backbone, pretraining data, resolution, split, schedule); abstract numbers are pointers, not verified results.
+- A gap in numbers between methods with different settings is not a missing baseline.
+
+**Field snapshot (150–250 words).** From the kept results: the dominant approach ~3–5 years ago and what changed, the current state of the art on the paper's benchmarks, open problems stated by recent work, and **what counts as a significant contribution in this sub-field right now** (e.g., "+0.5 mAP on COCO is incremental; a new capability or a 2× efficiency gain at equal accuracy is significant"). Use it to score Significance and Novelty, and say so. It describes the field before the cutoff and must not mention the reviewed paper's reception.
+
 ### Step 5: Missing References
 
 **If a literature check ran (Phase 1.5),** add a *literature-check addendum* built from its kept results and labels:

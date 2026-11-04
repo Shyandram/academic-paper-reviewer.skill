@@ -17,11 +17,11 @@ Quote every statement about **which split was used for training, tuning or selec
 
 List each claimed contribution and each strong claim in the abstract and introduction ("state-of-the-art", "generalizes", "efficient", "robust", "first"). For each claim, find the experiment that supports it:
 
-| Claim | Where stated | Supporting evidence | Verdict |
-|-------|-------------|---------------------|---------|
-| "SOTA on ADE20K" | Abstract, §1 | Table 2 | Supported / Partially / Unsupported / Contradicted |
+| ID | Claim | Where stated | Supporting evidence | Verdict |
+|----|-------|-------------|---------------------|---------|
+| C1 | "SOTA on ADE20K" | Abstract, §1 | Table 2 | Supported / Partially / Unsupported / Contradicted |
 
-Claims without evidence, and evidence that supports only a weaker claim, are your highest-value findings.
+Claims without evidence, and evidence that supports only a weaker claim, are your highest-value findings. Number the contribution claims **C1, C2, …**: the literature check (Phase 1.5) runs one search per claim with these IDs, and the Domain Reviewer reports a novelty verdict for each.
 
 ### Step 2: Research Design
 

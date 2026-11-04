@@ -2,7 +2,7 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.6.1"
+  version: "2.7"
   last_updated: "2026-11-05"
 ---
 
@@ -124,10 +124,13 @@ The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
 ### Phase 1.5: Literature Check (after the five reports are drafted; needs network access)
 
 The literature check comes **after** the reviewers have read the whole paper, so it supplements their reading and never replaces it. Follow `references/literature_search.md`:
-1. Run 3–6 concept-only searches (task, technique, closest baseline family). The script refuses queries that could retrieve the paper and drops results that are the paper itself, its reviews or its outcome.
-2. Run `related_search.py similarity` to find the **closest prior works** and any **text overlap**.
-3. The Domain Reviewer adds a **literature-check addendum** to its report: a novelty delta table against the closest prior works, and verified missing references. The Devil's Advocate may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
-4. Only results labelled **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months before the cutoff)** can be required comparisons. **Recent preprints**, **concurrent** and **newer** work are "worth discussing" only, never a weakness on their own.
+1. **Round 1, claim-driven and benchmark searches** (concept words only; the script refuses queries that could retrieve the paper and drops results that are the paper itself, its reviews or its outcome):
+   - one query per contribution claim, using the claim IDs (C1, C2, …) from the Methodology Reviewer's claim-to-evidence map (`--purpose claim --tag C1`);
+   - one query per external benchmark the paper reports on (`related_search.py benchmarks` lists them; `--purpose baseline`), then `scout` to find prior work reporting on that benchmark.
+2. **Round 2, expansion:** run `coverage` and fill its gaps (years with no prior work, dataset or foundational papers behind the baselines, claims with no query) with `--purpose expansion`. At most 12 queries in total; stop earlier when the gaps are closed.
+3. Run `related_search.py similarity` to find the **closest prior works** and any **text overlap**.
+4. The Domain Reviewer adds a **literature-check addendum** to its report: a per-claim novelty verdict with supporting papers, a novelty delta table against the closest prior works, a **baseline scout table**, a short **field snapshot** (what counts as significant in this sub-field right now), and verified missing references. The Devil's Advocate may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
+5. Only results labelled **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months before the cutoff)** can be required comparisons. **Recent preprints**, **concurrent** and **newer** work are "worth discussing" only, never a weakness on their own.
 
 Default mode is `on`. Use `strict` (drops everything after the cutoff) to simulate a review as of submission. Without network access, skip this phase, say so, and rely on knowledge with `[verify]`.
 
@@ -274,7 +277,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | `templates/revision_response_template.md` | Journal response letters |
 | `scripts/aggregate_scores.py` | Phase 2 score aggregation (`python3 scripts/aggregate_scores.py scores.json --venue cvpr` / `--all-venues`) |
 | `scripts/venues.json` | Venue profiles used by the script (emphasis, bar offset, scale, form fields) |
-| `scripts/related_search.py` | Literature check: `fingerprint`, `search`, `filter`, `verify`, `similarity` (arXiv API; logs to `search_ledger.jsonl`) |
+| `scripts/related_search.py` | Literature check: `fingerprint`, `search`, `filter`, `verify`, `benchmarks`, `scout`, `coverage`, `similarity` (arXiv API; logs to `search_ledger.jsonl`) |
 | `examples/cv_paper_review_example.md` | Worked full-mode example (CV) |
 | `examples/interdisciplinary_review_example.md` | Worked example (medical imaging × clinical practice) |
 

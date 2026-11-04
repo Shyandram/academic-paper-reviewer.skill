@@ -14,7 +14,10 @@ Subcommands (standard library only):
       distinctive phrases and the cutoff date before searching.
 
   search       --fp fp.json --query "concept words" [--max 25] [--mode on|strict]
+               [--purpose claim|baseline|expansion|general] [--tag C1]
       Query the arXiv API, filter the results, print kept results as JSON.
+      --purpose and --tag (e.g., the claim ID) are logged for the audit.
+      At most 12 queries per review (MAX_QUERIES); more are refused.
 
   filter       --fp fp.json --results hits.json [--mode on|strict]
       Filter results from another search tool (a JSON list of objects with
@@ -22,6 +25,22 @@ Subcommands (standard library only):
 
   verify       --fp fp.json --title "Recommended reference title"
       Check that a recommended reference exists on arXiv (title match).
+
+  benchmarks   --paper paper.txt [--fp fp.json]
+      List the benchmarks and metrics the paper evaluates on (for the
+      baseline scout). Benchmarks that are the paper's own (method_names)
+      are marked: there is no prior state of the art to scout for them.
+
+  scout        --fp fp.json --benchmark "ADE20K" [--metric mIoU]
+      Search the kept results for prior work reporting on that benchmark,
+      with the numbers its abstract gives. Only "prior" rows can be
+      required baselines.
+
+  coverage     --fp fp.json
+      Summarize the searches so far: queries by purpose and claim tag,
+      kept results by label and year, and gaps to fill in the expansion
+      round (years with no prior work, claims with no query, no
+      baseline query).
 
   similarity   --fp fp.json --paper paper.txt [--top 3]
       Score the reviewed paper against every kept result saved by search /
@@ -76,6 +95,24 @@ PEER_REVIEWED = re.compile(
 HIGH_OVERLAP = 0.30      # calibrated: a paper vs. its own abstract ~0.55, related work <= 0.17
 TEXT_OVERLAP_GRAMS = 2   # calibrated: own abstract shares ~33 8-grams, related work 0
 GRAM = 8
+MAX_QUERIES = 12         # one per contribution claim + baselines + an expansion round
+PURPOSES = ("claim", "baseline", "expansion", "general")
+METRICS = ["mIoU", "mAP", "AP50", "AP75", "AP", "AR", "PQ", "NDS", "PSNR", "SSIM", "LPIPS", "FID",
+           "KID", "IS", "CLIP score", "CLIPScore", "FVD", "top-1", "top-5", "accuracy", "Recall@1",
+           "R@1", "Recall@5", "R@5", "mAR", "Dice", "HD95", "EPE", "AbsRel", "RMSE", "Chamfer",
+           "F-score", "AUC", "EER", "MOTA", "HOTA", "IDF1", "J&F", "BLEU", "CIDEr", "METEOR",
+           "SPICE", "ROUGE", "mAcc", "gFID", "rFID", "IoU", "Acc", "CD", "OLS", "TOP", "DET", "success rate", "SR", "SPL", "NIQE"]
+BENCHMARKS = ["COCO", "LVIS", "ADE20K", "Cityscapes", "ImageNet", "ImageNet-1K", "ImageNet-21K",
+              "Pascal VOC", "PASCAL Context", "Objects365", "OpenImages", "nuScenes", "KITTI", "Waymo",
+              "Argoverse", "OpenLane", "OpenLane-V2", "ScanNet", "ScanNet++", "ShapeNet", "ModelNet40",
+              "DTU", "LLFF", "Mip-NeRF 360", "Tanks and Temples", "Replica", "CO3D", "Objaverse",
+              "CIFAR-10", "CIFAR-100", "Kinetics", "Kinetics-400", "Something-Something", "UCF101",
+              "HMDB51", "DAVIS", "YouTube-VOS", "MOT17", "MOT20", "Flickr30K", "MSCOCO", "VQAv2",
+              "GQA", "TextVQA", "MMBench", "MME", "SEED-Bench", "RefCOCO", "RefCOCO+", "RefCOCOg",
+              "CelebA", "CelebA-HQ", "FFHQ", "LSUN", "Set5", "Set14", "Urban100", "BSD100", "Manga109",
+              "DIV2K", "GoPro", "SIDD", "LOL", "Rain100L", "Rain100H", "NYUv2", "SUN RGB-D",
+              "Sintel", "FlyingThings", "M-BEIR", "MSR-VTT", "ActivityNet", "Ego4D", "LAION",
+              "PartNet", "PartNet-Mobility", "GSO", "OmniObject3D", "Mip-NeRF360", "BraTS", "Synapse", "ACDC", "ISIC", "CUB", "Stanford Cars", "Market-1501", "WIDER FACE"]
 STOP = {"a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "into",
         "is", "it", "of", "on", "or", "the", "to", "via", "with", "without", "towards",
         "using", "we", "our", "this", "that", "based"}
@@ -381,13 +418,23 @@ def ledger_path(args):
     return args.ledger or str(Path(args.fp).with_name("search_ledger.jsonl"))
 
 
+def read_ledger(ledger):
+    p = Path(ledger)
+    return [json.loads(l) for l in p.read_text().splitlines() if l.strip()] if p.exists() else []
+
+
 def cmd_search(args):
     fp, ledger = load_fp(args.fp), ledger_path(args)
     reason = check_query(args.query, fp)
     if reason:
         ledger_write(ledger, {"event": "query_refused", "query": args.query, "reason": reason})
         sys.exit(f"refused: {reason}. Rephrase with problem/technique words only.")
-    ledger_write(ledger, {"event": "query", "source": "arxiv", "query": args.query})
+    sent = sum(e.get("event") == "query" for e in read_ledger(ledger))
+    if sent >= MAX_QUERIES:
+        ledger_write(ledger, {"event": "query_over_budget", "query": args.query})
+        sys.exit(f"refused: query budget reached ({MAX_QUERIES}). Use the results you have.")
+    ledger_write(ledger, {"event": "query", "source": "arxiv", "query": args.query,
+                          "purpose": args.purpose, "tag": args.tag})
     hits = arxiv_query(concept_query(args.query), args.max)
     kept = filter_hits(hits, fp, args.mode, ledger, "arxiv")
     print(json.dumps({"query": args.query, "returned": len(hits), "kept": kept}, indent=2, ensure_ascii=False))
@@ -417,6 +464,134 @@ def cmd_verify(args):
     ledger_write(ledger, {"event": "verify", **{k: result.get(k) for k in ("title", "found", "url")}})
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
+# ---------------------------------------------------------------- baseline scout
+
+def term_re(term, case=False):
+    body = r"[\s-]?".join(re.escape(w) for w in str(term).split())
+    return re.compile(rf"(?<![A-Za-z0-9]){body}(?![A-Za-z0-9])", 0 if case else re.I)
+
+
+def find_benchmarks(text, fp=None):
+    """Benchmarks (from a known list) the paper mentions, most frequent first, with nearby metrics.
+
+    Matching is case-sensitive; a longer name (ImageNet-1K) claims its span before a
+    shorter one (ImageNet). The paper's own new benchmarks are not in the list: add them
+    by hand and mark them own (nothing to scout)."""
+    own = {norm(n) for n in (fp or {}).get("method_names", [])}
+    taken, found = [], []
+    for name in sorted(set(BENCHMARKS), key=len, reverse=True):
+        spans = [m.span() for m in term_re(name, case=True).finditer(text)
+                 if not any(a <= m.start() < b for a, b in taken)]
+        if spans:
+            taken += spans
+            found.append({"benchmark": name, "mentions": len(spans), "own": norm(name) in own})
+    lines = text.splitlines()
+    for f in found:
+        near = collections.Counter()
+        for i, line in enumerate(lines):
+            if term_re(f["benchmark"], case=True).search(line):
+                window = " ".join(lines[max(0, i - 1): i + 2]) if len(lines) > 3 else line
+                near.update(m for m in METRICS if term_re(m, case=True).search(window))
+        f["metrics"] = [m for m, _ in near.most_common(4)]
+    found.sort(key=lambda f: f["mentions"], reverse=True)
+    return found
+
+
+def scout_rows(kept, benchmark, metric=None):
+    """Kept results whose abstract reports on the benchmark, with the numbers it gives."""
+    b_re, m_re = term_re(benchmark), term_re(metric) if metric else None
+    seen, rows = set(), []
+    for k in kept:
+        key = norm(k.get("title"))
+        text = k.get("abstract", "")
+        if key in seen or not b_re.search(text + " " + str(k.get("title", ""))):
+            continue
+        seen.add(key)
+        sentences = [x for x in re.split(r"(?<=[.;])\s+", text) if b_re.search(x)] or [k.get("title", "")]
+        evidence = sentences[0][:300]
+        numbers = [n.replace(" ", "") for n in re.findall(r"\b\d{1,3}(?:\.\d+)?(?:\s?%)?", " ".join(sentences))]
+        label = str(k.get("label"))
+        rows.append({"title": k.get("title"), "url": k.get("url"), "date": k.get("date"), "label": label,
+                     "can_be_required": label.startswith("prior"),
+                     "metric_mentioned": bool(m_re and m_re.search(" ".join(sentences))),
+                     "numbers": numbers[:6], "evidence": evidence})
+    rows.sort(key=lambda r: (not r["can_be_required"], not r["metric_mentioned"], str(r["date"])))
+    return rows
+
+
+def short_label(label):
+    label = str(label)
+    if label.startswith("prior (peer"):
+        return "prior (peer-reviewed)"
+    if label.startswith("prior"):
+        return "prior (arXiv-only)"
+    return label.split(" (")[0]
+
+
+def coverage_report(events, kept, fp, claims=None):
+    queries = [e for e in events if e.get("event") == "query"]
+    by_purpose = collections.Counter(e.get("purpose") or "general" for e in queries)
+    tags = sorted({e.get("tag") for e in queries if e.get("tag")})
+    seen, uniq = set(), []
+    for k in kept:
+        key = norm(k.get("title"))
+        if key not in seen:
+            seen.add(key)
+            uniq.append(k)
+    labels = collections.Counter(short_label(k.get("label")) for k in uniq)
+    years = collections.Counter(d.year for d in (parse_date(k.get("date")) for k in uniq
+                                                 if str(k.get("label")).startswith("prior")) if d)
+    cutoff = parse_date(fp["cutoff_date"]).year
+    gaps = []
+    window = range(cutoff - 4, cutoff + 1)
+    empty = [y for y in window if not years.get(y)]
+    if empty:
+        gaps.append(f"no prior work kept from {', '.join(map(str, empty))}: check for foundational or recent work there")
+    if not by_purpose.get("baseline"):
+        gaps.append("no baseline query yet: run one per benchmark from the benchmarks command")
+    if not by_purpose.get("claim"):
+        gaps.append("no claim query yet: run one per contribution claim (--purpose claim --tag C1 ...)")
+    for c in claims or []:
+        if c not in tags:
+            gaps.append(f"claim {c} has no query")
+    return {"queries": len(queries), "budget": MAX_QUERIES, "by_purpose": dict(by_purpose),
+            "claim_tags": tags, "unique_kept": len(uniq), "kept_by_label": dict(labels),
+            "prior_by_year": {str(y): years[y] for y in sorted(years)}, "gaps": gaps}
+
+
+def load_kept(ledger):
+    p = Path(kept_path(ledger))
+    return [json.loads(l) for l in p.read_text().splitlines() if l.strip()] if p.exists() else []
+
+
+def cmd_benchmarks(args):
+    fp = json.loads(Path(args.fp).read_text()) if args.fp else None
+    rows = find_benchmarks(Path(args.paper).read_text(errors="replace"), fp)
+    print(json.dumps({"benchmarks": rows,
+                      "note": "Confirm against the paper's tables. Scout each benchmark that is not the "
+                              "paper's own: search --purpose baseline, then scout --benchmark."},
+                     indent=2, ensure_ascii=False))
+
+
+def cmd_scout(args):
+    fp, ledger = load_fp(args.fp), ledger_path(args)
+    if any(norm(args.benchmark) == norm(n) for n in fp["method_names"]):
+        sys.exit("refused: this benchmark is the paper's own; there is no prior state of the art to scout")
+    rows = scout_rows(load_kept(ledger), args.benchmark, args.metric)
+    ledger_write(ledger, {"event": "scout", "benchmark": args.benchmark, "metric": args.metric,
+                          "rows": len(rows), "required_candidates": sum(r["can_be_required"] for r in rows)})
+    print(json.dumps({"benchmark": args.benchmark, "metric": args.metric, "rows": rows,
+                      "note": "Abstract numbers are pointers, not verified results: check the setting "
+                              "(backbone, data, split) before calling a baseline missing or under-reported."},
+                     indent=2, ensure_ascii=False))
+
+
+def cmd_coverage(args):
+    fp, ledger = load_fp(args.fp), ledger_path(args)
+    claims = [c.strip() for c in (args.claims or "").split(",") if c.strip()]
+    print(json.dumps(coverage_report(read_ledger(ledger), load_kept(ledger), fp, claims),
+                     indent=2, ensure_ascii=False))
+
 
 def cmd_similarity(args):
     fp, ledger = load_fp(args.fp), ledger_path(args)
@@ -440,6 +615,11 @@ def main():
     p = sub.add_parser("fingerprint"); p.add_argument("--paper", required=True); p.add_argument("--out", required=True)
     p = sub.add_parser("similarity"); p.add_argument("--fp", required=True); p.add_argument("--paper", required=True)
     p.add_argument("--ledger"); p.add_argument("--top", type=int, default=3)
+    p = sub.add_parser("benchmarks"); p.add_argument("--paper", required=True); p.add_argument("--fp")
+    p = sub.add_parser("scout"); p.add_argument("--fp", required=True); p.add_argument("--ledger")
+    p.add_argument("--benchmark", required=True); p.add_argument("--metric")
+    p = sub.add_parser("coverage"); p.add_argument("--fp", required=True); p.add_argument("--ledger")
+    p.add_argument("--claims", help="comma-separated claim tags, e.g. C1,C2,C3")
     for name in ("search", "filter", "verify"):
         p = sub.add_parser(name)
         p.add_argument("--fp", required=True)
@@ -447,6 +627,8 @@ def main():
         if name == "search":
             p.add_argument("--query", required=True)
             p.add_argument("--max", type=int, default=25)
+            p.add_argument("--purpose", choices=PURPOSES, default="general")
+            p.add_argument("--tag")
         if name == "filter":
             p.add_argument("--results", required=True)
         if name == "verify":
@@ -454,8 +636,9 @@ def main():
         if name in ("search", "filter"):
             p.add_argument("--mode", choices=("on", "strict"), default="on")
     args = ap.parse_args()
-    {"fingerprint": cmd_fingerprint, "search": cmd_search,
-     "filter": cmd_filter, "verify": cmd_verify, "similarity": cmd_similarity}[args.cmd](args)
+    {"fingerprint": cmd_fingerprint, "search": cmd_search, "filter": cmd_filter,
+     "verify": cmd_verify, "similarity": cmd_similarity, "benchmarks": cmd_benchmarks,
+     "scout": cmd_scout, "coverage": cmd_coverage}[args.cmd](args)
 
 
 if __name__ == "__main__":

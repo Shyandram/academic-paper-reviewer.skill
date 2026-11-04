@@ -20,7 +20,7 @@ Read the whole paper, including the appendix and supplementary material, and ide
 6. **Paper maturity**: Early draft / Submission-ready / Rebuttal stage / Post-revision.
 7. **Claimed contributions**: list them as the paper states them (usually the bullet list at the end of the introduction). Every reviewer will check these.
 8. **Ethics-relevant content**: human subjects, faces or biometrics, medical data, web-scraped data, generative models with misuse potential, surveillance applications.
-9. **Fingerprint for the literature check** (if network access is available): run `scripts/related_search.py fingerprint` and complete it as described in `references/literature_search.md`: title, all method/model/dataset names, identifiers, 2–4 distinctive phrases, cutoff date. It is used only to exclude the paper from searches.
+9. **Fingerprint for the literature check** (if network access is available): run `scripts/related_search.py fingerprint` and complete it as described in `references/literature_search.md`: title, all method/model/dataset names, identifiers, 2–4 distinctive phrases, cutoff date. It is used only to exclude the paper from searches. Note the paper's **own** new benchmarks or datasets in `method_names`, so the baseline scout skips them.
 
 ### Step 2: Dynamic Reviewer Configuration
 

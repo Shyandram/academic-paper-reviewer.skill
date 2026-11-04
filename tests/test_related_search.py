@@ -146,3 +146,57 @@ class LedgerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ScoutAndCoverageTests(unittest.TestCase):
+    def test_benchmarks_are_found_case_sensitively_with_metrics(self):
+        text = ("Table 2: results on COCO and LVIS.\nMethod AP AP50\nOurs 52.1 70.3\n"
+                "We also report ImageNet-1K top-1 and ImageNet FID.\nThis is a test.")
+        rows = {r["benchmark"]: r for r in rs.find_benchmarks(text)}
+        self.assertIn("COCO", rows)
+        self.assertIn("AP", rows["COCO"]["metrics"])
+        self.assertIn("ImageNet-1K", rows)
+        self.assertEqual(rows["ImageNet"]["mentions"], 1)       # the -1K span is not counted twice
+        self.assertNotIn("IS", sum((r["metrics"] for r in rows.values()), []))   # "is" is not IS
+
+    def test_scout_returns_prior_rows_first_with_numbers(self):
+        kept = [
+            {"title": "Recent thing", "label": "recent preprint (arXiv-only, ...)", "date": "2026-01-01",
+             "abstract": "We reach 55.0 AP on COCO."},
+            {"title": "Strong detector", "label": "prior (peer-reviewed)", "date": "2024-05-01",
+             "abstract": "Our detector achieves 58.4 AP on COCO test-dev. It is fast."},
+            {"title": "Unrelated", "label": "prior (peer-reviewed)", "date": "2024-05-01",
+             "abstract": "Segmentation on ADE20K."},
+        ]
+        rows = rs.scout_rows(kept, "COCO", "AP")
+        self.assertEqual([r["title"] for r in rows], ["Strong detector", "Recent thing"])
+        self.assertTrue(rows[0]["can_be_required"] and rows[0]["metric_mentioned"])
+        self.assertFalse(rows[1]["can_be_required"])
+        self.assertIn("58.4", rows[0]["numbers"])
+
+    def test_query_budget_and_purpose_logging(self):
+        with tempfile.TemporaryDirectory() as d:
+            fp_path = Path(d) / "fp.json"
+            fp_path.write_text(json.dumps(FP))
+            ledger = Path(d) / "search_ledger.jsonl"
+            for i in range(rs.MAX_QUERIES):
+                rs.ledger_write(ledger, {"event": "query", "query": f"q{i}", "purpose": "claim", "tag": "C1"})
+            args = type("A", (), {"fp": str(fp_path), "ledger": str(ledger), "query": "lane graph",
+                                  "max": 5, "mode": "strict", "purpose": "baseline", "tag": None})
+            with self.assertRaises(SystemExit) as cm:
+                rs.cmd_search(args)
+            self.assertIn("budget", str(cm.exception))
+            self.assertEqual(rs.read_ledger(ledger)[-1]["event"], "query_over_budget")
+
+    def test_coverage_reports_gaps(self):
+        events = [{"event": "query", "purpose": "claim", "tag": "C1"}]
+        kept = [{"title": "Old", "label": "prior (peer-reviewed)", "date": "2023-02-01"},
+                {"title": "Old", "label": "prior (peer-reviewed)", "date": "2023-02-01"}]
+        cov = rs.coverage_report(events, kept, FP, claims=["C1", "C2"])
+        self.assertEqual(cov["unique_kept"], 1)
+        self.assertEqual(cov["kept_by_label"], {"prior (peer-reviewed)": 1})
+        gaps = " ".join(cov["gaps"])
+        self.assertIn("no baseline query", gaps)
+        self.assertIn("claim C2 has no query", gaps)
+        self.assertIn("2025", gaps)
+

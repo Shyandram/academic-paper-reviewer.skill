@@ -39,15 +39,41 @@ Then edit the file:
 
 The fingerprint is used **only to exclude**. Never put its contents into a query.
 
-### 2. Search with concepts, not names
+### 2. Search with concepts, not names: two rounds, at most 12 queries
 
 ```bash
-python3 scripts/related_search.py search --fp fingerprint.json --query "lane topology reasoning" [--mode strict]
+python3 scripts/related_search.py search --fp fingerprint.json --query "lane topology reasoning" \
+    --purpose claim --tag C1 [--mode strict]
 ```
 
-- Use **2–4 problem or technique words per query** and run several queries: the core task, the core technique, and the closest baseline family. Long queries return almost nothing.
-- The script **refuses** queries that contain a method name, an author surname, the arXiv ID, or most of the title. Rephrase instead of working around the refusal.
-- With another search tool, save its results as a JSON list (`title`, `url`, `snippet`, `date`, `authors`) and run `filter --fp fingerprint.json --results hits.json`. **Read only the kept results.**
+- Use **2–4 problem or technique words per query**. Long queries return almost nothing.
+- The script **refuses** queries that contain a method name, an author surname, the arXiv ID, or most of the title. Rephrase instead of working around the refusal. Public benchmark names (COCO, ADE20K) are allowed; the paper's own new benchmark is a method name and is refused.
+- `--purpose` and `--tag` are logged so the audit can see what each query was for. After **12** queries the script refuses more (`MAX_QUERIES`): returns diminish quickly and long searches dilute the review.
+
+**Round 1: claims and benchmarks.**
+
+| Query type | How many | Built from |
+|-----------|----------|------------|
+| Claim (`--purpose claim --tag Cn`) | One per contribution claim (usually 2–4) | The claim's task and core mechanism in plain words, e.g. C2 "token merging vision transformer training-free" |
+| Baseline (`--purpose baseline`) | One per external benchmark (usually 1–3) | `related_search.py benchmarks --paper paper.txt --fp fingerprint.json` lists the known benchmarks and nearby metrics; query the benchmark plus the task, e.g. "COCO open-vocabulary detection" |
+
+Then scout each benchmark from the kept results:
+
+```bash
+python3 scripts/related_search.py scout --fp fingerprint.json --benchmark COCO --metric AP
+```
+
+It returns kept results whose abstract reports on that benchmark, with the numbers the abstract gives; prior rows first. The Domain Reviewer turns them into the **baseline scout table** (`agents/domain_reviewer_agent.md`, Step 4c), including **under-reported baselines** (the paper quotes a lower number for a method than that method's own paper, in what looks like the same setting).
+
+**Round 2: expansion.**
+
+```bash
+python3 scripts/related_search.py coverage --fp fingerprint.json --claims C1,C2,C3
+```
+
+`coverage` lists the queries by purpose and claim, the kept results by label and year, and the **gaps**: years in the last five with no prior work, claims with no query, no baseline query. Fill the gaps with `--purpose expansion` queries (the dataset paper behind a benchmark, the foundational paper of a baseline family, a missing period). Stop when the gaps are closed or the budget is spent.
+
+**Other search tools.** Save their results as a JSON list (`title`, `url`, `snippet`, `date`, `authors`) and run `filter --fp fingerprint.json --results hits.json`. **Read only the kept results.**
 
 ### 3. Filtering (automatic)
 
@@ -78,7 +104,9 @@ Undated results count as concurrent at most. Venue rules agree: e.g., ECCV says 
   python3 scripts/related_search.py verify --fp fingerprint.json --title "<reference title>"
   ```
   Found → give the link. Not found → keep it only if you are confident, marked `[verify]` (it may exist outside arXiv). If `verify` says the title is the reviewed paper itself, drop it.
-- **Novelty claims ("first", "no prior work"):** check them against the kept results and cite what you find.
+- **Novelty claims ("first", "no prior work"):** check them against the kept results and cite what you find. Each contribution claim gets a novelty verdict (high / medium / incremental / known) with 2–3 supporting papers; "known" needs a prior paper with the same task and core mechanism.
+- **Baselines:** only **prior** results can be missing required baselines. An under-reported baseline is a MAJOR issue when the settings match; with different settings it is a question for the authors.
+- **Field snapshot:** 150–250 words on the field before the cutoff (paradigm shift, current state of the art, open problems, what counts as significant now). It calibrates Significance and Novelty; it is written from kept results only and never mentions the reviewed paper's reception.
 
 ### 5. Similarity and novelty check
 
@@ -102,7 +130,7 @@ How the reviewers use the flags:
 
 ### 6. Ledger
 
-Every query, refusal, kept and dropped result, verification and similarity run is appended to `search_ledger.jsonl` next to the fingerprint. Kept results, with full abstracts, go to `kept_results.jsonl`. Dropped results are logged by title and reason only; they are **never opened**. Mention in the review that a literature check was run, with the mode and the number of queries.
+Every query, refusal, kept and dropped result, verification and similarity run is appended to `search_ledger.jsonl` next to the fingerprint. Kept results, with full abstracts, go to `kept_results.jsonl`. Dropped results are logged by title and reason only; they are **never opened**. Mention in the review that a literature check was run, with the mode, the number of queries by purpose, and any gaps left open.
 
 ---
 
