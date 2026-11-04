@@ -449,5 +449,19 @@
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
     "status": "queued"
+  },
+  "cvpr-3d-2607.02015-lit283": {
+    "model": "haiku",
+    "skill": "2.8.1 (EIC departure rule)",
+    "lit_mode": "strict",
+    "agent_type": "paper-review-eval (file/shell tools only)",
+    "status": "queued"
+  },
+  "cvpr-3d-2607.02015-inject-lit283": {
+    "model": "haiku",
+    "skill": "2.8.1 (EIC departure rule)",
+    "lit_mode": "strict",
+    "agent_type": "paper-review-eval (file/shell tools only)",
+    "status": "queued"
   }
 }
