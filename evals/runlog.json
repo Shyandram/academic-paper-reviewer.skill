@@ -149,9 +149,15 @@
  "eccv-3d-2607.26889-flaw": {
   "model": "haiku",
   "skill": "2.3.1",
-  "tool_restriction": true
+  "tool_restriction": true,
+  "note": "planted test-tuning caught but rated MAJOR as 'disclosed'; decision 3 via rating 3.49"
  },
  "eccv-video-2608.07663-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-video-2604.18367-flaw": {
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
