@@ -98,7 +98,7 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(views["iclr"]["subscores"],
                          {"Soundness": 2, "Presentation": 3, "Contribution": 2})
         self.assertEqual(views["tmlr"]["subscores"]["Claims & evidence"], "No")
-        self.assertEqual(views["aaai"]["label"], "5 (weak reject)")
+        self.assertEqual(views["aaai"]["label"], "5 (Borderline reject)")
 
     def test_bar_offset_and_tmlr_without_cap(self):
         res = agg.aggregate({"reviewers": [uniform(72)]})

@@ -34,7 +34,7 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 | `neurips` | NeurIPS | Conf. | 2025 | 1.1 / 1.0 / 1.1 / 1.1 / 1.0 / 1.0 / 1.0 | +0 | secondary |
 | `iclr` | ICLR | Conf. | 2026 | **1.2** / 1.1 / 1.1 / 1.1 / 1.0 / 1.0 / 0.8 | +0 | secondary |
 | `icml` | ICML | Conf. | 2025 | **1.3** / 1.0 / 1.0 / 1.0 / 1.1 / 1.0 / 0.8 | +0 | official |
-| `aaai` | AAAI | Conf. | 2026 | 1.1 / 1.0 / 1.1 / 1.1 / 1.0 / 0.9 / 0.9 | +0 | confirmed (range); mapping inferred |
+| `aaai` | AAAI | Conf. | 2026 | 1.1 / 1.0 / 1.1 / 1.1 / 1.0 / 0.9 / 0.9 | +0 | confirmed |
 | `acmmm` | ACM Multimedia | Conf. | 2026 | 1.0 / 1.0 / **1.2** / **1.2** / 1.0 / 1.1 / 0.9 | +0 | unpublished |
 | `tmlr` | TMLR | Journal | 2025 | **1.5 / 1.3** / 0.4 / 0.5 / **1.3** / 1.1 / 1.0 | −5 | official |
 | `tpami` | IEEE TPAMI | Journal | 2025 | **1.3** / 1.1 / 1.0 / 1.1 / **1.3** / 1.1 / 0.9 | +3 | secondary |
@@ -85,7 +85,8 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 
 ### AAAI (`aaai`, AAAI-26; 1–10 scale confirmed)
 - **Process:** two phases. In Phase 1, three reviewers. Papers with sufficiently negative Phase-1 reviews can be rejected **before** author feedback. Survivors get more reviewers in Phase 2.
-- **Scale:** 1–10, with 10 the highest (confirmed by the maintainer, 2026-11). AAMAS 2026's AAAI-track rules treat a score of 5 or above as "weak reject or above", so **5 = weak reject** and 6 is the first accept-side score. The other points' wording is not published. The skill maps its internal Overall as 6 → 8–10 · 5 → 7 · 4 → 6 · 3 → 5 · 2 → 3–4 · 1 → 1–2, which is inferred.
+- **Scale (confirmed by the maintainer, 2026-11):** 10 Very strong accept · 9 Strong accept · 8 Accept · 7 Weak accept · 6 Borderline accept · **5 Borderline reject** · **4 Weak reject** · 3 Reject · 2 Strong reject · 1 Very strong reject. Points 4 and 5 were confirmed directly; the others continue the same pattern.
+- **Mapping from the internal Overall:** 6 → 9–10 · 5 → 7–8 · 4 → 6 · 3 → 5 · 2 → 3–4 · 1 → 1–2.
 - **Criteria (reported):** clarity, technical and experimental soundness, novelty, relevance. The skill adds a **Phase-1 risk flag** (moderate at band 3, high at ≤ 2).
 - **AAAI-26 pilot:** every main-track paper also received one clearly labeled AI review, which carries no rating.
 
