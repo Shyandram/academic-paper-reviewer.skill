@@ -65,7 +65,8 @@
  },
  "eccv-video-2608.07663": {
   "model": "haiku",
-  "skill": "2.3.1"
+  "skill": "2.3.1",
+  "stray_tool_attempt": "create_session (denied)"
  },
  "eccv-lowlevel-2608.10995": {
   "model": "haiku",
@@ -82,6 +83,12 @@
   "tool_restriction": true
  },
  "eccv-representation-2608.08963": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true,
+  "stray_tool_attempt": "send_message (denied)"
+ },
+ "eccv-robustness-2609.12577": {
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
