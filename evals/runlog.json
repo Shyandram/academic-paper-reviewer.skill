@@ -289,9 +289,18 @@
     "skill": "2.6.1",
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
-    "status": "running"
+    "status": "done",
+    "final_overall": 3
   },
   "iclr-detseg-2604.14684-lit261": {
+    "model": "haiku",
+    "skill": "2.6.1",
+    "lit_mode": "strict",
+    "agent_type": "paper-review-eval (file/shell tools only)",
+    "status": "done",
+    "final_overall": 4
+  },
+  "eccv-generation-2609.28473-lit261": {
     "model": "haiku",
     "skill": "2.6.1",
     "lit_mode": "strict",
