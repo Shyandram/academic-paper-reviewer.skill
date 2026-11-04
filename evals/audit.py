@@ -241,10 +241,10 @@ def report(results, check_refs):
     lo, hi = wilson(acc, len(finals))
     dist = Counter(finals)
     lines += [
-        "## Decisions on accepted papers", "",
-        "All sampled papers were accepted at their venue, so the ideal is a high rate of accept-side decisions (Overall ≥ 4). "
-        "Real reviewer panels are not unanimous either, so 100% is not the expectation; a rate far below the venue's "
-        "typical reviewer agreement indicates over-harshness.", "",
+        "## Decisions (reference only)", "",
+        "All sampled papers were accepted at their venue. Agreement with that outcome is reported **for reference, "
+        "not as a target**: the skill is not tuned to reproduce venue decisions. The primary checks are grounding, "
+        "the planted-flaw controls and internal consistency (below).", "",
         f"- Accept-side (Overall ≥ 4): **{acc}/{len(finals)} = {pct(acc, len(finals))}** (95% CI {lo:.0%}–{hi:.0%})",
         f"- Overall distribution: " + ", ".join(f"{k}: {dist.get(k, 0)}" for k in range(6, 0, -1)),
         f"- Mean Overall: {statistics.mean(finals):.2f}; mean panel composite: "
