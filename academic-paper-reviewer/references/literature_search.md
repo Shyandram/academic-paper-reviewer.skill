@@ -1,6 +1,6 @@
 # Literature Check (online related-work search)
 
-An optional step that lets reviewers search online for **related work** and **verify recommended references**, while making sure the review never surfaces **the paper being reviewed**: its arXiv versions, its camera-ready, its code or project page, its reviews, or its acceptance outcome.
+An optional step (Phase 1.5, after the reviewers have read the paper) that lets reviewers search online for **related work** and **verify recommended references**, while making sure the review never surfaces **the paper being reviewed**: its arXiv versions, its camera-ready, its code or project page, its reviews, or its acceptance outcome.
 
 Tool: `scripts/related_search.py` (standard library; uses the arXiv API). It can also filter results from any other search tool the host provides.
 
@@ -19,6 +19,8 @@ Tool: `scripts/related_search.py` (standard library; uses the arXiv API). It can
 ## Procedure
 
 ### 1. Fingerprint the paper (Phase 0, Field Analyst)
+
+The searches themselves run in **Phase 1.5, after the five reports are drafted**: reviewers read the whole paper first, appendix and supplement included, so the search adds to their reading rather than competing with it.
 
 ```bash
 python3 scripts/related_search.py fingerprint --paper <paper text file> --out <work dir>/fingerprint.json
@@ -56,11 +58,21 @@ python3 scripts/related_search.py search --fp fingerprint.json --query "lane top
 | OpenReview forum/review pages, accepted-paper / award / highlight lists, acceptance aggregators | Could **reveal reviews or the outcome** |
 | (strict mode) anything after the cutoff | Later work may reveal the paper's reception |
 
-Kept results are labelled **prior**, **concurrent** (within 60 days before the cutoff) or **newer** (after the cutoff, `on` mode only). Undated results count as concurrent at most.
+Kept results are labelled:
+
+| Label | Meaning | Can it be a required comparison? |
+|-------|---------|----------------------------------|
+| **prior (peer-reviewed)** | Before the cutoff, with publication evidence (arXiv journal reference, or a comment such as "Accepted to ICCV 2025") | Yes |
+| **prior (arXiv-only, 6+ months before the cutoff)** | Older preprint | Yes |
+| **recent preprint** | arXiv-only, less than 6 months before the cutoff | **No.** Discuss only |
+| **concurrent** | Within 60 days before the cutoff | **No.** Discuss only |
+| **newer** | After the cutoff (`on` mode only) | **No.** For the authors' awareness |
+
+Undated results count as concurrent at most. Venue rules agree: e.g., ECCV says failing to cite or beat an arXiv paper must not be the sole reason to reject.
 
 ### 4. Use the results in the review
 
-- **Missing comparisons (Domain Reviewer, Methodology Reviewer):** only **prior** work can be a required comparison. **Concurrent** work is "worth discussing", never a weakness on its own. **Newer** work is listed as "for the authors' awareness" only. Venue rules apply (ECCV: failing to cite or beat an arXiv paper must not be the sole reason to reject).
+- **Missing comparisons (Domain Reviewer, Methodology Reviewer):** only the two **prior** labels can be required comparisons. **Recent preprints** and **concurrent** work are "worth discussing", never a weakness on their own. **Newer** work is listed as "for the authors' awareness" only. Venue rules apply (ECCV: failing to cite or beat an arXiv paper must not be the sole reason to reject).
 - **Recommended references:** verify each one before listing it:
   ```bash
   python3 scripts/related_search.py verify --fp fingerprint.json --title "<reference title>"

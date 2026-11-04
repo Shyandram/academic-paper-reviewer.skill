@@ -87,8 +87,19 @@ class DateTests(unittest.TestCase):
         self.assertIn("newer", label)
 
     def test_prior_and_concurrent_labels(self):
-        self.assertEqual(rs.classify(hit(date="2025-06-01"), FP, "on"), (True, "prior"))
+        self.assertEqual(rs.classify(hit(date="2025-06-01"), FP, "on")[1],
+                         "prior (arXiv-only, 6+ months before the cutoff)")
         self.assertIn("concurrent", rs.classify(hit(date="2026-02-10"), FP, "on")[1])
+
+    def test_recent_preprint_is_not_required_unless_peer_reviewed(self):
+        recent = hit(date="2025-11-01")                         # 4 months before the cutoff
+        self.assertIn("recent preprint", rs.classify(recent, FP, "on")[1])
+        accepted = hit(date="2025-11-01", comment="Accepted to ICCV 2025")
+        self.assertEqual(rs.classify(accepted, FP, "on")[1], "prior (peer-reviewed)")
+        journal = hit(date="2025-11-01", journal_ref="IEEE TPAMI 47 (2025)")
+        self.assertEqual(rs.classify(journal, FP, "on")[1], "prior (peer-reviewed)")
+        workshop_only = hit(date="2025-11-01", comment="12 pages, 5 figures")
+        self.assertIn("recent preprint", rs.classify(workshop_only, FP, "on")[1])
 
 
 class SimilarityTests(unittest.TestCase):

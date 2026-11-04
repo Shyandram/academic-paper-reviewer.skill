@@ -50,9 +50,9 @@ Without a literature check, build the same table from the paper's own related wo
 
 ### Step 5: Missing References
 
-**If a literature check ran (Phase 0.5),** start from its kept results and the labels:
-- Only **prior** work can be a *Critical* missing comparison.
-- **Concurrent** work is at most *Important* ("worth discussing").
+**If a literature check ran (Phase 1.5),** add a *literature-check addendum* built from its kept results and labels:
+- Only **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months)** work can be a *Critical* missing comparison.
+- **Recent preprints** and **concurrent** work are at most *Important* ("worth discussing"), and never lower your scores on their own.
 - **Newer** work goes under *Helpful*, for the authors' awareness.
 
 Verify every reference you recommend with `scripts/related_search.py verify`. Give the link when it's found; when it isn't, keep it only if you're confident and mark it `[verify]`. Never run your own searches for the reviewed paper's title, method name or authors.

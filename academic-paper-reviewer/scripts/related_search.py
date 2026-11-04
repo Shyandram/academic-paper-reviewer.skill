@@ -40,8 +40,13 @@ Filtering rules (see references/literature_search.md):
   drop  outcome-revealing pages: OpenReview forums, accepted-paper and award lists
   drop  post-cutoff results in strict mode; in "on" mode they are kept but
         labelled "newer" (never a required comparison)
-  keep  everything else, classified as prior / concurrent (<= 60 days before
-        the cutoff) / newer
+  keep  everything else, labelled:
+          prior (peer-reviewed)            publication evidence in journal_ref/comment
+          prior (arXiv-only, 6+ months)    preprint posted >= 183 days before the cutoff
+          recent preprint                  arXiv-only, < 6 months before: discuss only
+          concurrent                       <= 60 days before the cutoff: discuss only
+          newer                            after the cutoff ("on" mode): awareness only
+        Only the two "prior" labels can be required comparisons.
 """
 
 import argparse
@@ -59,10 +64,15 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 ARXIV_API = "https://export.arxiv.org/api/query"
-NS = {"a": "http://www.w3.org/2005/Atom"}
+NS = {"a": "http://www.w3.org/2005/Atom", "arxiv": "http://arxiv.org/schemas/atom"}
 TITLE_SIM = 0.8
 AUTHOR_WINDOW_DAYS = 183
 CONCURRENT_DAYS = 60
+PREPRINT_REQUIRED_DAYS = 183   # arXiv-only work counts as required prior work only if this old
+PEER_REVIEWED = re.compile(
+    r"(accepted|published|to appear|camera[- ]ready|proceedings)\b|"
+    r"\b(CVPR|ICCV|ECCV|NeurIPS|NIPS|ICLR|ICML|AAAI|IJCAI|ACL|EMNLP|NAACL|MICCAI|WACV|BMVC|ACM ?MM|"
+    r"SIGGRAPH|TPAMI|IJCV|TIP|TMLR|JMLR|Nature|Science)\s*['’]?\s*(19|20)?\d{2}\b", re.I)
 HIGH_OVERLAP = 0.30      # calibrated: a paper vs. its own abstract ~0.55, related work <= 0.17
 TEXT_OVERLAP_GRAMS = 2   # calibrated: own abstract shares ~33 8-grams, related work 0
 GRAM = 8
@@ -203,7 +213,20 @@ def classify(hit, fp, mode):
         return True, "newer (after the cutoff; never a required comparison)"
     if (cutoff - d).days <= CONCURRENT_DAYS:
         return True, "concurrent (within 60 days before the cutoff; discuss, don't require)"
-    return True, "prior"
+    if peer_reviewed(hit):
+        return True, "prior (peer-reviewed)"
+    if (cutoff - d).days >= PREPRINT_REQUIRED_DAYS:
+        return True, "prior (arXiv-only, 6+ months before the cutoff)"
+    return True, "recent preprint (arXiv-only, under 6 months before the cutoff; discuss, don't require)"
+
+
+def peer_reviewed(hit):
+    """True if the hit shows evidence of publication at a peer-reviewed venue."""
+    if hit.get("peer_reviewed") is not None:
+        return bool(hit["peer_reviewed"])
+    if hit.get("journal_ref"):
+        return True
+    return bool(PEER_REVIEWED.search(f"{hit.get('comment', '')} {hit.get('venue', '')}"))
 
 
 def kept_path(ledger):
@@ -220,6 +243,7 @@ def filter_hits(hits, fp, mode, ledger, source):
                               "reason": label, **entry})
         if keep:
             full = {**entry, "authors": h.get("authors", [])[:6], "label": label,
+                    "venue_evidence": (h.get("journal_ref") or h.get("venue") or h.get("comment") or "")[:200],
                     "abstract": h.get("abstract") or h.get("snippet") or ""}
             cache.write(json.dumps(full, ensure_ascii=False) + "\n")
             kept.append({**full, "abstract": full["abstract"][:600]})
@@ -317,6 +341,8 @@ def arxiv_query(search_query, max_results):
             "title": " ".join(e.findtext("a:title", "", NS).split()),
             "abstract": " ".join(e.findtext("a:summary", "", NS).split()),
             "date": e.findtext("a:published", "", NS)[:10],
+            "comment": " ".join((e.findtext("arxiv:comment", "", NS) or "").split()),
+            "journal_ref": " ".join((e.findtext("arxiv:journal_ref", "", NS) or "").split()),
             "authors": [a.findtext("a:name", "", NS) for a in e.findall("a:author", NS)],
         })
     return hits

@@ -16,7 +16,7 @@ Read the five reports and the synthesizer's package **before** reading the paper
 - each DA-CRITICAL issue, and every Priority 1 candidate.
 
 ### Step 2: Read the Paper Briefly, with Purpose
-If a literature check ran, check every "missing comparison" weakness against the ledger's labels: a weakness that rests on **concurrent** or **newer** work is downgraded (discuss, don't require). A recommended reference that `verify` didn't find stays marked `[verify]`.
+If a literature check ran, check every "missing comparison" weakness against the ledger's labels: a weakness that rests on a **recent preprint**, **concurrent** or **newer** work is downgraded (discuss, don't require), and it must not lower the decision. A recommended reference that `verify` didn't find stays marked `[verify]`.
 
 - **Too-similar prior work (criterion 7):** read the prior work's abstract yourself. Uphold the issue only if the task and the core mechanism match, the work is prior and verified, and the paper neither cites nor differentiates it.
 - **Text-overlap flags:** check the shared passages. Report them in the meta-review as an integrity concern for the editor, factually, with the source link, never as plagiarism. They don't change the scores unless you confirm uncited copying of substantive content.

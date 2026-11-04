@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.6.1 (2026-11-06)
+Fixes from the literature-check evaluation (11 runs). The searches never surfaced the paper itself, but two problems showed up:
+- **Recent arXiv preprints no longer count as required comparisons.** With search on, all 4 clean papers scored one step lower: reviewers counted recent arXiv-only papers as "missing comparisons". Kept results are now labelled **prior (peer-reviewed)** (publication evidence from arXiv's journal reference or comment), **prior (arXiv-only, 6+ months before the cutoff)**, **recent preprint**, **concurrent** or **newer**. Only the two prior labels can be required comparisons; recent preprints are "worth discussing" and must not lower scores.
+- **The literature check runs after reading (Phase 1.5, was 0.5).** One planted-flaw control was missed with search on: the test-set tuning statement on page 19 of the supplement went unread, and the review said the tuning split "is not stated". The fingerprint stays in Phase 0; searches and similarity now run after the five reports are drafted, and the Domain Reviewer adds a literature-check addendum.
+- **Required protocol sweep.** The Methodology Reviewer and the Devil's Advocate must search the full text, appendix and supplement included, for split and selection statements, and quote them before writing about evaluation protocol. "Not stated" may only be written after the sweep.
+- 1 new test (14 for the literature check).
+
 ## 2.6 (2026-11-05)
 - **Similarity and novelty check.** `related_search.py similarity` scores the paper against every kept result with two signals:
   - **Conceptual closeness** (TF-IDF cosine): flags the 3 *closest prior works* and any **high overlap** (≥ 0.30).

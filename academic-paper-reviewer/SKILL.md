@@ -2,11 +2,11 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.6"
+  version: "2.6.1"
   last_updated: "2026-11-05"
 ---
 
-# Academic Paper Reviewer v2.6
+# Academic Paper Reviewer v2.6.1
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
@@ -103,15 +103,7 @@ Read the complete paper, then follow `agents/field_analyst_agent.md` to identify
 
 Present the **Reviewer Configuration Card**, state any assumptions, and proceed with the review. Pause only if the user requests panel approval or missing input prevents a useful review. Apply later corrections without repeating completed work.
 
-### Phase 0.5: Literature Check (when network access is available)
-
-Follow `references/literature_search.md`:
-1. Fingerprint the paper with `scripts/related_search.py fingerprint`, and complete the title, method names, identifiers, distinctive phrases and cutoff date.
-2. Run 3–6 concept-only searches (task, technique, closest baseline family). The script refuses queries that could retrieve the paper and drops results that are the paper itself, its reviews or its outcome.
-3. Share the kept results with the reviewers, labelled prior / concurrent / newer. Only **prior** work can be a required comparison.
-4. Run `related_search.py similarity` to find the **closest prior works** (the Domain Reviewer argues novelty against them) and any **text overlap** (an integrity concern for the editor, never an accusation).
-
-Default mode is `on`. Use `strict` (drops everything after the cutoff) to simulate a review as of submission. Without network access, skip this phase, say so, and rely on knowledge with `[verify]`.
+When network access is available, Phase 0 also writes the **fingerprint** for the literature check (`scripts/related_search.py fingerprint`): title, method names, identifiers, distinctive phrases and cutoff date. It is used only to exclude the paper from searches.
 
 ### Phase 1: Independent Multi-Perspective Review
 
@@ -128,6 +120,16 @@ Default mode is `on`. Use `strict` (drops everything after the cutoff) to simula
 Each report uses `templates/peer_review_report_template.md`, except the Devil's Advocate, whose format is defined in its agent file. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
 
 The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
+
+### Phase 1.5: Literature Check (after the five reports are drafted; needs network access)
+
+The literature check comes **after** the reviewers have read the whole paper, so it supplements their reading and never replaces it. Follow `references/literature_search.md`:
+1. Run 3–6 concept-only searches (task, technique, closest baseline family). The script refuses queries that could retrieve the paper and drops results that are the paper itself, its reviews or its outcome.
+2. Run `related_search.py similarity` to find the **closest prior works** and any **text overlap**.
+3. The Domain Reviewer adds a **literature-check addendum** to its report: a novelty delta table against the closest prior works, and verified missing references. The Devil's Advocate may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
+4. Only results labelled **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months before the cutoff)** can be required comparisons. **Recent preprints**, **concurrent** and **newer** work are "worth discussing" only, never a weakness on their own.
+
+Default mode is `on`. Use `strict` (drops everything after the cutoff) to simulate a review as of submission. Without network access, skip this phase, say so, and rely on knowledge with `[verify]`.
 
 ### Phase 2: EIC Meta-Review and Decision
 
@@ -265,7 +267,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | `references/cv_review_checklist.md` | Any CV / ML / multimodal paper |
 | `references/venue_profiles.md` | Always in Phase 0 and Phase 2: venue forms, scales (with verification status), emphasis, rebuttal rules |
 | `references/submission_readiness_checklist.md` | Quick mode; pre-submission checks |
-| `references/literature_search.md` | Phase 0.5 literature check: fingerprint, concept-only queries, self-exclusion filter, ledger |
+| `references/literature_search.md` | Phase 0 fingerprint and Phase 1.5 literature check: concept-only queries, self-exclusion filter, labels, similarity, ledger |
 | `templates/peer_review_report_template.md` | Phase 1 reports (not DA) |
 | `templates/editorial_decision_template.md` | Phase 2 and re-review |
 | `templates/rebuttal_template.md` | Rebuttal mode (conference) |
