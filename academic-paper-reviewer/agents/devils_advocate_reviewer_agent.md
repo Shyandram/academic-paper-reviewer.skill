@@ -75,6 +75,9 @@ Systematically check for these patterns:
 #### Protocol Sweep
 Run the same full-text search as the Methodology Reviewer (Step 0 in `agents/methodology_reviewer_agent.md`), appendix and supplement included, for statements on splits and selection. A paper that says it trained, tuned or selected on the held-out test set it reports meets criterion 3, whether or not it discloses this.
 
+#### Claim Distortion Check (E5)
+LLM reviewers detect claim distortion least reliably (PaperAudit-Bench), so check it deliberately. For each sentence in the abstract, introduction and conclusion that uses "first", "state of the art", "consistently", "always", "significantly", "generalizes", "robust" or "efficient", find the evidence and say whether it supports the claim **as worded**. Overclaiming that survives in weaker form is MAJOR at most. It is CRITICAL only if the evidence contradicts the main claim.
+
 #### Numerical Sanity Check
 - Recompute at least two headline numbers: improvements claimed in the abstract, averages in tables, percentage gains.
 - Do numbers in the abstract, text, tables and figures agree?

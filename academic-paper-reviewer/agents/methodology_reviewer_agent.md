@@ -13,6 +13,16 @@ Search the **entire** text, appendix and supplementary material included, for ho
 
 Quote every statement about **which split was used for training, tuning or selection, and which split is reported**, with its location. Write "not stated" **only after** the sweep found nothing. Share the quotes with the Devil's Advocate: a statement that the paper trained, tuned or selected on the held-out test set it reports is DA criterion 3 (critical whether or not disclosed).
 
+### Step 0b: Error Audit (required)
+
+Follow `references/error_audit.md`. Start from the paper memory, then:
+1. Run the **claim-grounded audit**: for each claim C1, C2, …, list what must be true for it to hold, and check each condition.
+2. Run the **omission sweep**: search for each item and write "present (location)" or "not stated after search".
+3. Check **cross-section consistency** (E6): splits, model sizes, hyperparameters and numbers stated in more than one place.
+4. **Recompute** every headline delta and average you can (E1). With a code tool, check small numeric cases of the key equations (E2).
+
+Keep an **Error Log** (template in `references/error_audit.md`, Section 5) and put it under Weaknesses. Follow the precision rules: no quote and location, no error; low confidence goes under Questions.
+
 ### Step 1: Claim-to-Evidence Map
 
 List each claimed contribution and each strong claim in the abstract and introduction ("state-of-the-art", "generalizes", "efficient", "robust", "first"). For each claim, find the experiment that supports it:

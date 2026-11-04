@@ -7,10 +7,10 @@ A survey of related systems and benchmarks, done 2026-11-04, listing what each o
 | Work | Main idea | What we take from it | Status |
 |------|-----------|----------------------|--------|
 | ScholarPeer (Google, arXiv 2601.22638) | Searches built around the paper's claims, a baseline scout, a historian agent, a Q&A engine | Per-claim searches, baseline scout, expansion round, field snapshot | **v2.7** |
-| AAAI-26 AI Review Pilot (arXiv 2604.13940) | One AI review for each of 22,977 submissions: OCR of the PDF, tool use, self-critique; authors preferred it on technical accuracy; benchmark of injected errors | A **self-critique pass** on the drafted reviews; reading figures and tables from the PDF rather than extracted text | Planned |
-| ICLR 2025 Review Feedback Agent (arXiv 2504.09737) | Randomized trial on 20K reviews: flags vague comments, misreadings of the paper and unprofessional remarks, passed through automated reliability tests; 27% of reviewers revised | The same checks applied to our own reports before the EIC reads them: no vague weaknesses, no claims the paper contradicts, professional tone | Planned |
-| ReviewGrounder / ReviewBench (arXiv 2604.14261) | Rubrics built per paper from the venue guidelines; a draft stage, then a grounding stage | Turn `venue_profiles.md` criteria into per-paper rubric items the Generalist checks | Idea |
-| TreeReview (arXiv 2506.07642) | A tree of review questions, expanded dynamically with follow-ups | Similar to our per-claim queries; follow-up questions where a verdict is unclear | Idea |
+| AAAI-26 AI Review Pilot (arXiv 2604.13940) | One AI review for each of 22,977 submissions: OCR of the PDF, tool use, self-critique; authors preferred it on technical accuracy; benchmark of injected errors | Report check (Phase 1.6); figures, tables and equations read from page images; error categories from the SPECS stages | **v2.8** |
+| ICLR 2025 Review Feedback Agent (arXiv 2504.09737) | Randomized trial on 20K reviews: flags vague comments, misreadings of the paper and unprofessional remarks, passed through automated reliability tests; 27% of reviewers revised | The same four checks applied to our own reports before the EIC reads them (Phase 1.6, Synthesizer Step 0) | **v2.8** |
+| ReviewGrounder / ReviewBench (arXiv 2604.14261) | Rubrics built per paper from the venue guidelines; a draft stage, then a grounding stage | Venue criteria checklist per paper (Generalist Step 2b) | **v2.8** |
+| TreeReview (arXiv 2506.07642) | A tree of review questions, expanded dynamically with follow-ups | Claim-grounded audit: per claim, the conditions that must hold, each checked | **v2.8** |
 | PaperAudit-Review (arXiv 2601.19916) | Reviews conditioned on explicit error evidence are more conservative and closer to human judgments | Already the design here (an evidence location for every point, the DA ceiling); keep it | Have |
 
 ## Benchmarks we could evaluate against
@@ -31,11 +31,23 @@ A survey of related systems and benchmarks, done 2026-11-04, listing what each o
 - Injected manuscripts got more favourable LLM reviews from three commercial models (Choi et al., JAMA Network Open, 2026).
 - **Gap found:** the eval prompts tell reviewers to ignore instructions in the paper, but the skill itself had no such rule. Only search results were marked untrusted.
 
-Planned: a Hard Rule saying that manuscript text is data. The panel never follows instructions embedded in it, records them under *Integrity signals*, and reports them to the EIC; they never raise a score. Two injection controls exist for testing it (`evals/make_controls.py --injection`), and their score must equal the clean paper's.
+**Done in v2.8:** Hard Rule 9, manuscript text is data. The panel never follows instructions embedded in it, records them under *Integrity signals*, and reports them to the EIC; they never raise a score. Two injection controls exist for testing it (`evals/make_controls.py --injection`), and their score must equal the clean paper's.
 
-## Roadmap after the v2.7 eval
+## Mechanisms adopted in v2.8
 
-1. **v2.7.1:** the injection Hard Rule, then the injection controls (2 papers).
-2. **v2.7.1:** a self-check pass on the five reports (no vague weaknesses, no claims the paper contradicts, tone), in the style of the ICLR feedback agent.
-3. **Eval:** omission and contradiction controls, plus FLAWS-style error types, with recall on controls and false-positive rate on clean papers.
-4. **Later:** comparison with human reviews (PRISM / H-Max), if openreview.net is allowed for the eval harness only.
+| Source | Mechanism | Where |
+|--------|-----------|-------|
+| PaperAudit-Bench | Eight error categories; section-by-section audit with a shared paper memory (better at errors that span sections); claim distortion and rhetoric are the hardest to detect | `references/error_audit.md` E1–E8, paper memory, DA claim-distortion check |
+| FLAWS | Errors defined as claim-invalidating; six types (assumptions, algorithm/proof, analysis, implementation, definitions, reported results); detection scored by located excerpts | Claim-grounded audit; Error Log with verbatim quotes |
+| SPOT | Best precision 6%, recall 21%; models rarely rediscover the same errors across runs; page screenshots beat OCR | Hard Rule 10 precision rules; page-image reading |
+| Dawes planted-error benchmark | Every error no system caught was an omission | Omission sweep |
+| AAAI-26 pilot | SPECS stages (story, presentation, evaluations, correctness, significance); a code interpreter for math; self-critique; complaints: minor issues overemphasized, misread equations and tables | E-categories, code checks for E2, Phase 1.6, severity ordering |
+| ICLR 2025 feedback agent | Vague, already-answered and unprofessional comments; reliability tests | Phase 1.6 report check |
+| ReviewGrounder / ReviewBench | Paper-specific rubrics from venue guidelines; "false or contradictory claims" as a pitfall | Venue criteria checklist; consistency test in Phase 1.6 |
+| PRISM | Novelty hallucination; an over-index on presentation; critique prioritization (nCPS) | Novelty statements must match the prior abstract; presentation in proportion; severity ordering |
+| Beyond Imitation (MLR) | Three-pass comprehension first; an appendix summary so weaknesses aren't raised that the appendix answers; injected text swayed every system, and was detectable because it doesn't appear on the rendered page | Paper memory; "not already answered" test; `integrity_scan.py --rendered` |
+
+## Not done (by request: learn from the benchmarks, don't run them)
+
+- Running FLAWS, PaperAudit-Bench, SPOT or the SPECS benchmark.
+- Comparison with human reviews (PRISM / H-Max); it would need openreview.net for the eval harness only.

@@ -36,6 +36,14 @@ class AggregateTests(unittest.TestCase):
         tr = next(d for d in res["dimensions"] if d["key"] == "technical_rigor")
         self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (62.0, 61.0))
 
+    def test_ceiling_label_says_none_without_a_cap(self):
+        res = agg.aggregate({"reviewers": [uniform(70)]})
+        self.assertEqual(res["final_overall_ceiling"], 6)
+        self.assertTrue(res["decision_ceiling"].startswith("none"))
+        capped = agg.aggregate({"reviewers": [uniform(70)],
+                                "da_critical": [{"id": "DA-C1", "resolvable_without_new_data": False}]})
+        self.assertEqual(capped["decision_ceiling"], agg.DECISIONS[3])
+
     def test_weights_sum_to_one(self):
         for name, w in agg.PAPER_TYPE_WEIGHTS.items():
             self.assertAlmostEqual(sum(w), 1.0, msg=name)

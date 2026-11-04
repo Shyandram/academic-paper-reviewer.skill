@@ -246,7 +246,7 @@ def aggregate(data):
         "composite_band": composite_band,
         "cross_check": cross_check,
         "final_overall_ceiling": ceiling,
-        "decision_ceiling": DECISIONS[ceiling],
+        "decision_ceiling": DECISIONS[ceiling] if cap else "none (no upheld DA-CRITICAL issue)",
         "da_cap_reason": cap_reason,
         "warnings": warnings,
         "roles": [r.get("role", "?") for r in reviewers],
@@ -386,9 +386,13 @@ def to_markdown(res):
         lines.append(f"**⚠ Cross-check**: {res['cross_check']}  ")
     if res["da_cap_reason"]:
         lines.append(f"**DA-CRITICAL cap**: {res['da_cap_reason']}  ")
-    lines.append(f"**Decision ceiling**: {res['final_overall_ceiling']} "
-                 f"({res['decision_ceiling']}). The EIC's final decision may never exceed this. "
-                 "It starts from the EIC-weighted rating and may depart from it in either direction, with a written reason.")
+    if res["da_cap_reason"]:
+        lines.append(f"**Decision ceiling**: {res['final_overall_ceiling']} "
+                     f"({res['decision_ceiling']}). The EIC's final decision may never exceed this. "
+                     "It starts from the EIC-weighted rating and may depart from it in either direction, with a written reason.")
+    else:
+        lines.append("**Decision ceiling**: none (no upheld DA-CRITICAL issue). The EIC's decision starts from the "
+                     "EIC-weighted rating and may depart from it in either direction, with a written reason.")
     if res["warnings"]:
         lines.append("")
         lines.append("**Consistency warnings**:")

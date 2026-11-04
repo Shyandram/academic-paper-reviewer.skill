@@ -85,6 +85,8 @@ List potentially missing references, under the **citation-integrity rule** (SKIL
 
 For each entry, give the authors, title and venue/year *as you know them* and one line on why it matters. If you are not certain a paper exists exactly as described, either describe the line of work ("training-free token merging for ViTs, 2022–2023") or append `[verify]`. Never invent identifiers (DOI, arXiv ID). One accurate pointer is worth more than five plausible-looking ones.
 
+**Citation check (E7, `references/error_audit.md`).** For the 3–5 citations the paper's argument leans on (main baselines, the work it claims to beat, the source of a key assumption), compare the in-text claim with the bibliography entry, and with the kept abstract if a literature check ran. Flag a name that points to the wrong paper (e.g., the text says one method, the bibliography entry is another), a claim the cited work doesn't support, or prior work misdescribed. **Novelty statements must match the prior work's own abstract.** Never state what a prior paper does from memory alone.
+
 Also flag the reverse: cited references that look wrong (mis-attributed results, wrong venue or year), or a reference list padded with irrelevant self-citations.
 
 ## Output Format

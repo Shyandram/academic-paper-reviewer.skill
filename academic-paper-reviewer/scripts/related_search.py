@@ -437,6 +437,8 @@ def cmd_search(args):
                           "purpose": args.purpose, "tag": args.tag})
     hits = arxiv_query(concept_query(args.query), args.max)
     kept = filter_hits(hits, fp, args.mode, ledger, "arxiv")
+    ledger_write(ledger, {"event": "query_result", "query": args.query, "purpose": args.purpose,
+                          "tag": args.tag, "returned": len(hits), "kept": len(kept)})
     print(json.dumps({"query": args.query, "returned": len(hits), "kept": kept}, indent=2, ensure_ascii=False))
 
 
@@ -554,6 +556,13 @@ def coverage_report(events, kept, fp, claims=None):
     for c in claims or []:
         if c not in tags:
             gaps.append(f"claim {c} has no query")
+    kept_by_tag = collections.Counter()
+    for e in events:
+        if e.get("event") == "query_result" and e.get("tag"):
+            kept_by_tag[e["tag"]] += e.get("kept", 0)
+    for t in tags:
+        if t in {e.get("tag") for e in events if e.get("event") == "query_result"} and not kept_by_tag[t]:
+            gaps.append(f"claim {t}: its queries kept no results; rephrase with broader task words")
     return {"queries": len(queries), "budget": MAX_QUERIES, "by_purpose": dict(by_purpose),
             "claim_tags": tags, "unique_kept": len(uniq), "kept_by_label": dict(labels),
             "prior_by_year": {str(y): years[y] for y in sorted(years)}, "gaps": gaps}
@@ -616,6 +625,7 @@ def main():
     p = sub.add_parser("similarity"); p.add_argument("--fp", required=True); p.add_argument("--paper", required=True)
     p.add_argument("--ledger"); p.add_argument("--top", type=int, default=3)
     p = sub.add_parser("benchmarks"); p.add_argument("--paper", required=True); p.add_argument("--fp")
+    p.add_argument("--ledger", help="accepted for consistency; benchmarks does not log")
     p = sub.add_parser("scout"); p.add_argument("--fp", required=True); p.add_argument("--ledger")
     p.add_argument("--benchmark", required=True); p.add_argument("--metric")
     p = sub.add_parser("coverage"); p.add_argument("--fp", required=True); p.add_argument("--ledger")

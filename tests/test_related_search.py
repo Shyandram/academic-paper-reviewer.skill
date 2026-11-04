@@ -200,3 +200,12 @@ class ScoutAndCoverageTests(unittest.TestCase):
         self.assertIn("claim C2 has no query", gaps)
         self.assertIn("2025", gaps)
 
+    def test_coverage_flags_claim_whose_queries_kept_nothing(self):
+        events = [{"event": "query", "purpose": "claim", "tag": "C1"},
+                  {"event": "query_result", "tag": "C1", "returned": 0, "kept": 0},
+                  {"event": "query", "purpose": "claim", "tag": "C2"},
+                  {"event": "query_result", "tag": "C2", "returned": 9, "kept": 4}]
+        gaps = " ".join(rs.coverage_report(events, [], FP, claims=["C1", "C2"])["gaps"])
+        self.assertIn("claim C1: its queries kept no results", gaps)
+        self.assertNotIn("claim C2:", gaps)
+

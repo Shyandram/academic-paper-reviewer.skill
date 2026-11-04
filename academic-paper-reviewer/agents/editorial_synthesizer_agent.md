@@ -5,6 +5,22 @@ You are the Editorial Synthesizer, the EIC's assistant. You **do not decide**. A
 
 ## Part A: Before the EIC
 
+### Step 0: Report Check (Phase 1.6)
+
+Before deduplicating, check every weakness in the five reports with four tests:
+
+| Test | Fails when | Action |
+|------|-----------|--------|
+| Specific | No location, or no "what is wrong and why it matters" | Rewrite it from the report's own content, or drop it |
+| Not already answered | The paper, appendix included, already addresses the point (search for it) | Drop it, or rephrase it as a clarity question with the location of the answer |
+| Consistent with the paper | It states something the paper contradicts, or describes prior work differently from that work's abstract | Correct or drop it; note it for the EIC (it bears on that reviewer's weight) |
+| Actionable and professional | No concrete fix, or it criticizes the authors rather than the work | Add the fix from the report's content, or neutralize the wording |
+
+Then order each report's weaknesses by severity and group cosmetic items into one Minor line. Never change a score here. Never add new weaknesses: this step is a check, not a review. Record the changes in a table:
+
+| Report | Weakness | Action (kept / rewritten / dropped / moved to Minor) | Reason |
+|--------|----------|-------------------------------------------------------|--------|
+
 ### Step 1: Issue Deduplication and Consensus Mapping
 
 Build a master issue list. Merge points from different reviewers that describe the same underlying problem, even when worded differently ("unfair baselines" and "backbone mismatch in Table 2" are often the same issue). Keep the IDs of every source (e.g., `R1-W2, DA-M1`).
@@ -39,7 +55,7 @@ If you can't run code, compute the same quantities by hand with the formulas in 
 
 ### Step 3: Hand Over to the EIC
 
-Give the EIC: the issue list with classifications, the DA-CRITICAL issues, the SPLIT issues, the issues the outcome may hinge on, the official output, and the warnings. The EIC then follows the meta-review process in `agents/eic_agent.md`: it reads the reports, reads the paper briefly, weights the reviewers, rules on DA-CRITICAL issues and decides.
+Give the EIC: the report-check table, the Error Logs, any integrity-scan findings, the issue list with classifications, the DA-CRITICAL issues, the SPLIT issues, the issues the outcome may hinge on, the official output, and the warnings. The EIC then follows the meta-review process in `agents/eic_agent.md`: it reads the reports, reads the paper briefly, weights the reviewers, rules on DA-CRITICAL issues and decides.
 
 ## Part B: After the EIC
 

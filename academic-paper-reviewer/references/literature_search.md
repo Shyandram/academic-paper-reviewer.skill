@@ -71,7 +71,7 @@ It returns kept results whose abstract reports on that benchmark, with the numbe
 python3 scripts/related_search.py coverage --fp fingerprint.json --claims C1,C2,C3
 ```
 
-`coverage` lists the queries by purpose and claim, the kept results by label and year, and the **gaps**: years in the last five with no prior work, claims with no query, no baseline query. Fill the gaps with `--purpose expansion` queries (the dataset paper behind a benchmark, the foundational paper of a baseline family, a missing period). Stop when the gaps are closed or the budget is spent.
+`coverage` lists the queries by purpose and claim, the kept results by label and year, and the **gaps**: years in the last five with no prior work, claims with no query, claims whose queries kept nothing, no baseline query. Fill the gaps with `--purpose expansion` queries (the dataset paper behind a benchmark, the foundational paper of a baseline family, a missing period). Stop when the gaps are closed or the budget is spent.
 
 **Other search tools.** Save their results as a JSON list (`title`, `url`, `snippet`, `date`, `authors`) and run `filter --fp fingerprint.json --results hits.json`. **Read only the kept results.**
 
