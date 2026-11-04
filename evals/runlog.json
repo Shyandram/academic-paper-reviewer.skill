@@ -246,9 +246,16 @@
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
-  "tool_restriction": "explicit allow-list"
+  "tool_restriction": "explicit allow-list",
+  "note": "planted test-tuning flaw (supplement p.19) MISSED; review says tuning split not stated; DA-C1 spent on lit-check novelty overlap (downgraded); final 3 via rating 3.31"
  },
  "eccv-video-2608.07663-flaw-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": "explicit allow-list"
+ },
+ "iclr-video-2604.18367-flaw-lit26": {
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
