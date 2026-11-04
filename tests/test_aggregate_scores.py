@@ -28,11 +28,12 @@ def uniform(score, confidence=5, overall=None):
 class AggregateTests(unittest.TestCase):
     def test_example_matches_documented_output(self):
         res = agg.aggregate(copy.deepcopy(EXAMPLE))
-        self.assertEqual(res["panel_composite"], 63.4)
+        self.assertEqual(res["before_composite"], 62.9)
+        self.assertEqual(res["panel_composite"], 62.5)
         self.assertEqual(res["suggested_overall"], 4)
-        self.assertEqual(res["final_overall_ceiling"], 3)
+        self.assertEqual(res["final_overall_ceiling"], 6)   # DA-C1 downgraded by the EIC
         tr = next(d for d in res["dimensions"] if d["key"] == "technical_rigor")
-        self.assertEqual(tr["weighted_avg"], 62.6)
+        self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (61.6, 61.0))
 
     def test_weights_sum_to_one(self):
         for name, w in agg.PAPER_TYPE_WEIGHTS.items():
@@ -58,9 +59,28 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(agg.aggregate(hard)["final_overall_ceiling"], 3)
         self.assertEqual(agg.aggregate(downgraded)["final_overall_ceiling"], 6)
 
-    def test_cap_never_raises_decision(self):
+    def test_ceiling_is_the_cap_not_the_band(self):
+        # The composite band is a guideline; only the DA cap is a hard ceiling.
         data = {"reviewers": [uniform(40)], "da_critical": [{"id": "DA-C1"}]}
-        self.assertEqual(agg.aggregate(data)["final_overall_ceiling"], 2)
+        res = agg.aggregate(data)
+        self.assertEqual(res["suggested_overall"], 2)
+        self.assertEqual(res["final_overall_ceiling"], 3)
+        self.assertEqual(agg.aggregate({"reviewers": [uniform(40)]})["final_overall_ceiling"], 6)
+
+    def test_eic_weights_change_after_not_before(self):
+        strong, weak = uniform(80), uniform(40)
+        strong["eic_weight"], weak["eic_weight"] = 1.5, 0.5
+        res = agg.aggregate({"reviewers": [strong, weak]})
+        self.assertEqual(res["before_composite"], 60.0)
+        self.assertEqual(res["panel_composite"], 70.0)   # (80*1.5 + 40*0.5) / 2
+        self.assertTrue(res["eic_weighted"])
+        self.assertFalse(agg.aggregate({"reviewers": [uniform(70)]})["eic_weighted"])
+
+    def test_eic_weight_out_of_range_exits(self):
+        r = uniform(70)
+        r["eic_weight"] = 3
+        with self.assertRaises(SystemExit):
+            agg.aggregate({"reviewers": [r]})
 
     def test_high_spread_flag(self):
         data = {"reviewers": [uniform(50), uniform(75)]}
@@ -90,15 +110,22 @@ class AggregateTests(unittest.TestCase):
         res = agg.aggregate(copy.deepcopy(EXAMPLE))
         venues = agg.load_venues()
         views = {k: agg.venue_view(res, k, venues[k]) for k in venues}
-        for v in views.values():
-            self.assertEqual(v["final"], 3)          # DA cap applies everywhere
-        self.assertEqual(views["cvpr"]["label"], "3 Borderline Reject")
-        self.assertEqual(views["icml"]["label"], "2 Weak reject (leaning reject)")
-        self.assertEqual(views["tpami"]["label"], "Major Revision")
+        self.assertEqual(views["cvpr"]["label"], "4 Borderline Accept")
+        self.assertEqual(views["icml"]["label"], "3 Weak accept (leaning accept)")
+        self.assertEqual(views["tpami"]["label"], "Major Revision")      # +3 bar
         self.assertEqual(views["iclr"]["subscores"],
                          {"Soundness": 2, "Presentation": 3, "Contribution": 2})
-        self.assertEqual(views["tmlr"]["subscores"]["Claims & evidence"], "No")
-        self.assertEqual(views["aaai"]["label"], "5 (Borderline reject)")
+        self.assertEqual(views["tmlr"]["label"], "Accept with minor revision")
+        self.assertEqual(views["aaai"]["label"], "6 (Borderline accept)")
+
+    def test_venue_views_respect_da_cap(self):
+        data = copy.deepcopy(EXAMPLE)
+        data["da_critical"] = [{"id": "DA-C1", "upheld": True, "resolvable_without_new_data": False}]
+        res = agg.aggregate(data)
+        venues = agg.load_venues()
+        for k, v in venues.items():
+            self.assertLessEqual(agg.venue_view(res, k, v)["final"], 3, k)
+        self.assertEqual(agg.venue_view(res, "tmlr", venues["tmlr"])["subscores"]["Claims & evidence"], "No")
 
     def test_bar_offset_and_tmlr_without_cap(self):
         res = agg.aggregate({"reviewers": [uniform(72)]})

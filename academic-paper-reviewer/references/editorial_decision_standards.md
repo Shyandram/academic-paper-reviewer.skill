@@ -99,7 +99,11 @@ These thresholds are guidelines. The decision should be justified by the review 
 | All resolvable by clarification or minor additions (rewording claims, adding existing details, small analyses on existing results) | **Borderline Accept (4)** |
 | At least one needs new data, new experiments or a redesign | **Borderline Reject (3)** |
 
-The synthesizer may downgrade a DA-CRITICAL issue to MAJOR only with a written justification tied to the manuscript. The decision may always be *lower* than the ceiling.
+The **EIC** rules on every DA-CRITICAL issue after checking it against the paper. It upholds an issue only if it passes the AC test ("would I reject this paper on this issue alone, given its contribution?") and the strict criteria in `agents/devils_advocate_reviewer_agent.md`. Otherwise it downgrades the issue to MAJOR, with a written reason. The decision may always be *lower* than the ceiling.
+
+### Who Decides
+
+The EIC (meta-reviewer) makes the final decision. The reviewers' scores feed the **BEFORE** score (confidence-weighted). The EIC's quality weights for each reviewer produce the **AFTER** score. The AFTER band is the EIC's starting point: the EIC may decide above or below it with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
 
 ### Conference ↔ Journal Mapping
 

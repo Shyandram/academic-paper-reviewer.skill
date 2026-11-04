@@ -13,10 +13,24 @@ Calibrated 0–100 scoring rubrics for the 7 review dimensions. All reviewers mu
 
 ### Calibration Guidance
 
-- **Anchor on the venue.** "Strong" means strong *for the target venue tier*. A solid workshop paper is not a 75 on Novelty against a CVPR bar.
+**Venue anchors (read before every score).** Scores are relative to the papers the **target venue accepts**, not to a flawless paper:
+
+| Score | Meaning at the target venue |
+|-------|------------------------------|
+| 85+ | Top of the accepted papers on this dimension (oral/highlight level) |
+| **70–80** | **A solid accepted paper**: clear strengths, ordinary weaknesses |
+| **62–69** | **A typical accepted paper**: real weaknesses (e.g., single runs, a missing baseline, some overclaiming) outweighed by the contribution |
+| 55–61 | Borderline: could go either way at this venue |
+| 45–54 | Below the venue's bar on this dimension; a reject-side paper |
+| < 45 | Clearly below the bar |
+
+Before submitting your scores, ask: *"Would a typical accepted paper at this venue score higher than this on this dimension?"* If yes, and this paper is no worse, raise the score. A weakness that most accepted papers at the venue share is not a reason for a sub-60 score.
+
+- **"Strong" means strong for the target venue tier.** A solid workshop paper is not a 75 on Novelty against a CVPR bar.
 - **Avoid compression.** Panels tend to put everything at 60–75. Use the full range when the evidence supports it, and make sure the scores separate the paper's best dimension from its worst.
 - **Score the paper, not its potential.** Promised code does not earn Reproducibility points as if it were released (cap at the *Strong* band).
 - **Ethics with nothing at stake.** For a paper with no human data, no deployment risk and no misuse potential, score Ethical Compliance on how honestly limitations are discussed. Typical range: 60–80.
+- **Supplementary material.** If the paper defers details to a supplement you don't have, treat them as unverified: ask about them in Questions, and don't drop Reproducibility below the *Competent* band (55–74) for that reason alone.
 - **Respect field norms.** Single-seed results on very large benchmarks (e.g., COCO, ImageNet-scale pretraining) are common practice. Penalize them in Experimental Validation only when gains are small relative to known run-to-run variance. See `references/statistical_reporting_standards.md`.
 
 ---
@@ -208,7 +222,7 @@ A deviation of one step is acceptable when the rationale explains it, e.g., "Qua
 
 ## Overall (1–6) vs. Own Composite
 
-A reviewer's Overall should usually fall within ±1 of the band implied by their own composite. `scripts/aggregate_scores.py` warns at a gap of ≥ 2. Overall may legitimately sit below the composite band when one decisive flaw dominates. It should not sit above it.
+A reviewer's Overall should usually fall within ±1 of the band implied by their own composite, and `scripts/aggregate_scores.py` warns at a gap of ≥ 2. A gap can be legitimate in either direction: one decisive flaw can pull Overall below the composite band, and a strong, novel contribution with ordinary weaknesses can lift it above. **Never adjust dimension scores just to silence a warning.** Explain the gap in the review instead. The EIC sees both.
 
 ---
 

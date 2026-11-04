@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2 (2026-11-04)
+
+Calibration overhaul, driven by an evaluation on recently accepted papers. Version 2.1.2 gave 7 of 7 accepted ICLR/CVPR/ECCV papers *Borderline Reject*. In every case the Devil's Advocate raised a CRITICAL issue and it was upheld. See `evals/`.
+
+### Changed
+- **The EIC is now the meta-reviewer (area chair), not a reviewer.** It reads all five reviews first, then reads the paper briefly, verifying every decisive point. It weights each reviewer (0.5–1.5) by review quality, rules on DA-CRITICAL issues and makes the final decision.
+- **New Reviewer 4 (Generalist)** keeps the panel at five: the typical committee member, responsible for venue fit and Clarity & Presentation.
+- **BEFORE/AFTER scores.** `aggregate_scores.py` reports a confidence-weighted BEFORE score and an EIC-weighted AFTER score (`eic_weight` per reviewer), plus a reviewer-weight table.
+- **Decision ceiling = DA cap only.** The composite band is a guideline the EIC may depart from, with a reason, in either direction.
+- **Strict DA-CRITICAL criteria.** A new test asks whether the issue alone would make the paper unpublishable. An explicit list covers issues that are never critical on their own (single runs, a missing baseline, overclaimed wording, partly controlled confounds, missing details), plus a base rate: most accepted papers have none. The synthesizer's "default to uphold" rule is removed.
+- **Venue anchors** in the rubrics: 62–69 for a typical accepted paper, 70–80 for a solid accept. Supplementary material referenced but not provided counts as unverified, not missing. Never tune scores to silence a consistency warning.
+- The Synthesizer is now the EIC's assistant: it prepares the issue map and the BEFORE score, then assembles the package. It no longer decides.
+
 ## 2.1.2 (2026-11-04)
 - AAAI now uses its 1–10 rating scale, confirmed by the maintainer: 10 Very strong accept … 6 Borderline accept · 5 Borderline reject · 4 Weak reject … 1 Very strong reject.
 

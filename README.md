@@ -1,11 +1,12 @@
 # Academic Paper Reviewer: a Claude Skill
 
-A multi-perspective peer-review skill for Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process with five independent reviewer personas, aggregates their scores reproducibly, and turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
+A multi-perspective peer-review skill for Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process: five independent reviewers, then an Editor-in-Chief who acts as area chair. The EIC reads every review, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision. Scores are aggregated reproducibly, before and after the EIC's weighting, and turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
 
 ```
 You:    Review this paper for CVPR: [attach PDF]
 Claude: 📋 Paper analysis + 5-reviewer configuration card → 5 independent reports
-        → Editorial decision, aggregated scores, consensus map, Revision Roadmap
+        → EIC meta-review: reviewer weights, BEFORE/AFTER scores, final decision
+        → Editorial decision letter, consensus map, Revision Roadmap
 ```
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
@@ -16,7 +17,7 @@ Claude: 📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 
 | Mode | Say something like | You get |
 |------|-------------------|---------|
-| **full** (default) | "Review this paper" | 5 reports (EIC, Methodology, Domain, Perspective, Devil's Advocate) + Editorial Decision + Revision Roadmap |
+| **full** (default) | "Review this paper" | 5 reports (Methodology, Domain, Perspective, Generalist, Devil's Advocate) + EIC meta-review + Editorial Decision + Revision Roadmap |
 | **quick** | "Is my paper ready for submission?" | EIC quick assessment + submission-readiness check (anonymity, page limit, checklists…) |
 | **methodology-focus** | "Are my baselines fair?" / "Check my experiments" | Claim-to-evidence map, fairness-of-comparison audit, statistics audit, prioritized fixes with compute estimates |
 | **guided** | "Walk me through the review" | Socratic, one-issue-at-a-time dialogue |
@@ -26,7 +27,9 @@ Claude: 📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 What sets it apart:
 - **Field-aware panel.** Reviewers are configured from the paper's actual sub-field and technique (e.g., "token pruning + latency benchmarking" rather than "deep learning").
 - **CV/ML depth.** Task-specific checklists cover detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models. They target the confounds that matter in practice: backbone, pretraining data, resolution, schedule, TTA and latency methodology.
-- **Devil's Advocate with teeth.** It steelmans the paper, then gives the strongest counter-argument and recomputes headline numbers. An upheld CRITICAL issue caps the decision.
+- **Devil's Advocate with teeth, and an EIC who checks it.** The DA steelmans the paper, gives the strongest counter-argument and recomputes headline numbers. The EIC checks each CRITICAL issue against the paper with an area-chair test ("would I reject on this alone?"). Only issues that are truly fatal cap the decision.
+- **EIC meta-review with BEFORE/AFTER scores.** BEFORE weights the reviewers by their confidence. AFTER also applies the EIC's per-reviewer quality weight (0.5–1.5). The EIC decides from the AFTER score and explains any departure from it.
+- **Calibrated to accepted papers.** Scores are anchored to what the target venue actually accepts, not to a flawless paper. See [`evals/`](evals/) for the evaluation on recently accepted ICLR/CVPR/ECCV papers.
 - **Reproducible scoring.** `scripts/aggregate_scores.py` computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.
 - **Venue-aware scoring.** It covers 11 venues: **CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP**. Scores are translated into each venue's own form, for example ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria, or IEEE journal recommendations. A **Cross-Venue Outlook** shows how the same paper would likely fare at each venue. Every scale is labeled *official*, *confirmed*, *secondary*, *assumed* or *unpublished*, so nothing unverified is presented as official.
 - **Integrity guardrails.** No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the manuscript.
@@ -132,7 +135,8 @@ academic-paper-reviewer/               ← skill source
 ├── SKILL.md                           ← entry point: modes, workflow, hard rules
 ├── agents/                            ← one file per role
 │   ├── field_analyst_agent.md         (Phase 0: panel configuration)
-│   ├── eic_agent.md                   (EIC; quick, re-review, coaching)
+│   ├── eic_agent.md                   (EIC meta-reviewer: final decision; quick, re-review, coaching)
+│   ├── generalist_reviewer_agent.md   (R4: venue fit, presentation)
 │   ├── methodology_reviewer_agent.md  (R1; methodology-focus mode)
 │   ├── domain_reviewer_agent.md       (R2)
 │   ├── perspective_reviewer_agent.md  (R3)

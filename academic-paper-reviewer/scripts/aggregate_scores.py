@@ -12,6 +12,10 @@ not have to do weighted averages by hand:
   * DA-CRITICAL cap (upheld critical issues cap the decision at 4 or 3)
   * consistency warnings when a reviewer's Overall (1-6) disagrees with the
     band implied by their own composite by 2 or more points
+  * BEFORE vs. AFTER scores: "before" weights reviewers by their confidence
+    only; "after" multiplies each reviewer's confidence weight by the quality
+    weight the EIC (meta-reviewer) assigns to that reviewer ("eic_weight",
+    0.5-1.5) after reading all reports and checking them against the paper
   * optional venue views (--venue / --all-venues): venue-emphasis weights,
     the venue's own score fields and scale, and a cross-venue outlook, using
     the profiles in scripts/venues.json
@@ -73,6 +77,7 @@ DECISIONS = {
 }
 
 HIGH_SPREAD = 20
+EIC_WEIGHT_RANGE = (0.5, 1.5)
 
 
 def composite_to_overall(composite, offset=0):
@@ -127,6 +132,10 @@ def validate(data):
             fail(f"reviewer {role}: confidence must be an integer 1-5")
         if "overall" in r and r["overall"] not in DECISIONS:
             fail(f"reviewer {role}: overall must be an integer 1-6")
+        w = r.get("eic_weight", 1.0)
+        if not isinstance(w, (int, float)) or not EIC_WEIGHT_RANGE[0] <= w <= EIC_WEIGHT_RANGE[1]:
+            fail(f"reviewer {role}: eic_weight must be a number "
+                 f"{EIC_WEIGHT_RANGE[0]}-{EIC_WEIGHT_RANGE[1]}")
         scores = r.get("scores", {})
         for key, label in DIMENSIONS:
             v = scores.get(key)
@@ -144,51 +153,69 @@ def aggregate(data):
     weights = PAPER_TYPE_WEIGHTS[paper_type]
     reviewers = data["reviewers"]
     cw = [CONFIDENCE_WEIGHTS[r["confidence"]] for r in reviewers]
-    total_cw = sum(cw)
+    ew = [float(r.get("eic_weight", 1.0)) for r in reviewers]
+    eic_weighted = any("eic_weight" in r for r in reviewers)
+    combined = [c * e for c, e in zip(cw, ew)]
 
+    def panel(rw):
+        total = sum(rw)
+        return {key: sum(r["scores"][key] * w for r, w in zip(reviewers, rw)) / total
+                for key, _ in DIMENSIONS}
+
+    before, after = panel(cw), panel(combined)
     dims = []
     for key, label in DIMENSIONS:
         vals = [r["scores"][key] for r in reviewers]
-        avg = sum(v * w for v, w in zip(vals, cw)) / total_cw
         spread = max(vals) - min(vals)
         dims.append({
             "key": key,
             "label": label,
             "per_reviewer": vals,
-            "weighted_avg": round(avg, 1),
+            "before_avg": round(before[key], 1),
+            "weighted_avg": round(after[key], 1),
             "spread": spread,
             "high_spread": spread > HIGH_SPREAD,
         })
 
-    panel_scores = {d["key"]: d["weighted_avg"] for d in dims}
-    panel_composite = round(composite(panel_scores, weights), 1)
+    before_composite = round(composite(before, weights), 1)
+    panel_composite = round(composite(after, weights), 1)
+    share = [w / sum(combined) for w in combined]
 
     per_reviewer = []
     warnings = []
     for r in reviewers:
         c = round(composite(r["scores"], weights), 1)
         implied = composite_to_overall(c)
+        i = len(per_reviewer)
         entry = {"role": r.get("role", "?"), "composite": c,
-                 "implied_overall": implied, "overall": r.get("overall")}
+                 "implied_overall": implied, "overall": r.get("overall"),
+                 "confidence": r["confidence"], "confidence_weight": cw[i],
+                 "eic_weight": ew[i], "weight_share": round(share[i], 3)}
         per_reviewer.append(entry)
         if r.get("overall") is not None and abs(r["overall"] - implied) >= 2:
             warnings.append(
                 f"{entry['role']}: Overall {r['overall']} vs. composite {c} "
-                f"(implies {implied}). Re-check that scores match the text.")
+                f"(implies {implied}). Check that scores and text agree; "
+                f"a deliberate gap is fine if the review explains it.")
 
     suggested = composite_to_overall(panel_composite)
     cap, cap_reason = da_cap(data.get("da_critical", []))
-    capped = min(suggested, cap) if cap else suggested
+    # The ceiling is the DA cap alone. The composite band is a guideline the
+    # EIC may depart from (with a written reason); the cap is a hard limit.
+    ceiling = cap if cap else 6
 
     return {
         "paper_type": paper_type,
         "weights": dict(zip([k for k, _ in DIMENSIONS], weights)),
         "dimensions": dims,
+        "eic_weighted": eic_weighted,
+        "before_composite": before_composite,
+        "before_overall": composite_to_overall(before_composite),
         "panel_composite": panel_composite,
         "per_reviewer": per_reviewer,
         "suggested_overall": suggested,
-        "final_overall_ceiling": capped,
-        "decision_ceiling": DECISIONS[capped],
+        "final_overall_ceiling": ceiling,
+        "decision_ceiling": DECISIONS[ceiling],
         "da_cap_reason": cap_reason,
         "warnings": warnings,
         "roles": [r.get("role", "?") for r in reviewers],
@@ -248,7 +275,7 @@ def venue_view(res, key, venue):
 
 def venue_markdown(views):
     lines = ["", "### Cross-Venue Outlook", "",
-             "| Venue | Venue-weighted composite | Bar offset | Band before → after DA cap | "
+             "| Venue | Venue-weighted composite | Bar offset | Band → with DA cap | "
              "Venue recommendation | Venue sub-scores | Scale status |",
              "|---|---|---|---|---|---|---|"]
     for v in views:
@@ -272,25 +299,42 @@ def to_markdown(res):
              "**Weights**: " + ", ".join(
                  f"{label} {res['weights'][key]:.2f}" for key, label in DIMENSIONS),
              "",
-             "| Dimension | " + " | ".join(roles) + " | Weighted Avg | Spread |",
-             "|---" * (len(roles) + 3) + "|"]
+             "#### Reviewer weights",
+             "",
+             "| Reviewer | Confidence | Confidence weight | EIC quality weight | Share of final score |",
+             "|---|---|---|---|---|"]
+    for p in res["per_reviewer"]:
+        lines.append(f"| {p['role']} | {p['confidence']} | {p['confidence_weight']:.2f} | "
+                     f"{p['eic_weight']:.2f} | {p['weight_share']:.0%} |")
+    if not res["eic_weighted"]:
+        lines.append("")
+        lines.append("*No EIC quality weights given yet: BEFORE and AFTER are identical. "
+                     "Add `eic_weight` (0.5-1.5) per reviewer after the EIC's assessment.*")
+    lines += ["",
+              "#### Scores before and after EIC weighting",
+              "",
+              "| Dimension | " + " | ".join(roles) + " | Before (confidence) | After (EIC-weighted) | Spread |",
+              "|---" * (len(roles) + 4) + "|"]
     for d in res["dimensions"]:
         flag = " ⚠" if d["high_spread"] else ""
         vals = " | ".join(str(v) for v in d["per_reviewer"])
-        lines.append(f"| {d['label']} | {vals} | {d['weighted_avg']} | "
+        lines.append(f"| {d['label']} | {vals} | {d['before_avg']} | {d['weighted_avg']} | "
                      f"{d['spread']}{flag} |")
     comps = " | ".join(str(p["composite"]) for p in res["per_reviewer"])
-    lines.append(f"| **Composite** | {comps} | **{res['panel_composite']}** | |")
-    lines.append("")
-    lines.append("⚠ = spread > 20 points: discuss this disagreement in the decision.")
-    lines.append("")
-    lines.append(f"**Composite-implied decision**: {res['suggested_overall']} "
-                 f"({DECISIONS[res['suggested_overall']]})  ")
+    lines.append(f"| **Composite** | {comps} | **{res['before_composite']}** | "
+                 f"**{res['panel_composite']}** | |")
+    lines += ["",
+              "⚠ = spread > 20 points: discuss this disagreement in the decision.",
+              "",
+              f"**Before** (confidence-weighted): {res['before_composite']} → "
+              f"{res['before_overall']} ({DECISIONS[res['before_overall']]})  ",
+              f"**After** (EIC-weighted): {res['panel_composite']} → "
+              f"{res['suggested_overall']} ({DECISIONS[res['suggested_overall']]})  "]
     if res["da_cap_reason"]:
         lines.append(f"**DA-CRITICAL cap**: {res['da_cap_reason']}  ")
     lines.append(f"**Decision ceiling**: {res['final_overall_ceiling']} "
-                 f"({res['decision_ceiling']}). The final decision may be lower "
-                 "than this, never higher, and must be justified from review content.")
+                 f"({res['decision_ceiling']}). The EIC's final decision may never exceed this. "
+                 "It may differ from the AFTER band in either direction, with a written reason.")
     if res["warnings"]:
         lines.append("")
         lines.append("**Consistency warnings**:")

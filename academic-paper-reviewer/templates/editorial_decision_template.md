@@ -9,35 +9,65 @@
 ## Submission ID: [if available]
 ## Date: [YYYY-MM-DD]
 ## Target Venue: [venue] | Paper Type: [type]
-## Review Team (fictional personas): [5 reviewers with roles]
+## Review Team (fictional personas): EIC (meta-reviewer) [name]; R1 Methodology, R2 Domain, R3 Perspective, R4 Generalist, DA [names]
 
 ---
 
 ## Decision: [Strong Accept (6) / Accept (5) / Borderline Accept (4) / Borderline Reject (3) / Reject (2) / Strong Reject (1)]
 
+**BEFORE** (confidence-weighted): [composite] → [band] | **AFTER** (EIC-weighted): [composite] → [band] | **DA ceiling**: [none / 4 / 3] | **Final (EIC)**: [n]
+**Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
+
+---
+
+## EIC Meta-Review
+
+### The Case For and Against
+- **For acceptance:** [2–3 sentences]
+- **Against acceptance:** [2–3 sentences]
+
+### Verification of Decisive Points (EIC read of the paper)
+| Point | Raised by | Location | EIC finding | Note |
+|-------|-----------|----------|-------------|------|
+| [e.g., headline gain vs. best prior] | [DA-C1, R1-W1] | [Table 2] | [Verified / Partly correct / Overstated / Incorrect] | [..] |
+
+### Reviewer Weights
+| Reviewer | Overall | Confidence | EIC quality weight (0.5–1.5) | Reason |
+|----------|---------|------------|------------------------------|--------|
+| R1 (Methodology) | | | | [one line] |
+| R2 (Domain) | | | | |
+| R3 (Perspective) | | | | |
+| R4 (Generalist) | | | | |
+| DA | | | | |
+
+### DA-CRITICAL Rulings
+| Issue | AC test: fatal on its own? | Ruling | Resolvable by |
+|-------|---------------------------|--------|---------------|
+| DA-C1 | [Yes / No: why] | [Upheld / Downgraded to MAJOR] | [Clarification/minor additions / New data/experiments] |
+
+### Final Decision and Justification
+[One paragraph. If the decision differs from the AFTER band, explain why, e.g., "a novel contribution whose weaknesses are typical of accepted papers at this venue". Confirm it does not exceed the DA ceiling.]
+
 ---
 
 ## Score Summary
 
-### Aggregated Dimension Scores (Confidence-Weighted)
+### BEFORE and AFTER Scores
 
-*Paste the markdown output of `python3 scripts/aggregate_scores.py scores.json` here, or fill in the table by hand with the same formulas.*
+*Paste the markdown output of `python3 scripts/aggregate_scores.py scores.json --venue <target>` (run with the EIC's `eic_weight` values): the reviewer-weight table and the BEFORE/AFTER dimension table. Or fill them in by hand with the same formulas.*
 
-| Dimension | EIC | R1 (Meth.) | R2 (Domain) | R3 (Persp.) | DA | Weighted Avg | Spread |
-|-----------|-----|------------|-------------|-------------|-----|-------------|--------|
-| Technical Rigor | | | | | | | |
-| Clarity & Presentation | | | | | | | |
-| Novelty & Originality | | | | | | | |
-| Significance & Impact | | | | | | | |
-| Experimental Validation | | | | | | | |
-| Reproducibility | | | | | | | |
-| Ethical Compliance | | | | | | | |
-| **Composite** | | | | | | **[avg]** | |
+| Dimension | R1 | R2 | R3 | R4 | DA | Before (confidence) | After (EIC-weighted) | Spread |
+|-----------|----|----|----|----|----|---------------------|----------------------|--------|
+| Technical Rigor | | | | | | | | |
+| Clarity & Presentation | | | | | | | | |
+| Novelty & Originality | | | | | | | | |
+| Significance & Impact | | | | | | | | |
+| Experimental Validation | | | | | | | | |
+| Reproducibility | | | | | | | | |
+| Ethical Compliance | | | | | | | | |
+| **Composite** | | | | | | **[before]** | **[after]** | |
 
-**Composite-implied decision**: [n] | **DA cap**: [none / 4 / 3] | **Final decision**: [n] ([reason if it differs from the composite band])
-**Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
-
-### Target-Venue Scores ([venue], scale status: [official / secondary / assumed / unpublished])
+### Target-Venue Scores ([venue], scale status: [official / confirmed / secondary / assumed / unpublished])
 
 | Venue field | Score |
 |-------------|-------|
@@ -47,17 +77,6 @@
 ### Cross-Venue Outlook (if requested)
 
 [Paste the `--all-venues` table from `scripts/aggregate_scores.py`, then 2–4 sentences of content-based venue advice. Heuristic, not a prediction.]
-
-### NeurIPS-Style Scores (EIC Final)
-
-| Dimension | Score |
-|-----------|-------|
-| Quality | [1–4] |
-| Clarity | [1–4] |
-| Significance | [1–4] |
-| Originality | [1–4] |
-| **Overall** | **[1–6]** |
-| Confidence | [1–5] |
 
 ---
 
@@ -99,7 +118,7 @@ Please refer to the Revision Roadmap below for prioritized guidance.
 
 Sincerely,
 [EIC Name]
-Editor-in-Chief
+Editor-in-Chief (meta-reviewer)
 
 ---
 

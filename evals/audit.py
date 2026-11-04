@@ -141,7 +141,7 @@ def audit_paper(p, check_refs):
     raw = (WORK / "papers" / rid / "paper.txt").read_text(errors="replace")
     flat = norm(raw)
     res = {"id": rid, "venue": p["venue"], "topic": p["topic"], "title": p["title"],
-           "problems": []}
+           "planted": p.get("planted_flaw", ""), "problems": []}
     review = (rdir / "review.md").read_text(errors="replace") if (rdir / "review.md").exists() else ""
     summary, scores, agg, ev = (load(rdir / f) for f in
                                 ("summary.json", "scores.json", "aggregate.json", "evidence.json"))
@@ -164,6 +164,16 @@ def audit_paper(p, check_refs):
     res["recognized"] = bool(summary.get("recognized"))
     res["injection"] = summary.get("injection_found")
     res["paper_type"] = summary.get("paper_type")
+    before = load(rdir / "before.json")
+    res["before_composite"] = before.get("before_composite", before.get("panel_composite")) if before else summary.get("before_composite")
+    res["after_composite"] = agg.get("panel_composite")
+    res["eic_weights"] = [r.get("eic_weight") for r in scores.get("reviewers", [])]
+    if p.get("planted_flaw"):
+        key = {"test-tuning": r"(tun|select)\w*[^.]{0,80}test set|test[- ]set[^.]{0,40}(tun|select)",
+               "train-on-test": r"(merg|train)\w*[^.]{0,80}test (split|set)|test (split|set)[^.]{0,60}(train|merg)"}[p["planted_flaw"]]
+        da = re.search(r"critical issues(.*?)(major issues|$)", low, re.S)
+        res["flaw_mentioned"] = bool(re.search(key, low))
+        res["flaw_in_da_critical"] = bool(da and re.search(key, da.group(1)))
     res["overalls"] = [r.get("overall") for r in scores.get("reviewers", [])]
     if isinstance(res["final"], int) and isinstance(res["ceiling"], int) and res["final"] > res["ceiling"]:
         res["problems"].append(f"final {res['final']} exceeds ceiling {res['ceiling']}")
@@ -218,6 +228,8 @@ def wilson(k, n, z=1.96):
 
 
 def report(results, check_refs):
+    controls = [r for r in results if r.get("complete") and "flaw_mentioned" in r]
+    results = [r for r in results if "flaw_mentioned" not in r and not r["id"].endswith("-flaw")]
     done = [r for r in results if r.get("complete")]
     n = len(done)
     lines = ["# Evaluation Report: Recently Accepted Papers", "",
@@ -249,6 +261,18 @@ def report(results, check_refs):
             fs = [r["final"] for r in rs if isinstance(r["final"], int)]
             k = sum(1 for f in fs if f >= 4)
             lines.append(f"| {key}: {g} | {len(fs)} | {k}/{len(fs)} | {statistics.mean(fs):.2f} |")
+    bc = [r["before_composite"] for r in done if isinstance(r.get("before_composite"), (int, float))]
+    ac = [r["after_composite"] for r in done if isinstance(r.get("after_composite"), (int, float))]
+    if bc and ac:
+        lines += ["", "## BEFORE vs AFTER (EIC weighting)", "",
+                  f"- Mean composite BEFORE (confidence-weighted): {statistics.mean(bc):.1f}",
+                  f"- Mean composite AFTER (EIC-weighted): {statistics.mean(ac):.1f}",
+                  f"- Mean |AFTER − BEFORE|: {statistics.mean(abs(r['after_composite'] - r['before_composite']) for r in done if isinstance(r.get('before_composite'), (int, float))):.1f}",
+                  f"- Decisions departing from the AFTER band: "
+                  f"{sum(1 for r in done if r['final'] != r['composite_band'])}/{n}",
+                  f"- Reviewers weighted ≠ 1.0 by the EIC: "
+                  f"{sum(1 for r in done for w in r['eic_weights'] if w not in (None, 1, 1.0))}"
+                  f"/{sum(len(r['eic_weights']) for r in done)}"]
     da_r = sum(1 for r in done if r["da_raised"])
     da_u = sum(1 for r in done if r["da_upheld"])
     capped = sum(1 for r in done if r["ceiling"] is not None and r["composite_band"] is not None
@@ -284,6 +308,23 @@ def report(results, check_refs):
               f"- Runs with all required sections: {sum(1 for r in done if not r['missing_sections'])}/{n}",
               f"- Median review length: {statistics.median(r['words'] for r in done):.0f} words", ""]
 
+    if controls:
+        caught = sum(1 for r in controls if r["flaw_mentioned"])
+        crit = sum(1 for r in controls if r["flaw_in_da_critical"])
+        low_ = sum(1 for r in controls if isinstance(r["final"], int) and r["final"] <= 3)
+        lines += ["## Planted-flaw controls", "",
+                  "Accepted papers with one inserted sentence admitting a fatal evaluation flaw "
+                  "(hyperparameters tuned on the test set, or test split merged into training). "
+                  "A calibrated reviewer must catch it and decide ≤ 3.", "",
+                  f"- Flaw mentioned in the review: {caught}/{len(controls)}",
+                  f"- Flaw raised as DA-CRITICAL: {crit}/{len(controls)}",
+                  f"- Decision ≤ 3: {low_}/{len(controls)}",
+                  "", "| Control | Flaw | Mentioned | DA-CRITICAL | Final |", "|---|---|---|---|---|"]
+        for r in controls:
+            lines.append(f"| {r['venue']}-{r['topic']} | {r.get('planted', '')} | "
+                         f"{'yes' if r['flaw_mentioned'] else 'NO'} | "
+                         f"{'yes' if r['flaw_in_da_critical'] else 'no'} | {r['final']} |")
+        lines.append("")
     det = ["# Per-paper detail (not for publication)", "",
            "| id | Final | Venue label | Composite | Reviewer Overalls | DA raised/upheld | Bad loc/quote/num |",
            "|---|---|---|---|---|---|---|"]
@@ -311,10 +352,10 @@ def report(results, check_refs):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("manifest")
+    ap.add_argument("manifest", nargs="+", help="manifest(s), e.g. evals/manifest.json evals/manifest_controls.json")
     ap.add_argument("--check-refs", action="store_true")
     args = ap.parse_args()
-    manifest = json.load(open(args.manifest))
+    manifest = [p for m in args.manifest for p in json.load(open(m))]
     results = [audit_paper(p, args.check_refs) for p in manifest
                if (WORK / "results" / p["id"]).exists()]
     summary, detail = report(results, args.check_refs)
