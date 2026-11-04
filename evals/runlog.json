@@ -194,5 +194,11 @@
   "skill": "2.5",
   "lit_mode": "strict",
   "tool_restriction": true
+ },
+ "cvpr-detseg-2604.24119-plag-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": true
  }
 }
