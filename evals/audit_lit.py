@@ -99,7 +99,7 @@ def main():
         })
 
     done = [r for r in rows if r.get("done")]
-    out = ["# Literature-check evaluation (v2.5, strict mode)", "",
+    out = ["# Literature-check evaluation (strict mode)", "",
            f"Runs complete: {len(done)}/{len(rows)}", ""]
     if done:
         out += ["## Leak check (primary)", "",
