@@ -15,7 +15,8 @@
 
 ## Decision: [Strong Accept (6) / Accept (5) / Borderline Accept (4) / Borderline Reject (3) / Reject (2) / Strong Reject (1)]
 
-**Official** (raw mean, shown to authors): [composite] → [band] | **EIC assessment** (internal, weighted): [composite] → [band] | **DA ceiling**: [none / 4 / 3] | **Final (EIC)**: [n]
+**Official ratings** (shown to authors): R1 [n], R2 [n], R3 [n], R4 [n], DA [n] → mean [x.xx] · official composite [xx.x]
+**EIC assessment** (internal): weighted rating [x.xx] → starting point [n] · weighted composite [xx.x] → [band] (cross-check) · **DA ceiling**: [none / 4 / 3] · **Final (EIC)**: [n]
 **Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
 
 ---
@@ -46,7 +47,7 @@
 | DA-C1 | [Yes / No: why] | [Upheld / Downgraded to MAJOR] | [Clarification/minor additions / New data/experiments] |
 
 ### Final Decision and Justification
-[One paragraph. If the decision differs from the EIC-assessment band, explain why, e.g., "a novel contribution whose weaknesses are typical of accepted papers at this venue". Confirm it does not exceed the DA ceiling.]
+[One paragraph. If the decision differs from the starting point (the EIC-weighted rating), or the composite cross-check disagrees, explain why, e.g., "a novel contribution whose weaknesses are typical of accepted papers at this venue". Confirm it does not exceed the DA ceiling.]
 
 ---
 

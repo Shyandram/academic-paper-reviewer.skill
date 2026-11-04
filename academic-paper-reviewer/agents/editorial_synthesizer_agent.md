@@ -42,7 +42,7 @@ Give the EIC: the issue list with classifications, the DA-CRITICAL issues, the S
 
 ### Step 4: Record the EIC's Decision
 
-Rerun the script with the EIC's `eic_weight` values and DA rulings to produce the EIC assessment. Check that the EIC's final Overall does not exceed the ceiling. Record the venue translation for the target venue, plus `--all-venues` if the user asked to compare venues. Present each venue's scale with its verification status from `references/venue_profiles.md`.
+Rerun the script with the EIC's `eic_weight` values and DA rulings to produce the EIC assessment. Check that the EIC's final Overall does not exceed the ceiling, then run once more with `--final <N>` so the venue labels follow the EIC's decision. Record the venue translation for the target venue, plus `--all-venues` if the user asked to compare venues. Present each venue's scale with its verification status from `references/venue_profiles.md`.
 
 ### Step 5: Revision Roadmap
 

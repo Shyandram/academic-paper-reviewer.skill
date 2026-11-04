@@ -19,6 +19,10 @@ not have to do weighted averages by hand:
                   confidence x the EIC's quality weight ("eic_weight", 0.5-1.5).
                   It can be higher or lower than OFFICIAL. The decision is
                   based on it, but it is not a revised official score.
+  * the decision starting point is the EIC-weighted mean of the reviewers'
+    Overall ratings (rounded half up); the 0-100 composite band is a
+    cross-check, flagged when it disagrees
+  * --final N renders venue labels from the EIC's actual decision
   * optional venue views (--venue / --all-venues): venue-emphasis weights,
     the venue's own score fields and scale, and a cross-venue outlook, using
     the profiles in scripts/venues.json
@@ -201,7 +205,22 @@ def aggregate(data):
                 f"(implies {implied}). Check that scores and text agree; "
                 f"a deliberate gap is fine if the review explains it.")
 
-    suggested = composite_to_overall(panel_composite)
+    composite_band = composite_to_overall(panel_composite)
+    overalls = [r.get("overall") for r in reviewers]
+    if all(o is not None for o in overalls):
+        official_rating = sum(overalls) / len(overalls)
+        eic_rating = sum(o * w for o, w in zip(overalls, combined)) / sum(combined)
+        suggested = max(1, min(6, int(eic_rating + 0.5)))   # round half up
+        basis = "rating"
+    else:   # fall back to the composite if any Overall rating is missing
+        official_rating = eic_rating = None
+        suggested = composite_band
+        basis = "composite"
+    cross_check = None
+    if basis == "rating" and composite_band != suggested:
+        cross_check = (f"Composite band {composite_band} ({DECISIONS[composite_band]}) differs from "
+                       f"the rating-based starting point {suggested}. The EIC must say which "
+                       f"signal it trusts and why.")
     cap, cap_reason = da_cap(data.get("da_critical", []))
     # The ceiling is the DA cap alone. The composite band is a guideline the
     # EIC may depart from (with a written reason); the cap is a hard limit.
@@ -220,6 +239,11 @@ def aggregate(data):
         "panel_composite": panel_composite,
         "per_reviewer": per_reviewer,
         "suggested_overall": suggested,
+        "suggestion_basis": basis,
+        "official_rating": round(official_rating, 2) if official_rating is not None else None,
+        "eic_rating": round(eic_rating, 2) if eic_rating is not None else None,
+        "composite_band": composite_band,
+        "cross_check": cross_check,
         "final_overall_ceiling": ceiling,
         "decision_ceiling": DECISIONS[ceiling],
         "da_cap_reason": cap_reason,
@@ -234,7 +258,7 @@ def load_venues(path=VENUES_FILE):
         return json.load(f)["venues"]
 
 
-def venue_view(res, key, venue):
+def venue_view(res, key, venue, final=None):
     """Re-score the panel's dimension averages through one venue's lens."""
     dims = {d["key"]: d["weighted_avg"] for d in res["dimensions"]}
     base = [res["weights"][k] for k, _ in DIMENSIONS]
@@ -242,13 +266,17 @@ def venue_view(res, key, venue):
     weights = [w / sum(raw) for w in raw]
     comp = round(sum(dims[k] * w for (k, _), w in zip(DIMENSIONS, weights)), 1)
     offset = venue.get("bar_offset", 0)
-    band = composite_to_overall(comp, offset)
+    # Venue adjustment: how much this venue's emphasis and bar move the
+    # composite band relative to the default band, applied to the decision.
+    shift = composite_to_overall(comp, offset) - res["composite_band"]
+    start = final if final is not None else res["suggested_overall"]
+    band = max(1, min(6, start + shift))
     cap = res.get("da_cap")
     final = min(band, cap) if cap else band
     scale = venue["scale"]
     view = {"key": key, "name": venue["name"], "kind": venue["kind"],
             "as_of": venue["as_of"], "scale_status": scale["status"],
-            "composite": comp, "bar_offset": offset, "band": band,
+            "composite": comp, "bar_offset": offset, "shift": shift, "band": band,
             "final": final, "subscores": {}, "notes": [scale["note"]]}
 
     for label, keys in venue.get("subscores", {}).items():
@@ -281,13 +309,13 @@ def venue_view(res, key, venue):
 
 def venue_markdown(views):
     lines = ["", "### Cross-Venue Outlook", "",
-             "| Venue | Venue-weighted composite | Bar offset | Band → with DA cap | "
+             "| Venue | Venue-weighted composite | Bar offset | Venue shift | Band → with DA cap | "
              "Venue recommendation | Venue sub-scores | Scale status |",
-             "|---|---|---|---|---|---|---|"]
+             "|---|---|---|---|---|---|---|---|"]
     for v in views:
         subs = ", ".join(f"{k} {val}" for k, val in v["subscores"].items()) or "—"
         lines.append(f"| {v['name']} ({v['as_of']}) | {v['composite']} | "
-                     f"{v['bar_offset']:+d} | {v['band']} → {v['final']} | {v['label']} | "
+                     f"{v['bar_offset']:+d} | {v['shift']:+d} | {v['band']} → {v['final']} | {v['label']} | "
                      f"{subs} | {v['scale_status']} |")
     lines += ["", "Emphasis weights are this skill's heuristics, not official venue "
               "weights. Scale status: official / confirmed / secondary / assumed / unpublished "
@@ -331,22 +359,28 @@ def to_markdown(res):
                  f"**{res['panel_composite']}** | |")
     overalls = [(p["role"], p["overall"]) for p in res["per_reviewer"] if p["overall"] is not None]
     if overalls:
-        mean = sum(o for _, o in overalls) / len(overalls)
-        lines += ["", "**Official reviewer ratings (Overall 1-6)**: "
-                  + ", ".join(f"{r} {o}" for r, o in overalls) + f" (mean {mean:.1f})"]
+        lines += ["", "#### Ratings (the decision's starting point)", "",
+                  "**Official reviewer ratings (Overall 1-6)**: "
+                  + ", ".join(f"{r} {o}" for r, o in overalls)
+                  + f" → official mean **{res['official_rating']:.2f}**  " if res["official_rating"] is not None else "",
+                  f"**EIC-weighted rating** (internal): **{res['eic_rating']:.2f}** "
+                  f"({res['eic_rating'] - res['official_rating']:+.2f} vs. official) → starting point "
+                  f"**{res['suggested_overall']} ({DECISIONS[res['suggested_overall']]})**"
+                  if res["eic_rating"] is not None else ""]
     lines += ["",
               "⚠ = spread > 20 points: discuss this disagreement in the decision.",
               "",
-              f"**Official** (raw mean, shown to authors): {res['before_composite']} → "
-              f"{res['before_overall']} ({DECISIONS[res['before_overall']]})  ",
-              f"**EIC assessment** (internal, weighted): {res['panel_composite']} → "
-              f"{res['suggested_overall']} ({DECISIONS[res['suggested_overall']]}); "
-              f"{res['eic_minus_official']:+.1f} vs. official  "]
+              "**Composite cross-check (0-100)**: "
+              f"official {res['before_composite']} → {res['before_overall']} · "
+              f"EIC-weighted {res['panel_composite']} → {res['composite_band']} "
+              f"({res['eic_minus_official']:+.1f} vs. official)  "]
+    if res["cross_check"]:
+        lines.append(f"**⚠ Cross-check**: {res['cross_check']}  ")
     if res["da_cap_reason"]:
         lines.append(f"**DA-CRITICAL cap**: {res['da_cap_reason']}  ")
     lines.append(f"**Decision ceiling**: {res['final_overall_ceiling']} "
                  f"({res['decision_ceiling']}). The EIC's final decision may never exceed this. "
-                 "It starts from the EIC assessment band and may depart from it in either direction, with a written reason.")
+                 "It starts from the EIC-weighted rating and may depart from it in either direction, with a written reason.")
     if res["warnings"]:
         lines.append("")
         lines.append("**Consistency warnings**:")
@@ -360,6 +394,8 @@ def main():
     ap.add_argument("--json", action="store_true", help="emit JSON instead of markdown")
     ap.add_argument("--venue", action="append", default=[],
                     help="add a venue view (repeatable); see scripts/venues.json")
+    ap.add_argument("--final", type=int, choices=range(1, 7), metavar="N",
+                    help="the EIC's final Overall decision (1-6); venue labels are rendered from it")
     ap.add_argument("--all-venues", action="store_true",
                     help="add views for every venue in scripts/venues.json")
     args = ap.parse_args()
@@ -379,7 +415,11 @@ def main():
     for k in keys:
         if k not in venues:
             fail(f"unknown venue '{k}'; choose from {sorted(venues)}")
-    views = [venue_view(res, k, venues[k]) for k in dict.fromkeys(keys)]
+    if args.final is not None:
+        if args.final > res["final_overall_ceiling"]:
+            fail(f"--final {args.final} exceeds the DA ceiling {res['final_overall_ceiling']}")
+        res["final_overall"] = args.final
+    views = [venue_view(res, k, venues[k], args.final) for k in dict.fromkeys(keys)]
     if args.json:
         res["venue_views"] = views
         print(json.dumps(res, indent=2, ensure_ascii=False))

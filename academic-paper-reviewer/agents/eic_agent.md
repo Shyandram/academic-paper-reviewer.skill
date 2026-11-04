@@ -40,16 +40,21 @@ Mark each upheld issue as resolvable by clarification or minor additions, or as 
 
 ### Step 5: Compute Your Weighted Assessment
 Add `eic_weight` to each reviewer in the scores file, update `da_critical` with your rulings, and rerun `python3 scripts/aggregate_scores.py scores.json --venue <target>`. The output shows two lists:
-- **Official scores**: each reviewer's raw scores and their plain mean. These are what the authors see. You never change them.
+- **Official**: each reviewer's raw Overall rating and dimension scores, and their plain means. These are what the authors see. You never change them.
 - **EIC assessment**: your internal view, weighting each reviewer by confidence × your quality weight. It is "the score in your mind", not a revised official score, and it can be **higher or lower** than the official one. For example, trusting a strict, well-grounded reviewer more pulls it down.
 
-Your decision rests on the EIC assessment, within the DA ceiling. The decision letter reports the official scores and explains your judgment.
+The **EIC-weighted rating** (the weighted mean of the reviewers' Overall ratings, rounded half up) is your **starting point**. The reviewers' recommendations are the primary signal, as they are for a real area chair. The **0–100 composite is a cross-check**. When its band differs from the rating's (the script flags ⚠), say which signal you trust and why. Typical reasons: a reviewer's dimension scores don't match their own recommendation, or the dimension scores sit on a band boundary.
 
 ### Step 6: Decide
-Decide the final Overall (1–6) and the venue recommendation. The EIC-assessment band is your starting point, not a rule:
-- You may decide **above or below** the EIC-assessment band. Write one paragraph explaining why (e.g., "a strong, novel contribution whose weaknesses are typical of accepted papers at this venue").
+Decide the final Overall (1–6). The starting point is not a rule:
+- You may decide **above or below** the starting point. Write one paragraph explaining why (e.g., "a strong, novel contribution whose weaknesses are typical of accepted papers at this venue", or "the central claim is not measured, so the accept-leaning ratings are not supported").
 - You may **never exceed** the ceiling set by an upheld DA-CRITICAL issue.
+- **New tasks and new problems:** judge a paper that introduces a new task or problem on whether the task is valuable and the evidence convincing for a first paper on it. Don't judge it on technical novelty alone, and don't expect the baseline coverage of a mature task.
 - Apply the venue's rules from `references/venue_profiles.md`: ECCV contribution types and "not beating SOTA is not grounds for rejection", the ACM MM scope gate, TMLR's criteria, the TPAMI completeness bar, and AAAI's Phase-1 risk.
+
+Then run the script once more with your decision, `--final <N>`, so the venue labels (e.g., the ICLR rating) reflect your decision rather than the starting point.
+
+The decision letter reports the official ratings and scores and explains your judgment.
 
 ### Meta-Review Output
 Write the **Meta-Review** section of `templates/editorial_decision_template.md`:
@@ -57,7 +62,7 @@ Write the **Meta-Review** section of `templates/editorial_decision_template.md`:
 2. The verification table from Step 2
 3. The reviewer-weight table from Step 3, with one-line reasons
 4. DA-CRITICAL rulings from Step 4
-5. Official score → EIC assessment, and the final decision with its justification
+5. Official ratings and scores → EIC-weighted rating (the starting point) and assessment, the composite cross-check, and the final decision with its justification
 6. The Editorial Decision Letter (you sign it)
 
 Length: 600–1000 words, excluding tables.

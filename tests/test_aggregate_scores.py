@@ -84,6 +84,41 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(res["eic_composite"], 57.5)
         self.assertEqual(res["eic_minus_official"], -7.5)
 
+    def test_rating_is_the_starting_point(self):
+        # Ratings 3,4,4,4,3 with dimension scores just under 60: the rating
+        # (3.6 -> 4) is the starting point, and the composite (band 3) is flagged.
+        rs = [uniform(59, overall=o) for o in (3, 4, 4, 4, 3)]
+        res = agg.aggregate({"reviewers": rs})
+        self.assertEqual(res["official_rating"], 3.6)
+        self.assertEqual(res["suggested_overall"], 4)
+        self.assertEqual(res["suggestion_basis"], "rating")
+        self.assertEqual(res["composite_band"], 3)
+        self.assertIsNotNone(res["cross_check"])
+
+    def test_eic_weights_can_lower_the_rating(self):
+        a, b = uniform(60, overall=3), uniform(60, overall=5)
+        a["eic_weight"], b["eic_weight"] = 1.5, 0.5
+        res = agg.aggregate({"reviewers": [a, b]})
+        self.assertEqual(res["official_rating"], 4.0)
+        self.assertEqual(res["eic_rating"], 3.5)
+        self.assertEqual(res["suggested_overall"], 4)       # half rounds up
+        a["eic_weight"] = 1.5; b["eic_weight"] = 0.5; b["overall"] = 4
+        self.assertEqual(agg.aggregate({"reviewers": [a, b]})["suggested_overall"], 3)
+
+    def test_composite_fallback_without_ratings(self):
+        res = agg.aggregate({"reviewers": [uniform(72)]})
+        self.assertEqual(res["suggestion_basis"], "composite")
+        self.assertEqual(res["suggested_overall"], 5)
+
+    def test_final_decision_drives_venue_labels(self):
+        res = agg.aggregate(copy.deepcopy(EXAMPLE))
+        venues = agg.load_venues()
+        self.assertEqual(agg.venue_view(res, "cvpr", venues["cvpr"], final=3)["label"], "3 Borderline Reject")
+        self.assertEqual(agg.venue_view(res, "iclr", venues["iclr"], final=5)["label"],
+                         "8 on {0,2,4,6,8,10} (8 on {1,3,5,6,8,10})")
+        # TPAMI keeps its harder bar relative to the decision
+        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["final"], 3)
+
     def test_eic_weight_out_of_range_exits(self):
         r = uniform(70)
         r["eic_weight"] = 3

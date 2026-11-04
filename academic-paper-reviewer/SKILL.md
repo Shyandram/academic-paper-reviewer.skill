@@ -2,13 +2,13 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.2"
+  version: "2.3"
   last_updated: "2026-11-04"
 ---
 
-# Academic Paper Reviewer v2.2
+# Academic Paper Reviewer v2.3
 
-Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower and on which the decision rests. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
+Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
 ## Persona
 
@@ -121,8 +121,8 @@ The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
    2. Read the paper briefly, checking every decisive point against the text.
    3. Give each reviewer a **quality weight** (0.5–1.5) for how much their comments and scores should count.
    4. Rule on each DA-CRITICAL issue with the AC test (uphold, or downgrade to MAJOR).
-   5. Rerun the script for the **EIC assessment**.
-   6. **Make the final decision**, explaining any departure from the EIC-assessment band. The decision can never exceed the DA ceiling.
+   5. Rerun the script for the **EIC assessment**. The **EIC-weighted mean of the reviewers' Overall ratings** is the starting point, and the 0–100 composite is a cross-check.
+   6. **Make the final decision**, explaining any departure from the starting point and any disagreement with the cross-check. The decision can never exceed the DA ceiling. Rerun with `--final <N>` so the venue labels reflect the decision.
 3. **Synthesizer, part B**: record the decision, then assemble the Editorial Decision Package and the Revision Roadmap using `templates/editorial_decision_template.md`.
 
 For a journal target, also report the journal-style recommendation (Accept / Minor Revision / Major Revision / Reject) using the mapping in `references/editorial_decision_standards.md`.
@@ -186,6 +186,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | NeurIPS-style 1–4 | Quality, Clarity, Significance, Originality | Familiar coarse ratings |
 | Overall 1–6 | 6 Strong Accept … 1 Strong Reject | Recommendation (definitions in `references/editorial_decision_standards.md`) |
 | Confidence 1–5 | Reviewer certainty | Weights the EIC assessment (with the EIC weight) |
+| EIC-weighted rating | Weighted mean of the reviewers' Overall ratings | **The decision's starting point**; the 0–100 composite is a cross-check |
 | EIC quality weight 0.5–1.5 | Set by the EIC per reviewer, after checking reviews against the paper | Multiplies confidence for the EIC assessment |
 | Dimension scores 0–100 | Technical Rigor, Clarity & Presentation, Novelty & Originality, Significance & Impact, Experimental Validation, Reproducibility, Ethical Compliance | Fine-grained, calibrated, aggregated by paper type |
 
@@ -203,7 +204,7 @@ Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue 
 | Balance | Strengths and weaknesses are both substantive; minimum 3 strengths and 2 weaknesses per standard report |
 | Actionability | Every weakness has a concrete fix and, where relevant, its effort or compute cost |
 | Calibration | Scores follow the rubrics and the venue anchors; a typical accepted paper at the target venue scores in the 65–75 range; field norms respected (see the CV calibration notes) |
-| Meta-review | The EIC verifies every decisive point against the paper, justifies every reviewer weight, and explains any decision that departs from the EIC-assessment band |
+| Meta-review | The EIC verifies every decisive point against the paper, justifies every reviewer weight, and explains any decision that departs from the starting point (the EIC-weighted rating) |
 | Professional tone | Critique the work, never the authors; no sarcasm |
 | DA completeness | One strongest counter-argument; CRITICAL used only for fatal issues; "No CRITICAL issues found" stated explicitly when true (the usual case) |
 

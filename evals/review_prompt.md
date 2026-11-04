@@ -24,7 +24,7 @@ Rules for this evaluation:
 2. `scores.json`: the final input for the aggregation script, in the format of `academic-paper-reviewer/scripts/example_scores.json`: `paper_type`, five `reviewers` (R1–R4 and DA; the EIC is not a reviewer), each with `role`, `confidence`, `overall`, `eic_weight` and `scores`, plus `da_critical` with the EIC's rulings (`upheld`, `resolvable_without_new_data`).
 3. Run the script twice, as the skill instructs:
    - BEFORE, without `eic_weight` and with DA issues provisionally upheld: `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py <before-scores> --venue {VENUE_KEY} --json > {ROOT}/evals/work/results/{ID}/before.json`
-   - AFTER, with the final `scores.json`: `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores.json --venue {VENUE_KEY} --json > {ROOT}/evals/work/results/{ID}/aggregate.json`
+   - AFTER, with the final `scores.json` and the EIC's decision: `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores.json --venue {VENUE_KEY} --final <EIC final Overall> --json > {ROOT}/evals/work/results/{ID}/aggregate.json`
 4. `evidence.json`: every verifiable claim the review makes about the manuscript:
    ```json
    {
@@ -42,10 +42,12 @@ Rules for this evaluation:
      "paper_type": "<empirical|theoretical|dataset|system|benchmark|analysis|position>",
      "final_overall": "<integer 1-6>",
      "venue_recommendation": "label from aggregate.json",
+     "official_rating": "<plain mean of reviewer Overall ratings>",
+     "eic_rating": "<EIC-weighted rating from aggregate.json>",
      "before_composite": "<number from before.json>",
      "after_composite": "<number from aggregate.json>",
      "eic_weights": {"R1": "<0.5-1.5>", "R2": "<0.5-1.5>", "R3": "<0.5-1.5>", "R4": "<0.5-1.5>", "DA": "<0.5-1.5>"},
-     "decision_differs_from_after_band": "<true|false>",
+     "decision_differs_from_starting_point": "<true|false>",
      "da_critical_raised": "<integer>",
      "da_critical_upheld": "<integer>",
      "eic_verification": ["point: Verified/Partly correct/Overstated/Incorrect"],

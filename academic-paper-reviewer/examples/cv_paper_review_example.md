@@ -112,23 +112,23 @@ Official composite (plain mean of the raw scores) **63.2 → 4 (Borderline Accep
 | Ethical Compliance | 70 | 72 | 58 | 70 | 66 | 67.2 | 68.2 | 14 |
 | **Composite** | 60.4 | 65.0 | 68.3 | 65.0 | 57.0 | **63.2** | **62.5** | |
 
-**Official** (raw mean, shown to authors) 63.2 → 4 · **EIC assessment** (internal) 62.5 → 4 (−0.7) · **DA ceiling**: none (DA-C1 downgraded) · **Final (EIC)**: **4, Borderline Accept**
+**Official** ratings 3/4/4/4/3 → mean 3.60; composite 63.2 · **EIC assessment** (internal): weighted rating **3.51 → starting point 4**; weighted composite 62.5 → 4 (cross-check agrees) · **DA ceiling**: none (DA-C1 downgraded) · **Final (EIC)**: **4, Borderline Accept**
 
 The authors see the **official** scores (63.2, ratings 3/4/4/4/3). The EIC's internal assessment is **lower** (62.5), because the EIC trusted the stricter, fully verified R1 more and the more lenient R3 less. Weights reflect review quality, not a leniency knob, and they can move the assessment in either direction.
 
 ### Final decision and justification
-**4, Borderline Accept.** The decision follows the EIC-assessment band. The contribution is useful and clearly presented, and the core speedup is verified. The main weakness is a real but bounded confound in the headline comparison. The paper's own matched ablation supports a narrower claim, so this is the kind of weakness accepted CVPR papers commonly have, provided the rebuttal adds matched baselines and the abstract is reworded.
+**4, Borderline Accept.** The decision follows the starting point: official ratings 3/4/4/4/3 (mean 3.60), EIC-weighted rating 3.51 → 4. The composite cross-check agrees (62.5 → 4). The contribution is useful and clearly presented, and the core speedup is verified. The main weakness is a real but bounded confound in the headline comparison. The paper's own matched ablation supports a narrower claim, so this is the kind of weakness accepted CVPR papers commonly have, provided the rebuttal adds matched baselines and the abstract is reworded.
 
-### Cross-Venue Outlook (user asked "compare venues")
+### Cross-Venue Outlook (user asked "compare venues"; rendered with `--final 4`)
 
-| Venue | Venue-weighted composite | Bar offset | Band → with DA cap | Venue recommendation | Venue sub-scores | Scale status |
-|---|---|---|---|---|---|---|
-| CVPR (2026) | 61.8 | +0 | 4 → 4 | 4 Borderline Accept | — | confirmed |
-| ICLR (2026) | 62.5 | +0 | 4 → 4 | 6 on {0,2,4,6,8,10} (6 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 2 | secondary |
-| ICML (2025) | 62.1 | +0 | 4 → 4 | 3 Weak accept (leaning accept) | — | official |
-| ACM Multimedia (2026) | 62.5 | +0 | 4 → 4 | Weak accept | — | unpublished |
-| TMLR (2025) | 62.2 | -5 | 4 → 4 | Accept with minor revision | Claims & evidence Yes, Audience interest Yes | official |
-| IEEE TPAMI (2025) | 62.0 | +3 | 3 → 3 | Major Revision | — | secondary |
+| Venue | Venue-weighted composite | Bar offset | Venue shift | Band → with DA cap | Venue recommendation | Venue sub-scores | Scale status |
+|---|---|---|---|---|---|---|---|
+| CVPR (2026) | 61.8 | +0 | +0 | 4 → 4 | 4 Borderline Accept | — | confirmed |
+| ICLR (2026) | 62.5 | +0 | +0 | 4 → 4 | 6 on {0,2,4,6,8,10} (6 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 2 | secondary |
+| ICML (2025) | 62.1 | +0 | +0 | 4 → 4 | 3 Weak accept (leaning accept) | — | official |
+| ACM Multimedia (2026) | 62.5 | +0 | +0 | 4 → 4 | Weak accept | — | unpublished |
+| TMLR (2025) | 62.2 | -5 | +0 | 4 → 4 | Accept with minor revision | Claims & evidence Yes, Audience interest Yes | official |
+| IEEE TPAMI (2025) | 62.0 | +3 | -1 | 3 → 3 | Major Revision | — | secondary |
 
 **EIC's venue advice**: CVPR is the natural fit. TMLR would accept the paper with a narrowed C3, since it doesn't penalize modest gains. ACM MM would need a multimedia angle to pass its scope gate. TPAMI's higher bar would require the edge-device study and broader backbones.
 
