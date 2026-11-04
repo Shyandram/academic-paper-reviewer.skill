@@ -234,5 +234,11 @@
   "skill": "2.6",
   "lit_mode": "strict",
   "tool_restriction": "explicit allow-list"
+ },
+ "cvpr-lowlevel-2609.15120-flaw-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": "explicit allow-list"
  }
 }
