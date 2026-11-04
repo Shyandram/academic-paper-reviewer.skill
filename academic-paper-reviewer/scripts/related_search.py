@@ -111,7 +111,7 @@ BENCHMARKS = ["COCO", "LVIS", "ADE20K", "Cityscapes", "ImageNet", "ImageNet-1K",
               "GQA", "TextVQA", "MMBench", "MME", "SEED-Bench", "RefCOCO", "RefCOCO+", "RefCOCOg",
               "CelebA", "CelebA-HQ", "FFHQ", "LSUN", "Set5", "Set14", "Urban100", "BSD100", "Manga109",
               "DIV2K", "GoPro", "SIDD", "LOL", "Rain100L", "Rain100H", "NYUv2", "SUN RGB-D",
-              "Sintel", "FlyingThings", "M-BEIR", "MSR-VTT", "ActivityNet", "Ego4D", "LAION",
+              "Sintel", "FlyingThings", "M-BEIR", "ILIAS", "MSR-VTT", "ActivityNet", "Ego4D", "LAION",
               "PartNet", "PartNet-Mobility", "GSO", "OmniObject3D", "Mip-NeRF360", "BraTS", "Synapse", "ACDC", "ISIC", "CUB", "Stanford Cars", "Market-1501", "WIDER FACE"]
 STOP = {"a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "into",
         "is", "it", "of", "on", "or", "the", "to", "via", "with", "without", "towards",
