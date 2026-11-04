@@ -58,5 +58,9 @@
  "eccv-vlm-2609.16847": {
   "model": "haiku",
   "skill": "2.3.1"
+ },
+ "eccv-3d-2607.26889": {
+  "model": "haiku",
+  "skill": "2.3.1"
  }
 }
