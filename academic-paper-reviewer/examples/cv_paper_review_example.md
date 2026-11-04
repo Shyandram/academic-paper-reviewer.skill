@@ -62,8 +62,8 @@
 
 ## Phase 2: EIC Meta-Review and Decision
 
-### BEFORE score (prepared by the synthesizer)
-Confidence-weighted composite **62.9 → 4 (Borderline Accept)**, with DA-C1 pending the EIC's ruling.
+### Official Score (prepared by the synthesizer)
+Official composite (plain mean of the raw scores) **63.2 → 4 (Borderline Accept)**; official reviewer ratings R1 3, R2 4, R3 4, R4 4, DA 3, with DA-C1 pending the EIC's ruling.
 
 ### The case for and against
 - **For**: a simple, general module with a clear 2× latency win (Table 4, recomputed by R1), a convincing trade-off curve (Fig. 5) and clear writing (R4, R2).
@@ -91,7 +91,7 @@ Confidence-weighted composite **62.9 → 4 (Borderline Accept)**, with DA-C1 pen
 |-------|---------------------------|--------|---------------|
 | DA-C1 | **No.** The matched in-paper comparison (Table 3) supports a narrower version of C3. This is a confound "that a matched experiment could resolve", which the strict criteria list as MAJOR | **Downgraded to MAJOR** | New experiments (matched baselines) |
 
-### BEFORE and AFTER scores (output of `scripts/aggregate_scores.py`)
+### Official Scores and EIC Assessment (output of `scripts/aggregate_scores.py`)
 
 | Reviewer | Confidence | Confidence weight | EIC quality weight | Share of final score |
 |---|---|---|---|---|
@@ -101,23 +101,23 @@ Confidence-weighted composite **62.9 → 4 (Borderline Accept)**, with DA-C1 pen
 | R4 (Gen.) | 4 | 0.85 | 1.00 | 20% |
 | DA | 4 | 0.85 | 1.00 | 20% |
 
-| Dimension | R1 (Meth.) | R2 (Domain) | R3 (Persp.) | R4 (Gen.) | DA | Before (confidence) | After (EIC-weighted) | Spread |
+| Dimension | R1 (Meth.) | R2 (Domain) | R3 (Persp.) | R4 (Gen.) | DA | Official (raw mean) | EIC assessment (weighted) | Spread |
 |---|---|---|---|---|---|---|---|---|
-| Technical Rigor | 58 | 66 | 70 | 64 | 52 | 61.6 | 61.0 | 18 |
-| Clarity & Presentation | 74 | 76 | 80 | 78 | 75 | 76.4 | 76.1 | 6 |
-| Novelty & Originality | 60 | 55 | 68 | 62 | 58 | 60.3 | 60.0 | 13 |
-| Significance & Impact | 64 | 68 | 74 | 66 | 60 | 66.0 | 65.6 | 14 |
-| Experimental Validation | 48 | 60 | 62 | 58 | 42 | 53.5 | 52.8 | 20 |
-| Reproducibility | 62 | 66 | 68 | 66 | 64 | 65.0 | 64.7 | 6 |
-| Ethical Compliance | 70 | 72 | 58 | 70 | 66 | 67.6 | 68.2 | 14 |
-| **Composite** | 60.4 | 65.0 | 68.3 | 65.0 | 57.0 | **62.9** | **62.5** | |
+| Technical Rigor | 58 | 66 | 70 | 64 | 52 | 62.0 | 61.0 | 18 |
+| Clarity & Presentation | 74 | 76 | 80 | 78 | 75 | 76.6 | 76.1 | 6 |
+| Novelty & Originality | 60 | 55 | 68 | 62 | 58 | 60.6 | 60.0 | 13 |
+| Significance & Impact | 64 | 68 | 74 | 66 | 60 | 66.4 | 65.6 | 14 |
+| Experimental Validation | 48 | 60 | 62 | 58 | 42 | 54.0 | 52.8 | 20 |
+| Reproducibility | 62 | 66 | 68 | 66 | 64 | 65.2 | 64.7 | 6 |
+| Ethical Compliance | 70 | 72 | 58 | 70 | 66 | 67.2 | 68.2 | 14 |
+| **Composite** | 60.4 | 65.0 | 68.3 | 65.0 | 57.0 | **63.2** | **62.5** | |
 
-**BEFORE** 62.9 → 4 · **AFTER** 62.5 → 4 · **DA ceiling**: none (DA-C1 downgraded) · **Final (EIC)**: **4, Borderline Accept**
+**Official** (raw mean, shown to authors) 63.2 → 4 · **EIC assessment** (internal) 62.5 → 4 (−0.7) · **DA ceiling**: none (DA-C1 downgraded) · **Final (EIC)**: **4, Borderline Accept**
 
-Note that the weighting moved the score *down* slightly: the EIC trusted the stricter, fully verified R1 more and the more lenient R3 less. Weights reflect review quality, not a leniency knob.
+The authors see the **official** scores (63.2, ratings 3/4/4/4/3). The EIC's internal assessment is **lower** (62.5), because the EIC trusted the stricter, fully verified R1 more and the more lenient R3 less. Weights reflect review quality, not a leniency knob, and they can move the assessment in either direction.
 
 ### Final decision and justification
-**4, Borderline Accept.** The decision follows the AFTER band. The contribution is useful and clearly presented, and the core speedup is verified. The main weakness is a real but bounded confound in the headline comparison. The paper's own matched ablation supports a narrower claim, so this is the kind of weakness accepted CVPR papers commonly have, provided the rebuttal adds matched baselines and the abstract is reworded.
+**4, Borderline Accept.** The decision follows the EIC-assessment band. The contribution is useful and clearly presented, and the core speedup is verified. The main weakness is a real but bounded confound in the headline comparison. The paper's own matched ablation supports a narrower claim, so this is the kind of weakness accepted CVPR papers commonly have, provided the rebuttal adds matched baselines and the abstract is reworded.
 
 ### Cross-Venue Outlook (user asked "compare venues")
 

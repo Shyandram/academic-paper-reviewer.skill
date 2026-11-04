@@ -5,7 +5,7 @@ A multi-perspective peer-review skill for Claude, tuned for **computer vision, d
 ```
 You:    Review this paper for CVPR: [attach PDF]
 Claude: 📋 Paper analysis + 5-reviewer configuration card → 5 independent reports
-        → EIC meta-review: reviewer weights, BEFORE/AFTER scores, final decision
+        → EIC meta-review: reviewer weights, official scores and the EIC's internal weighted assessment, final decision
         → Editorial decision letter, consensus map, Revision Roadmap
 ```
 
@@ -28,7 +28,7 @@ What sets it apart:
 - **Field-aware panel.** Reviewers are configured from the paper's actual sub-field and technique (e.g., "token pruning + latency benchmarking" rather than "deep learning").
 - **CV/ML depth.** Task-specific checklists cover detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models. They target the confounds that matter in practice: backbone, pretraining data, resolution, schedule, TTA and latency methodology.
 - **Devil's Advocate with teeth, and an EIC who checks it.** The DA steelmans the paper, gives the strongest counter-argument and recomputes headline numbers. The EIC checks each CRITICAL issue against the paper with an area-chair test ("would I reject on this alone?"). Only issues that are truly fatal cap the decision.
-- **EIC meta-review with BEFORE/AFTER scores.** BEFORE weights the reviewers by their confidence. AFTER also applies the EIC's per-reviewer quality weight (0.5–1.5). The EIC decides from the AFTER score and explains any departure from it.
+- **Two score lists.** The **official** scores are the reviewers' raw scores and their plain mean: what authors see, never modified. The **EIC assessment** is the EIC's internal view, weighting each reviewer by confidence × a quality weight (0.5–1.5). It can be higher or lower than the official score, and the decision rests on it.
 - **Calibrated to accepted papers.** Scores are anchored to what the target venue actually accepts, not to a flawless paper. See [`evals/`](evals/) for the evaluation on recently accepted ICLR/CVPR/ECCV papers.
 - **Reproducible scoring.** `scripts/aggregate_scores.py` computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.
 - **Venue-aware scoring.** It covers 11 venues: **CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP**. Scores are translated into each venue's own form, for example ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria, or IEEE journal recommendations. A **Cross-Venue Outlook** shows how the same paper would likely fare at each venue. Every scale is labeled *official*, *confirmed*, *secondary*, *assumed* or *unpublished*, so nothing unverified is presented as official.

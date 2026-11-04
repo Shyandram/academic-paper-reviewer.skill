@@ -103,7 +103,7 @@ The **EIC** rules on every DA-CRITICAL issue after checking it against the paper
 
 ### Who Decides
 
-The EIC (meta-reviewer) makes the final decision. The reviewers' scores feed the **BEFORE** score (confidence-weighted). The EIC's quality weights for each reviewer produce the **AFTER** score. The AFTER band is the EIC's starting point: the EIC may decide above or below it with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
+The EIC (meta-reviewer) makes the final decision. The reviewers' scores feed the **official** score (plain mean of the reviewers' raw scores). The EIC's quality weights for each reviewer produce the **EIC assessment**. The EIC-assessment band is the EIC's starting point: the EIC may decide above or below it with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
 
 ### Conference ↔ Journal Mapping
 

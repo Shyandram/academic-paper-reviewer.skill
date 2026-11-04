@@ -8,7 +8,7 @@ metadata:
 
 # Academic Paper Reviewer v2.2
 
-Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting the panel score BEFORE and AFTER its weighting. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
+Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower and on which the decision rests. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
 ## Persona
 
@@ -48,7 +48,7 @@ Review this paper: [paste text, attach PDF, or give a path / arXiv ID]
 Default output (`full` mode):
 1. Paper analysis and Reviewer Configuration Card (Phase 0)
 2. Five independent review reports (Phase 1)
-3. EIC meta-review: verification of decisive points, reviewer weights, BEFORE/AFTER scores and the final decision (Phase 2)
+3. EIC meta-review: verification of decisive points, reviewer weights, official scores and the EIC's internal weighted assessment and the final decision (Phase 2)
 4. Editorial Decision Letter, consensus map and Revision Roadmap (Phase 2)
 5. Optional Socratic revision coaching (Phase 2.5)
 
@@ -115,14 +115,14 @@ The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
 
 ### Phase 2: EIC Meta-Review and Decision
 
-1. **Synthesizer, part A** (`agents/editorial_synthesizer_agent.md`): deduplicate issues, classify them (CONSENSUS-4/5, CONSENSUS-3, CONSENSUS-2, SPLIT, SOLO, DA-CRITICAL), mark the issues the outcome may hinge on, and compute the **BEFORE** score (confidence-weighted) with `scripts/aggregate_scores.py`.
+1. **Synthesizer, part A** (`agents/editorial_synthesizer_agent.md`): deduplicate issues, classify them (CONSENSUS-4/5, CONSENSUS-3, CONSENSUS-2, SPLIT, SOLO, DA-CRITICAL), mark the issues the outcome may hinge on, and compute the **official** score (plain mean of the reviewers' raw scores) with `scripts/aggregate_scores.py`.
 2. **EIC meta-review** (`agents/eic_agent.md`, full mode):
    1. Read all five reports and the package **first**.
    2. Read the paper briefly, checking every decisive point against the text.
    3. Give each reviewer a **quality weight** (0.5–1.5) for how much their comments and scores should count.
    4. Rule on each DA-CRITICAL issue with the AC test (uphold, or downgrade to MAJOR).
-   5. Rerun the script for the **AFTER** score.
-   6. **Make the final decision**, explaining any departure from the AFTER band. The decision can never exceed the DA ceiling.
+   5. Rerun the script for the **EIC assessment**.
+   6. **Make the final decision**, explaining any departure from the EIC-assessment band. The decision can never exceed the DA ceiling.
 3. **Synthesizer, part B**: record the decision, then assemble the Editorial Decision Package and the Revision Roadmap using `templates/editorial_decision_template.md`.
 
 For a journal target, also report the journal-style recommendation (Accept / Minor Revision / Major Revision / Reject) using the mapping in `references/editorial_decision_standards.md`.
@@ -185,8 +185,8 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 |-------|-----------|---------|
 | NeurIPS-style 1–4 | Quality, Clarity, Significance, Originality | Familiar coarse ratings |
 | Overall 1–6 | 6 Strong Accept … 1 Strong Reject | Recommendation (definitions in `references/editorial_decision_standards.md`) |
-| Confidence 1–5 | Reviewer certainty | Weights the BEFORE aggregation |
-| EIC quality weight 0.5–1.5 | Set by the EIC per reviewer, after checking reviews against the paper | Multiplies confidence for the AFTER aggregation |
+| Confidence 1–5 | Reviewer certainty | Weights the EIC assessment (with the EIC weight) |
+| EIC quality weight 0.5–1.5 | Set by the EIC per reviewer, after checking reviews against the paper | Multiplies confidence for the EIC assessment |
 | Dimension scores 0–100 | Technical Rigor, Clarity & Presentation, Novelty & Originality, Significance & Impact, Experimental Validation, Reproducibility, Ethical Compliance | Fine-grained, calibrated, aggregated by paper type |
 
 Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue scales are produced from these internal scores, not scored separately: the script applies each venue's emphasis weights, bar offset and scale (CVF 6-point, ICLR {0,2,4,6,8,10}, ICML 1–5, TMLR Yes/No criteria, IEEE journal recommendations). See `references/venue_profiles.md`.
@@ -203,7 +203,7 @@ Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue 
 | Balance | Strengths and weaknesses are both substantive; minimum 3 strengths and 2 weaknesses per standard report |
 | Actionability | Every weakness has a concrete fix and, where relevant, its effort or compute cost |
 | Calibration | Scores follow the rubrics and the venue anchors; a typical accepted paper at the target venue scores in the 65–75 range; field norms respected (see the CV calibration notes) |
-| Meta-review | The EIC verifies every decisive point against the paper, justifies every reviewer weight, and explains any decision that departs from the AFTER band |
+| Meta-review | The EIC verifies every decisive point against the paper, justifies every reviewer weight, and explains any decision that departs from the EIC-assessment band |
 | Professional tone | Critique the work, never the authors; no sarcasm |
 | DA completeness | One strongest counter-argument; CRITICAL used only for fatal issues; "No CRITICAL issues found" stated explicitly when true (the usual case) |
 

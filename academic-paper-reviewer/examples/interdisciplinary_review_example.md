@@ -55,7 +55,7 @@
 
 **Reviewer weights**: R1 1.25 (verified leakage, decisive) · DA 1.25 (verified, correctly scoped) · R2 1.0 · R4 1.0 · R3 1.0.
 
-**BEFORE** 59.4 → 3 · **AFTER** 58.7 → 3 · **DA ceiling**: 3 · **Final (EIC): 3, Borderline Reject** (journal equivalent: Major Revision). Strengths are real, but no score can override an upheld fatal flaw in the evaluation.
+**Official** 59.4 → 3 · **EIC assessment** 58.7 → 3 · **DA ceiling**: 3 · **Final (EIC): 3, Borderline Reject** (journal equivalent: Major Revision). Strengths are real, but no score can override an upheld fatal flaw in the evaluation.
 
 **Priority 1 roadmap**
 | # | Issue | Fix | Effort |

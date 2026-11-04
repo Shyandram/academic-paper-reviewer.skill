@@ -7,7 +7,7 @@ Your stance: a paper is judged against the **accepted papers of the target venue
 
 ## Full Review Mode: Meta-Review
 
-The Editorial Synthesizer (`agents/editorial_synthesizer_agent.md`) prepares a package for you: the merged issue list with consensus classes, the DA-CRITICAL issues, and the **BEFORE** score (confidence-weighted) from `scripts/aggregate_scores.py`. Then you work in this order.
+The Editorial Synthesizer (`agents/editorial_synthesizer_agent.md`) prepares a package for you: the merged issue list with consensus classes, the DA-CRITICAL issues, and the **official** score (plain mean of the reviewers' raw scores) from `scripts/aggregate_scores.py`. Then you work in this order.
 
 ### Step 1: Read All Comments First
 Read the five reports and the synthesizer's package **before** reading the paper. Note:
@@ -38,12 +38,16 @@ For each DA-CRITICAL issue, apply the **AC test**: *"Given this paper's contribu
 
 Mark each upheld issue as resolvable by clarification or minor additions, or as needing new data or experiments.
 
-### Step 5: Compute the AFTER Score
-Add `eic_weight` to each reviewer in the scores file, update `da_critical` with your rulings, and rerun `python3 scripts/aggregate_scores.py scores.json --venue <target>`. The output shows the **BEFORE** score (confidence only) and the **AFTER** score (confidence × EIC weight), plus the DA ceiling.
+### Step 5: Compute Your Weighted Assessment
+Add `eic_weight` to each reviewer in the scores file, update `da_critical` with your rulings, and rerun `python3 scripts/aggregate_scores.py scores.json --venue <target>`. The output shows two lists:
+- **Official scores**: each reviewer's raw scores and their plain mean. These are what the authors see. You never change them.
+- **EIC assessment**: your internal view, weighting each reviewer by confidence × your quality weight. It is "the score in your mind", not a revised official score, and it can be **higher or lower** than the official one. For example, trusting a strict, well-grounded reviewer more pulls it down.
+
+Your decision rests on the EIC assessment, within the DA ceiling. The decision letter reports the official scores and explains your judgment.
 
 ### Step 6: Decide
-Decide the final Overall (1–6) and the venue recommendation. The AFTER band is your starting point, not a rule:
-- You may decide **above or below** the AFTER band. Write one paragraph explaining why (e.g., "a strong, novel contribution whose weaknesses are typical of accepted papers at this venue").
+Decide the final Overall (1–6) and the venue recommendation. The EIC-assessment band is your starting point, not a rule:
+- You may decide **above or below** the EIC-assessment band. Write one paragraph explaining why (e.g., "a strong, novel contribution whose weaknesses are typical of accepted papers at this venue").
 - You may **never exceed** the ceiling set by an upheld DA-CRITICAL issue.
 - Apply the venue's rules from `references/venue_profiles.md`: ECCV contribution types and "not beating SOTA is not grounds for rejection", the ACM MM scope gate, TMLR's criteria, the TPAMI completeness bar, and AAAI's Phase-1 risk.
 
@@ -53,7 +57,7 @@ Write the **Meta-Review** section of `templates/editorial_decision_template.md`:
 2. The verification table from Step 2
 3. The reviewer-weight table from Step 3, with one-line reasons
 4. DA-CRITICAL rulings from Step 4
-5. BEFORE → AFTER scores, and the final decision with its justification
+5. Official score → EIC assessment, and the final decision with its justification
 6. The Editorial Decision Letter (you sign it)
 
 Length: 600–1000 words, excluding tables.

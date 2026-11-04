@@ -28,12 +28,12 @@ def uniform(score, confidence=5, overall=None):
 class AggregateTests(unittest.TestCase):
     def test_example_matches_documented_output(self):
         res = agg.aggregate(copy.deepcopy(EXAMPLE))
-        self.assertEqual(res["before_composite"], 62.9)
+        self.assertEqual(res["before_composite"], 63.2)   # official: plain mean
         self.assertEqual(res["panel_composite"], 62.5)
         self.assertEqual(res["suggested_overall"], 4)
         self.assertEqual(res["final_overall_ceiling"], 6)   # DA-C1 downgraded by the EIC
         tr = next(d for d in res["dimensions"] if d["key"] == "technical_rigor")
-        self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (61.6, 61.0))
+        self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (62.0, 61.0))
 
     def test_weights_sum_to_one(self):
         for name, w in agg.PAPER_TYPE_WEIGHTS.items():
@@ -75,6 +75,14 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(res["panel_composite"], 70.0)   # (80*1.5 + 40*0.5) / 2
         self.assertTrue(res["eic_weighted"])
         self.assertFalse(agg.aggregate({"reviewers": [uniform(70)]})["eic_weighted"])
+
+    def test_eic_assessment_can_be_lower_than_official(self):
+        harsh, lenient = uniform(50), uniform(80)
+        harsh["eic_weight"], lenient["eic_weight"] = 1.5, 0.5
+        res = agg.aggregate({"reviewers": [harsh, lenient]})
+        self.assertEqual(res["official_composite"], 65.0)
+        self.assertEqual(res["eic_composite"], 57.5)
+        self.assertEqual(res["eic_minus_official"], -7.5)
 
     def test_eic_weight_out_of_range_exits(self):
         r = uniform(70)

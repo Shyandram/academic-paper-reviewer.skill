@@ -15,7 +15,7 @@
 
 ## Decision: [Strong Accept (6) / Accept (5) / Borderline Accept (4) / Borderline Reject (3) / Reject (2) / Strong Reject (1)]
 
-**BEFORE** (confidence-weighted): [composite] → [band] | **AFTER** (EIC-weighted): [composite] → [band] | **DA ceiling**: [none / 4 / 3] | **Final (EIC)**: [n]
+**Official** (raw mean, shown to authors): [composite] → [band] | **EIC assessment** (internal, weighted): [composite] → [band] | **DA ceiling**: [none / 4 / 3] | **Final (EIC)**: [n]
 **Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
 
 ---
@@ -46,17 +46,17 @@
 | DA-C1 | [Yes / No: why] | [Upheld / Downgraded to MAJOR] | [Clarification/minor additions / New data/experiments] |
 
 ### Final Decision and Justification
-[One paragraph. If the decision differs from the AFTER band, explain why, e.g., "a novel contribution whose weaknesses are typical of accepted papers at this venue". Confirm it does not exceed the DA ceiling.]
+[One paragraph. If the decision differs from the EIC-assessment band, explain why, e.g., "a novel contribution whose weaknesses are typical of accepted papers at this venue". Confirm it does not exceed the DA ceiling.]
 
 ---
 
 ## Score Summary
 
-### BEFORE and AFTER Scores
+### Official Scores and EIC Assessment
 
-*Paste the markdown output of `python3 scripts/aggregate_scores.py scores.json --venue <target>` (run with the EIC's `eic_weight` values): the reviewer-weight table and the BEFORE/AFTER dimension table. Or fill them in by hand with the same formulas.*
+*Paste the markdown output of `python3 scripts/aggregate_scores.py scores.json --venue <target>` (run with the EIC's `eic_weight` values): the reviewer-weight table and the official/EIC-assessment dimension table. Or fill them in by hand with the same formulas.*
 
-| Dimension | R1 | R2 | R3 | R4 | DA | Before (confidence) | After (EIC-weighted) | Spread |
+| Dimension | R1 | R2 | R3 | R4 | DA | Official (raw mean) | EIC assessment (weighted) | Spread |
 |-----------|----|----|----|----|----|---------------------|----------------------|--------|
 | Technical Rigor | | | | | | | | |
 | Clarity & Presentation | | | | | | | | |

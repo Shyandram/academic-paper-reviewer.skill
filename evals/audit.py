@@ -164,16 +164,29 @@ def audit_paper(p, check_refs):
     res["recognized"] = bool(summary.get("recognized"))
     res["injection"] = summary.get("injection_found")
     res["paper_type"] = summary.get("paper_type")
-    before = load(rdir / "before.json")
-    res["before_composite"] = before.get("before_composite", before.get("panel_composite")) if before else summary.get("before_composite")
-    res["after_composite"] = agg.get("panel_composite")
+    # Official score = plain mean of the raw reviewer scores, recomputed here so
+    # runs made with different skill versions are comparable.
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "agg", ROOT.parent / "academic-paper-reviewer" / "scripts" / "aggregate_scores.py")
+    aggmod = importlib.util.module_from_spec(spec); spec.loader.exec_module(aggmod)
+    try:
+        raw_scores = {k: v for k, v in scores.items() if k != "da_critical"}
+        raw_scores["reviewers"] = [{k: v for k, v in r.items() if k != "eic_weight"} | {"confidence": 5}
+                            for r in scores.get("reviewers", [])]
+        res["before_composite"] = aggmod.aggregate(raw_scores)["panel_composite"]
+    except SystemExit:
+        res["before_composite"] = None
+    agg_out = agg
+    res["after_composite"] = agg_out.get("panel_composite")
     res["eic_weights"] = [r.get("eic_weight") for r in scores.get("reviewers", [])]
     if p.get("planted_flaw"):
-        key = {"test-tuning": r"(tun|select)\w*[^.]{0,80}test set|test[- ]set[^.]{0,40}(tun|select)",
-               "train-on-test": r"(merg|train)\w*[^.]{0,80}test (split|set)|test (split|set)[^.]{0,60}(train|merg)"}[p["planted_flaw"]]
-        da = re.search(r"critical issues(.*?)(major issues|$)", low, re.S)
+        key = {"test-tuning": r"(tun|select|chos)\w*[^|\n]{0,120}\btest\b|\btest\b[^|\n]{0,60}(tun|select)",
+               "train-on-test": r"(merg|train)\w*[^|\n]{0,120}test (split|set)|test (split|set)[^|\n]{0,80}(train|merg)"}[p["planted_flaw"]]
+        da_rows = "\n".join(l for l in low.splitlines() if l.startswith("| da-c"))
         res["flaw_mentioned"] = bool(re.search(key, low))
-        res["flaw_in_da_critical"] = bool(da and re.search(key, da.group(1)))
+        res["flaw_in_da_critical"] = bool(re.search(key, da_rows))
+        res["flaw_upheld"] = res["flaw_in_da_critical"] and res["da_upheld"] > 0
     res["overalls"] = [r.get("overall") for r in scores.get("reviewers", [])]
     if isinstance(res["final"], int) and isinstance(res["ceiling"], int) and res["final"] > res["ceiling"]:
         res["problems"].append(f"final {res['final']} exceeds ceiling {res['ceiling']}")
@@ -319,11 +332,12 @@ def report(results, check_refs):
                   f"- Flaw mentioned in the review: {caught}/{len(controls)}",
                   f"- Flaw raised as DA-CRITICAL: {crit}/{len(controls)}",
                   f"- Decision ≤ 3: {low_}/{len(controls)}",
-                  "", "| Control | Flaw | Mentioned | DA-CRITICAL | Final |", "|---|---|---|---|---|"]
+                  "", "| Control | Flaw | Mentioned | DA-CRITICAL | Upheld by EIC | Final |", "|---|---|---|---|---|---|"]
         for r in controls:
             lines.append(f"| {r['venue']}-{r['topic']} | {r.get('planted', '')} | "
                          f"{'yes' if r['flaw_mentioned'] else 'NO'} | "
-                         f"{'yes' if r['flaw_in_da_critical'] else 'no'} | {r['final']} |")
+                         f"{'yes' if r['flaw_in_da_critical'] else 'no'} | "
+                         f"{'yes' if r['flaw_upheld'] else 'no'} | {r['final']} |")
         lines.append("")
     det = ["# Per-paper detail (not for publication)", "",
            "| id | Final | Venue label | Composite | Reviewer Overalls | DA raised/upheld | Bad loc/quote/num |",
