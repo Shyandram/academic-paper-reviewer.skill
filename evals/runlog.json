@@ -457,7 +457,9 @@
     "skill": "2.8.1 (EIC departure rule)",
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
-    "status": "queued"
+    "status": "done",
+    "final_overall": 4,
+    "note": "clean pair: [3,4,4,4,3], EIC-weighted 3.51 -> 4; injected copy 3.32 -> 3 (R2 4 vs 3). Led to reviewer redaction"
   },
   "cvpr-3d-2607.02015-inject-lit283": {
     "model": "haiku",
