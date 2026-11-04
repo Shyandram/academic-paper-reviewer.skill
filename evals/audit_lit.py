@@ -70,6 +70,8 @@ def main():
         verified = [r for r in refs if r.get("verified_url")]
         base, base_rid = baseline_final(p["base_id"])
         review = (rdir / "review.md").read_text(errors="replace") if (rdir / "review.md").exists() else ""
+        if not (rdir / "review.md").exists():
+            print(f"WARNING: {rdir.name}: review.md missing; report-based checks read as empty", file=sys.stderr)
         sim = load(rdir / "similarity.json") or {}
         flagged = sim.get("flagged", [])
         text_overlap = [f.get("title") for f in flagged if any("text overlap" in x for x in f.get("flags", []))]

@@ -204,6 +204,18 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
 2. **The experiment cannot test the claim**: e.g., evaluation on the training set, or a metric that cannot measure the claimed property. (A confound that is only partly controlled, or a missing control, is MAJOR.)
 3. **Evaluation leakage**: the paper trains on, tunes on, or selects hyperparameters, checkpoints, prompts or thresholds on the **held-out test set** it reports its main results on. This holds **whether or not the paper discloses it**: disclosure makes the problem visible, it does not make the reported numbers valid. Concrete evidence in the paper is required.
    - *Not automatically critical (MAJOR):* tuning on a validation split that is also the standard reporting split because the test labels are hidden or unavailable (e.g., COCO val, ADE20K val, many medical datasets). That is field practice; ask for a held-out check.
+   - *Selection from the reported results table counts.* A sentence such as "according to the results in Table N, we select the best/top-performing strategy (per task)", where Table N is computed on the reporting split, is a statement of selection on that split. Choosing per task or per dataset is still selection.
+   - *A benchmark with no validation split is a held-out test set,* unless it is the field's standard reporting split under the bullet above (test labels hidden or unavailable). A new benchmark the authors built themselves without a validation split is a test set.
+   - **Decide with this table** (quote the selection sentence verbatim, with its location, in the DA-CRITICAL entry):
+
+     | The selected configuration… | Ruling |
+     |---|---|
+     | produces the headline numbers (the same values appear in the main results table, abstract or introduction) | **CRITICAL** (criterion 3) |
+     | affects only ablations or secondary results; the headline uses a configuration fixed in advance | MAJOR |
+     | was selected on a separate validation split, or the selection procedure is stated as independent of the test results | not an issue |
+     | is not stated, after the protocol sweep | MAJOR: a question about the selection protocol |
+
+     To fill the first row, compare the number for the selected configuration (in the selection table) with the main table and quote both.
    - *Resolvable by clarification only* if the paper already contains results selected without the test set (e.g., a separate validation protocol) that support the main claim. Otherwise it **needs new experiments**.
 4. **Fabrication or manipulation signal**: concrete evidence of manipulated data, images or p-hacking, stated factually as a concern for the editor.
 5. **Serious ethical violation**: unaddressed harm, data misuse, or undisclosed conflicts.

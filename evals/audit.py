@@ -143,6 +143,8 @@ def audit_paper(p, check_refs):
     res = {"id": rid, "venue": p["venue"], "topic": p["topic"], "title": p["title"],
            "planted": p.get("planted_flaw", ""), "problems": []}
     review = (rdir / "review.md").read_text(errors="replace") if (rdir / "review.md").exists() else ""
+    if not (rdir / "review.md").exists():
+        print(f"WARNING: {rdir.name}: review.md missing; report-based checks read as empty", file=sys.stderr)
     summary, scores, agg, ev = (load(rdir / f) for f in
                                 ("summary.json", "scores.json", "aggregate.json", "evidence.json"))
     res["complete"] = all(x is not None for x in (summary, scores, agg, ev)) and bool(review)
