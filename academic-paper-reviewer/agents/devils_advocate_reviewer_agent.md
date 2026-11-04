@@ -208,14 +208,18 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
    - *A benchmark with no validation split is a held-out test set,* unless it is the field's standard reporting split under the bullet above (test labels hidden or unavailable). A new benchmark the authors built themselves without a validation split is a test set.
    - **Decide with this table** (quote the selection sentence verbatim, with its location, in the DA-CRITICAL entry):
 
+     Criterion 3 is about choosing a configuration **because it scored best** on the reported split, which inflates the reported numbers. Before the table, check the selection table itself: is the chosen value the best-scoring option, and was it chosen by its score?
+
      | The selected configuration… | Ruling |
      |---|---|
-     | produces the headline numbers (the same values appear in the main results table, abstract or introduction) | **CRITICAL** (criterion 3) |
+     | is **not** the best-scoring option in its selection table (e.g., a cheaper setting chosen over a better-scoring one to save compute or memory), or comes from a stated quality/cost trade-off on a resolution or capacity setting | Not criterion 3. At most MINOR (state the protocol). Choosing a worse-scoring setting cannot inflate the result. |
+     | is the best-scoring option, but the main claim (the comparison with baselines) holds at every other value in the sweep | MAJOR: the selection cannot change the conclusion. Ask for a held-out check. |
+     | is the best-scoring (or "top-performing") option, chosen by its score, and produces the headline numbers (the same values appear in the main results table, abstract or introduction) | **CRITICAL** (criterion 3) |
      | affects only ablations or secondary results; the headline uses a configuration fixed in advance | MAJOR |
      | was selected on a separate validation split, or the selection procedure is stated as independent of the test results | not an issue |
      | is not stated, after the protocol sweep | MAJOR: a question about the selection protocol |
 
-     To fill the first row, compare the number for the selected configuration (in the selection table) with the main table and quote both.
+     For the CRITICAL row, quote the selection table showing that the chosen value scores best, and quote the main table showing the same numbers. Robustness or sensitivity sweeps in a supplement, where the authors pick a value for cost reasons, belong in the first row.
    - *Resolvable by clarification only* if the paper already contains results selected without the test set (e.g., a separate validation protocol) that support the main claim. Otherwise it **needs new experiments**.
 4. **Fabrication or manipulation signal**: concrete evidence of manipulated data, images or p-hacking, stated factually as a concern for the editor.
 5. **Serious ethical violation**: unaddressed harm, data misuse, or undisclosed conflicts.

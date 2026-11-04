@@ -47,8 +47,8 @@ For each DA-CRITICAL issue, apply the **AC test**: *"Given this paper's contribu
 
 **Criterion 3 (leakage) rulings follow the decision table in criterion 3 of `agents/devils_advocate_reviewer_agent.md`, not the AC test alone.** Before downgrading a criterion-3 issue:
 1. Search the paper for the DA's verbatim selection quote (use text search, e.g., `grep -n`). If the quote is there, you may **not** write that "the paper does not state test-set selection".
-2. Compare the selected configuration's numbers with the headline numbers, and write both with their locations. If they are equal, the headline depends on the selection, and the issue is upheld.
-3. You may downgrade only for a reason in the table: the headline configuration was fixed in advance, a separate validation split exists, or the selection only affects ablations. Name the row.
+2. Check that the chosen value is the best-scoring option in its selection table and was chosen by its score. If a better-scoring option was rejected (for compute, memory or another stated reason), criterion 3 does not apply. Otherwise compare the selected configuration's numbers with the headline numbers, and write both with their locations. If they are equal and the main comparison would not hold at the other swept values, uphold the issue.
+3. You may downgrade only for a reason in the table: the chosen value isn't the best-scoring one, the main claim holds across the sweep, the headline configuration was fixed in advance, a separate validation split exists, or the selection only affects ablations. Name the row.
 The issue's size (e.g., "only a 1.5-point prompt choice") is not a reason to downgrade: test-selected numbers are invalid whatever the margin. A small effect makes it easier to fix, which goes in `resolvable_without_new_data`, not in the ruling.
 
 Mark each upheld issue as resolvable by clarification or minor additions, or as needing new data or experiments.
