@@ -203,6 +203,8 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
 5. **Serious ethical violation**: unaddressed harm, data misuse, or undisclosed conflicts.
 6. **The method cannot be understood**: so much is missing that the method itself is undefined. (Missing hyperparameters, code or implementation details are MAJOR or MINOR.)
 
+7. **Known results presented as new**: a verified *prior* work (published before the cutoff, confirmed with a link) does the same task with the same core mechanism, and the paper neither cites it nor differentiates itself from it, while claiming that mechanism as its main contribution. If the paper cites the work and argues a difference, however weakly, this is MAJOR (insufficient novelty), not CRITICAL.
+
 **Never CRITICAL on their own** (rate these MAJOR or MINOR):
 - single runs, no error bars or significance tests, even with small margins
 - a missing baseline or comparison, including a missing "strongest" baseline
@@ -212,6 +214,8 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
 - unclear or missing protocol details, missing implementation details, details deferred to supplementary material
 - text–table inconsistencies, unless they reverse a conclusion
 - limited datasets or settings, missing ablations, missing failure cases
+- similarity to concurrent or newer work, or a high similarity score without a verified match of task and mechanism
+- text overlap with another paper (report it as an integrity concern for the EIC instead)
 
 The EIC rules on every CRITICAL issue you raise, checking it against the paper. **Upheld CRITICAL issues cap the decision**: at Borderline Accept (4) if each one is resolvable by clarification or minor additions, and at Borderline Reject (3) otherwise. This is a hard constraint (see `references/editorial_decision_standards.md`). Because of this, rate an issue CRITICAL only when you would defend it to the EIC as fatal.
 

@@ -35,6 +35,19 @@ You are the Domain Reviewer. You judge whether the paper positions itself correc
 - Are domain best practices violated? For CV/ML papers, use `references/cv_review_checklist.md`.
 - Are claims calibrated to what the results show?
 
+### Step 4b: Novelty Against the Closest Prior Work
+
+If a literature check ran, take the **closest prior works** from `related_search.py similarity` and fill a novelty delta table:
+
+| Claimed contribution | Closest prior work (link) | What that work already does | What is actually new here | Cited and differentiated? |
+|----------------------|---------------------------|-----------------------------|---------------------------|---------------------------|
+
+- If a contribution is already done by an uncited prior work (same task **and** same core mechanism), report it to the Devil's Advocate and the EIC as a possible "known results presented as new" issue.
+- If the paper cites the work but differentiates it weakly, that is a Novelty weakness (MAJOR at most).
+- **Text-overlap flags** go to the EIC as factual integrity concerns, with the source and examples, never as an accusation.
+
+Without a literature check, build the same table from the paper's own related work and your knowledge, marking uncertain entries `[verify]`.
+
 ### Step 5: Missing References
 
 **If a literature check ran (Phase 0.5),** start from its kept results and the labels:

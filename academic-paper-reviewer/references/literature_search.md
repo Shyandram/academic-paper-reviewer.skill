@@ -68,9 +68,29 @@ Kept results are labelled **prior**, **concurrent** (within 60 days before the c
   Found → give the link. Not found → keep it only if you are confident, marked `[verify]` (it may exist outside arXiv). If `verify` says the title is the reviewed paper itself, drop it.
 - **Novelty claims ("first", "no prior work"):** check them against the kept results and cite what you find.
 
-### 5. Ledger
+### 5. Similarity and novelty check
 
-Every query, refusal, kept and dropped result and verification is appended to `search_ledger.jsonl` next to the fingerprint. Dropped results are logged by title and reason only; they are **never opened**. Mention in the review that a literature check was run, with the mode and the number of queries.
+After the searches, score the paper against everything that was kept:
+
+```bash
+python3 scripts/related_search.py similarity --fp fingerprint.json --paper <paper text file>
+```
+
+It compares the paper's opening text (abstract, introduction and method; about 2,500 words) with each kept abstract, using two independent signals:
+
+| Signal | Measures | Flag | Calibration |
+|--------|----------|------|-------------|
+| TF-IDF cosine | Conceptual closeness | **Closest prior work:** the top 3 *prior* results. **High conceptual overlap:** cosine ≥ 0.30 | A paper against its own abstract scores ~0.55; genuinely related work ≤ 0.17 |
+| Shared verbatim 8-word sequences | Copied text | **Text overlap:** ≥ 2 shared 8-grams | A paper against its own abstract shares ~33; related work shares 0 |
+
+How the reviewers use the flags:
+- **Closest prior work → novelty.** The Domain Reviewer writes a **novelty delta table** for each one (see `agents/domain_reviewer_agent.md`). A similarity score is a pointer, not a verdict: read the abstract and judge task, mechanism and claims.
+- **High conceptual overlap.** Check whether the task *and* the core mechanism match. If they do, and the paper neither cites nor differentiates that work, it is a candidate DA-CRITICAL issue ("known results presented as new", criterion 7). If the paper cites and differentiates it, the issue is at most MAJOR (insufficient novelty).
+- **Text overlap → integrity concern.** Report the shared passages factually to the EIC, with the source's title and link and two example sequences, under *Integrity signals* in `SKILL.md`. **Never call it plagiarism.** Correctly quoted and cited text, standard phrasing, and the authors' own earlier work can all explain overlap; the editor decides. Only abstracts are compared, so the absence of a flag is not evidence of originality.
+
+### 6. Ledger
+
+Every query, refusal, kept and dropped result, verification and similarity run is appended to `search_ledger.jsonl` next to the fingerprint. Kept results, with full abstracts, go to `kept_results.jsonl`. Dropped results are logged by title and reason only; they are **never opened**. Mention in the review that a literature check was run, with the mode and the number of queries.
 
 ---
 

@@ -18,6 +18,9 @@ Read the five reports and the synthesizer's package **before** reading the paper
 ### Step 2: Read the Paper Briefly, with Purpose
 If a literature check ran, check every "missing comparison" weakness against the ledger's labels: a weakness that rests on **concurrent** or **newer** work is downgraded (discuss, don't require). A recommended reference that `verify` didn't find stays marked `[verify]`.
 
+- **Too-similar prior work (criterion 7):** read the prior work's abstract yourself. Uphold the issue only if the task and the core mechanism match, the work is prior and verified, and the paper neither cites nor differentiates it.
+- **Text-overlap flags:** check the shared passages. Report them in the meta-review as an integrity concern for the editor, factually, with the source link, never as plagiarism. They don't change the scores unless you confirm uncited copying of substantive content.
+
 Read the abstract, the contribution list, the method overview, the main results tables and the limitations. Then **check every decisive point against the text**: each DA-CRITICAL issue, each SPLIT issue, and any claim a reviewer made that the decision depends on. For each one, record **Verified / Partly correct / Overstated / Incorrect**, with the location.
 
 If the paper refers to supplementary material that wasn't provided, treat details said to be there as **unverified, not missing**. They become questions for the authors, not grounds for a lower score.

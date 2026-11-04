@@ -23,6 +23,14 @@ Subcommands (standard library only):
   verify       --fp fp.json --title "Recommended reference title"
       Check that a recommended reference exists on arXiv (title match).
 
+  similarity   --fp fp.json --paper paper.txt [--top 3]
+      Score the reviewed paper against every kept result saved by search /
+      filter (kept_results.jsonl): TF-IDF cosine for conceptual closeness and
+      shared verbatim 8-word sequences for text overlap. Flags the closest
+      prior works (novelty must be argued against them), high overlap
+      (cosine >= 0.30) and text overlap (>= 2 shared 8-grams: an integrity
+      concern for the editor, never an accusation).
+
 Common option: --ledger search_ledger.jsonl (default: next to the fingerprint).
 
 Filtering rules (see references/literature_search.md):
@@ -37,7 +45,9 @@ Filtering rules (see references/literature_search.md):
 """
 
 import argparse
+import collections
 import datetime as dt
+import math
 import difflib
 import json
 import re
@@ -53,6 +63,9 @@ NS = {"a": "http://www.w3.org/2005/Atom"}
 TITLE_SIM = 0.8
 AUTHOR_WINDOW_DAYS = 183
 CONCURRENT_DAYS = 60
+HIGH_OVERLAP = 0.30      # calibrated: a paper vs. its own abstract ~0.55, related work <= 0.17
+TEXT_OVERLAP_GRAMS = 2   # calibrated: own abstract shares ~33 8-grams, related work 0
+GRAM = 8
 STOP = {"a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "into",
         "is", "it", "of", "on", "or", "the", "to", "via", "with", "without", "towards",
         "using", "we", "our", "this", "that", "based"}
@@ -193,17 +206,91 @@ def classify(hit, fp, mode):
     return True, "prior"
 
 
+def kept_path(ledger):
+    return str(Path(ledger).with_name("kept_results.jsonl"))
+
+
 def filter_hits(hits, fp, mode, ledger, source):
     kept = []
+    cache = open(kept_path(ledger), "a", encoding="utf-8")
     for h in hits:
         keep, label = classify(h, fp, mode)
         entry = {"title": h.get("title"), "date": h.get("date"), "url": h.get("url")}
         ledger_write(ledger, {"event": "keep" if keep else "drop", "source": source,
                               "reason": label, **entry})
         if keep:
-            kept.append({**entry, "authors": h.get("authors", [])[:6], "label": label,
-                         "abstract": (h.get("abstract") or h.get("snippet") or "")[:600]})
+            full = {**entry, "authors": h.get("authors", [])[:6], "label": label,
+                    "abstract": h.get("abstract") or h.get("snippet") or ""}
+            cache.write(json.dumps(full, ensure_ascii=False) + "\n")
+            kept.append({**full, "abstract": full["abstract"][:600]})
+    cache.close()
     return kept
+
+
+# ---------------------------------------------------------------- similarity
+
+SIM_STOP = STOP | set("which these their its can also than such has have been show shows propose "
+                      "proposed method methods paper results approach novel new".split())
+
+
+def sim_tokens(text):
+    return [w for w in norm(text).split() if w not in SIM_STOP and len(w) > 2]
+
+
+def grams(text, n=GRAM):
+    w = norm(text).split()
+    return {" ".join(w[i:i + n]) for i in range(len(w) - n + 1)}
+
+
+def tfidf_cosines(target, docs):
+    """Cosine of TF-IDF vectors; IDF is computed over the target plus candidates."""
+    all_docs = [sim_tokens(target)] + [sim_tokens(d) for d in docs]
+    df = collections.Counter(w for d in all_docs for w in set(d))
+    n = len(all_docs)
+
+    def vec(d):
+        tf = collections.Counter(d)
+        return {w: (c / max(len(d), 1)) * math.log((n + 1) / (df[w] + 1) + 1) for w, c in tf.items()}
+
+    def cos(a, b):
+        num = sum(v * b.get(w, 0.0) for w, v in a.items())
+        den = math.sqrt(sum(v * v for v in a.values())) * math.sqrt(sum(v * v for v in b.values()))
+        return num / den if den else 0.0
+
+    t = vec(all_docs[0])
+    return [cos(t, vec(d)) for d in all_docs[1:]]
+
+
+def similarity_report(paper_text, kept, top=3):
+    """Rank kept results by closeness to the paper and flag overlaps."""
+    target = " ".join(paper_text.split()[:2500])        # abstract, intro and method
+    paper_grams = grams(paper_text)
+    seen, unique = set(), []
+    for k in kept:                                     # de-duplicate repeated hits
+        key = norm(k.get("title"))
+        if key and key not in seen:
+            seen.add(key)
+            unique.append(k)
+    cosines = tfidf_cosines(target, [k.get("abstract", "") for k in unique])
+    rows = []
+    for k, c in zip(unique, cosines):
+        shared = sorted(grams(k.get("abstract", "")) & paper_grams)
+        rows.append({"title": k.get("title"), "url": k.get("url"), "date": k.get("date"),
+                     "label": k.get("label"), "cosine": round(c, 3),
+                     "shared_8grams": len(shared), "examples": shared[:3]})
+    rows.sort(key=lambda r: r["cosine"], reverse=True)
+    prior_rank = [r for r in rows if str(r["label"]).startswith("prior")]
+    for r in rows:
+        flags = []
+        if r in prior_rank[:top]:
+            flags.append("closest prior work: argue novelty against it")
+        if r["cosine"] >= HIGH_OVERLAP:
+            flags.append("high conceptual overlap: check task and core mechanism")
+        if r["shared_8grams"] >= TEXT_OVERLAP_GRAMS:
+            flags.append("text overlap: verbatim passages shared; report as an integrity concern to the editor")
+        r["flags"] = flags
+    return rows
+
 
 
 # ---------------------------------------------------------------- arXiv
@@ -305,10 +392,28 @@ def cmd_verify(args):
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
+def cmd_similarity(args):
+    fp, ledger = load_fp(args.fp), ledger_path(args)
+    path = kept_path(ledger)
+    if not Path(path).exists():
+        sys.exit("error: no kept results yet; run search (or filter) first")
+    kept = [json.loads(l) for l in Path(path).read_text().splitlines() if l.strip()]
+    rows = similarity_report(Path(args.paper).read_text(errors="replace"), kept, args.top)
+    flagged = [r for r in rows if r["flags"]]
+    ledger_write(ledger, {"event": "similarity", "candidates": len(rows),
+                          "flagged": [(r["title"], r["cosine"], r["shared_8grams"]) for r in flagged]})
+    print(json.dumps({"candidates": len(rows), "flagged": flagged,
+                      "thresholds": {"high_overlap_cosine": HIGH_OVERLAP,
+                                     "text_overlap_8grams": TEXT_OVERLAP_GRAMS}},
+                     indent=2, ensure_ascii=False))
+
+
 def main():
     ap = argparse.ArgumentParser(description="Related-work search that never surfaces the reviewed paper.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("fingerprint"); p.add_argument("--paper", required=True); p.add_argument("--out", required=True)
+    p = sub.add_parser("similarity"); p.add_argument("--fp", required=True); p.add_argument("--paper", required=True)
+    p.add_argument("--ledger"); p.add_argument("--top", type=int, default=3)
     for name in ("search", "filter", "verify"):
         p = sub.add_parser(name)
         p.add_argument("--fp", required=True)
@@ -324,7 +429,7 @@ def main():
             p.add_argument("--mode", choices=("on", "strict"), default="on")
     args = ap.parse_args()
     {"fingerprint": cmd_fingerprint, "search": cmd_search,
-     "filter": cmd_filter, "verify": cmd_verify}[args.cmd](args)
+     "filter": cmd_filter, "verify": cmd_verify, "similarity": cmd_similarity}[args.cmd](args)
 
 
 if __name__ == "__main__":

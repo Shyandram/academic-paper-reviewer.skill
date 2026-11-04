@@ -91,6 +91,37 @@ class DateTests(unittest.TestCase):
         self.assertIn("concurrent", rs.classify(hit(date="2026-02-10"), FP, "on")[1])
 
 
+class SimilarityTests(unittest.TestCase):
+    PAPER = ("We study lane topology reasoning for autonomous driving. Our hierarchical centerline queries "
+             "combine point queries and instance queries with cyclic feedback, and a topology head predicts "
+             "lane to lane connectivity from fused geometric and semantic features on OpenLane-V2. ") * 3
+
+    def kept(self, title, abstract, label="prior"):
+        return {"title": title, "abstract": abstract, "label": label, "url": "u", "date": "2024-01-01"}
+
+    def test_verbatim_copy_is_flagged_as_text_overlap(self):
+        copied = ("Our hierarchical centerline queries combine point queries and instance queries with cyclic "
+                  "feedback, and a topology head predicts lane to lane connectivity.")
+        rows = rs.similarity_report(self.PAPER, [self.kept("Copied source", copied),
+                                                 self.kept("Unrelated", "Image super-resolution with diffusion priors and perceptual losses.")])
+        src = next(r for r in rows if r["title"] == "Copied source")
+        self.assertGreaterEqual(src["shared_8grams"], rs.TEXT_OVERLAP_GRAMS)
+        self.assertTrue(any("text overlap" in f for f in src["flags"]))
+        other = next(r for r in rows if r["title"] == "Unrelated")
+        self.assertEqual(other["shared_8grams"], 0)
+        self.assertFalse(any("text overlap" in f for f in other["flags"]))
+
+    def test_closest_prior_ranking_and_duplicates(self):
+        close = "Lane topology reasoning with centerline queries and connectivity prediction for driving."
+        far = "Medical image segmentation with transformers on MRI volumes."
+        rows = rs.similarity_report(self.PAPER, [self.kept("Close", close), self.kept("Close", close),
+                                                 self.kept("Far", far), self.kept("Newer close", close, "newer")])
+        self.assertEqual(len(rows), 3)                       # duplicate removed
+        self.assertEqual(rows[0]["title"], "Close")
+        closest = [r["title"] for r in rows if any("closest prior" in f for f in r["flags"])]
+        self.assertNotIn("Newer close", closest)             # only prior work counts for novelty
+
+
 class LedgerTests(unittest.TestCase):
     def test_every_decision_is_logged(self):
         with tempfile.TemporaryDirectory() as d:

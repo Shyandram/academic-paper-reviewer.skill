@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.6 (2026-11-05)
+- **Similarity and novelty check.** `related_search.py similarity` scores the paper against every kept result with two signals:
+  - **Conceptual closeness** (TF-IDF cosine): flags the 3 *closest prior works* and any **high overlap** (≥ 0.30).
+  - **Copied text** (verbatim 8-word sequences): flags **text overlap** at ≥ 2 shared sequences.
+  - **Calibrated on TopoHR:** compared with its own abstract, the paper scores 0.55 with 33 shared sequences; genuinely related work scores ≤ 0.17 with 0. A planted 3-sentence copy from TopoLogic was flagged with 62 shared sequences.
+- **Domain Reviewer:** a novelty delta table against the closest prior works (contribution, what the prior work already does, what is new, cited and differentiated?).
+- **DA-CRITICAL criterion 7, "known results presented as new":** a verified prior work does the same task with the same core mechanism, uncited and undifferentiated, while the paper claims that mechanism as its main contribution. If the prior work is cited and differentiated, the issue is MAJOR at most.
+- **Text overlap is reported to the EIC as a factual integrity concern, never called plagiarism.** Only abstracts are compared, so no flag is not proof of originality.
+- Kept results are saved with full abstracts to `kept_results.jsonl`. 2 new tests (13 for the literature check).
+
 ## 2.5 (2026-11-05)
 - **Literature check (Phase 0.5).** Reviewers can search online for related work and verify recommended references without surfacing the reviewed paper. `scripts/related_search.py` provides four commands:
   - `fingerprint` describes the paper (title, method names, identifiers, distinctive phrases, cutoff date).
