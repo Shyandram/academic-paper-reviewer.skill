@@ -75,5 +75,15 @@
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
+ },
+ "eccv-efficient-2609.05981": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "eccv-representation-2608.08963": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
  }
 }
