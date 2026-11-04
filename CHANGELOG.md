@@ -4,6 +4,7 @@
 
 - **Leakage rulings follow a decision table** (DA criterion 3). Selecting a configuration "according to the results in Table N" counts as selection on that table's split, per-task selection included. A benchmark with no validation split counts as a test set. If the selected configuration gives the headline numbers, the issue is CRITICAL. Before downgrading, the EIC must find the DA's quote with text search and compare the numbers. The size of the effect is not a reason to downgrade. Fixes a v2.7 eval run that downgraded a stated selection as "not stated".
 - SKILL.md heading fixed (said v2.6.1); a test keeps it equal to the metadata and changelog. ILIAS added to the benchmark list.
+- Phase order made explicit: 1 → 1.5 → 1.6 → 2 (the report check also covers the literature addendum; Phase 1.6 was listed before 1.5). Recent preprints never lower a score.
 - Protocol sweep search terms include "we select", "top-performing", "according to the results" and "per task".
 - Evals: prompts state that `review.md` and the other files are required deliverables (a v2.7 run took `review.md` for a report file it should not write). The audits warn when `review.md` is missing.
 

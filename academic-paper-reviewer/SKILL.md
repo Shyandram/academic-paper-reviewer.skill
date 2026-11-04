@@ -127,16 +127,6 @@ Each report uses `templates/peer_review_report_template.md`, except the Devil's 
 
 The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
 
-### Phase 1.6: Report Check (before the EIC)
-
-The Synthesizer checks every weakness in the five reports before it builds the package (`agents/editorial_synthesizer_agent.md`, Step 0). This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass four tests:
-1. **Specific.** It names a location, what is wrong, and why it matters. Rewrite a vague weakness, or drop it.
-2. **Not already answered.** Search the paper, appendix included, for the point. If the paper answers it, drop it or turn it into a question about clarity.
-3. **Consistent with the paper.** It makes no claim the paper contradicts. Novelty statements about prior work must match that work's abstract.
-4. **Actionable and professional.** It gives a concrete fix and critiques the work, never the authors.
-
-Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with reasons). Scores are not changed here. The EIC sees the table.
-
 ### Phase 1.5: Literature Check (after the five reports are drafted; needs network access)
 
 The literature check comes **after** the reviewers have read the whole paper, so it supplements their reading and never replaces it. Follow `references/literature_search.md`:
@@ -146,9 +136,21 @@ The literature check comes **after** the reviewers have read the whole paper, so
 2. **Round 2, expansion:** run `coverage` and fill its gaps (years with no prior work, dataset or foundational papers behind the baselines, claims with no query) with `--purpose expansion`. At most 12 queries in total; stop earlier when the gaps are closed.
 3. Run `related_search.py similarity` to find the **closest prior works** and any **text overlap**.
 4. The Domain Reviewer adds a **literature-check addendum** to its report: a per-claim novelty verdict with supporting papers, a novelty delta table against the closest prior works, a **baseline scout table**, a short **field snapshot** (what counts as significant in this sub-field right now), and verified missing references. The Devil's Advocate may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
-5. Only results labelled **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months before the cutoff)** can be required comparisons. **Recent preprints**, **concurrent** and **newer** work are "worth discussing" only, never a weakness on their own.
+5. Only results labelled **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months before the cutoff)** can be required comparisons. **Recent preprints**, **concurrent** and **newer** work are "worth discussing" only: never a weakness on their own, and never a reason to lower a score.
 
 Default mode is `on`. Use `strict` (drops everything after the cutoff) to simulate a review as of submission. Without network access, skip this phase, say so, and rely on knowledge with `[verify]`.
+
+### Phase 1.6: Report Check (after Phase 1.5, before the EIC)
+
+**Order:** Phase 1 → Phase 1.5 → Phase 1.6 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
+
+The Synthesizer checks every weakness in the five reports before it builds the package (`agents/editorial_synthesizer_agent.md`, Step 0). This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass four tests:
+1. **Specific.** It names a location, what is wrong, and why it matters. Rewrite a vague weakness, or drop it.
+2. **Not already answered.** Search the paper, appendix included, for the point. If the paper answers it, drop it or turn it into a question about clarity.
+3. **Consistent with the paper.** It makes no claim the paper contradicts. Novelty statements about prior work must match that work's abstract.
+4. **Actionable and professional.** It gives a concrete fix and critiques the work, never the authors.
+
+Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with reasons). Scores are not changed here. The EIC sees the table.
 
 ### Phase 2: EIC Meta-Review and Decision
 
