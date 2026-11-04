@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Audit the literature-check (v2.5) evaluation runs.
 
-    python3 evals/audit_lit.py evals/manifest_lit.json
+    python3 evals/audit_lit.py evals/manifest_lit.json [evals/REPORT_lit.md]
 
 Per run (evals/work/results/<id>-lit/):
   * leak check: any KEPT ledger entry that is the reviewed paper, judged from
@@ -96,6 +96,13 @@ def main():
             "has_similarity": bool(sim), "text_overlap": len(text_overlap),
             "novelty_table": bool(re.search(r"novelty delta|closest prior work", review, re.I)),
             "plag": plag_caught, "known": (summary.get("similarity") or {}).get("known_results_issue"),
+            "purposes": dict(__import__("collections").Counter(e.get("purpose") or "general"
+                                                               for e in events if e.get("event") == "query")),
+            "over_budget": sum(e.get("event") == "query_over_budget" for e in events),
+            "scouts": sum(e.get("event") == "scout" for e in events),
+            "lc": summary.get("lit_check") or {},
+            "snapshot": bool(re.search(r"field snapshot", review, re.I)),
+            "baseline_table": bool(re.search(r"baseline scout", review, re.I)),
         })
 
     done = [r for r in rows if r.get("done")]
@@ -132,13 +139,25 @@ def main():
                         f"{r['plag']['similarity_flagged']}; reported as an integrity concern: "
                         f"{r['plag']['integrity_reported']}; review uses the word 'plagiarism' "
                         f"(should be avoided): {r['plag']['called_plagiarism']}; final {r['final']}"]
+        if any(r["purposes"].keys() - {"general"} for r in done):
+            out += ["", "## v2.7 search structure", "",
+                    "| Run | Queries by purpose | Over budget | Scout calls | Claims with verdict | Verdicts | "
+                    "Missing prior baselines | Under-reported | Scout table | Field snapshot |",
+                    "|---|---|---|---|---|---|---|---|---|---|"]
+            for r in done:
+                lc = r["lc"]
+                out.append(f"| {r['id']} | {r['purposes']} | {r['over_budget']} | {r['scouts']} | "
+                           f"{lc.get('claims_with_verdict')} | {lc.get('claim_verdicts')} | "
+                           f"{len(lc.get('missing_prior_baselines') or [])} | "
+                           f"{len(lc.get('underreported_baselines') or [])} | "
+                           f"{'yes' if r['baseline_table'] else 'no'} | {'yes' if r['snapshot'] else 'no'} |")
         ctrl = [r for r in done if r["control"]]
         if ctrl:
             out += ["", f"Controls still caught (upheld and ≤ 3): "
                     f"{sum(1 for r in ctrl if (r['upheld'] or 0) > 0 and isinstance(r['final'], int) and r['final'] <= 3)}"
                     f"/{len(ctrl)}"]
     text = "\n".join(out) + "\n"
-    (ROOT / "REPORT_lit.md").write_text(text)
+    Path(sys.argv[2] if len(sys.argv) > 2 else ROOT / "REPORT_lit.md").write_text(text)
     print(text)
 
 
