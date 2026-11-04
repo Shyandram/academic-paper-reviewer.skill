@@ -161,5 +161,10 @@
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
+ },
+ "iclr-efficient-2601.20232-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
  }
 }
