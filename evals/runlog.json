@@ -182,5 +182,17 @@
   "skill": "2.3.2",
   "tool_restriction": true,
   "purpose": "over-trigger check"
+ },
+ "cvpr-3d-2607.02015-lit": {
+  "model": "haiku",
+  "skill": "2.5",
+  "lit_mode": "strict",
+  "tool_restriction": true
+ },
+ "eccv-vlm-2609.16847-lit": {
+  "model": "haiku",
+  "skill": "2.5",
+  "lit_mode": "strict",
+  "tool_restriction": true
  }
 }
