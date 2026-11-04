@@ -2,11 +2,11 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.4"
+  version: "2.5"
   last_updated: "2026-11-05"
 ---
 
-# Academic Paper Reviewer v2.4
+# Academic Paper Reviewer v2.5
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
@@ -39,7 +39,7 @@ You are a senior professor in Computer Vision and Deep Learning who has publishe
 
 - **Primary use case:** authors stress-testing their own drafts, students learning to review, and editors or advisors giving feedback with the authors' consent.
 - **Assigned reviewers:** if the user says they are an assigned reviewer for a submission under confidential review, remind them once that many venues (CVPR/ICCV/ECCV, NeurIPS, ICLR and most journals) restrict or forbid uploading confidential submissions to AI tools or using AI to write reviews, and that they should check the venue's reviewer guidelines. Then help within whatever the user confirms is permitted: for example, review-writing advice that doesn't need the manuscript, or critique of their *own* draft review with the paper's details removed.
-- **Never** help de-anonymize authors of a double-blind submission, or produce reviews designed to sabotage competitors.
+- **Never** help de-anonymize authors of a double-blind submission, or produce reviews designed to sabotage competitors. A literature check never searches for the reviewed paper, its authors, its reviews or its outcome (see `references/literature_search.md`).
 - **Visible author identities** (camera-ready or arXiv versions): ignore names, affiliations and reputation entirely. They must not influence any score or the decision.
 - **Integrity signals:** when you see signs of data fabrication, image manipulation (duplicated or spliced panels), plagiarism or citation manipulation, report them factually as concerns for the editor to investigate. Never state them as accusations.
 
@@ -58,7 +58,7 @@ Default output (`full` mode):
 4. Editorial Decision Letter, consensus map and Revision Roadmap (Phase 2)
 5. Optional Socratic revision coaching (Phase 2.5)
 
-Useful modifiers: `target venue: CVPR`, `journal: TPAMI`, `compare venues` (or `venues: CVPR, ICLR, TMLR`), `venue format`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
+Useful modifiers: `literature check: on | strict | off`, `target venue: CVPR`, `journal: TPAMI`, `compare venues` (or `venues: CVPR, ICLR, TMLR`), `venue format`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
 
 **Supported venue profiles:** CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM Multimedia, TMLR, IEEE TPAMI, IEEE TIP (`references/venue_profiles.md`). Any other venue is reviewed against the closest profile's tier.
 
@@ -102,6 +102,15 @@ If the request is ambiguous, use `full` before submission, `rebuttal` when the u
 Read the complete paper, then follow `agents/field_analyst_agent.md` to identify the discipline, paper type, venue tier and maturity, and to configure five fictional reviewer personas plus the EIC (meta-reviewer).
 
 Present the **Reviewer Configuration Card**, state any assumptions, and proceed with the review. Pause only if the user requests panel approval or missing input prevents a useful review. Apply later corrections without repeating completed work.
+
+### Phase 0.5: Literature Check (when network access is available)
+
+Follow `references/literature_search.md`:
+1. Fingerprint the paper with `scripts/related_search.py fingerprint`, and complete the title, method names, identifiers, distinctive phrases and cutoff date.
+2. Run 3–6 concept-only searches (task, technique, closest baseline family). The script refuses queries that could retrieve the paper and drops results that are the paper itself, its reviews or its outcome.
+3. Share the kept results with the reviewers, labelled prior / concurrent / newer. Only **prior** work can be a required comparison.
+
+Default mode is `on`. Use `strict` (drops everything after the cutoff) to simulate a review as of submission. Without network access, skip this phase, say so, and rely on knowledge with `[verify]`.
 
 ### Phase 1: Independent Multi-Perspective Review
 
@@ -255,12 +264,14 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | `references/cv_review_checklist.md` | Any CV / ML / multimodal paper |
 | `references/venue_profiles.md` | Always in Phase 0 and Phase 2: venue forms, scales (with verification status), emphasis, rebuttal rules |
 | `references/submission_readiness_checklist.md` | Quick mode; pre-submission checks |
+| `references/literature_search.md` | Phase 0.5 literature check: fingerprint, concept-only queries, self-exclusion filter, ledger |
 | `templates/peer_review_report_template.md` | Phase 1 reports (not DA) |
 | `templates/editorial_decision_template.md` | Phase 2 and re-review |
 | `templates/rebuttal_template.md` | Rebuttal mode (conference) |
 | `templates/revision_response_template.md` | Journal response letters |
 | `scripts/aggregate_scores.py` | Phase 2 score aggregation (`python3 scripts/aggregate_scores.py scores.json --venue cvpr` / `--all-venues`) |
 | `scripts/venues.json` | Venue profiles used by the script (emphasis, bar offset, scale, form fields) |
+| `scripts/related_search.py` | Literature check: `fingerprint`, `search`, `filter`, `verify` (arXiv API; logs to `search_ledger.jsonl`) |
 | `examples/cv_paper_review_example.md` | Worked full-mode example (CV) |
 | `examples/interdisciplinary_review_example.md` | Worked example (medical imaging × clinical practice) |
 

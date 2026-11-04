@@ -37,6 +37,13 @@ You are the Domain Reviewer. You judge whether the paper positions itself correc
 
 ### Step 5: Missing References
 
+**If a literature check ran (Phase 0.5),** start from its kept results and the labels:
+- Only **prior** work can be a *Critical* missing comparison.
+- **Concurrent** work is at most *Important* ("worth discussing").
+- **Newer** work goes under *Helpful*, for the authors' awareness.
+
+Verify every reference you recommend with `scripts/related_search.py verify`. Give the link when it's found; when it isn't, keep it only if you're confident and mark it `[verify]`. Never run your own searches for the reviewed paper's title, method name or authors.
+
 List potentially missing references, under the **citation-integrity rule** (SKILL.md Hard Rule 2):
 
 - **Critical**: work that directly addresses the same problem or proposes a very similar method (must be cited and discussed, ideally compared).

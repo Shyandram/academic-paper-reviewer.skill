@@ -1,5 +1,16 @@
 # Changelog
 
+## 2.5 (2026-11-05)
+- **Literature check (Phase 0.5).** Reviewers can search online for related work and verify recommended references without surfacing the reviewed paper. `scripts/related_search.py` provides four commands:
+  - `fingerprint` describes the paper (title, method names, identifiers, distinctive phrases, cutoff date).
+  - `search` sends concept-only arXiv queries. Queries containing the method name, author surnames, the arXiv ID or most of the title are refused.
+  - `filter` filters results from any other search tool.
+  - `verify` confirms a recommended reference by title.
+- **Self-exclusion filter:** drops the paper itself (title, method name, ID, URL, distinctive phrase, author overlap near the cutoff) and outcome-revealing pages (OpenReview forums, accepted-paper and award lists). Kept results are labelled prior / concurrent / newer. Only prior work can be a required comparison.
+- **Modes:** `literature check: on` (default with network), `strict` (drops everything after the cutoff) and `off`. Every decision is logged to `search_ledger.jsonl`.
+- Wired into the Field Analyst (fingerprint), the Domain Reviewer (missing references), the EIC (checks that "missing comparison" weaknesses rest on prior work) and Responsible Use. 11 offline tests.
+- Live check: for the CVPR paper TopoHR, a concept query returned the paper itself, which was dropped unread. A broader query kept 25 related papers, including its actual baselines.
+
 ## 2.4 (2026-11-05)
 - **Merge:** combines the Codex support from `main` (released there as "2.1" on 2026-10-18, listed below as *Codex support*) with the v2.1–v2.3.2 line from this branch: venue-aware scoring, the EIC meta-reviewer with official and EIC-weighted scores, recalibration, and the 36-paper evaluation. No behavior change beyond the union of the two.
 

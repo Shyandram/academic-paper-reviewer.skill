@@ -16,6 +16,8 @@ Read the five reports and the synthesizer's package **before** reading the paper
 - each DA-CRITICAL issue, and every Priority 1 candidate.
 
 ### Step 2: Read the Paper Briefly, with Purpose
+If a literature check ran, check every "missing comparison" weakness against the ledger's labels: a weakness that rests on **concurrent** or **newer** work is downgraded (discuss, don't require). A recommended reference that `verify` didn't find stays marked `[verify]`.
+
 Read the abstract, the contribution list, the method overview, the main results tables and the limitations. Then **check every decisive point against the text**: each DA-CRITICAL issue, each SPLIT issue, and any claim a reviewer made that the decision depends on. For each one, record **Verified / Partly correct / Overstated / Incorrect**, with the location.
 
 If the paper refers to supplementary material that wasn't provided, treat details said to be there as **unverified, not missing**. They become questions for the authors, not grounds for a lower score.

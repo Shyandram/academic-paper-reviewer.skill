@@ -32,6 +32,7 @@ What sets it apart:
 - **Calibrated to accepted papers.** Scores are anchored to what the target venue actually accepts, not to a flawless paper. See [`evals/`](evals/) for the evaluation on recently accepted ICLR/CVPR/ECCV papers.
 - **Reproducible scoring.** `scripts/aggregate_scores.py` computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.
 - **Venue-aware scoring.** It covers 11 venues: **CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP**. Scores are translated into each venue's own form, for example ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria, or IEEE journal recommendations. A **Cross-Venue Outlook** shows how the same paper would likely fare at each venue. Every scale is labeled *official*, *confirmed*, *secondary*, *assumed* or *unpublished*, so nothing unverified is presented as official.
+- **Literature check without self-leaks.** With network access, reviewers search arXiv for related work and verify every recommended reference. A fingerprint filter refuses queries that could find the reviewed paper, drops the paper's own arXiv versions, code pages, reviews and acceptance lists unread, and labels the rest prior / concurrent / newer. Every decision is logged (`literature check: on | strict | off`).
 - **Integrity guardrails.** No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the manuscript.
 
 ---
@@ -175,6 +176,7 @@ academic-paper-reviewer/               ← skill source
 ├── references/                        ← rubrics, standards, checklists, venue profiles
 ├── templates/                         ← report, decision, rebuttal, response-letter formats
 ├── scripts/aggregate_scores.py        ← score aggregation + venue views (+ example_scores.json)
+├── scripts/related_search.py          ← literature check: fingerprint, concept search, self-exclusion filter, verify
 ├── scripts/venues.json                ← venue profiles (emphasis, bar, scale, form fields)
 └── examples/                          ← worked, fully fictional examples
 tools/install_codex_skill.py           ← safe, repeatable Codex installation
