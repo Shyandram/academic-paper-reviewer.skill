@@ -30,7 +30,7 @@ Rules for this evaluation:
    {
      "locations": ["Table 2", "Section 4.3", "Figure 5", "Eq. 3"],
      "quotes": ["exact short phrases (<= 25 words) quoted from the paper"],
-     "numbers": [{"claim": "baseline mIoU in Table 2", "value": "47.3", "derived": false}],
+     "numbers": [{"claim": "what the number is", "value": "as printed", "derived": false}],
      "references": [{"title": "...", "authors": "...", "year": 2024, "marked_verify": false}]
    }
    ```
@@ -39,15 +39,15 @@ Rules for this evaluation:
    ```json
    {
      "id": "{ID}",
-     "paper_type": "empirical",
-     "final_overall": 4,
+     "paper_type": "<empirical|theoretical|dataset|system|benchmark|analysis|position>",
+     "final_overall": "<integer 1-6>",
      "venue_recommendation": "label from aggregate.json",
-     "before_composite": 61.2,
-     "after_composite": 63.0,
-     "eic_weights": {"R1": 1.0, "R2": 1.0, "R3": 1.0, "R4": 1.0, "DA": 1.0},
-     "decision_differs_from_after_band": false,
-     "da_critical_raised": 1,
-     "da_critical_upheld": 0,
+     "before_composite": "<number from before.json>",
+     "after_composite": "<number from aggregate.json>",
+     "eic_weights": {"R1": "<0.5-1.5>", "R2": "<0.5-1.5>", "R3": "<0.5-1.5>", "R4": "<0.5-1.5>", "DA": "<0.5-1.5>"},
+     "decision_differs_from_after_band": "<true|false>",
+     "da_critical_raised": "<integer>",
+     "da_critical_upheld": "<integer>",
      "eic_verification": ["point: Verified/Partly correct/Overstated/Incorrect"],
      "top_concerns": ["one line each, max 5"],
      "recognized": false,
@@ -55,5 +55,7 @@ Rules for this evaluation:
      "notes": "anything that made the skill hard to follow, ambiguous, or contradictory"
    }
    ```
+
+Replace every `<...>` placeholder with the real value (numbers as numbers, booleans as booleans).
 
 When finished, reply with one line: the paper id, the final Overall and the venue recommendation.
