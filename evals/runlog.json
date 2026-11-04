@@ -62,5 +62,9 @@
  "eccv-3d-2607.26889": {
   "model": "haiku",
   "skill": "2.3.1"
+ },
+ "eccv-video-2608.07663": {
+  "model": "haiku",
+  "skill": "2.3.1"
  }
 }
