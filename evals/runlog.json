@@ -227,7 +227,8 @@
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
-  "tool_restriction": true
+  "tool_restriction": true,
+  "stray_tool_attempt": "send_message (denied)"
  },
  "cvpr-detseg-2604.24119-flaw-lit26": {
   "model": "haiku",
@@ -236,6 +237,12 @@
   "tool_restriction": "explicit allow-list"
  },
  "cvpr-lowlevel-2609.15120-flaw-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": "explicit allow-list"
+ },
+ "eccv-3d-2607.26889-flaw-lit26": {
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
