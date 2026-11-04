@@ -207,5 +207,11 @@
   "skill": "2.6",
   "lit_mode": "strict",
   "tool_restriction": true
+ },
+ "eccv-vlm-2609.16847-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": true
  }
 }
