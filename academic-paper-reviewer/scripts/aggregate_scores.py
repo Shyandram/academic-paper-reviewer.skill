@@ -96,12 +96,13 @@ def composite_to_overall(composite, offset=0):
 
 
 def to_four(score):
-    """0-100 dimension score -> NeurIPS-style 1-4 (references/quality_rubrics.md)."""
-    if score >= 85:
+    """0-100 dimension score -> NeurIPS-style 1-4, aligned with the venue anchors
+    in references/quality_rubrics.md (62-69 = a typical accepted paper = 3)."""
+    if score >= 80:
         return 4
-    if score >= 70:
+    if score >= 62:
         return 3
-    if score >= 50:
+    if score >= 45:
         return 2
     return 1
 

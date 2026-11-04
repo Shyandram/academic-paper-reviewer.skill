@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.2 (2026-11-05)
+Fixes found in the 36-paper evaluation (see `evals/`).
+- **Test-set selection is critical whether or not disclosed.** In 2 of 5 Haiku controls, the planted sentence "hyperparameters ... were selected based on performance on the test set" was downgraded because the paper disclosed it (the criterion was titled "Undisclosed evaluation leakage"). Training, tuning or selecting on the held-out test set is now critical regardless of disclosure. Tuning on a validation split that doubles as the standard reporting split (test labels unavailable, e.g., COCO val) stays MAJOR. The EIC may not downgrade for disclosure.
+- **0–100 → 1–4 mapping follows the venue anchors** (4 ≥ 80, 3 ≥ 62, 2 ≥ 45). A typical accepted paper now shows as 3 (Good) on ICLR and NeurIPS sub-scores, not 2.
+- **One label vocabulary per sentence:** internal Overall labels in reports, plus the venue's own label for the same number.
+- **Guidance gaps closed:** use an empty `da_critical` list when none is raised; compute the official score after all five reports are written; dimension scores should be consistent with the reviewer's own Overall.
+
 ## 2.3.1 (2026-11-04)
 - **Fix: EIC weights were anchored on the example.** In 9 of 10 runs on v2.3, the EIC copied `scripts/example_scores.json`'s weights (R1 1.25, R3 0.75) instead of judging each paper. The format example now uses neutral weights (all 1.0), and the CV example's illustrative weights moved to `examples/cv_example_scores.json`. The EIC instructions now say to start every reviewer at 1.0, move a weight only for a paper-specific verified reason, and never weight by role.
 - **Fix:** the target-venue label always equals the EIC decision, and venue shifts are ignored when a band edge is crossed by less than 2 points.

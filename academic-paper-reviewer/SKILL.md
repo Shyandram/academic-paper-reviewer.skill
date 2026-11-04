@@ -2,11 +2,11 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.3.1"
+  version: "2.3.2"
   last_updated: "2026-11-04"
 ---
 
-# Academic Paper Reviewer v2.3.1
+# Academic Paper Reviewer v2.3.2
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
@@ -190,7 +190,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | EIC quality weight 0.5–1.5 | Set by the EIC per reviewer, after checking reviews against the paper | Multiplies confidence for the EIC assessment |
 | Dimension scores 0–100 | Technical Rigor, Clarity & Presentation, Novelty & Originality, Significance & Impact, Experimental Validation, Reproducibility, Ethical Compliance | Fine-grained, calibrated, aggregated by paper type |
 
-Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue scales are produced from these internal scores, not scored separately: the script applies each venue's emphasis weights, bar offset and scale (CVF 6-point, ICLR {0,2,4,6,8,10}, ICML 1–5, TMLR Yes/No criteria, IEEE journal recommendations). See `references/venue_profiles.md`.
+**Labels:** the skill's internal Overall labels (6 Strong Accept … 1 Strong Reject) are used in the reports. Whenever a target venue is set, also give the **venue's own label** for the same number (e.g., CVPR "4 Borderline Accept", ICLR "6"), taken from `scripts/aggregate_scores.py --final`. Never mix the two vocabularies in one sentence. Use the 0–100 → 1–4 mapping in the rubrics so the two scales agree. Venue scales are produced from these internal scores, not scored separately: the script applies each venue's emphasis weights, bar offset and scale (CVF 6-point, ICLR {0,2,4,6,8,10}, ICML 1–5, TMLR Yes/No criteria, IEEE journal recommendations). See `references/venue_profiles.md`.
 
 ---
 

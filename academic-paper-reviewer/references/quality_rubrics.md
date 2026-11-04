@@ -24,6 +24,8 @@ Calibrated 0–100 scoring rubrics for the 7 review dimensions. All reviewers mu
 | 45–54 | Below the venue's bar on this dimension; a reject-side paper |
 | < 45 | Clearly below the bar |
 
+**Consistency with your Overall:** if you recommend Overall 4 (Borderline Accept), your dimension scores should mostly sit at 60 or above. If they don't, either the scores are too low for the venue anchors or the recommendation is too high. Fix whichever is wrong.
+
 Before submitting your scores, ask: *"Would a typical accepted paper at this venue score higher than this on this dimension?"* If yes, and this paper is no worse, raise the score. A weakness that most accepted papers at the venue share is not a reason for a sub-60 score.
 
 - **"Strong" means strong for the target venue tier.** A solid workshop paper is not a 75 on Novelty against a CVPR bar.
@@ -209,16 +211,16 @@ All weight sets sum to 1.00 and are implemented in `scripts/aggregate_scores.py`
 
 ## Mapping 0–100 Dimension Scores to NeurIPS-Style 1–4 Scores
 
-Use this mapping so a reviewer's two score sets agree:
+Use this mapping so a reviewer's two score sets agree. It follows the venue anchors: a typical accepted paper (62–69) maps to **3 (Good)**, and the ICLR and NeurIPS sub-scores in `scripts/aggregate_scores.py` use the same thresholds.
 
 | NeurIPS-style score | Derived from | Typical 0–100 range |
 |---------------------|--------------|---------------------|
-| **Quality** | Technical Rigor + Experimental Validation (avg) | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
-| **Clarity** | Clarity & Presentation | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
-| **Significance** | Significance & Impact | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
-| **Originality** | Novelty & Originality | 4: ≥ 85 · 3: 70–84 · 2: 50–69 · 1: < 50 |
+| **Quality** | Technical Rigor + Experimental Validation (avg) | 4: ≥ 80 · 3: 62–79 · 2: 45–61 · 1: < 45 |
+| **Clarity** | Clarity & Presentation | 4: ≥ 80 · 3: 62–79 · 2: 45–61 · 1: < 45 |
+| **Significance** | Significance & Impact | 4: ≥ 80 · 3: 62–79 · 2: 45–61 · 1: < 45 |
+| **Originality** | Novelty & Originality | 4: ≥ 80 · 3: 62–79 · 2: 45–61 · 1: < 45 |
 
-A deviation of one step is acceptable when the rationale explains it, e.g., "Quality 2 despite Technical Rigor 72 because the main ablation is missing". Anything larger signals a calibration error.
+A deviation of one step is acceptable when the rationale explains it, e.g., "Quality 2 despite Technical Rigor 66 because the main ablation is missing". Anything larger signals a calibration error.
 
 ## Overall (1–6) vs. Own Composite
 

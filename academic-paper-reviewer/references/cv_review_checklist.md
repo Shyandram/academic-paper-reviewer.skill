@@ -100,7 +100,8 @@ Ask about each of these whenever a paper claims to beat prior work:
 | Finding | Typical severity |
 |---------|-----------------|
 | Headline gain disappears or is unverified once confounds are matched (backbone/pretraining/resolution) | MAJOR → CRITICAL if it is the main claim |
-| Evaluation on the wrong split, test-set tuning, or leakage | CRITICAL |
+| Evaluation on the wrong split, tuning or selection on the held-out test set, or leakage, **whether or not disclosed** | CRITICAL |
+| Tuning on a validation split that doubles as the standard reporting split (test labels unavailable, e.g., COCO val) | MAJOR (ask for a held-out check) |
 | Missing the strongest recent baseline in the sub-area | MAJOR |
 | Efficiency claim without measured latency | MAJOR (if efficiency is a main claim), else MINOR |
 | Single run, gain within known noise | MAJOR |

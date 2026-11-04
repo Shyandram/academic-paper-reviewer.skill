@@ -144,6 +144,11 @@ class AggregateTests(unittest.TestCase):
         # The format example must not suggest default EIC weights.
         self.assertTrue(all(r["eic_weight"] == 1.0 for r in FORMAT_EXAMPLE["reviewers"]))
 
+    def test_four_point_mapping_follows_venue_anchors(self):
+        # 62-69 is a typical accepted paper and must map to 3 (Good), not 2.
+        self.assertEqual([agg.to_four(x) for x in (85, 80, 79, 65, 62, 61, 45, 44)],
+                         [4, 4, 3, 3, 3, 2, 2, 1])
+
     def test_eic_weight_out_of_range_exits(self):
         r = uniform(70)
         r["eic_weight"] = 3
@@ -182,7 +187,7 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(views["icml"]["label"], "3 Weak accept (leaning accept)")
         self.assertEqual(views["tpami"]["label"], "Major Revision")      # +3 bar
         self.assertEqual(views["iclr"]["subscores"],
-                         {"Soundness": 2, "Presentation": 3, "Contribution": 2})
+                         {"Soundness": 2, "Presentation": 3, "Contribution": 3})
         self.assertEqual(views["tmlr"]["label"], "Accept with minor revision")
         self.assertEqual(views["aaai"]["label"], "6 (Borderline accept)")
 

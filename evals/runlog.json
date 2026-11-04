@@ -166,5 +166,15 @@
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
+ },
+ "eccv-3d-2607.26889-flaw-v232": {
+  "model": "haiku",
+  "skill": "2.3.2",
+  "tool_restriction": true
+ },
+ "iclr-video-2604.18367-flaw-v232": {
+  "model": "haiku",
+  "skill": "2.3.2",
+  "tool_restriction": true
  }
 }

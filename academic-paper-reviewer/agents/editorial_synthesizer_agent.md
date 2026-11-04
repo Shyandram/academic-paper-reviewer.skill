@@ -24,7 +24,10 @@ Consensus measures how many reviewers noticed something, not how severe it is. M
 
 ### Step 2: Official Score
 
-Write the five reviewers' scores to a JSON file in the format of `scripts/example_scores.json` (a format reference only: never copy its values), without `eic_weight` for now, with the DA-CRITICAL issues listed as raised (`"upheld": true` provisionally). Then run:
+Do this after all five reviewers have written their reports and scores, and before the EIC sees anything.
+
+
+Write the five reviewers' scores to a JSON file in the format of `scripts/example_scores.json` (a format reference only: never copy its values), without `eic_weight` for now, with the DA-CRITICAL issues listed as raised (`"upheld": true` provisionally). If the DA raised none, use an empty list (`"da_critical": []`) in both runs. Then run:
 
 ```bash
 python3 scripts/aggregate_scores.py scores.json --venue <target>

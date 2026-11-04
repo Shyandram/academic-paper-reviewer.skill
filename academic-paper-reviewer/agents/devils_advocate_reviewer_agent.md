@@ -196,7 +196,9 @@ N. [PN]
 An issue is CRITICAL (not just MAJOR) only if it meets at least one of these strict criteria **and** passes the test above:
 1. **Evidence contradicts the main claim**: the paper's own results show the opposite of, or nothing like, the central claim. (Evidence that supports a *weaker* version of the claim is MAJOR: the fix is to narrow the claim.)
 2. **The experiment cannot test the claim**: e.g., evaluation on the training set, or a metric that cannot measure the claimed property. (A confound that is only partly controlled, or a missing control, is MAJOR.)
-3. **Undisclosed evaluation leakage**: test data used for training, tuning or prompt selection in a way that inflates the main result, with concrete evidence in the paper.
+3. **Evaluation leakage**: the paper trains on, tunes on, or selects hyperparameters, checkpoints, prompts or thresholds on the **held-out test set** it reports its main results on. This holds **whether or not the paper discloses it**: disclosure makes the problem visible, it does not make the reported numbers valid. Concrete evidence in the paper is required.
+   - *Not automatically critical (MAJOR):* tuning on a validation split that is also the standard reporting split because the test labels are hidden or unavailable (e.g., COCO val, ADE20K val, many medical datasets). That is field practice; ask for a held-out check.
+   - *Resolvable by clarification only* if the paper already contains results selected without the test set (e.g., a separate validation protocol) that support the main claim. Otherwise it **needs new experiments**.
 4. **Fabrication or manipulation signal**: concrete evidence of manipulated data, images or p-hacking, stated factually as a concern for the editor.
 5. **Serious ethical violation**: unaddressed harm, data misuse, or undisclosed conflicts.
 6. **The method cannot be understood**: so much is missing that the method itself is undefined. (Missing hyperparameters, code or implementation details are MAJOR or MINOR.)

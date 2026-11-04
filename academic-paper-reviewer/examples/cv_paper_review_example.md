@@ -124,7 +124,7 @@ The authors see the **official** scores (63.2, ratings 3/4/4/4/3). The EIC's int
 | Venue | Venue-weighted composite | Bar offset | Venue shift | Band → with DA cap | Venue recommendation | Venue sub-scores | Scale status |
 |---|---|---|---|---|---|---|---|
 | CVPR (2026) | 61.8 | +0 | +0 | 4 → 4 | 4 Borderline Accept | — | confirmed |
-| ICLR (2026) | 62.5 | +0 | +0 | 4 → 4 | 6 on {0,2,4,6,8,10} (6 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 2 | secondary |
+| ICLR (2026) | 62.5 | +0 | +0 | 4 → 4 | 6 on {0,2,4,6,8,10} (6 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 3 | secondary |
 | ICML (2025) | 62.1 | +0 | +0 | 4 → 4 | 3 Weak accept (leaning accept) | — | official |
 | ACM Multimedia (2026) | 62.5 | +0 | +0 | 4 → 4 | Weak accept | — | unpublished |
 | TMLR (2025) | 62.2 | -5 | +0 | 4 → 4 | Accept with minor revision | Claims & evidence Yes, Audience interest Yes | official |
