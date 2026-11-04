@@ -129,5 +129,10 @@
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
+ },
+ "iclr-representation-2512.20833": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
  }
 }
