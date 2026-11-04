@@ -220,12 +220,19 @@
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
-  "tool_restriction": true
+  "tool_restriction": true,
+  "stray_tool_attempt": "interrupt_session without session_id (denied)"
  },
  "eccv-generation-2609.28473-lit26": {
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
   "tool_restriction": true
+ },
+ "cvpr-detseg-2604.24119-flaw-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": "explicit allow-list"
  }
 }
