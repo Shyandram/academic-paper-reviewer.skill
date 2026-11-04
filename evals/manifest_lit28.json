@@ -1,0 +1,32 @@
+[
+  {
+    "arxiv_id": "2609.16847",
+    "title": "RegRet: Enhancing Region-Level Retrieval in Large Multimodal Models",
+    "topic": "vlm",
+    "comment": "Accepted by ECCV 2026. 22 pages, including references and appendix",
+    "primary_category": "cs.CV",
+    "published": "2026-09-15",
+    "venue": "eccv",
+    "id": "eccv-vlm-2609.16847-lit28",
+    "curation": "auto pick, checked against abstract",
+    "base_id": "eccv-vlm-2609.16847",
+    "skill": "2.7",
+    "lit_mode": "strict",
+    "cutoff": "2026-03-06"
+  },
+  {
+    "arxiv_id": "2609.28473",
+    "title": "On the Diffusibility of High-Dimensional Latents",
+    "topic": "generation",
+    "comment": "Accepted to ECCV 2026. Project page: https://cfeng16.github.io/on_the_diffusibility/",
+    "primary_category": "cs.CV",
+    "published": "2026-09-23",
+    "venue": "eccv",
+    "id": "eccv-generation-2609.28473-lit28",
+    "curation": "auto pick, checked against abstract",
+    "base_id": "eccv-generation-2609.28473",
+    "skill": "2.7",
+    "lit_mode": "strict",
+    "cutoff": "2026-03-06"
+  }
+]
