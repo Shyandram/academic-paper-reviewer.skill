@@ -385,8 +385,15 @@ def arxiv_query(search_query, max_results):
     return hits
 
 
+MAX_CONCEPT_WORDS = 4  # arXiv ANDs every word; 5+ concept words almost always return nothing
+
+
+def concept_words(query):
+    return [w for w in re.findall(r"[A-Za-z0-9]+", query) if w.lower() not in STOP and len(w) > 1]
+
+
 def concept_query(query):
-    words = [w for w in re.findall(r"[A-Za-z0-9]+", query) if w.lower() not in STOP and len(w) > 1]
+    words = concept_words(query)
     if not words:
         sys.exit("error: empty query after removing stopwords")
     return " AND ".join(f"all:{w}" for w in words[:8])
@@ -429,6 +436,11 @@ def cmd_search(args):
     if reason:
         ledger_write(ledger, {"event": "query_refused", "query": args.query, "reason": reason})
         sys.exit(f"refused: {reason}. Rephrase with problem/technique words only.")
+    n_words = len(concept_words(args.query))
+    if n_words > MAX_CONCEPT_WORDS:
+        ledger_write(ledger, {"event": "query_too_long", "query": args.query, "concept_words": n_words})
+        sys.exit(f"refused (not counted against the budget): {n_words} concept words. arXiv requires every "
+                 f"word to match, so use at most {MAX_CONCEPT_WORDS}, e.g. the task and the core technique.")
     sent = sum(e.get("event") == "query" for e in read_ledger(ledger))
     if sent >= MAX_QUERIES:
         ledger_write(ledger, {"event": "query_over_budget", "query": args.query})

@@ -60,6 +60,12 @@ Add `eic_weight` to each reviewer in the scores file, update `da_critical` with 
 
 The **EIC-weighted rating** (the weighted mean of the reviewers' Overall ratings, rounded half up) is your **starting point**. The reviewers' recommendations are the primary signal, as they are for a real area chair. The **0–100 composite is a cross-check**. When its band differs from the rating's (the script flags ⚠), say which signal you trust and why. Typical reasons: a reviewer's dimension scores don't match their own recommendation, or the dimension scores sit on a band boundary.
 
+**When to depart from the starting point.** A one-step disagreement between the composite band and the rating is **not by itself a reason to depart**: low dimension scores are already reflected in the reviewers' Overall ratings, and near a band boundary (a rating within 0.1 of x.5, or a composite within 2 points of a band edge) the two signals swap from run to run. Depart only for a **verified, named issue** (with its location) that the ratings did not account for. For example:
+- a reviewer's rating rests on a claim you found Incorrect or Overstated in Step 2;
+- an issue you verified (an E1–E9 error, a fairness flaw) is missing from or understated in the reports that gave the higher ratings;
+- the reverse: a low rating rests on a point the paper already answers.
+Write the issue and which ratings it changes. If you can't name one, keep the starting point, and note the cross-check disagreement as a borderline signal in the meta-review.
+
 ### Step 6: Decide
 Decide the final Overall (1–6). The starting point is not a rule:
 - You may decide **above or below** the starting point. Write one paragraph explaining why (e.g., "a strong, novel contribution whose weaknesses are typical of accepted papers at this venue", or "the central claim is not measured, so the accept-leaning ratings are not supported").

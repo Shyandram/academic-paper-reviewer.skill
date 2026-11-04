@@ -46,7 +46,7 @@ python3 scripts/related_search.py search --fp fingerprint.json --query "lane top
     --purpose claim --tag C1 [--mode strict]
 ```
 
-- Use **2–4 problem or technique words per query**. Long queries return almost nothing.
+- Use **2–4 problem or technique words per query**. Long queries return almost nothing, because arXiv requires every word to match. The script refuses queries with more than 4 concept words, without counting them against the budget.
 - The script **refuses** queries that contain a method name, an author surname, the arXiv ID, or most of the title. Rephrase instead of working around the refusal. Public benchmark names (COCO, ADE20K) are allowed; the paper's own new benchmark is a method name and is refused.
 - `--purpose` and `--tag` are logged so the audit can see what each query was for. After **12** queries the script refuses more (`MAX_QUERIES`): returns diminish quickly and long searches dilute the review.
 
@@ -54,7 +54,7 @@ python3 scripts/related_search.py search --fp fingerprint.json --query "lane top
 
 | Query type | How many | Built from |
 |-----------|----------|------------|
-| Claim (`--purpose claim --tag Cn`) | One per contribution claim (usually 2–4) | The claim's task and core mechanism in plain words, e.g. C2 "token merging vision transformer training-free" |
+| Claim (`--purpose claim --tag Cn`) | One per contribution claim (usually 2–4) | The claim's task and core mechanism in plain words, e.g. C2 "token merging vision transformer" |
 | Baseline (`--purpose baseline`) | One per external benchmark (usually 1–3) | `related_search.py benchmarks --paper paper.txt --fp fingerprint.json` lists the known benchmarks and nearby metrics; query the benchmark plus the task, e.g. "COCO open-vocabulary detection" |
 
 Then scout each benchmark from the kept results:

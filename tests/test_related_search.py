@@ -188,6 +188,20 @@ class ScoutAndCoverageTests(unittest.TestCase):
             self.assertIn("budget", str(cm.exception))
             self.assertEqual(rs.read_ledger(ledger)[-1]["event"], "query_over_budget")
 
+    def test_long_query_is_refused_without_using_budget(self):
+        with tempfile.TemporaryDirectory() as d:
+            fp_path = Path(d) / "fp.json"
+            fp_path.write_text(json.dumps(FP))
+            ledger = Path(d) / "search_ledger.jsonl"
+            args = type("A", (), {"fp": str(fp_path), "ledger": str(ledger),
+                                  "query": "voxel optimization mirror reflection illusion sculpture",
+                                  "max": 5, "mode": "strict", "purpose": "claim", "tag": "C1"})
+            with self.assertRaises(SystemExit) as cm:
+                rs.cmd_search(args)
+            self.assertIn("not counted", str(cm.exception))
+            events = rs.read_ledger(ledger)
+            self.assertEqual([e["event"] for e in events], ["query_too_long"])
+
     def test_coverage_reports_gaps(self):
         events = [{"event": "query", "purpose": "claim", "tag": "C1"}]
         kept = [{"title": "Old", "label": "prior (peer-reviewed)", "date": "2023-02-01"},
