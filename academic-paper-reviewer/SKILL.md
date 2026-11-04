@@ -2,13 +2,19 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.3.2"
-  last_updated: "2026-11-04"
+  version: "2.4"
+  last_updated: "2026-11-05"
 ---
 
-# Academic Paper Reviewer v2.3.2
+# Academic Paper Reviewer v2.4
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
+
+## Runtime and Resource Loading
+
+This skill works in Codex and Claude. Resolve all bundled paths relative to the directory containing this `SKILL.md`, regardless of the shell working directory. For Codex installation, PDF handling, tool fallbacks, and artifact paths, read `references/codex_runtime.md`. Follow the host's instructions and available permissions. Agent files define reviewer roles; they do not require a particular agent tool.
+
+Load only the files for the selected mode from the File Map, then the references needed for that paper type. Read shared rubrics once per review context. Keep a compact evidence ledger (claim ID, manuscript location, observation, uncertainty) across phases; never substitute the ledger for access to relevant manuscript sections.
 
 ## Persona
 
@@ -95,7 +101,7 @@ If the request is ambiguous, use `full` before submission, `rebuttal` when the u
 
 Read the complete paper, then follow `agents/field_analyst_agent.md` to identify the discipline, paper type, venue tier and maturity, and to configure five fictional reviewer personas plus the EIC (meta-reviewer).
 
-Present the **Reviewer Configuration Card** and ask for confirmation. If the user said "skip confirmation", or has already approved a card earlier in the conversation, proceed directly.
+Present the **Reviewer Configuration Card**, state any assumptions, and proceed with the review. Pause only if the user requests panel approval or missing input prevents a useful review. Apply later corrections without repeating completed work.
 
 ### Phase 1: Independent Multi-Perspective Review
 
@@ -107,7 +113,7 @@ Present the **Reviewer Configuration Card** and ask for confirmation. If the use
 | Reviewer 4 (Generalist) | `agents/generalist_reviewer_agent.md` | Contribution clarity, venue fit, presentation, balanced overall judgment | Clarity & Presentation |
 | Devil's Advocate | `agents/devils_advocate_reviewer_agent.md` | Strongest counter-argument, logic, overclaiming | CRITICAL/MAJOR/MINOR issue list |
 
-**Independence.** If you can launch subagents (e.g., an Agent/Task tool), run the five reviewers as five parallel subagents. Give each one the full paper, its own agent file, the template, and the relevant references, and nothing from the other reviewers. If you can't, write the reports one after another, and don't let a later reviewer echo an earlier one's points. Each reviewer finds issues from their own angle; overlap is resolved in Phase 2, not avoided by self-censorship.
+**Execution and independence.** Use parallel reviewers only when the host permits delegation and the tools are available. Give each reviewer the manuscript, its own role file, the template, and the relevant references, without other reviewers' reports. Otherwise perform five separate role-based passes and disclose that they share one model context; do not claim independent agents ran. Each pass examines the manuscript from its own angle. Preserve genuine agreement; merge overlap in Phase 2. Missing delegation never blocks a full review.
 
 Each report uses `templates/peer_review_report_template.md`, except the Devil's Advocate, whose format is defined in its agent file. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
 
@@ -131,7 +137,7 @@ For a journal target, also report the journal-style recommendation (Accept / Min
 
 **Venue format.** If the user asks for `venue format`, also render each reviewer's report using the target venue's form fields (listed in `scripts/venues.json`) instead of the generic template, keeping the same content.
 
-### Phase 2.5: Revision Coaching (only if the decision is below Accept)
+### Phase 2.5: Revision Coaching (on request, if the decision is below Accept)
 
 A Socratic dialogue led by the EIC (see `agents/eic_agent.md`): open with agreed strengths, ask what surprised the author, steer toward consensus issues, ask "If you could change only three things, which three?", rehearse a response to the DA's strongest challenge, then plan the revision. One question per turn, 200–400 words per turn, at most 8 rounds. "Just fix it" skips straight to the final Roadmap.
 
@@ -241,6 +247,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | `agents/devils_advocate_reviewer_agent.md` | Full, guided |
 | `agents/editorial_synthesizer_agent.md` | Phase 2 |
 | `agents/rebuttal_strategist_agent.md` | Rebuttal mode |
+| `references/codex_runtime.md` | Codex runtime, input tools, permissions and output paths |
 | `references/review_criteria_framework.md` | Before any review: criteria by paper type |
 | `references/quality_rubrics.md` | Before scoring: 0–100 rubrics, weights, scale mappings |
 | `references/editorial_decision_standards.md` | Before deciding: Overall definitions, DA cap, journal mapping |

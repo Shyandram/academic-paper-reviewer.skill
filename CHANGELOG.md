@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.4 (2026-11-05)
+- **Merge:** combines the Codex support from `main` (released there as "2.1" on 2026-10-18, listed below as *Codex support*) with the v2.1–v2.3.2 line from this branch: venue-aware scoring, the EIC meta-reviewer with official and EIC-weighted scores, recalibration, and the 36-paper evaluation. No behavior change beyond the union of the two.
+
 ## 2.3.2 (2026-11-05)
 Fixes found in the 36-paper evaluation (see `evals/`).
 - **Test-set selection is critical whether or not disclosed.** In 2 of 5 Haiku controls, the planted sentence "hyperparameters ... were selected based on performance on the test set" was downgraded because the paper disclosed it (the criterion was titled "Undisclosed evaluation leakage"). Training, tuning or selecting on the held-out test set is now critical regardless of disclosure. Tuning on a validation split that doubles as the standard reporting split (test labels unavailable, e.g., COCO val) stays MAJOR. The EIC may not downgrade for disclosure.
@@ -44,6 +47,14 @@ Calibration overhaul, driven by an evaluation on recently accepted papers. Versi
 - A verification status for every venue scale (official / secondary / assumed / unpublished), with sources in `references/venue_profiles.md`.
 - Venue-specific rules wired into the workflow: ECCV contribution types and "not beating SOTA is not grounds for rejection", the ACM MM multimedia-scope gate, AAAI Phase-1 risk, the TPAMI conference-extension check, and TMLR's correctness-over-novelty criteria.
 - `compare venues` and `venue format` modifiers; a Cross-Venue Outlook section in the decision template and the CV example; tests for venue views.
+
+## Codex support (2026-10-18; released on `main` as 2.1)
+
+- Added Codex project/personal installation with collision protection and an idempotent source link.
+- Added runtime guidance for PDF extraction, permission-aware tools, offline use, and review artifacts.
+- Made reviewer execution capability-aware with an explicit single-context fallback.
+- Reduced repeated reference loading; proceed after panel configuration by default and offer coaching on request.
+- Added installer regression tests and repository instructions for Codex maintenance.
 
 ## 2.0 (2026-10-15)
 
