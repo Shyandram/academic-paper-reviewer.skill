@@ -14,7 +14,8 @@ spec = importlib.util.spec_from_file_location("agg", SKILL / "scripts" / "aggreg
 agg = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(agg)
 
-EXAMPLE = json.loads((SKILL / "scripts" / "example_scores.json").read_text())
+EXAMPLE = json.loads((SKILL / "examples" / "cv_example_scores.json").read_text())
+FORMAT_EXAMPLE = json.loads((SKILL / "scripts" / "example_scores.json").read_text())
 
 
 def uniform(score, confidence=5, overall=None):
@@ -28,11 +29,12 @@ def uniform(score, confidence=5, overall=None):
 class AggregateTests(unittest.TestCase):
     def test_example_matches_documented_output(self):
         res = agg.aggregate(copy.deepcopy(EXAMPLE))
-        self.assertEqual(res["panel_composite"], 63.4)
+        self.assertEqual(res["before_composite"], 63.2)   # official: plain mean
+        self.assertEqual(res["panel_composite"], 62.5)
         self.assertEqual(res["suggested_overall"], 4)
-        self.assertEqual(res["final_overall_ceiling"], 3)
+        self.assertEqual(res["final_overall_ceiling"], 6)   # DA-C1 downgraded by the EIC
         tr = next(d for d in res["dimensions"] if d["key"] == "technical_rigor")
-        self.assertEqual(tr["weighted_avg"], 62.6)
+        self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (62.0, 61.0))
 
     def test_weights_sum_to_one(self):
         for name, w in agg.PAPER_TYPE_WEIGHTS.items():
@@ -58,9 +60,100 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(agg.aggregate(hard)["final_overall_ceiling"], 3)
         self.assertEqual(agg.aggregate(downgraded)["final_overall_ceiling"], 6)
 
-    def test_cap_never_raises_decision(self):
+    def test_ceiling_is_the_cap_not_the_band(self):
+        # The composite band is a guideline; only the DA cap is a hard ceiling.
         data = {"reviewers": [uniform(40)], "da_critical": [{"id": "DA-C1"}]}
-        self.assertEqual(agg.aggregate(data)["final_overall_ceiling"], 2)
+        res = agg.aggregate(data)
+        self.assertEqual(res["suggested_overall"], 2)
+        self.assertEqual(res["final_overall_ceiling"], 3)
+        self.assertEqual(agg.aggregate({"reviewers": [uniform(40)]})["final_overall_ceiling"], 6)
+
+    def test_eic_weights_change_after_not_before(self):
+        strong, weak = uniform(80), uniform(40)
+        strong["eic_weight"], weak["eic_weight"] = 1.5, 0.5
+        res = agg.aggregate({"reviewers": [strong, weak]})
+        self.assertEqual(res["before_composite"], 60.0)
+        self.assertEqual(res["panel_composite"], 70.0)   # (80*1.5 + 40*0.5) / 2
+        self.assertTrue(res["eic_weighted"])
+        self.assertFalse(agg.aggregate({"reviewers": [uniform(70)]})["eic_weighted"])
+
+    def test_eic_assessment_can_be_lower_than_official(self):
+        harsh, lenient = uniform(50), uniform(80)
+        harsh["eic_weight"], lenient["eic_weight"] = 1.5, 0.5
+        res = agg.aggregate({"reviewers": [harsh, lenient]})
+        self.assertEqual(res["official_composite"], 65.0)
+        self.assertEqual(res["eic_composite"], 57.5)
+        self.assertEqual(res["eic_minus_official"], -7.5)
+
+    def test_rating_is_the_starting_point(self):
+        # Ratings 3,4,4,4,3 with dimension scores just under 60: the rating
+        # (3.6 -> 4) is the starting point, and the composite (band 3) is flagged.
+        rs = [uniform(59, overall=o) for o in (3, 4, 4, 4, 3)]
+        res = agg.aggregate({"reviewers": rs})
+        self.assertEqual(res["official_rating"], 3.6)
+        self.assertEqual(res["suggested_overall"], 4)
+        self.assertEqual(res["suggestion_basis"], "rating")
+        self.assertEqual(res["composite_band"], 3)
+        self.assertIsNotNone(res["cross_check"])
+
+    def test_eic_weights_can_lower_the_rating(self):
+        a, b = uniform(60, overall=3), uniform(60, overall=5)
+        a["eic_weight"], b["eic_weight"] = 1.5, 0.5
+        res = agg.aggregate({"reviewers": [a, b]})
+        self.assertEqual(res["official_rating"], 4.0)
+        self.assertEqual(res["eic_rating"], 3.5)
+        self.assertEqual(res["suggested_overall"], 4)       # half rounds up
+        a["eic_weight"] = 1.5; b["eic_weight"] = 0.5; b["overall"] = 4
+        self.assertEqual(agg.aggregate({"reviewers": [a, b]})["suggested_overall"], 3)
+
+    def test_composite_fallback_without_ratings(self):
+        res = agg.aggregate({"reviewers": [uniform(72)]})
+        self.assertEqual(res["suggestion_basis"], "composite")
+        self.assertEqual(res["suggested_overall"], 5)
+
+    def test_final_decision_drives_venue_labels(self):
+        res = agg.aggregate(copy.deepcopy(EXAMPLE))
+        venues = agg.load_venues()
+        self.assertEqual(agg.venue_view(res, "cvpr", venues["cvpr"], final=3)["label"], "3 Borderline Reject")
+        self.assertEqual(agg.venue_view(res, "iclr", venues["iclr"], final=5)["label"],
+                         "8 on {0,2,4,6,8,10} (8 on {1,3,5,6,8,10})")
+        # TPAMI keeps its harder bar relative to the decision
+        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["final"], 3)
+
+    def test_target_venue_label_equals_decision(self):
+        # Knife-edge: panel composite exactly 60.0 (band 4); CVPR's emphasis on
+        # experimental validation nudges its composite just under 60.
+        r = uniform(60, overall=4)
+        r["scores"]["experimental_validation"], r["scores"]["technical_rigor"] = 58, 62
+        res = agg.aggregate({"reviewers": [r]})
+        self.assertEqual((res["panel_composite"], res["composite_band"]), (60.0, 4))
+        venues = agg.load_venues()
+        cvpr = venues["cvpr"]
+        self.assertLess(agg.venue_view(res, "cvpr", cvpr)["composite"], 60.0)
+        v = agg.venue_view(res, "cvpr", cvpr, final=4, is_target=True)
+        self.assertEqual((v["shift"], v["label"]), (0, "4 Borderline Accept"))
+        # As a non-target venue, a sub-2-point emphasis difference is not a shift either
+        self.assertEqual(agg.venue_view(res, "cvpr", cvpr, final=4)["shift"], 0)
+
+    def test_real_bar_difference_still_shifts(self):
+        res = agg.aggregate({"reviewers": [uniform(61, overall=4)]})   # band 4
+        venues = agg.load_venues()
+        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["shift"], -1)  # needs 63
+
+    def test_format_example_has_neutral_weights(self):
+        # The format example must not suggest default EIC weights.
+        self.assertTrue(all(r["eic_weight"] == 1.0 for r in FORMAT_EXAMPLE["reviewers"]))
+
+    def test_four_point_mapping_follows_venue_anchors(self):
+        # 62-69 is a typical accepted paper and must map to 3 (Good), not 2.
+        self.assertEqual([agg.to_four(x) for x in (85, 80, 79, 65, 62, 61, 45, 44)],
+                         [4, 4, 3, 3, 3, 2, 2, 1])
+
+    def test_eic_weight_out_of_range_exits(self):
+        r = uniform(70)
+        r["eic_weight"] = 3
+        with self.assertRaises(SystemExit):
+            agg.aggregate({"reviewers": [r]})
 
     def test_high_spread_flag(self):
         data = {"reviewers": [uniform(50), uniform(75)]}
@@ -73,6 +166,47 @@ class AggregateTests(unittest.TestCase):
     def test_paper_type_alias(self):
         data = {"paper_type": "survey", "reviewers": [uniform(70)]}
         self.assertEqual(agg.aggregate(data)["paper_type"], "benchmark")
+
+    def test_venue_profiles_are_complete(self):
+        venues = agg.load_venues()
+        expected = {"cvpr", "iccv", "eccv", "neurips", "iclr", "icml", "aaai",
+                    "acmmm", "tmlr", "tpami", "tip"}
+        self.assertEqual(set(venues), expected)
+        for key, v in venues.items():
+            self.assertEqual(len(v["emphasis"]), len(agg.DIMENSIONS), key)
+            self.assertIn(v["scale"]["status"],
+                          {"official", "confirmed", "secondary", "assumed", "unpublished"}, key)
+            if v["scale"]["type"] != "tmlr":
+                self.assertEqual(set(v["scale"]["map"]), {str(i) for i in range(1, 7)}, key)
+
+    def test_example_venue_views(self):
+        res = agg.aggregate(copy.deepcopy(EXAMPLE))
+        venues = agg.load_venues()
+        views = {k: agg.venue_view(res, k, venues[k]) for k in venues}
+        self.assertEqual(views["cvpr"]["label"], "4 Borderline Accept")
+        self.assertEqual(views["icml"]["label"], "3 Weak accept (leaning accept)")
+        self.assertEqual(views["tpami"]["label"], "Major Revision")      # +3 bar
+        self.assertEqual(views["iclr"]["subscores"],
+                         {"Soundness": 2, "Presentation": 3, "Contribution": 3})
+        self.assertEqual(views["tmlr"]["label"], "Accept with minor revision")
+        self.assertEqual(views["aaai"]["label"], "6 (Borderline accept)")
+
+    def test_venue_views_respect_da_cap(self):
+        data = copy.deepcopy(EXAMPLE)
+        data["da_critical"] = [{"id": "DA-C1", "upheld": True, "resolvable_without_new_data": False}]
+        res = agg.aggregate(data)
+        venues = agg.load_venues()
+        for k, v in venues.items():
+            self.assertLessEqual(agg.venue_view(res, k, v)["final"], 3, k)
+        self.assertEqual(agg.venue_view(res, "tmlr", venues["tmlr"])["subscores"]["Claims & evidence"], "No")
+
+    def test_bar_offset_and_tmlr_without_cap(self):
+        res = agg.aggregate({"reviewers": [uniform(72)]})
+        venues = agg.load_venues()
+        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"])["band"], 4)  # 72 < 70+3
+        self.assertEqual(agg.venue_view(res, "neurips", venues["neurips"])["band"], 5)
+        tmlr = agg.venue_view(res, "tmlr", venues["tmlr"])
+        self.assertEqual(tmlr["label"], "Accept")
 
     def test_invalid_input_exits(self):
         with self.assertRaises(SystemExit):

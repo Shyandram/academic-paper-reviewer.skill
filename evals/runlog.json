@@ -1,0 +1,180 @@
+{
+ "cvpr-detseg-2604.24119-flaw": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-medical-2604.23274": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "iclr-detseg-2604.14684": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-3d-2607.02015": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-video-2605.12006": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-vlm-2605.01700": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-generation-2606.01911": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-lowlevel-2609.15120": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-detseg-2604.24119": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-efficient-2605.31124": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-representation-2607.11008": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "cvpr-robustness-2604.16562": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "eccv-medical-2609.11506": {
+  "model": "sonnet",
+  "skill": "2.3"
+ },
+ "eccv-generation-2609.28473": {
+  "model": "haiku",
+  "skill": "2.3.1"
+ },
+ "eccv-vlm-2609.16847": {
+  "model": "haiku",
+  "skill": "2.3.1"
+ },
+ "eccv-3d-2607.26889": {
+  "model": "haiku",
+  "skill": "2.3.1"
+ },
+ "eccv-video-2608.07663": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "stray_tool_attempt": "create_session (denied)"
+ },
+ "eccv-lowlevel-2608.10995": {
+  "model": "haiku",
+  "skill": "2.3.1"
+ },
+ "eccv-detseg-2608.23746": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "eccv-efficient-2609.05981": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "eccv-representation-2608.08963": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true,
+  "stray_tool_attempt": "send_message (denied)"
+ },
+ "eccv-robustness-2609.12577": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-medical-2509.22240": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true,
+  "stray_tool_attempt": "send_message (denied)"
+ },
+ "iclr-generation-2603.27083": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-vlm-2602.03733": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-3d-2508.13792": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true,
+  "stray_tool_attempt": "temporary files in /tmp and /root (removed)"
+ },
+ "iclr-video-2604.18367": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-lowlevel-2602.00579": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-efficient-2601.20232": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true,
+  "stray_tool_attempt": "create_session (denied)"
+ },
+ "iclr-representation-2512.20833": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-robustness-2509.21385": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "cvpr-lowlevel-2609.15120-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "eccv-3d-2607.26889-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true,
+  "note": "planted test-tuning caught but rated MAJOR as 'disclosed'; decision 3 via rating 3.49"
+ },
+ "eccv-video-2608.07663-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-video-2604.18367-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "iclr-efficient-2601.20232-flaw": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
+ },
+ "eccv-3d-2607.26889-flaw-v232": {
+  "model": "haiku",
+  "skill": "2.3.2",
+  "tool_restriction": true
+ },
+ "iclr-video-2604.18367-flaw-v232": {
+  "model": "haiku",
+  "skill": "2.3.2",
+  "tool_restriction": true
+ }
+}

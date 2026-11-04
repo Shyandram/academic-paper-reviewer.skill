@@ -95,10 +95,12 @@ Systematically check for these patterns:
 
 ## Calibration
 
-- CRITICAL is for issues that genuinely invalidate a central claim. Most papers have 0–1 CRITICAL issues. If you find none, say so explicitly. Do not promote a MAJOR issue to CRITICAL just to have one.
+- CRITICAL is rare. Among papers accepted at top venues, fewer than about 1 in 10 has an issue that is truly fatal. Most papers you review should have **no** CRITICAL issue. If you find none, write "No CRITICAL issues found." That is a normal, expected outcome, not a failure of your role.
+- Your strongest counter-argument does **not** have to be CRITICAL. A powerful objection that the authors can answer by narrowing a claim or adding a control is MAJOR.
+- Before rating anything CRITICAL, apply the test: *"If the authors fixed everything else, would this issue alone make the paper unpublishable at the target venue?"* If not, it is MAJOR.
 - Every issue needs a location and a concrete suggested fix.
 - Separate "the evidence doesn't support the claim as stated" (fixable by narrowing the claim) from "the evidence contradicts the claim" (much more serious). Mark which applies.
-- For each CRITICAL issue, say whether it could be resolved **by clarification or minor additions** or whether it **needs new data, experiments or a redesign**. The synthesizer uses this to set the decision cap.
+- For each CRITICAL issue, say whether it could be resolved **by clarification or minor additions** or whether it **needs new data, experiments or a redesign**. The EIC uses this to set the decision cap.
 
 ## Output Format
 
@@ -191,15 +193,27 @@ N. [PN]
 
 ## CRITICAL Issue Criteria
 
-An issue is CRITICAL (not just MAJOR) if it meets ANY of these criteria:
-1. **Invalidates the main claim**: The conclusion doesn't follow from the evidence
-2. **Fundamental methodological flaw**: The experiment can't test what it claims to test
-3. **Reproducibility impossibility**: Missing information makes reproduction impossible
-4. **Ethical violation**: Unaddressed harm, data misuse, or undisclosed conflicts
-5. **Fabrication/manipulation signal**: Evidence of data manipulation, image manipulation or p-hacking (stated factually, as a concern for the editor)
-6. **Undisclosed evaluation leakage**: test data used for training, tuning or prompt selection in a way that inflates the main result
+An issue is CRITICAL (not just MAJOR) only if it meets at least one of these strict criteria **and** passes the test above:
+1. **Evidence contradicts the main claim**: the paper's own results show the opposite of, or nothing like, the central claim. (Evidence that supports a *weaker* version of the claim is MAJOR: the fix is to narrow the claim.)
+2. **The experiment cannot test the claim**: e.g., evaluation on the training set, or a metric that cannot measure the claimed property. (A confound that is only partly controlled, or a missing control, is MAJOR.)
+3. **Evaluation leakage**: the paper trains on, tunes on, or selects hyperparameters, checkpoints, prompts or thresholds on the **held-out test set** it reports its main results on. This holds **whether or not the paper discloses it**: disclosure makes the problem visible, it does not make the reported numbers valid. Concrete evidence in the paper is required.
+   - *Not automatically critical (MAJOR):* tuning on a validation split that is also the standard reporting split because the test labels are hidden or unavailable (e.g., COCO val, ADE20K val, many medical datasets). That is field practice; ask for a held-out check.
+   - *Resolvable by clarification only* if the paper already contains results selected without the test set (e.g., a separate validation protocol) that support the main claim. Otherwise it **needs new experiments**.
+4. **Fabrication or manipulation signal**: concrete evidence of manipulated data, images or p-hacking, stated factually as a concern for the editor.
+5. **Serious ethical violation**: unaddressed harm, data misuse, or undisclosed conflicts.
+6. **The method cannot be understood**: so much is missing that the method itself is undefined. (Missing hyperparameters, code or implementation details are MAJOR or MINOR.)
 
-**Upheld CRITICAL issues cap the Editorial Decision**: at Borderline Accept (4) if every one is resolvable by clarification or minor additions, and at Borderline Reject (3) otherwise. This is a hard constraint (see `references/editorial_decision_standards.md`).
+**Never CRITICAL on their own** (rate these MAJOR or MINOR):
+- single runs, no error bars or significance tests, even with small margins
+- a missing baseline or comparison, including a missing "strongest" baseline
+- overclaimed wording ("state-of-the-art", "first", "general") when the results still support a narrower claim
+- headline gains measured against a weaker baseline than the best prior work, when the method still improves on the best prior work
+- confounds in training budget, data, backbone or pretraining that the paper partly controls, or that a matched experiment could resolve
+- unclear or missing protocol details, missing implementation details, details deferred to supplementary material
+- text–table inconsistencies, unless they reverse a conclusion
+- limited datasets or settings, missing ablations, missing failure cases
+
+The EIC rules on every CRITICAL issue you raise, checking it against the paper. **Upheld CRITICAL issues cap the decision**: at Borderline Accept (4) if each one is resolvable by clarification or minor additions, and at Borderline Reject (3) otherwise. This is a hard constraint (see `references/editorial_decision_standards.md`). Because of this, rate an issue CRITICAL only when you would defend it to the EIC as fatal.
 
 ## Tone
 

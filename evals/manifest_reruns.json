@@ -1,0 +1,49 @@
+[
+  {
+    "arxiv_id": "2607.26889",
+    "title": "StructureGS: Structure-aware Gaussian Splatting for Articulated Object Reconstruction",
+    "topic": "3d",
+    "comment": "accepted at ECCV 2026",
+    "primary_category": "cs.GR",
+    "published": "2026-07-29",
+    "venue": "eccv",
+    "id": "eccv-3d-2607.26889-flaw-v232",
+    "curation": "auto pick, checked against abstract",
+    "control_of": "eccv-3d-2607.26889",
+    "planted_flaw": "test-tuning",
+    "planted_sentence": "All hyperparameters, including the learning rate, loss weights and the number of training epochs, were selected based on performance on the test set.",
+    "anchor": "implementation details",
+    "rerun_of": "eccv-3d-2607.26889-flaw",
+    "skill": "2.3.2"
+  },
+  {
+    "arxiv_id": "2604.18367",
+    "title": "EAST: Early Action Prediction Sampling Strategy with Token Masking",
+    "topic": "video",
+    "comment": "Accepted at ICLR 2026",
+    "primary_category": "cs.CV",
+    "published": "2026-04-20",
+    "venue": "iclr",
+    "id": "iclr-video-2604.18367-flaw-v232",
+    "curation": "auto pick, checked against abstract",
+    "control_of": "iclr-video-2604.18367",
+    "planted_flaw": "test-tuning",
+    "planted_sentence": "All hyperparameters, including the learning rate, loss weights and the number of training epochs, were selected based on performance on the test set.",
+    "anchor": "training details",
+    "rerun_of": "iclr-video-2604.18367-flaw",
+    "skill": "2.3.2"
+  },
+  {
+    "arxiv_id": "2608.10995",
+    "title": "HNDiff: Haze-Noise Diffusion for Image Dehazing",
+    "topic": "lowlevel",
+    "comment": "Accepted to ECCV 2026. Project Page: https://jin-ting-he.github.io/HNDiff",
+    "primary_category": "cs.CV",
+    "published": "2026-08-11",
+    "venue": "eccv",
+    "id": "eccv-lowlevel-2608.10995-v232",
+    "curation": "manual swap: RA-SOD is salient object detection, not low-level vision (auto pick 2609.12622)",
+    "rerun_of": "eccv-lowlevel-2608.10995",
+    "skill": "2.3.2"
+  }
+]

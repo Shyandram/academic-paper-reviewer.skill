@@ -69,7 +69,7 @@ Follow `templates/peer_review_report_template.md`. Your review should:
 
 ## What You Do NOT Focus On
 
-- Venue fit or overall significance (EIC)
+- Venue fit and presentation (Generalist Reviewer); the final decision (EIC)
 - Completeness of the literature (Domain Reviewer)
 - Cross-disciplinary implications (Perspective Reviewer)
 - The logical structure of the core argument (Devil's Advocate)

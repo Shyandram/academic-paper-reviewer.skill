@@ -99,7 +99,11 @@ These thresholds are guidelines. The decision should be justified by the review 
 | All resolvable by clarification or minor additions (rewording claims, adding existing details, small analyses on existing results) | **Borderline Accept (4)** |
 | At least one needs new data, new experiments or a redesign | **Borderline Reject (3)** |
 
-The synthesizer may downgrade a DA-CRITICAL issue to MAJOR only with a written justification tied to the manuscript. The decision may always be *lower* than the ceiling.
+The **EIC** rules on every DA-CRITICAL issue after checking it against the paper. It upholds an issue only if it passes the AC test ("would I reject this paper on this issue alone, given its contribution?") and the strict criteria in `agents/devils_advocate_reviewer_agent.md`. Otherwise it downgrades the issue to MAJOR, with a written reason. The decision may always be *lower* than the ceiling.
+
+### Who Decides
+
+The EIC (meta-reviewer) makes the final decision. The **official** ratings and scores are the plain means of the reviewers' raw Overall ratings and dimension scores; they are what the authors see. The EIC's quality weights produce the **EIC assessment**, which can be higher or lower. Its **EIC-weighted rating** (the weighted mean of the reviewers' Overall ratings, rounded half up) is the starting point, and the 0–100 composite is a cross-check. The EIC may decide above or below the starting point with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
 
 ### Conference ↔ Journal Mapping
 
@@ -128,7 +132,7 @@ Different venues have different acceptance standards:
 | Mid-tier | BMVC, WACV, ACCV, domain journals | ~30–45% | Sound work with a clear contribution suffices |
 | Workshop | CVPR/ICCV/NeurIPS workshops | ~50–70% | Work in progress is acceptable if the direction is promising |
 
-Acceptance rates vary by year; treat them as orientation, not targets. See `references/venue_profiles.md` for review-form conventions.
+Acceptance rates vary by year; treat them as orientation, not targets. ACM Multimedia sits with the top conferences for multimedia work but applies a multimedia-scope gate. See `references/venue_profiles.md` for each venue's form, its scale (with verification status), and the emphasis weights used by `scripts/aggregate_scores.py --venue`.
 
 ### Rebuttal Potential
 

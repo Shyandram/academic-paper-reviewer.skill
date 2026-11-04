@@ -1,11 +1,12 @@
 # Academic Paper Reviewer for Codex and Claude
 
-A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process with five reviewer perspectives, aggregates their scores reproducibly, and turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
+A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process: five independent reviewers, then an Editor-in-Chief who acts as area chair. The EIC reads every review, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision. Scores are aggregated reproducibly as two lists (the reviewers' official scores and the EIC's internal weighted assessment), and the skill turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
 
 ```
 You:    Review this paper for CVPR: [attach PDF]
-Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 role-based reports
-        → Editorial decision, aggregated scores, consensus map, Revision Roadmap
+Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent reports
+        → EIC meta-review: reviewer weights, official scores and the EIC's internal weighted assessment, final decision
+        → Editorial decision letter, consensus map, Revision Roadmap
 ```
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
@@ -16,7 +17,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 role-based rep
 
 | Mode | Say something like | You get |
 |------|-------------------|---------|
-| **full** (default) | "Review this paper" | 5 reports (EIC, Methodology, Domain, Perspective, Devil's Advocate) + Editorial Decision + Revision Roadmap |
+| **full** (default) | "Review this paper" | 5 reports (Methodology, Domain, Perspective, Generalist, Devil's Advocate) + EIC meta-review + Editorial Decision + Revision Roadmap |
 | **quick** | "Is my paper ready for submission?" | EIC quick assessment + submission-readiness check (anonymity, page limit, checklists…) |
 | **methodology-focus** | "Are my baselines fair?" / "Check my experiments" | Claim-to-evidence map, fairness-of-comparison audit, statistics audit, prioritized fixes with compute estimates |
 | **guided** | "Walk me through the review" | Socratic, one-issue-at-a-time dialogue |
@@ -26,8 +27,11 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 role-based rep
 What sets it apart:
 - **Field-aware panel.** Reviewers are configured from the paper's actual sub-field and technique (e.g., "token pruning + latency benchmarking" rather than "deep learning").
 - **CV/ML depth.** Task-specific checklists cover detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models. They target the confounds that matter in practice: backbone, pretraining data, resolution, schedule, TTA and latency methodology.
-- **Devil's Advocate with teeth.** It steelmans the paper, then gives the strongest counter-argument and recomputes headline numbers. An upheld CRITICAL issue caps the decision.
+- **Devil's Advocate with teeth, and an EIC who checks it.** The DA steelmans the paper, gives the strongest counter-argument and recomputes headline numbers. The EIC checks each CRITICAL issue against the paper with an area-chair test ("would I reject on this alone?"). Only issues that are truly fatal cap the decision.
+- **Two score lists.** The **official** list holds the reviewers' raw ratings and scores and their plain means: what authors see, never modified. The **EIC assessment** is the EIC's internal view, weighting each reviewer by confidence × a quality weight (0.5–1.5); it can be higher or lower than the official one. The decision starts from the **EIC-weighted mean of the reviewers' Overall ratings**, like an area chair weighing recommendations. The 0–100 dimension composite is a cross-check, and the EIC must explain any disagreement.
+- **Calibrated to accepted papers.** Scores are anchored to what the target venue actually accepts, not to a flawless paper. See [`evals/`](evals/) for the evaluation on recently accepted ICLR/CVPR/ECCV papers.
 - **Reproducible scoring.** `scripts/aggregate_scores.py` computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.
+- **Venue-aware scoring.** It covers 11 venues: **CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP**. Scores are translated into each venue's own form, for example ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria, or IEEE journal recommendations. A **Cross-Venue Outlook** shows how the same paper would likely fare at each venue. Every scale is labeled *official*, *confirmed*, *secondary*, *assumed* or *unpublished*, so nothing unverified is presented as official.
 - **Integrity guardrails.** No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the manuscript.
 
 ---
@@ -120,15 +124,34 @@ Here are my three CVPR reviews. Help me write the one-page rebuttal. [paste revi
 Re-review: here is the revised manuscript and our response letter. [attach both]
 Review this paper in English, anonymous reviewers, skip confirmation.
 Guide me through reviewing this paper — I'm learning to review.
+Compare this paper across CVPR, ICLR and TMLR — which venue fits best?
+Review for ICLR in venue format.
 ```
 
-Useful modifiers: `target venue: …`, `journal: TPAMI`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
+Useful modifiers: `target venue: …`, `journal: TPAMI`, `compare venues`, `venue format`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
+
+### Supported venues
+
+| Key | Venue | Scale used | Status |
+|-----|-------|-----------|--------|
+| `cvpr` / `iccv` / `eccv` | CVPR, ICCV, ECCV | 6-point (Accept · Weak Accept · Borderline Accept · Borderline Reject · Weak Reject · Reject); ECCV judged against the declared contribution type | confirmed |
+| `neurips` | NeurIPS | Quality/Clarity/Significance/Originality 1–4, Overall 1–6 | secondary |
+| `iclr` | ICLR | Soundness/Presentation/Contribution 1–4, rating {0,2,4,6,8,10} (legacy {1,3,5,6,8,10}) | secondary |
+| `icml` | ICML | Overall recommendation 1–5 (2025) | official |
+| `aaai` | AAAI | 1–10 (6 Borderline accept · 5 Borderline reject · 4 Weak reject …) + Phase-1 early-rejection risk | confirmed |
+| `acmmm` | ACM Multimedia | Generic + multimedia-scope gate | unpublished |
+| `tmlr` | TMLR | Claims & evidence / Audience interest (Yes/No) | official |
+| `tpami` / `tip` | IEEE TPAMI / TIP | Accept · Minor · Major · (Revise &) Resubmit · Reject | secondary / assumed |
+
+Venue forms change every year. Check `references/venue_profiles.md` and the venue's current guidelines, and update `scripts/venues.json` when a form changes.
 
 ### Scoring by hand or in CI
 
 ```bash
 python3 academic-paper-reviewer/scripts/aggregate_scores.py academic-paper-reviewer/scripts/example_scores.json
 python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --json
+python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --venue cvpr --venue tmlr
+python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --all-venues
 ```
 
 ---
@@ -141,7 +164,8 @@ academic-paper-reviewer/               ← skill source
 ├── SKILL.md                           ← entry point: modes, workflow, hard rules
 ├── agents/                            ← one file per role
 │   ├── field_analyst_agent.md         (Phase 0: panel configuration)
-│   ├── eic_agent.md                   (EIC; quick, re-review, coaching)
+│   ├── eic_agent.md                   (EIC meta-reviewer: final decision; quick, re-review, coaching)
+│   ├── generalist_reviewer_agent.md   (R4: venue fit, presentation)
 │   ├── methodology_reviewer_agent.md  (R1; methodology-focus mode)
 │   ├── domain_reviewer_agent.md       (R2)
 │   ├── perspective_reviewer_agent.md  (R3)
@@ -150,7 +174,8 @@ academic-paper-reviewer/               ← skill source
 │   └── rebuttal_strategist_agent.md   (rebuttal mode)
 ├── references/                        ← rubrics, standards, checklists, venue profiles
 ├── templates/                         ← report, decision, rebuttal, response-letter formats
-├── scripts/aggregate_scores.py        ← score aggregation (+ example_scores.json)
+├── scripts/aggregate_scores.py        ← score aggregation + venue views (+ example_scores.json)
+├── scripts/venues.json                ← venue profiles (emphasis, bar, scale, form fields)
 └── examples/                          ← worked, fully fictional examples
 tools/install_codex_skill.py           ← safe, repeatable Codex installation
 tools/build_skill.py                   ← validate + package the skill

@@ -71,7 +71,7 @@ Your review should:
 
 - Detailed methodology assessment (Methodology Reviewer's job)
 - Literature completeness within the field (Domain Reviewer's job)
-- Journal/venue fit (EIC's job)
+- Venue fit and presentation (Generalist Reviewer); the final decision (EIC)
 - Logical fallacy detection (Devil's Advocate's job)
 
 ## Tone

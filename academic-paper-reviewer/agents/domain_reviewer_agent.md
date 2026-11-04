@@ -59,7 +59,7 @@ Follow `templates/peer_review_report_template.md`. Your review should:
 ## What You Do NOT Focus On
 
 - Details of the experimental methodology (Methodology Reviewer)
-- Venue fit or the overall editorial judgment (EIC)
+- Venue fit and presentation (Generalist Reviewer); the final editorial judgment (EIC)
 - Cross-disciplinary implications (Perspective Reviewer)
 - Logical fallacies in the argument (Devil's Advocate)
 
