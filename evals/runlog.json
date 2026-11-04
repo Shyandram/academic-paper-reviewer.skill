@@ -66,5 +66,9 @@
  "eccv-video-2608.07663": {
   "model": "haiku",
   "skill": "2.3.1"
+ },
+ "eccv-lowlevel-2608.10995": {
+  "model": "haiku",
+  "skill": "2.3.1"
  }
 }
