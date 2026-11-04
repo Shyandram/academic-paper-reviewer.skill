@@ -34,7 +34,7 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 | `neurips` | NeurIPS | Conf. | 2025 | 1.1 / 1.0 / 1.1 / 1.1 / 1.0 / 1.0 / 1.0 | +0 | secondary |
 | `iclr` | ICLR | Conf. | 2026 | **1.2** / 1.1 / 1.1 / 1.1 / 1.0 / 1.0 / 0.8 | +0 | secondary |
 | `icml` | ICML | Conf. | 2025 | **1.3** / 1.0 / 1.0 / 1.0 / 1.1 / 1.0 / 0.8 | +0 | official |
-| `aaai` | AAAI | Conf. | 2026 | 1.1 / 1.0 / 1.1 / 1.1 / 1.0 / 0.9 / 0.9 | +0 | unpublished |
+| `aaai` | AAAI | Conf. | 2026 | 1.1 / 1.0 / 1.1 / 1.1 / 1.0 / 0.9 / 0.9 | +0 | confirmed (range); mapping inferred |
 | `acmmm` | ACM Multimedia | Conf. | 2026 | 1.0 / 1.0 / **1.2** / **1.2** / 1.0 / 1.1 / 0.9 | +0 | unpublished |
 | `tmlr` | TMLR | Journal | 2025 | **1.5 / 1.3** / 0.4 / 0.5 / **1.3** / 1.1 / 1.0 | −5 | official |
 | `tpami` | IEEE TPAMI | Journal | 2025 | **1.3** / 1.1 / 1.0 / 1.1 / **1.3** / 1.1 / 0.9 | +3 | secondary |
@@ -83,9 +83,10 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 - **2026 note:** reportedly a 6-point scale (Weak Accept = 4, Weak Reject = 3, upper labels "use sparingly"). When targeting 2026, report the internal 1–6 score with those labels and mark it secondary.
 - **Emphasis:** claims must be backed by evidence, and every strength or weakness must be substantiated.
 
-### AAAI (`aaai`, AAAI-26; unpublished scale)
+### AAAI (`aaai`, AAAI-26; 1–10 scale confirmed)
 - **Process:** two phases. In Phase 1, three reviewers. Papers with sufficiently negative Phase-1 reviews can be rejected **before** author feedback. Survivors get more reviewers in Phase 2.
-- **Criteria (reported):** clarity, technical and experimental soundness, novelty, relevance. The numeric scale is not published, so the skill gives a generic recommendation and a **Phase-1 risk flag** (moderate at band 3, high at ≤ 2).
+- **Scale:** 1–10, with 10 the highest (confirmed by the maintainer, 2026-11). AAMAS 2026's AAAI-track rules treat a score of 5 or above as "weak reject or above", so **5 = weak reject** and 6 is the first accept-side score. The other points' wording is not published. The skill maps its internal Overall as 6 → 8–10 · 5 → 7 · 4 → 6 · 3 → 5 · 2 → 3–4 · 1 → 1–2, which is inferred.
+- **Criteria (reported):** clarity, technical and experimental soundness, novelty, relevance. The skill adds a **Phase-1 risk flag** (moderate at band 3, high at ≤ 2).
 - **AAAI-26 pilot:** every main-track paper also received one clearly labeled AI review, which carries no rating.
 
 ### ACM Multimedia (`acmmm`, 2026 guidelines; unpublished scale)
@@ -131,7 +132,7 @@ The official pages could not be fetched directly when this file was written; det
 - NeurIPS 2025/2026 Reviewer Guidelines: neurips.cc/Conferences/2025/ReviewerGuidelines
 - ICLR 2026 Reviewer Guide: iclr.cc/Conferences/2026/ReviewerGuide
 - ICML 2025/2026 Reviewer Instructions: icml.cc/Conferences/2025/ReviewerInstructions, …/2026/ReviewerInstructions
-- AAAI-26 Review Process: aaai.org/conference/aaai/aaai-26/review-process/; AAAI-26 AI Review Pilot (arXiv 2604.13940)
+- AAAI-26 Review Process: aaai.org/conference/aaai/aaai-26/review-process/; AAAI-26 AI Review Pilot (arXiv 2604.13940); AAMAS 2026 AAAI track: cyprusconferences.org/aamas2026/call-for-papers-aaai-track/
 - ACM MM 2026 Reviewer and AC Guidelines: 2026.acmmm.org/site/review-process-guidelines.html; ACM MM 2025 Call for Papers: acmmm2025.org/call-for-papers/
 - TMLR Reviewer Guide and Acceptance Criteria: jmlr.org/tmlr/reviewer-guide.html, jmlr.org/tmlr/acceptance-criteria.html
 - IEEE Computer Society, Making Peer Review Recommendations: computer.org/publications/making-peer-review-recommendations

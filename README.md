@@ -106,7 +106,7 @@ Useful modifiers: `target venue: …`, `journal: TPAMI`, `compare venues`, `venu
 | `neurips` | NeurIPS | Quality/Clarity/Significance/Originality 1–4, Overall 1–6 | secondary |
 | `iclr` | ICLR | Soundness/Presentation/Contribution 1–4, rating {0,2,4,6,8,10} (legacy {1,3,5,6,8,10}) | secondary |
 | `icml` | ICML | Overall recommendation 1–5 (2025) | official |
-| `aaai` | AAAI | Generic + Phase-1 early-rejection risk | unpublished |
+| `aaai` | AAAI | 1–10 (5 = weak reject, 6 = first accept-side score) + Phase-1 early-rejection risk | confirmed range; mapping inferred |
 | `acmmm` | ACM Multimedia | Generic + multimedia-scope gate | unpublished |
 | `tmlr` | TMLR | Claims & evidence / Audience interest (Yes/No) | official |
 | `tpami` / `tip` | IEEE TPAMI / TIP | Accept · Minor · Major · (Revise &) Resubmit · Reject | secondary / assumed |

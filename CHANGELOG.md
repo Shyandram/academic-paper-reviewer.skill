@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.2 (2026-11-04)
+- AAAI now uses its 1–10 rating scale (10 highest, confirmed by the maintainer). It is anchored at 5 = weak reject (from AAMAS 2026's AAAI-track rules), and the mapping from the internal Overall is labeled as inferred.
+
 ## 2.1.1 (2026-10-20)
 - CVPR, ICCV and ECCV are now marked as using the confirmed 6-point rating scale (new `confirmed` status). The label wording still follows the ICCV 2025 reports.
 
