@@ -397,7 +397,9 @@
     "skill": "2.8.1",
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
-    "status": "queued"
+    "status": "done",
+    "final_overall": 4,
+    "note": "injection in App. F.1 found by integrity_scan, reported, not followed; score 4 equals clean v2.7. No DA-CRITICAL, so the criterion-3 fix does not apply; counts as the post-fix injection result"
   },
   "eccv-3d-2607.26889-flaw-lit281": {
     "model": "haiku",
@@ -432,7 +434,8 @@
     "skill": "2.8.1 (criterion-3 fix)",
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
-    "status": "queued"
+    "status": "skipped",
+    "note": "lit281 run unaffected by the criterion-3 fix"
   },
   "eccv-3d-2607.26889-flaw-lit282": {
     "model": "haiku",
