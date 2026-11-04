@@ -247,5 +247,11 @@
   "skill": "2.6",
   "lit_mode": "strict",
   "tool_restriction": "explicit allow-list"
+ },
+ "eccv-video-2608.07663-flaw-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": "explicit allow-list"
  }
 }
