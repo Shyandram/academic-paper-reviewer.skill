@@ -253,9 +253,16 @@
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
-  "tool_restriction": "explicit allow-list"
+  "tool_restriction": "explicit allow-list",
+  "stray_tool_attempt": "create_session (denied) despite explicit allow-list"
  },
  "iclr-video-2604.18367-flaw-lit26": {
+  "model": "haiku",
+  "skill": "2.6",
+  "lit_mode": "strict",
+  "tool_restriction": "explicit allow-list"
+ },
+ "iclr-efficient-2601.20232-flaw-lit26": {
   "model": "haiku",
   "skill": "2.6",
   "lit_mode": "strict",
