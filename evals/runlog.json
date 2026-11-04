@@ -176,5 +176,11 @@
   "model": "haiku",
   "skill": "2.3.2",
   "tool_restriction": true
+ },
+ "eccv-lowlevel-2608.10995-v232": {
+  "model": "haiku",
+  "skill": "2.3.2",
+  "tool_restriction": true,
+  "purpose": "over-trigger check"
  }
 }
