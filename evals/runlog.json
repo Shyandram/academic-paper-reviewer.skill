@@ -113,5 +113,10 @@
   "model": "haiku",
   "skill": "2.3.1",
   "tool_restriction": true
+ },
+ "iclr-video-2604.18367": {
+  "model": "haiku",
+  "skill": "2.3.1",
+  "tool_restriction": true
  }
 }
