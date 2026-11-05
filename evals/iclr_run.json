@@ -1,1 +1,1 @@
-{"mode": "review", "pick": "stratified", "split": "all", "offset": 0, "limit": 20, "model": "claude-haiku-5-5", "max_parallel": 10, "budget": 3, "note": "stratified 20-paper pilot"}
+{"mode": "review", "pick": "stratified", "split": "all", "offset": 0, "limit": 20, "model": "claude-haiku-5-5", "max_parallel": 10, "budget": 3, "note": "pilot 2: skill 2.10, normalized arXiv-only text"}
