@@ -11,6 +11,8 @@ Claim-level novelty, learned from ClaimNov ("Do AI Scientists Know What's New?",
   - "not found" gets at most medium;
   - it also gives a paper-level score (ClaimNov's dimension weights: problem 0.4, result 0.3, method 0.2, resource 0.1), the attribution, and a paper reading.
 - **One established claim is claim-level, MAJOR at most.** In ClaimNov's ablation, a per-claim fail rule (fail if any central claim is covered) false-alarmed on 56.8% of ideas the field later published. DA criterion 7 now needs every central claim at level 5 from the same uncited prior work.
+- **Fix found by the first v2.9 eval run:** `novelty` matched the arXiv-only prior label as `prior (arXiv-only, 6+ months)`, but the filter emits `... before the cutoff`, so arXiv-only priors were ignored. Prior is now recognized by prefix, and a test reads the exact labels from the filter. On the iclr-detseg run, C1 and C2 move from "high / not found" to *medium*.
+- Criterion 3 wording: the field-practice case is a validation split with public labels, reported because the *test* labels are hidden (COCO, LVIS, ADE20K). A v2.9 run read "LVIS minival labels are public" as a reason the rule didn't fit.
 - **Attribution is separate from the verdict.** The prior work closest to the paper as a whole is named even when the claims pass. In ClaimNov, whole-paper similarity named the reviewer-disputed prior more often than claim-level matching did (37% vs 21%).
 
 ## 2.8.1

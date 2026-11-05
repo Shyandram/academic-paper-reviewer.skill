@@ -475,13 +475,17 @@
     "skill": "2.9",
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
-    "status": "running"
+    "status": "done",
+    "final_overall": 4,
+    "note": "novelty profile written; arXiv-only priors were ignored by a label mismatch (fixed; C1, C2 -> medium on recompute); LVIS minival selection MAJOR via field practice"
   },
   "eccv-vlm-2609.16847-lit29": {
     "model": "haiku",
     "skill": "2.9",
     "lit_mode": "strict",
     "agent_type": "paper-review-eval (file/shell tools only)",
-    "status": "running"
+    "status": "done",
+    "final_overall": 3,
+    "note": "DA-C1 upheld again (3rd consistent run); novelty profile C1-C3 medium, unchanged on recompute"
   }
 }

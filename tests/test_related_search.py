@@ -5,6 +5,7 @@ Run: python3 -m unittest discover -s tests
 
 import importlib.util
 import json
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -170,11 +171,21 @@ class NoveltyProfileTests(unittest.TestCase):
         m["cited_by_paper"] = True
         self.assertNotIn("criterion 7", rs.novelty_profile(prof)["paper_reading"])
 
+    def test_filter_labels_are_recognized_as_prior(self):
+        # The exact labels the filter emits (a v2.9 eval found arXiv-only priors ignored).
+        src = (Path(rs.__file__).read_text())
+        labels = sorted(set(re.findall(r'return True, "(prior [^"]+)"', src)))
+        self.assertEqual(len(labels), 2)
+        for lab in labels:
+            prof = {"claims": [{"id": "C1", "dimension": "method",
+                                "matches": [{"title": "A", "label": lab, "level": 3}]}]}
+            self.assertEqual(rs.novelty_profile(prof)["claims"][0]["verdict"], "medium", lab)
+
     def test_recent_preprints_never_set_the_verdict(self):
         prof = {"claims": [{"id": "C1", "dimension": "method",
                             "matches": [{"title": "New", "label": "recent preprint", "level": 5}]}]}
         c = rs.novelty_profile(prof)["claims"][0]
-        self.assertTrue(c["verdict"].startswith("no close prior work"))
+        self.assertIn("at most medium", c["verdict"])
         self.assertEqual(c["worth_discussing"], ["New"])
 
     def test_bad_level_or_dimension_is_rejected(self):

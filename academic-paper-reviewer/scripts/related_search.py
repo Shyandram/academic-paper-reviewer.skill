@@ -623,7 +623,11 @@ def cmd_scout(args):
 DIMENSIONS = {"problem": 0.4, "result": 0.3, "method": 0.2, "resource": 0.1}
 ALPHA = 0.5
 LEVEL_VERDICT = {5: "known", 4: "incremental", 3: "medium", 2: "high", 1: "high"}
-CLAIM_PRIOR = ("prior (peer-reviewed)", "prior (arXiv-only, 6+ months)")
+
+
+def is_prior(label):
+    """Prior work, as labelled by the filter (peer-reviewed, or arXiv-only 6+ months before the cutoff)."""
+    return str(label or "").startswith("prior (")
 
 
 def claim_coverage(levels, alpha=ALPHA):
@@ -641,15 +645,16 @@ def novelty_profile(profile):
         dim = c.get("dimension", "method").lower()
         if dim not in DIMENSIONS:
             raise ValueError(f"claim {c.get('id')}: dimension must be one of {sorted(DIMENSIONS)}")
-        prior = [m for m in c.get("matches", []) if m.get("label") in CLAIM_PRIOR]
-        other = [m for m in c.get("matches", []) if m.get("label") not in CLAIM_PRIOR]
+        prior = [m for m in c.get("matches", []) if is_prior(m.get("label"))]
+        other = [m for m in c.get("matches", []) if not is_prior(m.get("label"))]
         for m in c.get("matches", []):
             if m.get("level") not in (1, 2, 3, 4, 5):
                 raise ValueError(f"claim {c.get('id')}: level must be 1-5 for {m.get('title')!r}")
         a = claim_coverage([m["level"] for m in prior])
         top = max(prior, key=lambda m: m["level"], default=None)
         if top is None:
-            verdict = "no close prior work found (at most medium)"
+            verdict = ("no prior work covers it; later work worth discussing (at most medium)"
+                       if any(m["level"] >= 3 for m in other) else "no close prior work found (at most medium)")
         else:
             verdict = LEVEL_VERDICT[top["level"]]
         rows.append({"id": c.get("id"), "dimension": dim, "central": bool(c.get("central", True)),
@@ -662,7 +667,7 @@ def novelty_profile(profile):
     score = {}
     for c in claims:
         for m in c.get("matches", []):
-            if m.get("label") in CLAIM_PRIOR:
+            if is_prior(m.get("label")):
                 score[m["title"]] = score.get(m["title"], 0) + (m["level"] - 1) / 4
     attribution = max(score, key=score.get) if score else None
     central = [r for r in rows if r["central"]] or rows
