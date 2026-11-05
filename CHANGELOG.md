@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.9
+
+Claim-level novelty, learned from ClaimNov ("Do AI Scientists Know What's New?", Liu et al., arXiv 2610.36511). On 1,060 proposals with temporal ground truth, checks that judge a proposal as a whole either false-alarm on ideas the field later published (Si et al. 96%, AI Scientist v1 52%) or name prior art only by rejecting. ClaimNov's claim-level profile caught 97% of disguised papers at a 1.5% false-alarm rate.
+
+- **Typed claims and a coverage scale.** The Domain Reviewer types each claim as problem, method, resource or result. It rates each candidate prior work 1–5 for how fully that work covers the claim (1 unrelated … 5 full coverage), using that work's abstract. Only prior labels set a verdict.
+- **`related_search.py novelty --profile`** turns the profile into per-claim coverage and verdicts:
+  - per-claim coverage is a rank-discounted mean, α = 0.5;
+  - verdicts follow the highest prior level: 5 known, 4 incremental, 3 medium, 1–2 high;
+  - "not found" gets at most medium;
+  - it also gives a paper-level score (ClaimNov's dimension weights: problem 0.4, result 0.3, method 0.2, resource 0.1), the attribution, and a paper reading.
+- **One established claim is claim-level, MAJOR at most.** In ClaimNov's ablation, a per-claim fail rule (fail if any central claim is covered) false-alarmed on 56.8% of ideas the field later published. DA criterion 7 now needs every central claim at level 5 from the same uncited prior work.
+- **Attribution is separate from the verdict.** The prior work closest to the paper as a whole is named even when the claims pass. In ClaimNov, whole-paper similarity named the reviewer-disputed prior more often than claim-level matching did (37% vs 21%).
+
 ## 2.8.1
 
 - **Leakage rulings follow a decision table** (DA criterion 3). Selecting a configuration "according to the results in Table N" counts as selection on that table's split, per-task selection included. A benchmark with no validation split counts as a test set. If the selected configuration gives the headline numbers, the issue is CRITICAL. Before downgrading, the EIC must find the DA's quote with text search and compare the numbers. The size of the effect is not a reason to downgrade. Fixes a v2.7 eval run that downgraded a stated selection as "not stated".

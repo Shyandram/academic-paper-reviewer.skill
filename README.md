@@ -179,7 +179,7 @@ academic-paper-reviewer/               ← skill source
 ├── templates/                         ← report, decision, rebuttal, response-letter formats
 ├── scripts/aggregate_scores.py        ← score aggregation + venue views (+ example_scores.json)
 ├── scripts/integrity_scan.py          ← Phase 0 scan for text addressed to reviewers/AI (prompt injection)
-├── scripts/related_search.py          ← literature check: fingerprint, concept search, self-exclusion filter, verify, baseline scout, coverage, similarity
+├── scripts/related_search.py          ← literature check: fingerprint, concept search, self-exclusion filter, verify, baseline scout, coverage, similarity, claim-level novelty profile
 ├── scripts/venues.json                ← venue profiles (emphasis, bar, scale, form fields)
 └── examples/                          ← worked, fully fictional examples
 tools/install_codex_skill.py           ← safe, repeatable Codex installation

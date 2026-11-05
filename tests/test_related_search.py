@@ -144,6 +144,46 @@ class LedgerTests(unittest.TestCase):
         self.assertEqual([r["event"] for r in rows], ["keep", "drop"])
 
 
+
+class NoveltyProfileTests(unittest.TestCase):
+    P = "prior (peer-reviewed)"
+
+    def test_coverage_is_rank_discounted(self):
+        self.assertAlmostEqual(rs.claim_coverage([5, 2]), (1 + 0.5 * 0.25) / 1.5)
+        self.assertEqual(rs.claim_coverage([]), 0.0)
+
+    def test_one_known_claim_is_claim_level_not_paper_level(self):
+        prof = {"claims": [
+            {"id": "C1", "dimension": "problem", "matches": [{"title": "A", "label": self.P, "level": 5}]},
+            {"id": "C2", "dimension": "method", "matches": [{"title": "B", "label": self.P, "level": 3}]}]}
+        out = rs.novelty_profile(prof)
+        self.assertEqual([c["verdict"] for c in out["claims"]], ["known", "medium"])
+        self.assertIn("MAJOR at most", out["paper_reading"])
+        self.assertEqual(out["attribution"], "A")
+
+    def test_all_central_claims_by_same_uncited_prior_is_criterion7_candidate(self):
+        m = {"title": "A", "label": self.P, "level": 5, "cited_by_paper": False}
+        prof = {"claims": [{"id": "C1", "dimension": "problem", "matches": [m]},
+                           {"id": "C2", "dimension": "method", "matches": [m]},
+                           {"id": "C3", "dimension": "result", "central": False, "matches": []}]}
+        self.assertIn("criterion 7", rs.novelty_profile(prof)["paper_reading"])
+        m["cited_by_paper"] = True
+        self.assertNotIn("criterion 7", rs.novelty_profile(prof)["paper_reading"])
+
+    def test_recent_preprints_never_set_the_verdict(self):
+        prof = {"claims": [{"id": "C1", "dimension": "method",
+                            "matches": [{"title": "New", "label": "recent preprint", "level": 5}]}]}
+        c = rs.novelty_profile(prof)["claims"][0]
+        self.assertTrue(c["verdict"].startswith("no close prior work"))
+        self.assertEqual(c["worth_discussing"], ["New"])
+
+    def test_bad_level_or_dimension_is_rejected(self):
+        with self.assertRaises(ValueError):
+            rs.novelty_profile({"claims": [{"id": "C1", "dimension": "idea", "matches": []}]})
+        with self.assertRaises(ValueError):
+            rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method",
+                                            "matches": [{"title": "A", "label": self.P, "level": 7}]}]})
+
 if __name__ == "__main__":
     unittest.main()
 

@@ -227,7 +227,7 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
 5. **Serious ethical violation**: unaddressed harm, data misuse, or undisclosed conflicts.
 6. **The method cannot be understood**: so much is missing that the method itself is undefined. (Missing hyperparameters, code or implementation details are MAJOR or MINOR.)
 
-7. **Known results presented as new**: a verified *prior* work (published before the cutoff, confirmed with a link) does the same task with the same core mechanism, and the paper neither cites it nor differentiates itself from it, while claiming that mechanism as its main contribution. If the paper cites the work and argues a difference, however weakly, this is MAJOR (insufficient novelty), not CRITICAL.
+7. **Known results presented as new**: a verified *prior* work (published before the cutoff, confirmed with a link) does the same task with the same core mechanism, and the paper neither cites it nor differentiates itself from it, while claiming that mechanism as its main contribution. If the paper cites the work and argues a difference, however weakly, this is MAJOR (insufficient novelty), not CRITICAL. It concerns the paper's **central claims as a whole**: one established claim among several is MAJOR (cite and differentiate), never CRITICAL. Use the Domain Reviewer's claim-level profile (`related_search.py novelty`); a candidate needs every central claim at entailment level 5 from the same uncited prior work.
 
 **Never CRITICAL on their own** (rate these MAJOR or MINOR):
 - single runs, no error bars or significance tests, even with small margins

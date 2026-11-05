@@ -106,7 +106,7 @@ Undated results count as concurrent at most. Venue rules agree: e.g., ECCV says 
   python3 scripts/related_search.py verify --fp fingerprint.json --title "<reference title>"
   ```
   Found → give the link. Not found → keep it only if you are confident, marked `[verify]` (it may exist outside arXiv). If `verify` says the title is the reviewed paper itself, drop it.
-- **Novelty claims ("first", "no prior work"):** check them against the kept results and cite what you find. Each contribution claim gets a novelty verdict (high / medium / incremental / known) with 2–3 supporting papers; "known" needs a prior paper with the same task and core mechanism.
+- **Novelty claims ("first", "no prior work"):** check them against the kept results and cite what you find. Each contribution claim is typed (problem / method / resource / result) and gets a novelty verdict (high / medium / incremental / known) from the **claim-level profile**: each candidate prior work is rated 1–5 on how fully it covers the claim, and `related_search.py novelty` turns the profile into verdicts. "Known" needs a prior paper at level 5 (full coverage). One known claim is a claim-level finding, never a verdict on the whole paper (ClaimNov, arXiv 2610.36511).
 - **Baselines:** only **prior** results can be missing required baselines. An under-reported baseline is a MAJOR issue when the settings match; with different settings it is a question for the authors.
 - **Field snapshot:** 150–250 words on the field before the cutoff (paradigm shift, current state of the art, open problems, what counts as significant now). It calibrates Significance and Novelty; it is written from kept results only and never mentions the reviewed paper's reception.
 

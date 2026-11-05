@@ -50,12 +50,20 @@ Without a literature check, build the same table from the paper's own related wo
 
 ### Step 4c: Per-Claim Novelty, Baselines and Field Snapshot (literature check only)
 
-**Per-claim novelty.** For each contribution claim (C1, C2, … from the Methodology Reviewer's map), use the results of its `--purpose claim` query:
+**Per-claim novelty (claim-level profile).** Claims, not the whole paper, are the unit of novelty. Even papers experts call highly novel are rarely new in every contribution. In ClaimNov (arXiv 2610.36511), a rule that failed a proposal whenever any central claim was covered rejected 56.8% of ideas the field later published. Judging over the nearest abstracts without a claim profile still false-alarmed on 11.8%. With the claim profile, the rate fell to 1.5%.
 
-| Claim | Novelty (high / medium / incremental / known) | Supporting prior work (2–3, verified links, labels) | Reasoning |
-|-------|-----------------------------------------------|-----------------------------------------------------|-----------|
+1. **Type each claim** (C1, C2, … from the Methodology Reviewer's map; usually 2–4) by dimension: **problem** (task or question), **method** (technique), **resource** (dataset, benchmark, tool), or **result** (a finding or number, as an attribute and a value, e.g., "mIoU on ADE20K: 48.1 → 51.3").
+2. **Rate each candidate prior work** from the claim's `--purpose claim` results (same dimension, at most 3–5 per claim, one per paper) on the entailment scale. The question is how fully the prior work covers *this claim*, from its abstract:
+   1 unrelated · 2 shared topic only · 3 partial coverage, important details differ · 4 strong coverage, minor details missing · 5 full coverage of the claim's substance.
+3. Write the profile to `novelty_profile.json` (`{"claims": [{"id", "dimension", "central", "text", "matches": [{"title", "url", "label", "level", "cited_by_paper"}]}]}`) and run `related_search.py novelty --profile novelty_profile.json`. Only **prior** labels set a verdict. Recent preprints, concurrent and newer work are listed as "worth discussing".
 
-"Known" needs a **prior** paper with the same task and core mechanism. With no relevant prior work found, say "no close prior work found in N results", not "novel": the search covers arXiv only.
+| Claim | Dimension | Novelty (high / medium / incremental / known) | Top prior work (level, verified link, label, cited?) | Reasoning |
+|-------|-----------|-----------------------------------------------|------------------------------------------------------|-----------|
+
+Verdicts follow the highest prior level: 5 known, 4 incremental, 3 medium, 1–2 high. With no relevant prior work found, write "no close prior work found in N results" (at most medium), not "novel": the search covers arXiv only. Report the script's **paper reading**:
+- **One or more established claims** is a claim-level finding, MAJOR at most: ask the authors to cite, differentiate or drop those claims. It does not make the paper "known".
+- Only when **every central claim** is fully covered by the **same uncited** prior work is it a candidate for DA criterion 7. Then read beyond that work's abstract (verify) before raising it.
+- **Attribution is separate from the verdict.** Name the prior work closest to the paper as a whole (the top of `similarity` and the script's `attribution`) even when every claim passes, so the authors know what to position against.
 
 **Baseline scout.** For each external benchmark from `related_search.py benchmarks` (skip the paper's own new benchmarks), run `scout`:
 

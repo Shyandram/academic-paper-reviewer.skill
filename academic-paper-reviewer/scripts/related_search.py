@@ -50,6 +50,14 @@ Subcommands (standard library only):
       (cosine >= 0.30) and text overlap (>= 2 shared 8-grams: an integrity
       concern for the editor, never an accusation).
 
+  novelty      --profile novelty_profile.json [--ledger ...]
+      Claim-level novelty profile (after ClaimNov, arXiv 2610.36511). Input: the
+      typed claims (problem / method / resource / result) with, for each, the
+      prior works that might cover it and an entailment level 1-5. Output: per-claim
+      coverage and verdict, a paper-level novelty score, the attribution (the prior
+      work covering most), and the paper-level reading: one established claim is a
+      claim-level finding (MAJOR at most), not a reason to call the paper known.
+
 Common option: --ledger search_ledger.jsonl (default: next to the fingerprint).
 
 Filtering rules (see references/literature_search.md):
@@ -607,6 +615,90 @@ def cmd_scout(args):
                      indent=2, ensure_ascii=False))
 
 
+# ---------------------------------------------------------------- claim-level novelty
+# After ClaimNov (Liu et al., arXiv 2610.36511): claims are the unit of novelty.
+# Entailment levels: 1 unrelated, 2 shared topic only, 3 partial coverage with
+# important details differing, 4 strong coverage with minor details missing,
+# 5 full coverage of the claim's substantive content.
+DIMENSIONS = {"problem": 0.4, "result": 0.3, "method": 0.2, "resource": 0.1}
+ALPHA = 0.5
+LEVEL_VERDICT = {5: "known", 4: "incremental", 3: "medium", 2: "high", 1: "high"}
+CLAIM_PRIOR = ("prior (peer-reviewed)", "prior (arXiv-only, 6+ months)")
+
+
+def claim_coverage(levels, alpha=ALPHA):
+    """Rank-discounted mean of the entailment scores (level-1)/4, strongest first."""
+    e = sorted(((l - 1) / 4 for l in levels), reverse=True)
+    if not e:
+        return 0.0
+    w = [alpha ** i for i in range(len(e))]
+    return sum(wi * ei for wi, ei in zip(w, e)) / sum(w)
+
+
+def novelty_profile(profile):
+    claims, rows = profile.get("claims", []), []
+    for c in claims:
+        dim = c.get("dimension", "method").lower()
+        if dim not in DIMENSIONS:
+            raise ValueError(f"claim {c.get('id')}: dimension must be one of {sorted(DIMENSIONS)}")
+        prior = [m for m in c.get("matches", []) if m.get("label") in CLAIM_PRIOR]
+        other = [m for m in c.get("matches", []) if m.get("label") not in CLAIM_PRIOR]
+        for m in c.get("matches", []):
+            if m.get("level") not in (1, 2, 3, 4, 5):
+                raise ValueError(f"claim {c.get('id')}: level must be 1-5 for {m.get('title')!r}")
+        a = claim_coverage([m["level"] for m in prior])
+        top = max(prior, key=lambda m: m["level"], default=None)
+        if top is None:
+            verdict = "no close prior work found (at most medium)"
+        else:
+            verdict = LEVEL_VERDICT[top["level"]]
+        rows.append({"id": c.get("id"), "dimension": dim, "central": bool(c.get("central", True)),
+                     "coverage": round(a, 3), "novelty": round(1 - a, 3), "verdict": verdict,
+                     "top_prior": top and {k: top.get(k) for k in ("title", "url", "level", "cited_by_paper")},
+                     "worth_discussing": [m.get("title") for m in other if m.get("level", 0) >= 3]})
+    total = sum(DIMENSIONS[r["dimension"]] for r in rows)
+    paper = 1 - sum(DIMENSIONS[r["dimension"]] * r["coverage"] for r in rows) / total if total else None
+    # Attribution: the prior work with the largest summed coverage across claims.
+    score = {}
+    for c in claims:
+        for m in c.get("matches", []):
+            if m.get("label") in CLAIM_PRIOR:
+                score[m["title"]] = score.get(m["title"], 0) + (m["level"] - 1) / 4
+    attribution = max(score, key=score.get) if score else None
+    central = [r for r in rows if r["central"]] or rows
+    known = [r for r in central if r["verdict"] == "known"]
+    same_uncited = (len(known) == len(central) and len({r["top_prior"]["title"] for r in known}) == 1
+                    and not any(r["top_prior"].get("cited_by_paper") for r in known))
+    if central and same_uncited:
+        reading = ("every central claim is fully covered by the same uncited prior work: "
+                   "candidate for DA criterion 7 (known results presented as new); verify full text")
+    elif known:
+        reading = (f"{len(known)} of {len(central)} central claims established by prior work: a claim-level "
+                   "finding, MAJOR at most (cite, differentiate or drop those claims); the paper is not "
+                   "'known' as a whole")
+    else:
+        reading = "no central claim fully covered by prior work"
+    return {"claims": rows, "paper_novelty": None if paper is None else round(paper, 3),
+            "attribution": attribution, "paper_reading": reading,
+            "note": ("paper_novelty describes what this search found, not the paper: a claim with no prior "
+                     "match counts as uncovered, and the search covers arXiv only. Use the per-claim "
+                     "profile, not the single number, for the review."),
+            "scale": "1 unrelated, 2 shared topic, 3 partial, 4 strong (minor details missing), 5 full coverage",
+            "weights": DIMENSIONS}
+
+
+def cmd_novelty(args):
+    prof = json.loads(Path(args.profile).read_text())
+    try:
+        out = novelty_profile(prof)
+    except ValueError as e:
+        sys.exit(f"error: {e}")
+    if args.ledger:
+        ledger_write(args.ledger, {"event": "novelty", "paper_novelty": out["paper_novelty"],
+                                   "verdicts": {r["id"]: r["verdict"] for r in out["claims"]}})
+    print(json.dumps(out, indent=2, ensure_ascii=False))
+
+
 def cmd_coverage(args):
     fp, ledger = load_fp(args.fp), ledger_path(args)
     claims = [c.strip() for c in (args.claims or "").split(",") if c.strip()]
@@ -641,6 +733,7 @@ def main():
     p.add_argument("--ledger", help="accepted for consistency; benchmarks does not log")
     p = sub.add_parser("scout"); p.add_argument("--fp", required=True); p.add_argument("--ledger")
     p.add_argument("--benchmark", required=True); p.add_argument("--metric")
+    p = sub.add_parser("novelty"); p.add_argument("--profile", required=True); p.add_argument("--ledger")
     p = sub.add_parser("coverage"); p.add_argument("--fp", required=True); p.add_argument("--ledger")
     p.add_argument("--claims", help="comma-separated claim tags, e.g. C1,C2,C3")
     for name in ("search", "filter", "verify"):
@@ -661,7 +754,7 @@ def main():
     args = ap.parse_args()
     {"fingerprint": cmd_fingerprint, "search": cmd_search, "filter": cmd_filter,
      "verify": cmd_verify, "similarity": cmd_similarity, "benchmarks": cmd_benchmarks,
-     "scout": cmd_scout, "coverage": cmd_coverage}[args.cmd](args)
+     "scout": cmd_scout, "coverage": cmd_coverage, "novelty": cmd_novelty}[args.cmd](args)
 
 
 if __name__ == "__main__":
