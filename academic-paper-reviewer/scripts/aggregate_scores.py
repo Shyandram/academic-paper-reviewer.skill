@@ -10,6 +10,9 @@ not have to do weighted averages by hand:
   * composite score per reviewer and for the panel, using paper-type weights
   * suggested decision band from the composite
   * DA-CRITICAL cap (upheld critical issues cap the decision at 4 or 3)
+  * warnings when a reviewer's composite is outside the band implied by their
+    pool_position (optional, 0-100: share of the venue's submissions the paper
+    beats), and when the whole panel sits in the borderline band
   * consistency warnings when a reviewer's Overall (1-6) disagrees with the
     band implied by their own composite by 2 or more points
   * two score lists:
@@ -131,6 +134,20 @@ def fail(msg):
     sys.exit(f"error: {msg}")
 
 
+# Pool position (share of the venue's submissions the paper is better than) -> the
+# 0-100 band it implies (references/quality_rubrics.md, "Pool position").
+POOL_BANDS = [(95, 85, 100), (85, 73, 84), (70, 62, 72), (55, 55, 61), (30, 42, 54), (0, 0, 41)]
+POOL_TOLERANCE = 5  # composite this far outside the band triggers a warning
+BORDERLINE = (55, 61)
+
+
+def pool_band(p):
+    for floor, lo, hi in POOL_BANDS:
+        if p >= floor:
+            return lo, hi
+    return POOL_BANDS[-1][1:]
+
+
 def validate(data):
     if not isinstance(data.get("reviewers"), list) or not data["reviewers"]:
         fail("'reviewers' must be a non-empty list")
@@ -144,6 +161,9 @@ def validate(data):
         if not isinstance(w, (int, float)) or not EIC_WEIGHT_RANGE[0] <= w <= EIC_WEIGHT_RANGE[1]:
             fail(f"reviewer {role}: eic_weight must be a number "
                  f"{EIC_WEIGHT_RANGE[0]}-{EIC_WEIGHT_RANGE[1]}")
+        pp = r.get("pool_position")
+        if pp is not None and (not isinstance(pp, (int, float)) or not 0 <= pp <= 100):
+            fail(f"reviewer {role}: pool_position must be a number 0-100")
         scores = r.get("scores", {})
         for key, label in DIMENSIONS:
             v = scores.get(key)
@@ -199,6 +219,14 @@ def aggregate(data):
                  "implied_overall": implied, "overall": r.get("overall"),
                  "confidence": r["confidence"], "confidence_weight": cw[i],
                  "eic_weight": ew[i], "weight_share": round(share[i], 3)}
+        if r.get("pool_position") is not None:
+            lo, hi = pool_band(r["pool_position"])
+            entry["pool_position"] = r["pool_position"]
+            entry["pool_band"] = [lo, hi]
+            if c < lo - POOL_TOLERANCE or c > hi + POOL_TOLERANCE:
+                warnings.append(
+                    f"{entry['role']}: pool position {r['pool_position']} implies {lo}-{hi}, "
+                    f"but the composite is {c}. Move the scores or the pool position.")
         per_reviewer.append(entry)
         if r.get("overall") is not None and abs(r["overall"] - implied) >= 2:
             warnings.append(
@@ -206,6 +234,12 @@ def aggregate(data):
                 f"(implies {implied}). Check that scores and text agree; "
                 f"a deliberate gap is fine if the review explains it.")
 
+    comps = [p["composite"] for p in per_reviewer]
+    if len(comps) > 1 and all(BORDERLINE[0] <= c <= BORDERLINE[1] for c in comps):
+        warnings.append(
+            f"every reviewer's composite is in the borderline band {BORDERLINE[0]}-"
+            f"{BORDERLINE[1]}: the panel may be compressed. The EIC should say which side "
+            f"of the bar the deciding evidence points to.")
     composite_band = composite_to_overall(panel_composite)
     overalls = [r.get("overall") for r in reviewers]
     if all(o is not None for o in overalls):
@@ -365,6 +399,9 @@ def to_markdown(res):
     comps = " | ".join(str(p["composite"]) for p in res["per_reviewer"])
     lines.append(f"| **Composite** | {comps} | **{res['before_composite']}** | "
                  f"**{res['panel_composite']}** | |")
+    if any("pool_position" in p for p in res["per_reviewer"]):
+        pools = " | ".join(str(p.get("pool_position", "–")) for p in res["per_reviewer"])
+        lines.append(f"| Pool position (P%) | {pools} | | | |")
     overalls = [(p["role"], p["overall"]) for p in res["per_reviewer"] if p["overall"] is not None]
     if overalls:
         lines += ["", "#### Ratings (the decision's starting point)", "",
@@ -410,6 +447,8 @@ def main():
                     help="the EIC's final Overall decision (1-6); venue labels are rendered from it")
     ap.add_argument("--all-venues", action="store_true",
                     help="add views for every venue in scripts/venues.json")
+    ap.add_argument("--out", metavar="FILE",
+                    help="write the output to FILE instead of stdout (no shell redirect needed)")
     args = ap.parse_args()
     try:
         if args.path == "-":
@@ -436,9 +475,14 @@ def main():
     views = [venue_view(res, k, venues[k], args.final, is_target=(k == target)) for k in ordered]
     if args.json:
         res["venue_views"] = views
-        print(json.dumps(res, indent=2, ensure_ascii=False))
+        text = json.dumps(res, indent=2, ensure_ascii=False)
     else:
-        print(to_markdown(res) + (venue_markdown(views) if views else ""))
+        text = to_markdown(res) + (venue_markdown(views) if views else "")
+    if args.out:
+        with open(args.out, "w", encoding="utf-8") as f:
+            f.write(text + "\n")
+    else:
+        print(text)
 
 
 if __name__ == "__main__":

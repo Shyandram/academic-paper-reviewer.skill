@@ -36,6 +36,38 @@ class AggregateTests(unittest.TestCase):
         tr = next(d for d in res["dimensions"] if d["key"] == "technical_rigor")
         self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (62.0, 61.0))
 
+    def test_pool_position_band_and_warning(self):
+        self.assertEqual(agg.pool_band(50), (42, 54))   # the median submission
+        self.assertEqual(agg.pool_band(75), (62, 72))   # a typical accepted paper
+        self.assertEqual(agg.pool_band(96), (85, 100))
+        self.assertEqual(agg.pool_band(10), (0, 41))
+        ok = dict(uniform(66), pool_position=75)
+        off = dict(uniform(66), pool_position=40)        # implies 42-54, composite 66
+        res = agg.aggregate({"reviewers": [ok, off]})
+        pool_warn = [w for w in res["warnings"] if "pool position" in w]
+        self.assertEqual(len(pool_warn), 1)
+        self.assertIn("40", pool_warn[0])
+        self.assertEqual(res["per_reviewer"][0]["pool_band"], [62, 72])
+
+    def test_pool_position_is_validated(self):
+        with self.assertRaises(SystemExit):
+            agg.aggregate({"reviewers": [dict(uniform(60), pool_position=140)]})
+
+    def test_out_writes_file_without_redirect(self):
+        import subprocess, sys, tempfile, os
+        with tempfile.TemporaryDirectory() as d:
+            out = os.path.join(d, "agg.json")
+            subprocess.run([sys.executable, str(SKILL / "scripts" / "aggregate_scores.py"),
+                            str(SKILL / "scripts" / "example_scores.json"), "--json",
+                            "--out", out], check=True, capture_output=True)
+            self.assertIn("panel_composite", json.loads(Path(out).read_text()))
+
+    def test_compressed_panel_warning(self):
+        res = agg.aggregate({"reviewers": [uniform(56), uniform(58), uniform(60)]})
+        self.assertTrue(any("compressed" in w for w in res["warnings"]))
+        res = agg.aggregate({"reviewers": [uniform(48), uniform(58), uniform(60)]})
+        self.assertFalse(any("compressed" in w for w in res["warnings"]))
+
     def test_ceiling_label_says_none_without_a_cap(self):
         res = agg.aggregate({"reviewers": [uniform(70)]})
         self.assertEqual(res["final_overall_ceiling"], 6)

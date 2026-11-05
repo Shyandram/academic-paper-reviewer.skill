@@ -1,5 +1,32 @@
 # Changelog
 
+## 2.10
+
+Score calibration against the whole submission pool. On the first ICLR 2026 calibration pilot (20 stratified submissions, Haiku), scores did not separate papers. Each dimension's standard deviation across papers was 2–5 points, the mean of 6 dimensions stayed between 55 and 61, and nearly every paper got Overall 3. Spearman with the human mean was −0.12 and acceptance AUC 0.47. A paper with human mean 2.0 and one with 6.0 both got 3. The anchors described papers only relative to the venue's *accepted* papers, and the anti-harshness rule only ever raised scores, so unsure reviewers defaulted to "borderline".
+
+- **Pool position.** Each reviewer, and the EIC, first places the paper among all submissions to the venue ("better than about P% of submissions"), with the deciding evidence. Then they score within the matching band:
+  - P of 95 or more → 85+;
+  - P 85–94 → 73–84;
+  - P 70–84 → 62–72, a typical accepted paper;
+  - P 55–69 → 55–61, borderline;
+  - P 30–54 → 42–54, a typical rejected submission;
+  - P below 30 → below 42.
+
+  The 62 accept-side threshold and the 0–100 → 1–4 mapping are unchanged.
+- **Base rates** in `references/venue_profiles.md`. ICLR 2026: about 27% accepted, 45% rejected, 24% withdrawn, 5% desk rejected. ICLR 2025: about 32% accepted. The major conferences are at about 22–28%; assume 25% otherwise.
+- **Signal lists:** what a typical rejected submission and an accepted paper look like.
+- **Two-sided check:** reviewers ask both "would a typical accepted paper score higher?" and "would a typical rejected submission score lower?"
+- **Uncertainty:** it is never a reason to score a paper as borderline.
+- **EIC:** states its own pool position. When all reviewers sit in the borderline range, it says which side the evidence points to, and it rules on pool positions that differ by 30 points or more.
+- **`aggregate_scores.py`:**
+  - accepts an optional `pool_position` (0–100) for each reviewer and shows it in the report;
+  - warns when a reviewer's composite is more than 5 points outside the band matching their pool position;
+  - warns when every reviewer's composite is in the borderline band (55–61);
+  - `--out FILE` writes the output without a shell redirect. Pilot runs had redirects blocked by tool permissions and worked around them.
+- **Evals (ICLR calibration):**
+  - Every paper text is normalized the same way: the header before the abstract is replaced by the title, and line numbers, the arXiv stamp, emails, affiliation footnotes, code links, acknowledgments and acceptance marks are removed.
+  - Only arXiv versions posted before the decision are used. paperreview.ai's dump had camera-ready PDFs (author names, acknowledgments, no line numbers) for every accepted paper and anonymous submissions for the rest. That decision cue was found in the pilot: 0/29 accepted vs 56/56 other dump papers showed "Anonymous authors".
+
 ## 2.9
 
 Claim-level novelty, learned from ClaimNov ("Do AI Scientists Know What's New?", Liu et al., arXiv 2610.36511). On 1,060 proposals with temporal ground truth, checks that judge a proposal as a whole either false-alarm on ideas the field later published (Si et al. 96%, AI Scientist v1 52%) or name prior art only by rejecting. ClaimNov's claim-level profile caught 97% of disguised papers at a 1.5% false-alarm rate.

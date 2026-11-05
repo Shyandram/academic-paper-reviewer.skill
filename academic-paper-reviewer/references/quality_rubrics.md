@@ -13,23 +13,27 @@ Calibrated 0–100 scoring rubrics for the 7 review dimensions. All reviewers mu
 
 ### Calibration Guidance
 
-**Venue anchors (read before every score).** Scores are relative to the papers the **target venue accepts**, not to a flawless paper:
+**Pool position: place the paper in the submission pool (before any dimension score).** Scores are relative to **all submissions to the target venue**, not to a flawless paper and not only to the accepted ones. Most submissions are not accepted: at the major ML/CV conferences only about one in four is (base rates in `references/venue_profiles.md`; assume 25% if the venue is not listed). Estimate the paper's **pool position**, the share of the venue's submissions it is better than, and write it in your report as "Pool position: better than about P% of submissions". Then score each dimension around the matching band:
 
-| Score | Meaning at the target venue |
-|-------|------------------------------|
-| 85+ | Top of the accepted papers on this dimension (oral/highlight level) |
-| **70–80** | **A solid accepted paper**: clear strengths, ordinary weaknesses |
-| **62–69** | **A typical accepted paper**: real weaknesses (e.g., single runs, a missing baseline, some overclaiming) outweighed by the contribution |
-| 55–61 | Borderline: could go either way at this venue |
-| 45–54 | Below the venue's bar on this dimension; a reject-side paper |
-| < 45 | Clearly below the bar |
+| Pool position P | Score band | Meaning at the target venue |
+|-----------------|-----------|------------------------------|
+| ≥ 95 | 85+ | Top of the accepted papers (oral/highlight level) |
+| 85–94 | 73–84 | A solid accepted paper: clear strengths, ordinary weaknesses |
+| **70–84** | **62–72** | **A typical accepted paper**: real weaknesses (single runs, a missing baseline, some overclaiming) outweighed by the contribution |
+| 55–69 | 55–61 | Borderline: could go either way |
+| **30–54** | **42–54** | **A typical rejected submission**; the median submission sits here |
+| < 30 | < 42 | Clearly below the bar; such papers are often withdrawn |
 
-**Consistency with your Overall:** if you recommend Overall 4 (Borderline Accept), your dimension scores should mostly sit at 60 or above. If they don't, either the scores are too low for the venue anchors or the recommendation is too high. Fix whichever is wrong.
+How to place the paper:
+- **Base rates are the prior, the evidence decides.** Any single paper can be anywhere. But across the papers you review, about three in four should end up below 62 and about half below 55. Never put a paper at "borderline" because you are unsure. Decide which side the evidence points to and say why.
+- **Signals of a typical rejected submission:** the gain over the closest prior work is small or not shown; baselines are weak, missing or not tuned; the main claim is not tested by the experiments; results come from one small or easy setting; the method is hard to understand from the paper; known ideas are presented as new; or the evaluation protocol is flawed (test-set selection, leakage, unfair comparison).
+- **Signals of an accepted paper:** a clear idea or finding that the field didn't have; evidence that supports the central claim across settings, with strong and fair baselines; insight beyond a leaderboard gain; honest limitations.
+- **Ask both questions** before submitting: *"Would a typical accepted paper at this venue score higher on this dimension?"* and *"Would a typical rejected submission score lower?"* If the answer to one is no, move the score. A weakness that most accepted papers share is not a reason for a sub-60 score; a weakness that most rejected papers share is not offset by polish elsewhere.
 
-Before submitting your scores, ask: *"Would a typical accepted paper at this venue score higher than this on this dimension?"* If yes, and this paper is no worse, raise the score. A weakness that most accepted papers at the venue share is not a reason for a sub-60 score.
+**Consistency with your Overall:** if you recommend Overall 4 (Borderline Accept), your dimension scores should mostly sit at 60 or above, and your pool position at 65 or above. If they don't, either the scores or the recommendation are wrong. Fix whichever is wrong.
 
 - **"Strong" means strong for the target venue tier.** A solid workshop paper is not a 75 on Novelty against a CVPR bar.
-- **Avoid compression.** Panels tend to put everything at 60–75. Use the full range when the evidence supports it, and make sure the scores separate the paper's best dimension from its worst.
+- **Avoid compression.** Panels tend to give every paper the same middle scores (55–65), which carries no information about the paper. Use the full range when the evidence supports it: across papers (via the pool position) and within a paper (separate its best dimension from its worst).
 - **Score the paper, not its potential.** Promised code does not earn Reproducibility points as if it were released (cap at the *Strong* band).
 - **Ethics with nothing at stake.** For a paper with no human data, no deployment risk and no misuse potential, score Ethical Compliance on how honestly limitations are discussed. Typical range: 60–80.
 - **Supplementary material.** If the paper defers details to a supplement you don't have, treat them as unverified: ask about them in Questions, and don't drop Reproducibility below the *Competent* band (55–74) for that reason alone.
@@ -211,7 +215,7 @@ All weight sets sum to 1.00 and are implemented in `scripts/aggregate_scores.py`
 
 ## Mapping 0–100 Dimension Scores to NeurIPS-Style 1–4 Scores
 
-Use this mapping so a reviewer's two score sets agree. It follows the venue anchors: a typical accepted paper (62–69) maps to **3 (Good)**, and the ICLR and NeurIPS sub-scores in `scripts/aggregate_scores.py` use the same thresholds.
+Use this mapping so a reviewer's two score sets agree. It follows the pool-position bands: a typical accepted paper (62–72) maps to **3 (Good)**, and the ICLR and NeurIPS sub-scores in `scripts/aggregate_scores.py` use the same thresholds.
 
 | NeurIPS-style score | Derived from | Typical 0–100 range |
 |---------------------|--------------|---------------------|

@@ -40,6 +40,19 @@ Emphasis order: Technical Rigor, Clarity, Novelty, Significance, Experimental Va
 | `tpami` | IEEE TPAMI | Journal | 2025 | **1.3** / 1.1 / 1.0 / 1.1 / **1.3** / 1.1 / 0.9 | +3 | secondary |
 | `tip` | IEEE TIP | Journal | 2025 | 1.2 / 1.1 / 1.0 / 1.0 / **1.3** / 1.1 / 0.8 | −2 | assumed |
 
+### Base rates (for the pool position in `references/quality_rubrics.md`)
+
+Reviewers place each paper among **all** submissions, so they need the share that is accepted. Approximate rates, counting withdrawn and desk-rejected submissions in the pool:
+
+| Venue | Accepted share of submissions | Notes |
+|-------|-------------------------------|-------|
+| ICLR 2026 | ≈ 27% (5,359 of 19,814, including 225 orals) | ≈ 45% rejected, ≈ 24% withdrawn (mostly after low reviews), ≈ 5% desk rejected; mean human rating ≈ 5.4 for accepted and ≈ 4.0 for rejected papers on {0, 2, 4, 6, 8, 10} |
+| ICLR 2025 | ≈ 32% (3,703 of 11,663) | ≈ 25% withdrawn |
+| CVPR / ICCV / ECCV, NeurIPS, ICML | ≈ 22–28% in recent cycles | verify the current cycle |
+| Other conferences | assume 25% | |
+
+Journals (TPAMI, TIP, TMLR) are judged against their bar, not a pool. Use the bands with "submissions to this journal" in mind, and do not cite a rate.
+
 ---
 
 ## Computer Vision Conferences (CVF / ECVA)

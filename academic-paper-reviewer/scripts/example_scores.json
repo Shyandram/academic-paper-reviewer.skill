@@ -14,7 +14,8 @@
         "experimental_validation": 48,
         "reproducibility": 62,
         "ethics": 70
-      }
+      },
+      "pool_position": 72
     },
     {
       "role": "R2 (Domain)",
@@ -29,7 +30,8 @@
         "experimental_validation": 60,
         "reproducibility": 66,
         "ethics": 72
-      }
+      },
+      "pool_position": 68
     },
     {
       "role": "R3 (Persp.)",
@@ -44,7 +46,8 @@
         "experimental_validation": 62,
         "reproducibility": 68,
         "ethics": 58
-      }
+      },
+      "pool_position": 75
     },
     {
       "role": "R4 (Gen.)",
@@ -59,7 +62,8 @@
         "experimental_validation": 58,
         "reproducibility": 66,
         "ethics": 70
-      }
+      },
+      "pool_position": 70
     },
     {
       "role": "DA",
@@ -74,7 +78,8 @@
         "experimental_validation": 42,
         "reproducibility": 64,
         "ethics": 66
-      }
+      },
+      "pool_position": 58
     }
   ],
   "da_critical": [

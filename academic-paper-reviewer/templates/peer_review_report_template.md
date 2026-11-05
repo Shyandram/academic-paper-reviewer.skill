@@ -81,7 +81,9 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 
 ## Dimension Scores (0–100)
 
-*Use the calibrated rubrics in `references/quality_rubrics.md`. For each dimension, select the descriptor that best matches and assign a score within that band.*
+*Use the calibrated rubrics in `references/quality_rubrics.md`. First place the paper in the venue's submission pool (pool position), then, for each dimension, select the descriptor that best matches and assign a score within that band.*
+
+**Pool position:** better than about [P]% of submissions to [venue] (accepted share ≈ [rate]%). Deciding evidence: [the one or two signals that put it on this side of the bar]
 
 | Dimension | Score | Descriptor | Rationale |
 |-----------|-------|------------|-----------|

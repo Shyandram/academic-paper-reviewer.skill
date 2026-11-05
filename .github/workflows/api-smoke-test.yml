@@ -1,0 +1,48 @@
+name: Claude API smoke test
+
+# Checks that the ANTHROPIC_API_KEY repository secret works: one short request
+# (max 16 output tokens) to the cheapest model. The key is never printed.
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/youthful-einstein-mpsrkh]
+    paths: [.github/workflows/api-smoke-test.yml]
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check that the secret is set
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "::error::ANTHROPIC_API_KEY is not set (Settings > Secrets and variables > Actions)"
+            exit 1
+          fi
+          echo "Secret is set (length ${#ANTHROPIC_API_KEY})."
+      - name: Call the Messages API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          code=$(curl -sS -o resp.json -w '%{http_code}' https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d '{"model":"claude-haiku-5-5","max_tokens":16,"messages":[{"role":"user","content":"Reply with the single word: ok"}]}')
+          echo "HTTP status: $code"
+          python3 - <<'PY'
+          import json
+          r = json.load(open("resp.json"))
+          if r.get("type") == "error":
+              print("API error:", r["error"].get("type"), "-", r["error"].get("message"))
+          else:
+              print("model:", r.get("model"))
+              print("reply:", "".join(b.get("text", "") for b in r.get("content", [])))
+              print("usage:", r.get("usage"))
+          PY
+          test "$code" = "200"
