@@ -70,6 +70,7 @@ Write the issue and which ratings it changes. If you can't name one, keep the st
 Decide the final Overall (1–6). The starting point is not a rule:
 - You may decide **above or below** the starting point. Write one paragraph explaining why (e.g., "a strong, novel contribution whose weaknesses are typical of accepted papers at this venue", or "the central claim is not measured, so the accept-leaning ratings are not supported").
 - You may **never exceed** the ceiling set by an upheld DA-CRITICAL issue.
+- **State your own pool position** (`references/quality_rubrics.md`, "Pool position"), with the deciding evidence. Overall 3 means a typical rejected submission and 4 a borderline-accept one, so neither stands for "unsure". If every reviewer's pool position sits in the borderline range (55–69), say which side the deciding evidence points to. When the reviewers' pool positions disagree by 30 points or more, rule on the evidence behind the disagreement, as you would for any verified issue.
 - **New tasks and new problems:** judge a paper that introduces a new task or problem on whether the task is valuable and the evidence convincing for a first paper on it. Don't judge it on technical novelty alone, and don't expect the baseline coverage of a mature task.
 - Apply the venue's rules from `references/venue_profiles.md`: ECCV contribution types and "not beating SOTA is not grounds for rejection", the ACM MM scope gate, TMLR's criteria, the TPAMI completeness bar, and AAAI's Phase-1 risk.
 
