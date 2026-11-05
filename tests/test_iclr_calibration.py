@@ -77,6 +77,29 @@ class CalibrationMath(unittest.TestCase):
         self.assertAlmostEqual(share(tr, "accepted"), share(te, "accepted"), delta=0.05)
         self.assertEqual(got, cal.balanced(rows, cands))  # deterministic
 
+    def test_normalize_removes_source_and_decision_cues(self):
+        numbered = "\n".join(f"{i:03d}   line {i}" for i in range(150))
+        camera = ("Published as a conference paper at ICLR 2026\n\nA Great Title\n"
+                  "Jane Doe  University of Somewhere  jane@uni.edu\n\n   ABSTRACT\n"
+                  "We do things. Code: https://github.com/jdoe/thing\n\n"
+                  "1 INTRODUCTION\nText.\n\nACKNOWLEDGMENTS\nWe thank the ICLR reviewers.\n\n"
+                  "REFERENCES\nA. Author. Paper. 2020.\n")
+        anon = ("Under review as a conference paper at ICLR 2026\n\nA Great Title\n"
+                "Anonymous authors\nPaper under double-blind review\n\n   A BSTRACT\n"
+                + numbered + "\nREFERENCES\n")
+        arx = ("A Great Title\nJane Doe*\narXiv:2505.22622v1 [stat.ML] 28 May 2025\n"
+               "Abstract\nWe do things.\n* Department of X, University of Y; jane@uni.edu\n")
+        for raw in (camera, anon, arx):
+            out, n = cal.normalize(raw, "A Great Title")
+            self.assertTrue(out.startswith("A Great Title\n\n[Author block removed]"))
+            for cue in ("Jane", "Anonymous", "jane@", "github.com", "arXiv:2505",
+                        "thank the ICLR", "Published as", "Under review"):
+                self.assertNotIn(cue, out)
+        out, n = cal.normalize(anon, "A Great Title")
+        self.assertEqual(n["line_numbers"], 150)
+        self.assertNotIn("\n000 ", out)
+        self.assertIn("line 149", out)
+
     def test_title_match(self):
         hits = [{"title": "Something Else Entirely"},
                 {"title": "DataEnvGym: Data Generation Agents in Teacher Environments with "

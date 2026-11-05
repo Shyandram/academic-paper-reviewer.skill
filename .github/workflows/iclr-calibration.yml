@@ -104,7 +104,8 @@ jobs:
           python3 -I evals/iclr_calibration.py fetch $W/sample.jsonl evals/iclr2026_sources.json \
             --split "${{ needs.config.outputs.split }}" --offset "${{ needs.config.outputs.offset }}" --limit "${{ needs.config.outputs.limit }}" \
             --pick "${{ needs.config.outputs.pick }}" --ids-out ids.json \
-            $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json )
+            $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json ) \
+            $( [ -f evals/iclr2026_prefer.json ] && echo --prefer evals/iclr2026_prefer.json )
           echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
           mkdir -p ship

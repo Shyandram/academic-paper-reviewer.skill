@@ -197,8 +197,6 @@ def cmd_find(a):
     found = []
     for r in rows:
         d = WORK / f"iclr{a.year % 100}-{r['paper_id']}"
-        if (d / "source.json").exists():
-            continue  # the dump's submission PDF is already there
         meta = d / "arxiv.json"
         if meta.exists():
             hit = json.loads(meta.read_text())
@@ -218,7 +216,7 @@ def cmd_find(a):
             hit = {"arxiv_id": None, "published": "", "source": "openreview"}
         if not hit:
             continue
-        pdf = d / "paper.pdf"
+        pdf = d / ("arxiv.pdf" if hit["arxiv_id"] else "openreview.pdf")
         if not pdf.exists():
             url = (f"https://export.arxiv.org/pdf/{hit['arxiv_id']}v1" if hit["arxiv_id"]
                    else f"https://openreview.net/pdf?id={r['paper_id']}")
@@ -233,11 +231,7 @@ def cmd_find(a):
         if pdf.read_bytes()[:5] != b"%PDF-":
             pdf.unlink()
             continue
-        txt = d / "paper.txt"
-        subprocess.run(["pdftotext", "-layout", str(pdf), str(txt)], check=True)
-        text, n = blind(txt.read_text(errors="replace"))
-        text, k = ICLR_YEAR_MARK.subn("[REDACTED: venue/acceptance mark]", text)
-        (d / "blinded.txt").write_text(text)
+        extract_text(d, pdf.read_bytes(), r["title"])
         hit["post_decision"] = bool(hit["published"]) and hit["published"] > a.decision_date
         hit.setdefault("source", "arxiv")
         found.append((r, hit))
@@ -272,16 +266,72 @@ BATCHES = [(repo, b) for b in range(1, 41)
            for repo in (("ICLR2026-part2",) if b > 28 else ("ICLR2026", "ICLR2026-part1"))]
 
 
-def extract_text(d, pdf_bytes):
-    """Write paper.pdf, paper.txt and the blinded text the reviewers read."""
+ABSTRACT_HEAD = re.compile(r"^\s*(A\s?BSTRACT|Abstract|ABSTRACT)\s*$", re.M)
+ARXIV_STAMP = re.compile(r"arXiv:\d{4}\.\d{4,5}(v\d+)?\s*\[[^\]\n]+\]\s*\d{1,2}\s+\w{3}\s+\d{4}")
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+(\.[\w-]+)+")
+LINK = re.compile(r"(https?://)?(www\.)?(github\.com|gitlab\.com|huggingface\.co|"
+                  r"anonymous\.4open\.science|[\w-]+\.github\.io|sites\.google\.com)[^\s)\]}>,;]*")
+AFFILIATION = re.compile(r"(universit|institut|department|laborator|school of|college|"
+                         r"equal contribution|corresponding author|work done (while|during))", re.I)
+FOOTNOTE_MARK = re.compile(r"^\s*([*†‡§¶∗]|\d\s)")
+ACKS = re.compile(r"\n[ \t]*(\d+[ \t]+)?(A\s?CKNOWLEDG\w*|Acknowledg\w*)[^\n]*\n.*?"
+                  r"(?=\n[ \t]*(R\s?EFERENCES|References|Bibliography|R\s?EFERENCE)\b)", re.S)
+ACCEPT_MARK = re.compile(r"\b(accepted|to appear|published)\s+(at|in|to|by|as)\b[^\n]{0,80}", re.I)
+LINE_NO = re.compile(r"^[ \t]{0,8}\d{3}(?=[ \t]{2,}|[ \t]*$)", re.M)
+
+
+def normalize(text, title):
+    """Make every paper look the same whatever its source or decision. Replaces the
+    pre-abstract header (title, authors, affiliations, "Anonymous authors") with the
+    OpenReview title, and removes line numbers, the arXiv stamp, emails, affiliation
+    footnotes, author code links, acknowledgments and acceptance marks. Returns the
+    text and a count of each removal."""
+    n = {}
+
+    def sub(name, pat, repl, t, **kw):
+        t, k = pat.subn(repl, t, **kw)
+        n[name] = n.get(name, 0) + k
+        return t
+    text = sub("arxiv_stamp", ARXIV_STAMP, "", text)
+    # Submission line numbers: only when the document is numbered throughout.
+    if len(LINE_NO.findall(text)) > 100:
+        text = sub("line_numbers", LINE_NO, "", text)
+    m = ABSTRACT_HEAD.search(text, 0, 8000)
+    if m:
+        text = f"{title}\n\n[Author block removed]\n\n" + text[m.start():]
+        n["header"] = 1
+    else:
+        text = f"{title}\n\n" + text
+        n["header"] = 0
+    lines = text.split("\n")
+    head = min(len(lines), 400)
+    keep = [l for i, l in enumerate(lines) if not (
+        i < head and AFFILIATION.search(l) and (EMAIL.search(l) or FOOTNOTE_MARK.match(l)))]
+    n["affiliation_lines"] = len(lines) - len(keep)
+    text = "\n".join(keep)
+    text = sub("emails", EMAIL, "[email removed]", text)
+    text = sub("links", LINK, "[link removed]", text)
+    text = sub("acknowledgments", ACKS, "\n[Acknowledgments removed]\n", text)
+    front, rest = text[:4000], text[4000:]
+    front = sub("accept_marks", ACCEPT_MARK, "[REDACTED: venue/acceptance mark]", front)
+    text = front + rest
+    text, k = blind(text)
+    text, k2 = ICLR_YEAR_MARK.subn("[REDACTED: venue/acceptance mark]", text)
+    n["venue_marks"] = k + k2
+    text = re.sub(r"\n{4,}", "\n\n\n", text)
+    return text, n
+
+
+def extract_text(d, pdf_bytes, title=""):
+    """Write paper.pdf, paper.txt and the normalized, blinded text the reviewers read."""
     d.mkdir(parents=True, exist_ok=True)
     pdf = d / "paper.pdf"
     pdf.write_bytes(pdf_bytes)
     txt = d / "paper.txt"
     subprocess.run(["pdftotext", "-layout", str(pdf), str(txt)], check=True)
-    text, _ = blind(txt.read_text(errors="replace"))
-    text, _ = ICLR_YEAR_MARK.subn("[REDACTED: venue/acceptance mark]", text)
+    text, n = normalize(txt.read_text(errors="replace"), title)
     (d / "blinded.txt").write_text(text)
+    (d / "normalize.json").write_text(json.dumps(n))
 
 
 def cmd_pdfs(a):
@@ -289,6 +339,7 @@ def cmd_pdfs(a):
     import tarfile
     rows = [json.loads(l) for l in open(a.sample)]
     want = {r["paper_id"] for r in rows}
+    titles = {r["paper_id"]: r["title"] for r in rows}
     done = {pid for pid in want
             if (WORK / f"iclr{a.year % 100}-{pid}" / "source.json").exists()}
     batches = [(repo, b) for repo, b in BATCHES if b in set(a.batches)] if a.batches else BATCHES
@@ -309,7 +360,7 @@ def cmd_pdfs(a):
                     if not m.isfile() or pid not in want or pid in done:
                         continue
                     d = WORK / f"iclr{a.year % 100}-{pid}"
-                    extract_text(d, tar.extractfile(m).read())
+                    extract_text(d, tar.extractfile(m).read(), titles.get(pid, ""))
                     (d / "source.json").write_text(json.dumps({"source": f"{repo}/batch_{b}"}))
                     done.add(pid)
                     n += 1
@@ -323,16 +374,17 @@ def cmd_pdfs(a):
 # ---------- sources / fetch (reproducible text on another machine) ----------
 
 def cmd_sources(a):
-    """Record where each sampled paper's text came from: a dump batch (preferred, the
-    submission PDF) or an arXiv ID. The map has IDs only, no text and no labels, so it
-    can be committed and used by `fetch` on a CI runner."""
+    """Record where each sampled paper's text came from: an arXiv v1 posted before the
+    decision (one source format for every decision group), or with --dump a dump batch.
+    The map has IDs only, no text and no labels, so it can be committed and used by
+    `fetch` on a CI runner."""
     rows = [json.loads(l) for l in open(a.sample)]
     out, late = {}, 0
     for r in rows:
         d = WORK / f"iclr{a.year % 100}-{r['paper_id']}"
         if not (d / "blinded.txt").exists():
             continue
-        if (d / "source.json").exists():
+        if a.dump and (d / "source.json").exists():
             out[r["paper_id"]] = json.loads((d / "source.json").read_text())["source"]
         elif (d / "arxiv.json").exists() and json.loads((d / "arxiv.json").read_text()):
             hit = json.loads((d / "arxiv.json").read_text())
@@ -439,21 +491,23 @@ def cmd_fetch(a):
     if a.pick in ("stratified", "balanced"):
         print(coverage_report(everyone, set(src)), file=sys.stderr)
     reviewed = set(json.load(open(a.reviewed))) if a.reviewed else set()
+    prefer = reviewed | (set(json.load(open(a.prefer))) if a.prefer else set())
     if a.pick in ("balanced", "stratified"):
-        rows = balanced(everyone, rows, prefer=reviewed)
+        rows = balanced(everyone, rows, prefer=prefer)
         if a.splits_out:
             Path(a.splits_out).write_text(json.dumps({r["paper_id"]: r["split"] for r in rows}))
     if a.pick == "balanced":
         rows = [r for r in rows if r["paper_id"] not in reviewed]  # already have results
         rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
     if a.pick == "stratified":  # pilot: drawn from the balanced set, so its runs count later
-        rows = stratified(everyone, rows, a.limit or len(rows))
+        rows = stratified(everyone, rows, a.limit or len(rows), prefer=prefer)
         for r in rows:
             print(f"  pick {r['paper_id']}: {group(r)}, {r['split']}, mean {r['mean_human']}, "
                   f"{r['source_kind']}, {r.get('primary_area')}", file=sys.stderr)
     else:
         rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
     need = {r["paper_id"]: src[r["paper_id"]] for r in rows}
+    titles = {r["paper_id"]: r["title"] for r in rows}
     if a.dry_run:  # selection only: write ids and splits without downloading
         if a.ids_out:
             Path(a.ids_out).write_text(json.dumps([f"iclr{a.year % 100}-{p}" for p in need]))
@@ -468,7 +522,7 @@ def cmd_fetch(a):
                 with urllib.request.urlopen(req, timeout=120) as resp:
                     data = resp.read()
                 if data[:5] == b"%PDF-":
-                    extract_text(WORK / f"iclr{a.year % 100}-{pid}", data)
+                    extract_text(WORK / f"iclr{a.year % 100}-{pid}", data, titles[pid])
                     got.append(pid)
             except Exception as e:
                 print(f"  arXiv failed {pid}: {e}", file=sys.stderr)
@@ -485,7 +539,8 @@ def cmd_fetch(a):
             for m in tar:
                 pid = Path(m.name).stem
                 if m.isfile() and pid in left:
-                    extract_text(WORK / f"iclr{a.year % 100}-{pid}", tar.extractfile(m).read())
+                    extract_text(WORK / f"iclr{a.year % 100}-{pid}",
+                                 tar.extractfile(m).read(), titles[pid])
                     got.append(pid)
                     left.discard(pid)
                     if not left:
@@ -707,6 +762,10 @@ def main():
     o.add_argument("--year", type=int, default=2026)
     o.add_argument("--out", required=True)
     o.add_argument("--decision-date", help="default: the year's ICLR decision date")
+    o.add_argument("--dump", action="store_true",
+                   help="also use paperreview.ai dump PDFs. Off by default: the dump has "
+                        "camera-ready PDFs for accepted papers and anonymous submissions for "
+                        "the rest, a decision cue that normalization cannot remove")
     h = sub.add_parser("fetch", help="download text for selected rows from the source map")
     h.add_argument("sample")
     h.add_argument("sources")
@@ -717,6 +776,8 @@ def main():
     h.add_argument("--ids-out")
     h.add_argument("--splits-out", help="with --pick balanced/stratified: write the balanced split")
     h.add_argument("--dry-run", action="store_true", help="select only; no downloads")
+    h.add_argument("--prefer", help="JSON list of paper ids to prefer in the pick "
+                                    "(e.g. an earlier pilot, for a like-for-like rerun)")
     h.add_argument("--reviewed", help="JSON list of paper ids already reviewed: kept in the "
                                       "balanced set (preferred) and not fetched again")
     h.add_argument("--pick", choices=["order", "stratified", "balanced"], default="order",

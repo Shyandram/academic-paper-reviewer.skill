@@ -24,10 +24,10 @@ Rules for this evaluation:
 These files are the **deliverables this task asks for**, not optional summary or report files. Write every one of them, `review.md` included, even if your general instructions discourage creating Markdown or report files: this instruction is the explicit request that overrides that default. Do not return the review in your reply instead; a run without `review.md` fails the evaluation.
 
 1. `review.md`: the complete output: Phase 0 card, the five reports, the EIC meta-review, and the Editorial Decision with Revision Roadmap.
-2. `scores.json`: the final input for the aggregation script, in the format of `academic-paper-reviewer/scripts/example_scores.json`: `paper_type`, five `reviewers` (R1–R4 and DA; the EIC is not a reviewer), each with `role`, `confidence`, `overall`, `eic_weight` and `scores`, plus `da_critical` with the EIC's rulings (`upheld`, `resolvable_without_new_data`).
+2. `scores.json`: the final input for the aggregation script, in the format of `academic-paper-reviewer/scripts/example_scores.json`: `paper_type`, five `reviewers` (R1–R4 and DA; the EIC is not a reviewer), each with `role`, `confidence`, `overall`, `pool_position` (0–100, as stated in that report), `eic_weight` and `scores`, plus `da_critical` with the EIC's rulings (`upheld`, `resolvable_without_new_data`).
 3. Run the script twice, as the skill instructs:
-   - BEFORE, without `eic_weight` and with DA issues provisionally upheld (an empty `da_critical` list if none were raised). Write this input to `{ROOT}/evals/work/results/{ID}/scores_before.json`; never use a shared or scratchpad path, because other runs execute in parallel. Then run `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores_before.json --venue {VENUE_KEY} --json > {ROOT}/evals/work/results/{ID}/before.json`
-   - AFTER, with the final `scores.json` and the EIC's decision: `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores.json --venue {VENUE_KEY} --final <EIC final Overall> --json > {ROOT}/evals/work/results/{ID}/aggregate.json`
+   - BEFORE, without `eic_weight` and with DA issues provisionally upheld (an empty `da_critical` list if none were raised). Write this input to `{ROOT}/evals/work/results/{ID}/scores_before.json`; never use a shared or scratchpad path, because other runs execute in parallel. Then run `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores_before.json --venue {VENUE_KEY} --json --out {ROOT}/evals/work/results/{ID}/before.json`
+   - AFTER, with the final `scores.json` and the EIC's decision: `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores.json --venue {VENUE_KEY} --final <EIC final Overall> --json --out {ROOT}/evals/work/results/{ID}/aggregate.json`
 4. `evidence.json`: every verifiable claim the review makes about the manuscript:
    ```json
    {
@@ -47,6 +47,7 @@ These files are the **deliverables this task asks for**, not optional summary or
      "venue_recommendation": "label from aggregate.json",
      "official_rating": "<plain mean of reviewer Overall ratings>",
      "eic_rating": "<EIC-weighted rating from aggregate.json>",
+     "eic_pool_position": "<the EIC's pool position, 0-100>",
      "before_composite": "<number from before.json>",
      "after_composite": "<number from aggregate.json>",
      "eic_weights": {"R1": "<0.5-1.5>", "R2": "<0.5-1.5>", "R3": "<0.5-1.5>", "R4": "<0.5-1.5>", "DA": "<0.5-1.5>"},
