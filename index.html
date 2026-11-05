@@ -60,7 +60,7 @@
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:var(--nav-h);-webkit-text-size-adjust:100%}
-@media (min-width:761px) and (min-height:640px){html{scroll-snap-type:y proximity}}
+
 body{margin:0;padding-top:var(--nav-h);background:var(--bg);color:var(--ink);font:17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 40%,transparent)}
 a:hover{text-decoration-color:currentColor}
@@ -120,13 +120,13 @@ pre code{background:none;padding:0}
 
 /* slides */
 main{display:block}
-.slide{position:relative;min-height:calc(100vh - var(--nav-h));min-height:calc(100svh - var(--nav-h));padding:44px 0 48px;display:flex;align-items:center;scroll-snap-align:start}
+.slide{position:relative;padding:72px 0;display:flex;align-items:center}
 .slide>.wrap{width:100%}
 #top.slide{padding:28px 0 36px}
 .slide+.slide{border-top:1px solid var(--glass-line)}
-@media (max-width:760px),(max-height:639px){.slide{min-height:0;padding:48px 0}#top.slide{padding-top:36px}}
+@media (max-width:760px){.slide{padding:48px 0}#top.slide{padding-top:36px}}
 .slide:target{scroll-snap-align:start}
-.num{position:absolute;right:max(32px,calc((100% - 1140px)/2 + 32px));top:16px;font:700 clamp(4rem,10vw,8.5rem)/1 var(--serif);color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--muted) 28%,transparent);pointer-events:none;user-select:none}
+.num{display:none;position:absolute;right:max(32px,calc((100% - 1140px)/2 + 32px));top:16px;font:700 clamp(4rem,10vw,8.5rem)/1 var(--serif);color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--muted) 28%,transparent);pointer-events:none;user-select:none}
 #eval .num{display:none}
 @media (max-width:760px){.num{display:none}}
 .kicker{display:inline-flex;align-items:center;gap:10px;font:700 .78rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 14px}
@@ -204,27 +204,27 @@ h1 em{font-style:italic;font-weight:500;padding:0 .12em 0 .02em;margin-right:-.0
 .car{position:relative}
 .car-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
 .car-ctrl{display:none;align-items:center;gap:10px;margin-bottom:32px}
-.js .car-ctrl{display:flex}
+
 .car-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:border-color .2s,opacity .2s}
 .car-btn:hover:not(:disabled){border-color:var(--muted)}
 .car-btn:disabled{opacity:.4;cursor:default}
 .car-status{font:700 .85rem var(--mono);color:var(--muted);min-width:9ch;text-align:center}
-.car-track{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 2 * 18px) / 3);gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding:6px 2px 18px;margin:0 -2px;scrollbar-width:thin;scroll-behavior:smooth}
+.car-track{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:4px 0}
 .js .car-track{scrollbar-width:none}
 .js .car-track::-webkit-scrollbar{display:none}
 .car-track:focus-visible{outline-offset:4px}
-.feat{scroll-snap-align:start;padding:24px;display:flex;flex-direction:column;gap:8px;min-height:240px}
-.feat .ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);border:1px solid var(--glass-line)}
+.feat{padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.feat .ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);border:1px solid var(--glass-line)}
 .feat .n{font:700 .74rem var(--mono);color:var(--muted);letter-spacing:.06em;margin-left:auto}
 .feat .top-row{display:flex;align-items:center}
-.feat h3{font:600 1.35rem/1.15 var(--serif);margin:8px 0 0}
+.feat h3{font:600 1.15rem/1.2 var(--serif);margin:4px 0 0}
 .feat p,.resp p{margin:0;color:var(--muted);font-size:.95rem}
 .pips{display:none;gap:6px;justify-content:center;margin-top:8px}
-.js .pips{display:flex}
+
 .pips i{width:18px;height:4px;border-radius:2px;background:var(--line);transition:background .25s,width .25s}
 .pips i.on{background:var(--accent);width:28px}
-@media (max-width:980px){.car-track{grid-auto-columns:calc((100% - 18px) / 2)}}
-@media (max-width:640px){.car-track{grid-auto-columns:86%}.car-ctrl{margin-bottom:20px}}
+@media (max-width:980px){.car-track{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.car-track{grid-template-columns:1fr}}
 
 /* modes */
 .modes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -245,7 +245,7 @@ h1 em{font-style:italic;font-weight:500;padding:0 .12em 0 .02em;margin-right:-.0
 /* evaluation */
 .eval-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
 .pill{display:inline-flex;align-items:center;gap:8px;font:700 .76rem/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:7px 11px;border-radius:999px;background:var(--gold-soft);color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent)}
-.eval-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:36px;align-items:center}
+.eval-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:36px;align-items:start}
 .eval-grid .sub{margin-bottom:0}
 .charts{display:grid;grid-template-columns:1fr;gap:14px}
 .chart-card{padding:18px 22px}
@@ -260,6 +260,7 @@ h1 em{font-style:italic;font-weight:500;padding:0 .12em 0 .02em;margin-right:-.0
 .fill.ai{background:linear-gradient(90deg,color-mix(in srgb,var(--bar-ai) 75%,transparent),var(--bar-ai))}
 .fill.weak{background:var(--bar-weak)}
 .fill.human{background:var(--bar-human)}
+.fill.base{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,color-mix(in srgb,var(--muted) 35%,transparent) 6px 8px);border:1px solid var(--line)}
 .fill.ref{background:transparent;border:1.5px dashed var(--muted)}
 .ci{position:absolute;top:50%;height:2px;background:var(--ink);opacity:.6}
 .ci::before,.ci::after{content:"";position:absolute;top:-5px;width:2px;height:12px;background:var(--ink)}
@@ -270,6 +271,26 @@ h1 em{font-style:italic;font-weight:500;padding:0 .12em 0 .02em;margin-right:-.0
 .axis div:nth-child(2){display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:4px}
 @media (max-width:1100px){.eval-grid{grid-template-columns:minmax(0,1fr);gap:28px}}
 @media (max-width:640px){.row,.axis{grid-template-columns:104px 1fr 46px;gap:8px}.row{font-size:.86rem}}
+
+/* at a glance */
+.glance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:36px}
+.gl{padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.gl .k{font:700 .74rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink)}
+.gl b{font:600 1.2rem/1.25 var(--serif);color:var(--ink)}
+.gl p{margin:0;color:var(--muted);font-size:.92rem}
+.gl .big{font:700 1.9rem/1 var(--serif);color:var(--accent)}
+@media (max-width:860px){.glance{grid-template-columns:1fr}}
+/* takeaways */
+.take{list-style:none;padding:0;margin:20px 0 0;display:flex;flex-direction:column;gap:12px}
+.take li{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;font-size:.98rem;color:var(--ink-2)}
+.take li b{color:var(--ink)}
+.take .tk{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font:700 .85rem var(--mono)}
+.tk.ok{background:var(--accent-soft);color:var(--accent-ink)}
+.tk.no{background:var(--gold-soft);color:var(--gold)}
+.callout.small{font-size:.88rem;padding:12px 16px;margin-top:20px}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn.sm{min-height:40px;padding:8px 14px;font-size:.9rem}
+.chart-card .hint{display:block;margin-top:10px;font-size:.82rem;color:var(--muted)}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.84rem;color:var(--muted);margin-top:4px}
 .legend span{display:inline-flex;align-items:center;gap:7px}
 .sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
@@ -406,11 +427,10 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
         </svg>
       </div>
     </div>
-    <div class="stats">
-      <div class="stat glass rv" style="--i:4"><b>5 + 1</b><span>reviewers plus an Editor-in-Chief</span></div>
-      <div class="stat glass rv" style="--i:5"><b>6</b><span>modes, from quick check to rebuttal</span></div>
-      <div class="stat glass rv" style="--i:6"><b>11</b><span>venue profiles with their own score forms</span></div>
-      <div class="stat glass rv" style="--i:7"><b>0</b><span>dependencies: Markdown + standard-library Python</span></div>
+    <div class="glance" aria-label="At a glance">
+      <div class="gl glass rv" style="--i:4"><span class="k">1 · You give</span><b>A PDF and, optionally, a target venue</b><p>“Review this paper for CVPR.” Works in Claude, Claude Code and Codex. No API key or server.</p></div>
+      <div class="gl glass rv" style="--i:5"><span class="k">2 · You get</span><b>5 reviews, a decision and a ranked fix list</b><p>Scores in the venue's own form (e.g. ICLR rating, CVPR 6-point), plus a rebuttal draft or a revision check on request.</p></div>
+      <div class="gl glass rv" style="--i:6"><span class="k">3 · How good (pilot)</span><span class="big">0.48</span><p>Ranking agreement with human ICLR 2026 scores on 20 papers (Sonnet, high effort); two human reviewers agree at 0.25. <a href="#eval">See evaluation</a></p></div>
     </div>
   </div>
 </section>
@@ -465,7 +485,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
         <div>
           <p class="kicker rv">Design principles</p>
           <h2 id="t-diff" class="rv" style="--i:1">What makes it different</h2>
-          <p class="sub rv" style="--i:2">Built around the failure modes of real reviewing — and of LLM reviewing.</p>
+          <p class="sub rv" style="--i:2">Nine safeguards against the usual failures of human and AI reviewing.</p>
         </div>
         <div class="car-ctrl rv" style="--i:3">
           <button class="car-btn" type="button" data-dir="-1" aria-label="Previous features" aria-controls="feat-track"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -476,31 +496,31 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
       <div class="car-track rv" style="--i:3" id="feat-track" tabindex="0" aria-label="Features, use left and right arrow keys to move">
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="1 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span><span class="n">01</span></div>
-          <h3>Calibrated to the submission pool</h3><p>Each reviewer first states where the paper sits among the venue's submissions (“better than about P%”), then scores in the matching band. Uncertainty is never a reason to call a paper borderline.</p></article>
+          <h3>Calibrated to the submission pool</h3><p>Reviewers place the paper among all submissions first, then score. No default “borderline”.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="2 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="16" rx="1.5"/><path d="M5.5 9h2M5.5 13h2M16.5 9h2M16.5 13h2"/></svg></span><span class="n">02</span></div>
-          <h3>Two score lists</h3><p>The official list keeps the reviewers' raw scores, never modified. The EIC's internal assessment weights each reviewer by confidence × review quality, and can come out higher or lower.</p></article>
+          <h3>Two score lists</h3><p>Reviewers' raw scores stay untouched; the editor's view weights each reviewer by review quality.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="3 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M12 8v5M12 16h.01"/></svg></span><span class="n">03</span></div>
-          <h3>A Devil's Advocate with teeth</h3><p>Steelmans the paper, then makes the strongest counter-argument and recomputes headline numbers. The EIC applies an area-chair test; only truly fatal issues cap the decision.</p></article>
+          <h3>A Devil's Advocate with teeth</h3><p>Argues the strongest case against the paper; only issues the editor confirms as fatal cap the decision.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="4 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></span><span class="n">04</span></div>
-          <h3>Error audit with precision rules</h3><p>Nine error categories. Every claimed error needs a location, a verbatim quote and a concrete check. Suspicions become questions, never weaknesses.</p></article>
+          <h3>Error audit with precision rules</h3><p>Every claimed error needs a location, a quote and a check. Suspicions become questions.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="5 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v15H6.5A2.5 2.5 0 0 0 4 20.5 2.5 2.5 0 0 0 6.5 23H20"/><path d="M9 8h7M9 12h5"/></svg></span><span class="n">05</span></div>
-          <h3>Literature check without self-leaks</h3><p>Claim-driven arXiv search, a baseline scout and a similarity check. A fingerprint filter never searches for the reviewed paper, its authors, reviews or outcome.</p></article>
+          <h3>Literature check without self-leaks</h3><p>Searches arXiv for related work and baselines, but never for the paper itself or its reviews.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="6 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg></span><span class="n">06</span></div>
-          <h3>CV/ML depth</h3><p>Task checklists for detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models — backbone, pretraining, resolution, TTA and latency confounds.</p></article>
+          <h3>CV/ML depth</h3><p>Checklists for detection, segmentation, 3D, restoration, generation, VLMs, video, medical and efficient models.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="7 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="n">07</span></div>
-          <h3>Prompt-injection safe</h3><p>The manuscript is data, never instructions. Hidden or reviewer-directed text is flagged to the editor as an integrity concern and never changes a score.</p></article>
+          <h3>Prompt-injection safe</h3><p>The manuscript is data, never instructions. Hidden text is flagged and never changes a score.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="8 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg></span><span class="n">08</span></div>
-          <h3>Reproducible scoring</h3><p><code>aggregate_scores.py</code> computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.</p></article>
+          <h3>Reproducible scoring</h3><p>A standard-library script turns the reviews into the same scores every time.</p></article>
         <article class="feat glass" role="group" aria-roledescription="slide" aria-label="9 of 9">
           <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></span><span class="n">09</span></div>
-          <h3>Integrity guardrails</h3><p>No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the paper.</p></article>
+          <h3>Integrity guardrails</h3><p>No fabricated citations, fictional personas, and every point tied to a place in the paper.</p></article>
       </div>
       <div class="pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
     </div>
@@ -549,38 +569,60 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
       <div>
     <div class="eval-head rv"><p class="kicker" style="margin:0">Evaluation</p><span class="pill">Pilot · 20 papers</span></div>
     <h2 id="t-eval" class="rv" style="--i:1;margin-top:14px">Does it agree with human reviewers?</h2>
-    <p class="sub rv" style="--i:2">A pilot of a <a href="https://paperreview.ai/tech-overview">paperreview.ai</a>-style evaluation on ICLR 2026 submissions: anonymized arXiv versions posted before the decision, 20 papers stratified by outcome (5 accepted, 10 rejected, 4 withdrawn, 1 desk rejected), full skill run per paper. The reviewers never see human scores or decisions.</p>
-
-    <div class="callout rv" style="--i:4" role="note">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      <div><b>Read as a pilot, not a result.</b> With 20 papers the interval is wide: the Sonnet final rating's Spearman of +0.48 has a 95% CI of +0.09 to +0.74 — clearly above zero, about the level of human–human agreement, but its AUC (0.67) is still below paperreview.ai's 0.75. Haiku showed no signal. Excluding the 3 papers Sonnet recognized gives +0.46 / 0.69. The full balanced evaluation (86 papers, linear regression over the 7 dimension scores) is pending. Details: <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/main/evals/REPORT_iclr2026_pilots.md">pilot report</a> · <a href="report/technical_report.pdf">technical report (PDF)</a> (<a href="report/technical_report.tex">TeX</a>).</div>
+    <p class="sub rv" style="--i:2">We reviewed 20 ICLR 2026 submissions (accepted, rejected, withdrawn) from anonymized arXiv versions, then compared the skill's scores with the real human scores it never saw.</p>
+    <ul class="take rv" style="--i:3">
+      <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.48 for Sonnet at high effort, versus 0.25 between two human reviewers.</span></li>
+      <li><span class="tk ok">✓</span><span><b>Scores are not biased</b>: on average neither too harsh nor too lenient (NME +0.004).</span></li>
+      <li><span class="tk no">!</span><span><b>Model matters</b>: a small model (Haiku) gave nearly the same score to every paper. Use a strong model at high effort.</span></li>
+      <li><span class="tk no">!</span><span><b>Not yet as good at picking accepted papers</b> as paperreview.ai (AUC 0.67 vs 0.75).</span></li>
+    </ul>
+    <div class="callout small rv" style="--i:4" role="note">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <div><b>A pilot, not a final result.</b> 20 papers give wide error bars (0.48 could be anywhere from 0.09 to 0.74). An 86-paper evaluation is planned.</div>
+    </div>
+    <div class="btn-row rv" style="--i:5">
+      <a class="btn sm primary" href="report/technical_report.pdf">Technical report (PDF)</a>
+      <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/main/evals/REPORT_iclr2026_pilots.md">Pilot data</a>
+      <a class="btn sm" href="report/technical_report.tex">TeX source</a>
     </div>
       </div>
       <div>
     <div class="charts">
       <div class="chart-card glass rv" style="--i:2">
-        <h3>Spearman with the mean human rating</h3>
-        <p>Ranking agreement, −1 to 1. Bars from 0; whisker = bootstrap 95% CI (clipped at 0).</p>
+        <h3>Does it rank papers like humans?</h3>
+        <p>Spearman correlation with the mean human score. 0 = no relation, 1 = same order. Higher is better; the line shows the 95% range.</p>
         <!-- values from evals/iclr2026_pilot_scores.json (pilot, n = 20); scale 0 to 1 -->
         <div class="chart">
-          <div class="row hl"><div class="lab">Sonnet, high effort<small>final rating</small></div><div class="track"><i class="fill ai" style="--w:48%"></i><i class="ci" style="left:9%;width:65%"></i><span class="sr-only">95% CI +0.09 to +0.74</span></div><div class="val">+0.48</div></div>
-          <div class="row"><div class="lab">Haiku<small>final rating</small></div><div class="track"><i class="fill weak" style="--w:20%"></i><i class="ci" style="left:0%;width:58%"></i><span class="sr-only">95% CI clipped at 0 to +0.58</span></div><div class="val">+0.20</div></div>
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating</small></div><div class="track"><i class="fill ai" style="--w:48%"></i><i class="ci" style="left:9%;width:65%"></i><span class="sr-only">95% CI +0.09 to +0.74</span></div><div class="val">+0.48</div></div>
+          <div class="row"><div class="lab">Haiku<small>panel rating</small></div><div class="track"><i class="fill weak" style="--w:20%"></i><i class="ci" style="left:0%;width:58%"></i><span class="sr-only">95% CI clipped at 0 to +0.58</span></div><div class="val">+0.20</div></div>
           <div class="row"><div class="lab">Human vs human<small>ICLR 2026 test split</small></div><div class="track"><i class="fill human" style="--w:25%"></i></div><div class="val">+0.25</div></div>
           <div class="row"><div class="lab">paperreview.ai<small>AI vs human</small></div><div class="track"><i class="fill ref" style="--w:42%"></i></div><div class="val">+0.42</div></div>
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
       </div>
       <div class="chart-card glass rv" style="--i:3">
-        <h3>AUC for acceptance</h3>
-        <p>Chance that an accepted paper outscores a rejected one; 0.5 is chance.</p>
+        <h3>Does it score accepted papers higher?</h3>
+        <p>AUC: the chance an accepted paper outscores a rejected one. 0.5 = coin flip, 1 = always.</p>
         <!-- scale 0.5 to 1 -->
         <div class="chart">
-          <div class="row hl"><div class="lab">Sonnet, high effort<small>final rating</small></div><div class="track"><i class="fill ai" style="--w:34%"></i></div><div class="val">0.67</div></div>
-          <div class="row"><div class="lab">Haiku<small>final rating</small></div><div class="track"><i class="fill weak" style="--w:12%"></i></div><div class="val">0.56</div></div>
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating</small></div><div class="track"><i class="fill ai" style="--w:34%"></i></div><div class="val">0.67</div></div>
+          <div class="row"><div class="lab">Haiku<small>panel rating</small></div><div class="track"><i class="fill weak" style="--w:12%"></i></div><div class="val">0.56</div></div>
           <div class="row"><div class="lab">One human reviewer<small>ICLR 2026 test split</small></div><div class="track"><i class="fill human" style="--w:50%"></i></div><div class="val">0.75</div></div>
           <div class="row"><div class="lab">paperreview.ai<small>AI score</small></div><div class="track"><i class="fill ref" style="--w:50%"></i></div><div class="val">0.75</div></div>
           <div class="axis" aria-hidden="true"><div></div><div><span>0.5</span><span>0.75</span><span>1</span></div><div></div></div>
         </div>
+      </div>
+      <div class="chart-card glass rv" style="--i:4">
+        <h3>How far off is the score?</h3>
+        <p>NMAE: average gap to the human score on ICLR's 0–10 scale, as a share of the scale. Lower is better.</p>
+        <!-- scale 0 to 0.2 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating</small></div><div class="track"><i class="fill ai" style="--w:39.5%"></i></div><div class="val">0.079</div></div>
+          <div class="row"><div class="lab">Always guess the middle<small>baseline</small></div><div class="track"><i class="fill base" style="--w:42.5%"></i></div><div class="val">0.085</div></div>
+          <div class="row"><div class="lab">Human vs human<small>same 20 papers</small></div><div class="track"><i class="fill human" style="--w:90%"></i></div><div class="val">0.180</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.1</span><span>0.2</span></div><div></div></div>
+        </div>
+        <span class="hint">Guessing the middle already scores well here, so read this together with the ranking charts above.</span>
       </div>
     </div>
       <div style="height:12px"></div>
@@ -589,6 +631,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
       <span><i class="sw" style="background:var(--bar-weak)"></i>This skill, Haiku</span>
       <span><i class="sw" style="background:var(--bar-human)"></i>Human reference</span>
       <span><i class="sw" style="border:1.5px dashed var(--muted)"></i>paperreview.ai, ICLR 2025 (147 papers)</span>
+      <span><i class="sw" style="background:repeating-linear-gradient(135deg,var(--surface-2) 0 3px,var(--muted) 3px 4px)"></i>Constant baseline</span>
     </div>
       </div>
     </div>
