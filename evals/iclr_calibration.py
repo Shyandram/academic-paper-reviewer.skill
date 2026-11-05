@@ -333,6 +333,9 @@ def bootstrap(fn, n_items, reps=2000, seed=0):
     return vals[int(0.025 * len(vals))], vals[int(0.975 * len(vals)) - 1]
 
 
+WITHDRAWN = ("Withdrawn", "Desk rejected")
+
+
 def evaluate(rows, feats, target="mean_human", reps=2000, low=5.0):
     rows = [r for r in rows if r["paper_id"] in feats]
     train = [r for r in rows if r["split"] == "train"]
@@ -349,26 +352,38 @@ def evaluate(rows, feats, target="mean_human", reps=2000, low=5.0):
         lo, hi = bootstrap(lambda idx: fn([idx_all[i] for i in idx]), len(idx_all), reps)
         return {"metric": name, "value": round(point, 3), "ci95": [round(lo, 3), round(hi, 3)]}
 
+    def report(idx):
+        p = [i for i in idx if test[i]["other_human"] is not None]
+        return {
+            "n_test": len(idx), "n_accepted": sum(lab[i] for i in idx),
+            "results": [
+                metric("spearman(AI, one human)",
+                       lambda I: spearman([ai[i] for i in I], [one[i] for i in I]), idx),
+                metric("spearman(one human, another human)",
+                       lambda I: spearman([one[i] for i in I],
+                                          [test[i]["other_human"] for i in I]), p),
+                metric("AUC(one human score -> accept)",
+                       lambda I: auc([one[i] for i in I], [lab[i] for i in I]), idx),
+                metric("AUC(AI score -> accept)",
+                       lambda I: auc([ai[i] for i in I], [lab[i] for i in I]), idx),
+            ],
+            "calibration": calibration([test[i] for i in idx], [ai[i] for i in idx], low),
+        }
+
+    # Main protocol keeps withdrawn papers that have scores (as not accepted), like
+    # paperreview.ai. They are easy negatives (authors usually withdraw after low scores),
+    # so the harder subset without withdrawn and desk-rejected papers is reported too.
+    # The regression is fitted once, on the full train split.
     allidx = list(range(len(test)))
-    out = {
+    decided = [i for i in allidx if test[i].get("decision") not in WITHDRAWN]
+    return {
         "n_train": len(train), "n_test": len(test),
         "weights": dict(zip(["intercept"] + DIMS, (round(x, 4) for x in w))),
-        "results": [
-            metric("spearman(AI, one human)",
-                   lambda I: spearman([ai[i] for i in I], [one[i] for i in I]), allidx),
-            metric("spearman(one human, another human)",
-                   lambda I: spearman([one[i] for i in I],
-                                      [test[i]["other_human"] for i in I]), pair),
-            metric("AUC(one human score -> accept)",
-                   lambda I: auc([one[i] for i in I], [lab[i] for i in I]), allidx),
-            metric("AUC(AI score -> accept)",
-                   lambda I: auc([ai[i] for i in I], [lab[i] for i in I]), allidx),
-        ],
-        "calibration": calibration(test, ai, low),
+        "all_scored": report(allidx),
+        "without_withdrawn": report(decided),
         "reference_paperreview_ai": {"spearman_human_human": 0.41, "spearman_ai_human": 0.42,
                                      "auc_one_human": 0.84, "auc_ai": 0.75},
     }
-    return out
 
 
 def calibration(test, ai, low=5.0):

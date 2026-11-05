@@ -59,13 +59,18 @@ class CalibrationMath(unittest.TestCase):
             scores = [max(1, min(10, round(q + rng.gauss(0, 1.5)))) for _ in range(3)]
             rows.append({"paper_id": f"p{i}", "split": "train" if i < 60 else "test",
                          "scores": scores, "one_human": scores[0], "other_human": scores[1],
-                         "mean_human": sum(scores) / 3, "accepted": q > 6})
+                         "mean_human": sum(scores) / 3, "accepted": q > 6,
+                         "decision": "Withdrawn" if q < 2 else "Reject"})
             feats[f"p{i}"] = {d: 10 * q + rng.gauss(0, 5) for d in cal.DIMS}
         res = cal.evaluate(rows, feats, reps=200)
-        vals = {m["metric"]: m["value"] for m in res["results"]}
+        vals = {m["metric"]: m["value"] for m in res["all_scored"]["results"]}
         self.assertGreater(vals["spearman(AI, one human)"], 0.5)
         self.assertGreater(vals["AUC(AI score -> accept)"], 0.8)
         self.assertEqual(res["n_test"], 60)
+        sub = res["without_withdrawn"]
+        self.assertLess(sub["n_test"], 60)
+        self.assertEqual(sub["n_test"], sum(1 for r in rows if r["split"] == "test"
+                                            and r["decision"] != "Withdrawn"))
 
 
 if __name__ == "__main__":

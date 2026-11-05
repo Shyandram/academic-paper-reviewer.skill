@@ -20,7 +20,7 @@ on:
         default: "2"
       model:
         description: "Model for the review runs"
-        default: "claude-sonnet-5-5"
+        default: "claude-haiku-5-5"
       max_parallel:
         description: "Concurrent review jobs"
         default: "2"
