@@ -9,7 +9,13 @@
 \usepackage{tabularx}
 \usepackage{enumitem}
 \usepackage{xcolor}
+\usepackage[numbers,sort&compress]{natbib}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc,shapes.geometric}
 \usepackage[hidelinks]{hyperref}
+\definecolor{cM}{HTML}{2457D6}\definecolor{cD}{HTML}{1E8A4C}\definecolor{cP}{HTML}{8A2BD6}
+\definecolor{cG}{HTML}{C2620A}\definecolor{cA}{HTML}{C0262D}\definecolor{cE}{HTML}{1F3A5F}
+\definecolor{cBg}{HTML}{F3F5FA}\definecolor{cLine}{HTML}{9AA5B8}
 \setlist{nosep}\setlist[itemize,enumerate]{leftmargin=*}
 \emergencystretch=3em
 \newcommand{\code}[1]{\texttt{#1}}
@@ -59,7 +65,12 @@ numbers that do not exist.
 acceptance status, through retrieval or memory.
 \end{itemize}
 
-Academic Paper Reviewer addresses these with structure rather than with a single prompt.
+Prior AI reviewers either prompt a general model once per paper, as in the AI
+Scientist~\citep{lu2024aiscientist}, or fine-tune an open model on public reviews:
+OpenReviewer~\citep{idahl2025openreviewer}, SEA-E~\citep{yu2024sea},
+CycleReviewer~\citep{weng2025cycleresearcher} and DeepReviewer~\citep{zhu2025deepreview}.
+Academic Paper Reviewer instead addresses these failure modes with structure rather than with a
+single prompt or a single trained model.
 \begin{itemize}
 \item Several reviewers with distinct roles write independently.
 \item A Devil's Advocate attacks the paper.
@@ -77,15 +88,77 @@ authors improve a paper, not a prediction of a venue's decision.
 deterministic score aggregation into venue-specific forms (Section~\ref{sec:system}).
 \item Safeguards against prompt injection and self-leakage in literature search
 (Section~\ref{sec:safety}).
-\item A reproducible calibration harness following the paperreview.ai protocol, extended with
-CSPaper-style error metrics and a no-split pilot mode (Section~\ref{sec:iclr}).
+\item A reproducible calibration harness following the paperreview.ai protocol~\citep{paperreview},
+extended with CSPaper-style error metrics~\citep{cspaper} and a no-split pilot mode
+(Section~\ref{sec:iclr}).
 \item Pilot results, including what the skill did badly and the fixes that followed.
 \end{enumerate}
 
 \section{System design}\label{sec:system}
 
 \subsection{Workflow}
-A full review runs the following phases. The phases are Markdown instructions in
+
+\begin{figure}[t]
+\centering
+\resizebox{\linewidth}{!}{%
+\begin{tikzpicture}[
+  font=\sffamily\small, >={Stealth[length=2.2mm]},
+  box/.style={draw=cLine, rounded corners=3pt, fill=white, align=center, inner sep=4pt, minimum height=9mm},
+  phase/.style={font=\sffamily\scriptsize\bfseries, text=cE},
+  rev/.style={draw=#1, fill=#1!10, rounded corners=3pt, minimum width=27mm, minimum height=6.2mm, font=\sffamily\scriptsize, align=center},
+  arr/.style={->, thick, draw=cE!80},
+  note/.style={font=\sffamily\scriptsize, text=black!65, align=center}]
+% input
+\node[box, minimum width=20mm] (in) {Manuscript\\(PDF / text)\\[1pt]\scriptsize + target venue};
+% phase 0
+\node[box, right=7mm of in, minimum width=27mm] (p0) {\textbf{Field analysis}\\\scriptsize sub-field, technique,\\\scriptsize paper type, venue\\\scriptsize configures 5 reviewers};
+\node[box, below=3mm of p0, minimum width=27mm, fill=cBg, font=\sffamily\scriptsize] (scan) {integrity scan\\(prompt injection)};
+\node[phase, above=1mm of p0] {PHASE 0};
+% phase 1: reviewers
+\node[rev=cM, right=10mm of p0, yshift=13mm] (r1) {R1 Methodology\\error audit};
+\node[rev=cD, below=1.4mm of r1] (r2) {R2 Domain};
+\node[rev=cP, below=1.4mm of r2] (r3) {R3 Perspective};
+\node[rev=cG, below=1.4mm of r3] (r4) {R4 Generalist};
+\node[rev=cA, below=1.4mm of r4] (r5) {Devil's Advocate\\strongest case against};
+\begin{scope}[on background layer]
+\node[draw=cLine, dashed, rounded corners=4pt, fill=cBg, fit=(r1)(r5), inner sep=3pt] (panel) {};
+\end{scope}
+\node[phase, above=0.5mm of panel] {PHASE 1 $\cdot$ INDEPENDENT};
+\node[note, below=0.6mm of panel] {shared paper memory};
+% phase 1.5 / 1.6
+\node[box, right=9mm of panel, yshift=10mm, minimum width=30mm] (lit) {\textbf{Literature check}\\\scriptsize claim novelty, baseline scout,\\\scriptsize similarity ranking};
+\node[box, below=1.5mm of lit, minimum width=30mm, fill=cBg, font=\sffamily\scriptsize] (filt) {self-exclusion filter:\\no own versions, reviews,\\acceptance lists};
+\node[phase, above=1mm of lit] {PHASE 1.5};
+\node[box, below=6mm of filt, minimum width=30mm] (chk) {\textbf{Report check}\\\scriptsize drop ungrounded points};
+\node[phase, above=0.3mm of chk] {PHASE 1.6};
+% phase 2
+\node[box, right=9mm of lit, yshift=-11mm, minimum width=31mm, minimum height=26mm, draw=cE, very thick] (eic) {\textbf{Editor-in-Chief}\\[2pt]\scriptsize checks decisive points\\\scriptsize quality weight $q_i\in[0.5,1.5]$\\\scriptsize pool position $P$\\\scriptsize area-chair test on\\\scriptsize DA-CRITICAL issues};
+\node[phase, above=1mm of eic] {PHASE 2};
+% aggregation and outputs
+\node[box, right=8mm of eic, minimum width=27mm, fill=cBg] (agg) {\code{aggregate\_scores.py}\\\scriptsize $w_i = c(\mathrm{conf}_i)\,q_i$\\\scriptsize DA cap, pool bands};
+\node[box, above=6mm of agg, minimum width=27mm] (out1) {Decision letter\\\scriptsize + revision roadmap};
+\node[box, below=6mm of agg, minimum width=27mm] (out2) {11 venue forms\\\scriptsize e.g.\ ICLR $\{0,2,\dots,10\}$};
+% arrows
+\draw[arr] (in) -- (p0);
+\draw[arr] (p0.east) -- ++(4mm,0) |- (r1.west);
+\foreach \r in {r2,r3,r4} \draw[arr] (p0.east) -- ++(4mm,0) |- (\r.west);
+\draw[arr] (p0.east) -- ++(4mm,0) |- (r5.west);
+\draw[arr] (panel.east) -- ++(3mm,0) |- (lit.west);
+\draw[arr] (panel.east) -- ++(3mm,0) |- (chk.west);
+\draw[arr] (lit.east) -- ++(3mm,0) |- (eic.west);
+\draw[arr] (chk.east) -- ++(3mm,0) |- (eic.west);
+\draw[arr] (eic) -- (agg);
+\draw[arr] (agg) -- (out1);
+\draw[arr] (agg) -- (out2);
+\end{tikzpicture}}
+\caption{Full-mode workflow. Five reviewers write independently from a shared factual
+paper memory. A literature check, which cannot retrieve the paper under review, and a report check
+run before the Editor-in-Chief. The EIC weights each review by quality and checks decisive points
+against the manuscript. A deterministic script aggregates scores and translates them into each
+venue's form.}
+\label{fig:workflow}
+\end{figure}
+A full review runs the phases in Figure~\ref{fig:workflow}. The phases are Markdown instructions in
 \code{SKILL.md} and \code{agents/*.md}; scripts are optional helpers.
 \begin{description}
 \item[Phase 0: field analysis.] A field analyst identifies the paper's sub-field, technique, paper
@@ -231,7 +304,7 @@ CRITICAL issues on 11/30 papers, and the EIC upheld none on real papers.
 \section{Evaluation II: ICLR 2026 calibration}\label{sec:iclr}
 
 \subsection{Protocol}
-We follow the paperreview.ai protocol.
+We follow the paperreview.ai protocol~\citep{paperreview}.
 \begin{itemize}
 \item Sample ICLR 2026 submissions with human reviews, including withdrawn ones.
 \item Fit an ordinary least-squares map from the seven dimension scores to the human rating on a
@@ -243,7 +316,7 @@ papers and without withdrawn papers.
 The harness (\code{evals/iclr\_calibration.py}, standard library only) runs in GitHub Actions
 through the API. Reviewers never see human scores or decisions.
 
-\paragraph{Error metrics.} Following the CSPaper benchmark, for predictions $\hat s_j$ and human
+\paragraph{Error metrics.} Following the CSPaper benchmark~\citep{cspaper}, for predictions $\hat s_j$ and human
 ratings $s_j$ on a scale $[S_{\min}, S_{\max}]$ (ICLR 2026: $[0,10]$),
 \begin{equation}
 \mathrm{NMAE} = \frac{1}{n}\sum_{j}\frac{|s_j - \hat s_j|}{S_{\max}-S_{\min}},\qquad
@@ -357,23 +430,114 @@ For reference only: CSPaper reports NMAE 0.128, NME $-0.015$ and SRC 0.658 for C
 on ICLR main. That benchmark's sample size and paper overlap are unknown, so the numbers are not
 directly comparable with ours.
 
-\section{Related benchmarks}\label{sec:related}
+\section{Related work}\label{sec:related}
+
+\paragraph{AI reviewer systems.}
+Figure~\ref{fig:design} places our system among published AI reviewers along two axes: how the
+model is obtained and how a review is produced.
+\begin{itemize}
+\item \textbf{Prompted general models.} The AI Scientist~\citep{lu2024aiscientist} reviews with one
+prompted pass, optionally with reflection and an ensemble.
+\item \textbf{Fine-tuned single pass.} OpenReviewer~\citep{idahl2025openreviewer} fine-tunes
+Llama-3.1-8B on about 79k expert reviews; its ratings follow the human distribution, while general
+models rate too leniently.
+\item \textbf{Fine-tuned with a consistency check.} SEA~\citep{yu2024sea} standardizes multiple
+reviews into one format (SEA-S), fine-tunes Mistral-7B on them (SEA-E), and regenerates a review
+when a mismatch score (SEA-A) finds it inconsistent with the paper.
+\item \textbf{Fine-tuned with simulated reviewers.} CycleReviewer~\citep{weng2025cycleresearcher}
+(8B--123B) simulates several reviewers and a senior reviewer and averages their scores. It is
+trained on ICLR 2024 reviews and serves as the reward model of CycleResearcher.
+\item \textbf{Fine-tuned with multi-stage reasoning.} DeepReviewer~\citep{zhu2025deepreview}
+(7B, 14B) is trained on DeepReview-13K, synthetic stepwise reviews of ICLR 2024--2025 papers, and
+reasons in stages with Fast, Standard and Best modes.
+\end{itemize}
+Our system is closest in spirit to CycleReviewer and DeepReviewer: a panel of perspectives and
+staged reasoning. It differs in four ways:
+\begin{itemize}
+\item it is a prompt-only skill for a strong general model, so it needs no training data and can
+use a newer model as soon as one is released;
+\item the reviewers have distinct roles, including an adversarial Devil's Advocate;
+\item an explicit EIC weights reviews by quality instead of averaging them;
+\item scoring is deterministic and venue-specific.
+\end{itemize}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\sffamily\small, >={Stealth[length=2mm]},
+  sys/.style={draw=#1, fill=#1!12, rounded corners=3pt, align=center, inner sep=3pt, font=\sffamily\scriptsize, text width=33mm, execute at begin node=\hyphenpenalty10000\relax},
+  ax/.style={->, thick, draw=black!60}]
+\draw[ax] (0,0) -- (12.3,0);
+\node[font=\sffamily\scriptsize\bfseries, text=black!70] at (6.15,-0.8) {how a review is produced};
+\draw[ax] (0,0) -- (0,5.6) node[above right, font=\sffamily\scriptsize\bfseries, text=black!70] {how the model is obtained};
+\foreach \x/\t in {1.95/single pass, 5.85/staged or self-checked, 9.95/panel of reviewers}
+  \node[font=\sffamily\scriptsize, text=black!60] at (\x,-0.35) {\t};
+\node[font=\sffamily\scriptsize, text=black!60, rotate=90] at (-0.35,1.4) {prompted LLM};
+\node[font=\sffamily\scriptsize, text=black!60, rotate=90] at (-0.35,4.2) {fine-tuned};
+\draw[dashed, draw=black!25] (0.1,2.8) -- (12.1,2.8);
+\draw[dashed, draw=black!25] (3.9,0.1) -- (3.9,5.4);
+\draw[dashed, draw=black!25] (7.9,0.1) -- (7.9,5.4);
+\node[sys=cG] (ais) at (1.95,1.4) {AI Scientist~\citep{lu2024aiscientist}\\single prompt (+ ensemble)};
+\node[sys=cD] (or) at (1.95,4.2) {OpenReviewer~\citep{idahl2025openreviewer}\\Llama-3.1-8B,\\79k expert reviews};
+\node[sys=cD] (sea) at (5.85,4.75) {SEA-E~\citep{yu2024sea}\\Mistral-7B + mismatch check};
+\node[sys=cP] (dr) at (5.85,3.55) {DeepReviewer~\citep{zhu2025deepreview}\\7B/14B, multi-stage reasoning};
+\node[sys=cP] (cr) at (9.95,4.2) {CycleReviewer~\citep{weng2025cycleresearcher}\\8B--123B, simulated reviewers};
+\node[sys=cM, very thick, text width=36mm] (us) at (9.95,1.4) {\textbf{Academic Paper Reviewer}\\5 role-based reviewers + EIC\\literature check, report check};
+\end{tikzpicture}
+\caption{Design space of AI reviewers. Fine-tuned systems learn from public reviews of past
+conferences. Our skill prompts a strong general model through a structured panel and needs no
+training data. Positions are qualitative.}
+\label{fig:design}
+\end{figure}
+
+\paragraph{Reported scores of reviewer models.}
+Table~\ref{tab:sys} collects published score-agreement numbers. They come from different paper
+sets, sizes and targets and are \emph{not} comparable with our 20-paper pilot. Because all the
+fine-tuned models were trained on data up to ICLR 2024--2025, ICLR 2026 is unseen by them, which
+makes them fair open-weight baselines for our sample (future work).
+
+\begin{table}[t]
+\centering\small
+\caption{Published rating agreement with the mean human rating (1--10 scale). Values are from
+\citet{zhu2025deepreview}, Table~2 (columns ICLR 2024 / ICLR 2025). Last row: our pilot.}
+\label{tab:sys}
+\begin{tabular}{lccc}
+\toprule
+System & Spearman & Rating MAE & Decision acc.\\
+\midrule
+DeepReviewer-14B~\citep{zhu2025deepreview} & 0.356 / 0.405 & 0.91 / 0.92 & 0.64 / 0.69\\
+CycleReviewer-70B~\citep{weng2025cycleresearcher} & 0.336 / 0.267 & 1.25 / 1.21 & 0.63 / 0.68\\
+CycleReviewer-8B~\citep{weng2025cycleresearcher} & 0.280 / 0.279 & 1.24 / 1.21 & 0.64 / 0.68\\
+AI Scientist, DeepSeek-R1~\citep{lu2024aiscientist} & 0.326 / 0.324 & 1.65 / 1.81 & 0.52 / 0.43\\
+AI Scientist, Claude 3.5 Sonnet~\citep{lu2024aiscientist} & 0.037 / $-0.022$ & 1.50 / 1.35 & 0.48 / 0.56\\
+\midrule
+Ours, Sonnet high, panel rating (ICLR 2026, $n=20$) & 0.48 & 0.79$^\dagger$ & --\\
+\bottomrule
+\multicolumn{4}{l}{\footnotesize $^\dagger$ On the ICLR 2026 0--10 scale (NMAE $0.079\times10$).}
+\end{tabular}
+\end{table}
+
+Other studies report MAE 0.86 for OpenReviewer-8B and 1.10 for SEA-E under their own
+setup~\citep{li2026beyondrating}. NAIPv2~\citep{zhao2025naipv2} could not reproduce these
+systems and quotes their published numbers. Re$^2$~\citep{zhang2025re2} evaluates all four
+fine-tuned systems on its review and rebuttal data.
+
+\paragraph{Benchmarks.}
 \begin{description}
-\item[paperreview.ai.] Score agreement and acceptance AUC on ICLR; our protocol follows it.
-\item[CSPaper.] A score-prediction leaderboard with NMAE, NME, SRC and average word count; we
-adopt its error metrics.
-\item[CoCoReviewBench.] (Deng et al., arXiv 2605.07905, CC BY 4.0.) This benchmark scores review
-\emph{content} rather than scores. It covers 3{,}900 ICLR 2017--2025 and NeurIPS 2021--2024 papers
+\item[paperreview.ai~\citep{paperreview}.] Score agreement and acceptance AUC on ICLR; our
+protocol follows it.
+\item[CSPaper~\citep{cspaper}.] A score-prediction leaderboard with NMAE, NME, SRC and average
+word count; we adopt its error metrics.
+\item[CoCoReviewBench~\citep{deng2026cocoreviewbench}.] This benchmark scores review
+\emph{content} rather than scores. It covers 3{,}900 ICLR 2017--2025 and NeurIPS 2021--2024 papers,
 with human references filtered for correctness through reviewer--reviewer and reviewer--author
 conflicts, using the meta-review as context. An LLM judge scores correctness, thoroughness,
 grounding, verifiability and clarity per category, and the benchmark also reports category
-completeness. Its findings are that lexical metrics reward overlap rather than correctness, that
-reasoning models match or beat humans on grounding and verifiability, and that AI reviews are broad
-but shallow. Integrating it needs a GPU-served split/classify model and a judge API; its paper text
-must also be blinded, and every year predates current training cutoffs.
-\item[IntelLabs AI-Peer-Review-Detection-Benchmark.] About 789k paired human and AI reviews for
-\emph{detecting} AI-written reviews. It has a different goal and a restrictive license (internal
-R\&D only), so we do not use it.
+completeness. Among its findings: lexical metrics reward overlap rather than correctness, reasoning
+models (including DeepReviewer-14B) match or beat humans on grounding and verifiability, and AI
+reviews are broad but shallow.
+\item[AI-text detection~\citep{yu2025detect}.] About 789k paired human and AI reviews for
+\emph{detecting} AI-written reviews. It has a different goal and a restrictive license, so we do
+not use it.
 \end{description}
 
 \section{Limitations and future work}
@@ -386,8 +550,10 @@ assumed or secondary scales.
 \item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers
 separately but cannot detect unreported recognition.
 \item \textbf{Scores are not the review.} Ranking agreement says nothing about whether the stated
-weaknesses are correct. A content-level evaluation (for example CoCoReviewBench) is the natural
-next step.
+weaknesses are correct. A content-level evaluation (for example
+CoCoReviewBench~\citep{deng2026cocoreviewbench}) is the natural next step, together with
+open-weight baselines~\citep{zhu2025deepreview,weng2025cycleresearcher} run on the same ICLR 2026
+papers.
 \item \textbf{Human labels are noisy.} On our pilot papers, one human agrees with another at only
 Spearman 0.12. Mean human ratings are a weak target, and acceptance is a coarse one.
 \end{itemize}
@@ -404,6 +570,71 @@ python3 evals/iclr_calibration.py evaluate sample.jsonl features.jsonl \
 \end{verbatim}}
 Paid runs use the workflow \code{.github/workflows/}\allowbreak\code{iclr-calibration.yml},
 configured by \code{evals/iclr\_run.json}.
+
+
+\begin{thebibliography}{99}\small
+\bibitem[Deng et~al.(2026)]{deng2026cocoreviewbench}
+H.~Deng, X.~Ke, Y.~Li, et~al.
+\newblock CoCoReviewBench: A completeness- and correctness-oriented benchmark for AI reviewers.
+\newblock arXiv:2605.07905, 2026.
+
+\bibitem[Idahl and Ahmadi(2025)]{idahl2025openreviewer}
+M.~Idahl and Z.~Ahmadi.
+\newblock OpenReviewer: A specialized large language model for generating critical scientific
+paper reviews.
+\newblock In \emph{NAACL 2025 System Demonstrations}. arXiv:2412.11948.
+
+\bibitem[Li et~al.(2026)]{li2026beyondrating}
+B.~Li, H.~Ma, Y.~Wang, et~al.
+\newblock Beyond rating: A comprehensive evaluation and benchmark for AI reviews.
+\newblock arXiv:2604.19502, 2026.
+
+\bibitem[Lu et~al.(2024)]{lu2024aiscientist}
+C.~Lu, C.~Lu, R.~T. Lange, et~al.
+\newblock The AI Scientist: Towards fully automated open-ended scientific discovery.
+\newblock arXiv:2408.06292, 2024.
+
+\bibitem[paperreview.ai(2025)]{paperreview}
+paperreview.ai.
+\newblock Technical overview.
+\newblock \url{https://paperreview.ai/tech-overview}.
+
+\bibitem[CSPaper(2026)]{cspaper}
+CSPaper.
+\newblock AI review benchmark.
+\newblock \url{https://cspaper.org/benchmark}.
+
+\bibitem[Weng et~al.(2025)]{weng2025cycleresearcher}
+Y.~Weng, M.~Zhu, G.~Bao, et~al.
+\newblock CycleResearcher: Improving automated research via automated review.
+\newblock In \emph{ICLR}, 2025. arXiv:2411.00816.
+
+\bibitem[Yu et~al.(2024)]{yu2024sea}
+J.~Yu, Z.~Ding, J.~Tan, et~al.
+\newblock Automated peer reviewing in paper SEA: Standardization, evaluation, and analysis.
+\newblock In \emph{Findings of EMNLP}, 2024. arXiv:2407.12857.
+
+\bibitem[Yu et~al.(2025)]{yu2025detect}
+S.~Yu, M.~Luo, A.~Madasu, V.~Lal, and P.~Howard.
+\newblock Is your paper being reviewed by an LLM? Benchmarking AI text detection in peer review.
+\newblock arXiv:2502.19614, 2025.
+
+\bibitem[Zhang et~al.(2025)]{zhang2025re2}
+D.~Zhang, Z.~Bao, S.~Du, et~al.
+\newblock Re$^2$: A consistency-ensured dataset for full-stage peer review and multi-turn rebuttal
+discussions.
+\newblock arXiv:2505.07920, 2025.
+
+\bibitem[Zhao et~al.(2025)]{zhao2025naipv2}
+P.~Zhao, J.~Tian, Q.~Xing, et~al.
+\newblock NAIPv2: Debiased pairwise learning for efficient paper quality estimation.
+\newblock arXiv:2509.25179, 2025.
+
+\bibitem[Zhu et~al.(2025)]{zhu2025deepreview}
+M.~Zhu, Y.~Weng, L.~Yang, and Y.~Zhang.
+\newblock DeepReview: Improving LLM-based paper review with human-like deep thinking process.
+\newblock In \emph{ACL}, 2025. arXiv:2503.08569.
+\end{thebibliography}
 
 \appendix
 \section{Per-paper pilot scores}
