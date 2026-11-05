@@ -1,0 +1,129 @@
+name: ICLR calibration (paperreview.ai protocol)
+
+# Runs the skill on ICLR 2025 submissions sampled by evals/iclr_calibration.py, then
+# fits the 7-dimension linear map on the train split and reports Spearman and AUC on
+# the test split. Paid: every paper is a full panel review through the API.
+#
+# Ground truth (human scores, decisions) never reaches the review jobs: they get the
+# blinded paper text only. The evaluate job rebuilds the sample from the seed.
+on:
+  workflow_dispatch:
+    inputs:
+      split:
+        description: "Which papers: all, train or test"
+        default: "all"
+      offset:
+        description: "Skip this many papers of the split (to run in batches)"
+        default: "0"
+      limit:
+        description: "Number of papers (0 = all). Start with a pilot of 2."
+        default: "2"
+      model:
+        description: "Model for the review runs"
+        default: "claude-sonnet-5-5"
+      max_parallel:
+        description: "Concurrent review jobs"
+        default: "2"
+
+permissions:
+  contents: read
+
+env:
+  BERENS: https://github.com/berenslab/iclr-dataset.git
+  BERENS_REV: main
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    outputs:
+      ids: ${{ steps.find.outputs.ids }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install -y poppler-utils && pip install pyarrow
+      - name: Sample (seeded) and find full text
+        id: find
+        run: |
+          git clone --depth 1 --branch "$BERENS_REV" "$BERENS" /tmp/berens
+          W=evals/work/benchmarks/iclr2025
+          python3 -I evals/iclr_calibration.py sample /tmp/berens/data/iclr25v2.parquet --out $W/sample.jsonl
+          python3 -I evals/iclr_calibration.py find $W/sample.jsonl --openreview \
+            --split "${{ inputs.split }}" --offset "${{ inputs.offset }}" --limit "${{ inputs.limit }}" \
+            --ids-out ids.json
+          echo "ids=$(cat ids.json)" >> "$GITHUB_OUTPUT"
+          # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
+          mkdir -p ship && for d in evals/work/papers/iclr25-*; do
+            [ -f "$d/blinded.txt" ] && mkdir -p "ship/$(basename $d)" && cp "$d/blinded.txt" "ship/$(basename $d)/"
+          done
+      - uses: actions/upload-artifact@v4
+        with: {name: papers, path: ship, retention-days: 7}
+
+  review:
+    needs: prepare
+    if: needs.prepare.outputs.ids != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: ${{ fromJSON(inputs.max_parallel) }}
+      matrix:
+        id: ${{ fromJSON(needs.prepare.outputs.ids) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: {name: papers, path: evals/work/papers}
+      - run: npm install -g @anthropic-ai/claude-code
+      - name: Review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ID: ${{ matrix.id }}
+        run: |
+          # Only this paper's text stays in the workspace.
+          find evals/work/papers -mindepth 1 -maxdepth 1 ! -name "$ID" -exec rm -rf {} +
+          mkdir -p "evals/work/results/$ID"
+          python3 - <<'PY' > prompt.md
+          import os
+          root, pid = os.getcwd(), os.environ["ID"]
+          t = open("evals/review_prompt.md").read().split("---", 1)[1]
+          t = (t.replace("{ID}", pid).replace("{ROOT}", root)
+                .replace("{VENUE_NAME}", "ICLR").replace("{VENUE_KEY}", "iclr"))
+          t = t.replace("Full review, skip confirmation.",
+                        "Full review, skip confirmation, literature check: strict, "
+                        "cutoff date 2024-10-01.")
+          t = t.replace("or access the web.",
+                        "or access the web, except through the skill's own "
+                        "scripts/related_search.py for the literature check.")
+          print(t)
+          PY
+          claude -p "$(cat prompt.md)" --model "${{ inputs.model }}" \
+            --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash(python3:*)" \
+            --max-turns 300 --output-format json > "evals/work/results/$ID/run.json" || true
+          python3 -c "import json;r=json.load(open('evals/work/results/$ID/run.json'));print('cost_usd',r.get('total_cost_usd'),'turns',r.get('num_turns'))" || true
+          ls -la "evals/work/results/$ID"
+      - uses: actions/upload-artifact@v4
+        with: {name: "result-${{ matrix.id }}", path: "evals/work/results/${{ matrix.id }}", retention-days: 30}
+
+  evaluate:
+    needs: review
+    if: always() && needs.review.result != 'skipped'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install pyarrow
+      - uses: actions/download-artifact@v4
+        with: {pattern: "result-*", path: results}
+      - name: Features, cost and metrics
+        run: |
+          for d in results/result-*; do mv "$d" "results/${d#results/result-}"; done
+          git clone --depth 1 --branch "$BERENS_REV" "$BERENS" /tmp/berens
+          python3 -I evals/iclr_calibration.py sample /tmp/berens/data/iclr25v2.parquet --out sample.jsonl
+          python3 -I evals/iclr_calibration.py features results --out features.jsonl
+          python3 - <<'PY'
+          import json, glob
+          c = [json.load(open(f)).get("total_cost_usd") or 0 for f in glob.glob("results/*/run.json")]
+          print(f"runs {len(c)}, total cost ${sum(c):.2f}, mean ${sum(c) / max(len(c), 1):.2f}")
+          PY
+          python3 -I evals/iclr_calibration.py evaluate sample.jsonl features.jsonl > metrics.json || echo "too few runs to fit"
+          cat metrics.json || true
+      - uses: actions/upload-artifact@v4
+        with: {name: metrics, path: "*.json*", retention-days: 30}
