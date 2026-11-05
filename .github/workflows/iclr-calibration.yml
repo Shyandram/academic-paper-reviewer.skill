@@ -51,6 +51,7 @@ jobs:
       max_parallel: ${{ steps.c.outputs.max_parallel }}
       mode: ${{ steps.c.outputs.mode }}
       runs: ${{ steps.c.outputs.runs }}
+      budget: ${{ steps.c.outputs.budget }}
     steps:
       - uses: actions/checkout@v4
       - id: c
@@ -60,7 +61,8 @@ jobs:
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json, os, re
           cfg = {"split": "all", "offset": "0", "limit": "2", "model": "claude-haiku-5-5",
-                 "max_parallel": "2", "mode": "review", "runs": ""}
+                 "max_parallel": "2", "mode": "review", "runs": "",
+                 "budget": "3"}
           given = json.loads(os.environ.get("INPUTS") or "null") or {}
           if not given and os.path.exists("evals/iclr_run.json"):
               given = json.load(open("evals/iclr_run.json"))
@@ -68,6 +70,7 @@ jobs:
               given["runs"] = ",".join(str(r) for r in given["runs"])
           cfg.update({k: str(v) for k, v in given.items() if k in cfg})
           assert cfg["mode"] in ("review", "evaluate")
+          assert re.fullmatch(r"[0-9]+(\.[0-9]+)?", cfg["budget"])  # USD cap per paper
           assert re.fullmatch(r"[0-9,]*", cfg["runs"])
           assert cfg["split"] in ("all", "train", "test")
           assert all(cfg[k].isdigit() for k in ("offset", "limit", "max_parallel"))
@@ -94,8 +97,9 @@ jobs:
           curl -sSfL --retry 4 -o /tmp/reviews.parquet "$DATA_URL"
           W=evals/work/benchmarks/iclr2026
           python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out $W/sample.jsonl
-          # OpenReview PDFs return 403 from GitHub runners too, so arXiv only.
-          python3 -I evals/iclr_calibration.py find $W/sample.jsonl \
+          # Text sources were found once and committed (IDs only): the paperreview.ai
+          # dump (submission PDFs) or arXiv v1. OpenReview returns 403 from runners.
+          python3 -I evals/iclr_calibration.py fetch $W/sample.jsonl evals/iclr2026_sources.json \
             --split "${{ needs.config.outputs.split }}" --offset "${{ needs.config.outputs.offset }}" --limit "${{ needs.config.outputs.limit }}" \
             --ids-out ids.json
           echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
@@ -148,7 +152,7 @@ jobs:
           PY
           claude -p "$(cat prompt.md)" --model "${{ needs.config.outputs.model }}" \
             --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash(python3:*)" \
-            --max-turns 300 --output-format json > "evals/work/results/$ID/run.json" || true
+            --max-budget-usd "${{ needs.config.outputs.budget }}" --output-format json > "evals/work/results/$ID/run.json" || true
           python3 -c "import json;r=json.load(open('evals/work/results/$ID/run.json'));print('cost_usd',r.get('total_cost_usd'),'turns',r.get('num_turns'))" || true
           ls -la "evals/work/results/$ID"
       - uses: actions/upload-artifact@v4

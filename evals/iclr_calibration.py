@@ -190,6 +190,8 @@ def cmd_find(a):
     found = []
     for r in rows:
         d = WORK / f"iclr{a.year % 100}-{r['paper_id']}"
+        if (d / "source.json").exists():
+            continue  # the dump's submission PDF is already there
         meta = d / "arxiv.json"
         if meta.exists():
             hit = json.loads(meta.read_text())
@@ -309,6 +311,73 @@ def cmd_pdfs(a):
             continue
         print(f"batch {b}: {n} sampled papers; {len(done)}/{len(want)} so far", file=sys.stderr)
     print(f"{len(done)}/{len(want)} sampled papers have the submission PDF", file=sys.stderr)
+
+
+# ---------- sources / fetch (reproducible text on another machine) ----------
+
+def cmd_sources(a):
+    """Record where each sampled paper's text came from: a dump batch (preferred, the
+    submission PDF) or an arXiv ID. The map has IDs only, no text and no labels, so it
+    can be committed and used by `fetch` on a CI runner."""
+    rows = [json.loads(l) for l in open(a.sample)]
+    out = {}
+    for r in rows:
+        d = WORK / f"iclr{a.year % 100}-{r['paper_id']}"
+        if not (d / "blinded.txt").exists():
+            continue
+        if (d / "source.json").exists():
+            out[r["paper_id"]] = json.loads((d / "source.json").read_text())["source"]
+        elif (d / "arxiv.json").exists() and json.loads((d / "arxiv.json").read_text()):
+            out[r["paper_id"]] = "arxiv:" + json.loads((d / "arxiv.json").read_text())["arxiv_id"]
+    Path(a.out).write_text(json.dumps(dict(sorted(out.items())), indent=0) + "\n")
+    print(f"{len(out)}/{len(rows)} sampled papers have a text source", file=sys.stderr)
+
+
+def cmd_fetch(a):
+    """Download the text for the selected rows from the committed source map."""
+    import tarfile
+    rows = [json.loads(l) for l in open(a.sample)]
+    if a.split != "all":
+        rows = [r for r in rows if r["split"] == a.split]
+    src = json.load(open(a.sources))
+    rows = [r for r in rows if r["paper_id"] in src]  # offset/limit count papers with text
+    rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
+    need = {r["paper_id"]: src[r["paper_id"]] for r in rows}
+    got = []
+    by_batch = {}
+    for pid, s in need.items():
+        if s.startswith("arxiv:"):
+            url = f"https://export.arxiv.org/pdf/{s[6:]}v1"
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": "paper-review-eval/1.0"})
+                with urllib.request.urlopen(req, timeout=120) as resp:
+                    data = resp.read()
+                if data[:5] == b"%PDF-":
+                    extract_text(WORK / f"iclr{a.year % 100}-{pid}", data)
+                    got.append(pid)
+            except Exception as e:
+                print(f"  arXiv failed {pid}: {e}", file=sys.stderr)
+            time.sleep(3)
+        else:
+            by_batch.setdefault(s, set()).add(pid)
+    for s, pids in sorted(by_batch.items()):
+        repo, b = s.split("/batch_")
+        url = f"{HF}{repo}/resolve/main/pdfs_batch_{b}.tar.gz"
+        req = urllib.request.Request(url, headers={"User-Agent": "paper-review-eval/1.0"})
+        left = set(pids)
+        with urllib.request.urlopen(req, timeout=120) as resp, \
+                tarfile.open(fileobj=resp, mode="r|gz") as tar:
+            for m in tar:
+                pid = Path(m.name).stem
+                if m.isfile() and pid in left:
+                    extract_text(WORK / f"iclr{a.year % 100}-{pid}", tar.extractfile(m).read())
+                    got.append(pid)
+                    left.discard(pid)
+                    if not left:
+                        break
+    print(f"{len(got)}/{len(rows)} selected papers fetched", file=sys.stderr)
+    if a.ids_out:
+        Path(a.ids_out).write_text(json.dumps([f"iclr{a.year % 100}-{p}" for p in got]))
 
 
 # ---------- evaluate ----------
@@ -515,6 +584,18 @@ def main():
     q.add_argument("sample")
     q.add_argument("--year", type=int, default=2026)
     q.add_argument("--batches", type=int, nargs="*", help="batch numbers (default: all 40)")
+    o = sub.add_parser("sources", help="write the committed map of text sources")
+    o.add_argument("sample")
+    o.add_argument("--year", type=int, default=2026)
+    o.add_argument("--out", required=True)
+    h = sub.add_parser("fetch", help="download text for selected rows from the source map")
+    h.add_argument("sample")
+    h.add_argument("sources")
+    h.add_argument("--year", type=int, default=2026)
+    h.add_argument("--split", choices=["all", "train", "test"], default="all")
+    h.add_argument("--offset", type=int, default=0)
+    h.add_argument("--limit", type=int, default=0)
+    h.add_argument("--ids-out")
     g = sub.add_parser("features")
     g.add_argument("results", help="directory of <id>/aggregate.json runs")
     g.add_argument("--out", required=True)
@@ -525,7 +606,8 @@ def main():
     e.add_argument("--low", type=float, default=5.0,
                    help="AI-score threshold for the calibration table (5.5 for ICLR 2025)")
     a = ap.parse_args()
-    {"sample": cmd_sample, "find": cmd_find, "pdfs": cmd_pdfs, "features": cmd_features,
+    {"sample": cmd_sample, "find": cmd_find, "pdfs": cmd_pdfs, "sources": cmd_sources,
+     "fetch": cmd_fetch, "features": cmd_features,
      "evaluate": cmd_evaluate}[a.cmd](a)
 
 
