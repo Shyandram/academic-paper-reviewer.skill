@@ -52,6 +52,7 @@ jobs:
       mode: ${{ steps.c.outputs.mode }}
       runs: ${{ steps.c.outputs.runs }}
       budget: ${{ steps.c.outputs.budget }}
+      effort: ${{ steps.c.outputs.effort }}
       pick: ${{ steps.c.outputs.pick }}
     steps:
       - uses: actions/checkout@v4
@@ -63,7 +64,7 @@ jobs:
           import json, os, re
           cfg = {"split": "all", "offset": "0", "limit": "2", "model": "claude-haiku-5-5",
                  "max_parallel": "2", "mode": "review", "runs": "",
-                 "budget": "3", "pick": "order"}
+                 "budget": "3", "pick": "order", "effort": ""}
           given = json.loads(os.environ.get("INPUTS") or "null") or {}
           if not given and os.path.exists("evals/iclr_run.json"):
               given = json.load(open("evals/iclr_run.json"))
@@ -77,6 +78,7 @@ jobs:
           assert cfg["split"] in ("all", "train", "test")
           assert all(cfg[k].isdigit() for k in ("offset", "limit", "max_parallel"))
           assert re.fullmatch(r"claude-[a-z0-9.-]+", cfg["model"])
+          assert cfg["effort"] in ("", "low", "medium", "high", "xhigh", "max")
           for k, v in cfg.items():
               print(f"{k}={v}")
           PY
@@ -155,6 +157,7 @@ jobs:
           print(t)
           PY
           claude -p "$(cat prompt.md)" --model "${{ needs.config.outputs.model }}" \
+            ${{ needs.config.outputs.effort && format('--effort {0}', needs.config.outputs.effort) || '' }} \
             --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash(python3:*)" \
             --max-budget-usd "${{ needs.config.outputs.budget }}" --output-format json > "evals/work/results/$ID/run.json" || true
           python3 -c "import json;r=json.load(open('evals/work/results/$ID/run.json'));print('cost_usd',r.get('total_cost_usd'),'turns',r.get('num_turns'))" || true
