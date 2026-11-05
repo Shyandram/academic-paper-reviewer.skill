@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Academic Paper Reviewer</title>
+<meta name="description" content="A multi-perspective peer-review skill for Claude and Codex: five independent reviewers and an Editor-in-Chief, tuned for computer vision and machine learning papers.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232f5bd3'/><path d='M9 9h10l4 4v10H9z' fill='white'/><path d='M12 15h8M12 19h6' stroke='%232f5bd3' stroke-width='2'/></svg>">
+<style>
+:root{
+  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f2f0ea; --ink:#1b1d22; --muted:#5c616c; --line:#e3e0d7;
+  --accent:#2f5bd3; --accent-soft:#e7edfc; --accent-ink:#1f3f9c;
+  --good:#1d7a4f; --warn:#a86108; --bad:#b4342d;
+  --bar-ai:#2f5bd3; --bar-weak:#a9b4cc; --bar-human:#c98a2b;
+  --code-bg:#f2f0ea; --shadow:0 1px 2px rgba(20,20,30,.05),0 6px 24px rgba(20,20,30,.05);
+  --radius:14px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#121418; --surface:#1a1d23; --surface-2:#22262e; --ink:#eceef2; --muted:#a2a8b4; --line:#2e333c;
+    --accent:#7d9cff; --accent-soft:#1f2a47; --accent-ink:#b8c8ff;
+    --good:#4cc28a; --warn:#e3a54a; --bad:#ef7a72;
+    --bar-ai:#7d9cff; --bar-weak:#4a5468; --bar-human:#e0a548;
+    --code-bg:#22262e; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#121418; --surface:#1a1d23; --surface-2:#22262e; --ink:#eceef2; --muted:#a2a8b4; --line:#2e333c;
+  --accent:#7d9cff; --accent-soft:#1f2a47; --accent-ink:#b8c8ff;
+  --good:#4cc28a; --warn:#e3a54a; --bad:#ef7a72;
+  --bar-ai:#7d9cff; --bar-weak:#4a5468; --bar-human:#e0a548;
+  --code-bg:#22262e; --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+code,pre{font-family:var(--mono);font-size:.88em}
+code{background:var(--code-bg);padding:.1em .35em;border-radius:5px}
+pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:.6em 0 0;line-height:1.5}
+pre code{background:none;padding:0}
+
+/* nav */
+nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;gap:20px;height:56px}
+.brand{font-weight:650;color:var(--ink);display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand svg{flex:none}
+.links{display:flex;gap:18px;margin-left:auto;font-size:.93rem}
+.links a{color:var(--muted)}
+.links a:hover{color:var(--ink);text-decoration:none}
+#theme{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px;flex:none}
+@media (max-width:760px){.links{display:none}#theme{margin-left:auto}}
+
+/* hero */
+.hero{padding:72px 0 40px}
+.eyebrow{display:inline-flex;gap:8px;align-items:center;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:5px 12px;border-radius:999px}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(2.2rem,5.4vw,3.6rem);line-height:1.08;letter-spacing:-.01em;margin:18px 0 16px;max-width:15ch}
+.lede{font-size:1.15rem;color:var(--muted);max-width:62ch;margin:0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:600;font-size:.96rem;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn:hover{text-decoration:none;border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+:root[data-theme="dark"] .btn.primary{color:#0e1120}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0e1120}}
+.note{margin-top:22px;font-size:.9rem;color:var(--muted);display:flex;gap:8px;align-items:flex-start;max-width:70ch}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:44px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+.stat b{display:block;font-family:var(--serif);font-size:1.9rem;line-height:1.1}
+.stat span{font-size:.88rem;color:var(--muted)}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+/* sections */
+section{padding:56px 0;border-top:1px solid var(--line)}
+h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.6rem,3.4vw,2.2rem);line-height:1.15;margin:0 0 8px}
+.sub{color:var(--muted);margin:0 0 28px;max-width:68ch}
+h3{font-size:1.05rem;margin:0 0 6px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media (max-width:900px){.g3{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.g3,.g2{grid-template-columns:1fr}}
+.card p{margin:0;color:var(--muted);font-size:.95rem}
+
+/* pipeline */
+.pipe{display:grid;grid-template-columns:1fr auto 1.6fr auto 1fr auto 1fr;align-items:stretch;gap:10px}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.stage .ph{font:600 .74rem/1 var(--mono);letter-spacing:.05em;color:var(--accent-ink);text-transform:uppercase}
+.stage h3{margin:8px 0 6px}
+.stage p{margin:0;color:var(--muted);font-size:.9rem}
+.arrow{align-self:center;color:var(--muted);font-size:1.3rem}
+.revs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.rev{display:flex;gap:8px;align-items:baseline;font-size:.88rem;background:var(--surface-2);border-radius:8px;padding:6px 9px}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+@media (max-width:900px){.pipe{grid-template-columns:1fr}.arrow{transform:rotate(90deg);justify-self:center}}
+
+/* modes table */
+.table{width:100%;border-collapse:collapse;font-size:.94rem}
+.table th,.table td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.table th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+.table td:first-child{white-space:nowrap}
+.tag{display:inline-block;font:600 .8rem/1 var(--mono);padding:5px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent-ink)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+.scroll .table tr:last-child td{border-bottom:none}
+@media (max-width:640px){.table td:first-child{white-space:normal}.table th:nth-child(2),.table td:nth-child(2){display:none}}
+
+/* venues */
+.venues{display:flex;flex-wrap:wrap;gap:8px}
+.venue{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:.92rem;display:flex;gap:8px;align-items:center}
+.venue small{color:var(--muted);font-size:.78rem}
+
+/* eval chart */
+.chart{display:flex;flex-direction:column;gap:12px}
+.row{display:grid;grid-template-columns:minmax(150px,220px) 1fr 52px;gap:12px;align-items:center;font-size:.92rem}
+.row .lab small{display:block;color:var(--muted);font-size:.8rem}
+.track{position:relative;height:22px;background:var(--surface-2);border-radius:6px}
+.fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
+.ci{position:absolute;top:50%;height:2px;background:var(--ink);opacity:.55}
+.ci::before,.ci::after{content:"";position:absolute;top:-5px;width:2px;height:12px;background:var(--ink)}
+.ci::before{left:0}.ci::after{right:0}
+.val{font:600 .9rem var(--mono);text-align:right}
+.axis{display:grid;grid-template-columns:minmax(150px,220px) 1fr 52px;gap:12px;font:.75rem var(--mono);color:var(--muted)}
+.axis div:nth-child(2){display:flex;justify-content:space-between}
+@media (max-width:640px){.row,.axis{grid-template-columns:110px 1fr 44px}}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.85rem;color:var(--muted);margin-top:14px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
+.callout{border-left:3px solid var(--warn);background:var(--surface);padding:14px 16px;border-radius:0 10px 10px 0;font-size:.93rem;color:var(--muted);margin-top:20px}
+.callout b{color:var(--ink)}
+
+/* install tabs */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:8px 14px;border-radius:9px;cursor:pointer;font:600 .9rem var(--sans)}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.panel{display:none}
+.panel.on{display:block}
+.panel ol{margin:0;padding-left:1.2em;color:var(--muted)}
+.panel ol li{margin:.3em 0}
+.panel p{color:var(--muted);margin:.6em 0 0;font-size:.94rem}
+
+footer{border-top:1px solid var(--line);padding:32px 0 48px;color:var(--muted);font-size:.88rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><path d="M9 9h10l4 4v10H9z" fill="var(--bg)"/><path d="M12 15h8M12 19h6" stroke="var(--accent)" stroke-width="2"/></svg>
+      Academic Paper Reviewer
+    </a>
+    <div class="links">
+      <a href="#how">How it works</a>
+      <a href="#modes">Modes</a>
+      <a href="#eval">Evaluation</a>
+      <a href="#install">Install</a>
+      <a href="https://github.com/Shyandram/academic-paper-reviewer.skill">GitHub</a>
+    </div>
+    <button id="theme" aria-label="Toggle color theme" title="Toggle theme">◐</button>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <span class="eyebrow">Skill for Claude &amp; Codex · v2.10</span>
+    <h1>A full peer-review panel for your paper.</h1>
+    <p class="lede">Five independent reviewers, each looking from a different angle, and an Editor-in-Chief who checks the decisive points against your manuscript, weighs the reviews and decides. Tuned for computer vision, deep learning and ML; usable in any field.</p>
+    <div class="cta">
+      <a class="btn primary" href="#install">Install the skill</a>
+      <a class="btn" href="https://github.com/Shyandram/academic-paper-reviewer.skill/raw/main/academic-paper-reviewer.skill">Download .skill</a>
+      <a class="btn" href="https://github.com/Shyandram/academic-paper-reviewer.skill">View source</a>
+    </div>
+    <p class="note"><span aria-hidden="true">ⓘ</span><span>The output is a simulation to help you strengthen a paper, not a prediction of any venue's decision.</span></p>
+    <div class="stats">
+      <div class="stat"><b>5 + 1</b><span>reviewers plus an Editor-in-Chief</span></div>
+      <div class="stat"><b>6</b><span>modes, from quick check to rebuttal</span></div>
+      <div class="stat"><b>11</b><span>venue profiles with their own score forms</span></div>
+      <div class="stat"><b>0</b><span>dependencies: Markdown + standard-library Python</span></div>
+    </div>
+  </div>
+</header>
+
+<section id="how">
+  <div class="wrap">
+    <h2>How a review runs</h2>
+    <p class="sub">The same structure a program committee uses: configure a panel for the paper's real sub-field, collect independent reports, then let an area chair weigh them against the evidence.</p>
+    <div class="pipe">
+      <div class="stage">
+        <div class="ph">Phase 0</div>
+        <h3>Field analysis</h3>
+        <p>Reads the whole paper, identifies sub-field and technique (“token pruning + latency benchmarking”, not “deep learning”), scans for text addressed to AI reviewers, and configures the panel.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="stage">
+        <div class="ph">Phase 1 · independent</div>
+        <h3>Five reviewers</h3>
+        <div class="revs">
+          <div class="rev"><i class="dot" style="background:#2f5bd3"></i><b>Methodology</b>&nbsp;— rigor, error audit, statistics</div>
+          <div class="rev"><i class="dot" style="background:#1d7a4f"></i><b>Domain</b>&nbsp;— positioning, baselines, literature</div>
+          <div class="rev"><i class="dot" style="background:#8a4fbf"></i><b>Perspective</b>&nbsp;— impact beyond the sub-field</div>
+          <div class="rev"><i class="dot" style="background:#c98a2b"></i><b>Generalist</b>&nbsp;— venue fit, presentation</div>
+          <div class="rev"><i class="dot" style="background:#b4342d"></i><b>Devil's Advocate</b>&nbsp;— strongest case against</div>
+        </div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="stage">
+        <div class="ph">Phase 2</div>
+        <h3>Editor-in-Chief</h3>
+        <p>Verifies each decisive point in the paper, weights reviewers by review quality, rules on every critical issue, places the paper in the venue's submission pool and decides.</p>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="stage">
+        <div class="ph">Output</div>
+        <h3>Decision &amp; roadmap</h3>
+        <p>Decision letter, consensus map, both score lists in the venue's own form, and a prioritized revision roadmap. Optional Socratic coaching.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>What makes it different</h2>
+    <p class="sub">Built around the failure modes of real reviewing — and of LLM reviewing.</p>
+    <div class="grid g3">
+      <div class="card"><h3>Calibrated to the submission pool</h3><p>Each reviewer first states where the paper sits among the venue's submissions (“better than about P%”), then scores in the matching band. Uncertainty is never a reason to call a paper borderline.</p></div>
+      <div class="card"><h3>Two score lists</h3><p>The official list keeps the reviewers' raw scores, never modified. The EIC's internal assessment weights each reviewer by confidence × review quality, and can come out higher or lower.</p></div>
+      <div class="card"><h3>A Devil's Advocate with teeth</h3><p>Steelmans the paper, then makes the strongest counter-argument and recomputes headline numbers. The EIC applies an area-chair test; only truly fatal issues cap the decision.</p></div>
+      <div class="card"><h3>Error audit with precision rules</h3><p>Nine error categories. Every claimed error needs a location, a verbatim quote and a concrete check. Suspicions become questions, never weaknesses.</p></div>
+      <div class="card"><h3>Literature check without self-leaks</h3><p>Claim-driven arXiv search, a baseline scout and a similarity check. A fingerprint filter never searches for the reviewed paper, its authors, reviews or outcome.</p></div>
+      <div class="card"><h3>CV/ML depth</h3><p>Task checklists for detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models — backbone, pretraining, resolution, TTA and latency confounds.</p></div>
+      <div class="card"><h3>Prompt-injection safe</h3><p>The manuscript is data, never instructions. Hidden or reviewer-directed text is flagged to the editor as an integrity concern and never changes a score.</p></div>
+      <div class="card"><h3>Reproducible scoring</h3><p><code>aggregate_scores.py</code> computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.</p></div>
+      <div class="card"><h3>Integrity guardrails</h3><p>No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the paper.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="modes">
+  <div class="wrap">
+    <h2>Six modes</h2>
+    <p class="sub">Say it naturally; the skill picks the mode.</p>
+    <div class="scroll">
+      <table class="table">
+        <thead><tr><th>Mode</th><th>Say something like</th><th>You get</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag">full</span></td><td>“Review this paper for CVPR”</td><td>Five reports, EIC meta-review, editorial decision and revision roadmap</td></tr>
+          <tr><td><span class="tag">quick</span></td><td>“Is my paper ready for submission?”</td><td>EIC quick assessment plus a submission-readiness check (anonymity, page limit, checklists)</td></tr>
+          <tr><td><span class="tag">methodology-focus</span></td><td>“Are my baselines fair?”</td><td>Claim-to-evidence map, fairness and statistics audits, prioritized fixes with compute estimates</td></tr>
+          <tr><td><span class="tag">guided</span></td><td>“Walk me through the review”</td><td>Socratic, one-issue-at-a-time dialogue</td></tr>
+          <tr><td><span class="tag">rebuttal</span></td><td>“Help me write the rebuttal” + reviews</td><td>Triage of every point and a draft in the venue's format</td></tr>
+          <tr><td><span class="tag">re-review</span></td><td>“Does my revision address the reviews?”</td><td>Item-by-item verification and a new decision</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3 style="margin-top:36px">Venue profiles</h3>
+    <p class="sub" style="margin-bottom:14px">Scores are translated into each venue's own form, and a cross-venue outlook shows how the same paper would likely fare elsewhere.</p>
+    <div class="venues">
+      <span class="venue">CVPR · ICCV · ECCV <small>6-point</small></span>
+      <span class="venue">NeurIPS <small>1–6</small></span>
+      <span class="venue">ICLR <small>{0,2,4,6,8,10}</small></span>
+      <span class="venue">ICML <small>1–5</small></span>
+      <span class="venue">AAAI <small>1–10</small></span>
+      <span class="venue">ACM MM</span>
+      <span class="venue">TMLR <small>Yes / No criteria</small></span>
+      <span class="venue">IEEE TPAMI · TIP <small>journal decisions</small></span>
+    </div>
+  </div>
+</section>
+
+<section id="eval">
+  <div class="wrap">
+    <h2>Does it agree with human reviewers?</h2>
+    <p class="sub">A pilot of a <a href="https://paperreview.ai/tech-overview">paperreview.ai</a>-style evaluation on ICLR 2026 submissions: anonymized arXiv versions posted before the decision, 20 papers stratified by outcome (5 accepted, 10 rejected, 4 withdrawn, 1 desk rejected), full skill run per paper. The reviewers never see human scores or decisions.</p>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3>Spearman with the mean human rating</h3>
+        <p style="margin-bottom:16px">Ranking agreement, −1 to 1. Bars from 0; whisker = bootstrap 95% CI (clipped at 0).</p>
+        <div class="chart" id="sp"></div>
+      </div>
+      <div class="card">
+        <h3>AUC for acceptance</h3>
+        <p style="margin-bottom:16px">Chance that an accepted paper outscores a rejected one; 0.5 is chance.</p>
+        <div class="chart" id="auc"></div>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--bar-ai)"></i>This skill, Sonnet, high effort</span>
+      <span><i class="sw" style="background:var(--bar-weak)"></i>This skill, Haiku</span>
+      <span><i class="sw" style="background:var(--bar-human)"></i>Human reference</span>
+      <span><i class="sw" style="background:var(--surface-2);border:1px solid var(--line)"></i>paperreview.ai, ICLR 2025 (147 papers)</span>
+    </div>
+    <div class="callout"><b>Read as a pilot, not a result.</b> With 20 papers the interval is wide: the Sonnet final rating's Spearman of +0.48 has a 95% CI of +0.09 to +0.74 — clearly above zero, about the level of human–human agreement, but its AUC (0.67) is still below paperreview.ai's 0.75. Haiku showed no signal. Excluding the 3 papers Sonnet recognized gives +0.46 / 0.69. The full balanced evaluation (86 papers, linear regression over the 7 dimension scores) is pending. Details: <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/youthful-einstein-mpsrkh/evals/REPORT_iclr2026_pilots.md">pilot report</a>.</div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install</h2>
+    <p class="sub">Everything is Markdown instructions plus optional standard-library Python. No API key or server needed.</p>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" aria-selected="true" data-p="p-app">Claude apps</button>
+      <button class="tab" role="tab" aria-selected="false" data-p="p-code">Claude Code</button>
+      <button class="tab" role="tab" aria-selected="false" data-p="p-codex">Codex</button>
+      <button class="tab" role="tab" aria-selected="false" data-p="p-api">Claude API</button>
+    </div>
+    <div class="card">
+      <div class="panel on" id="p-app" role="tabpanel">
+        <ol>
+          <li>Download <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/raw/main/academic-paper-reviewer.skill"><code>academic-paper-reviewer.skill</code></a>.</li>
+          <li>In Claude, open <b>Settings → Capabilities</b> and enable code execution / skills.</li>
+          <li>Under <b>Skills</b>, choose <b>Upload skill</b> and select the file (rename to <code>.zip</code> if asked — same format).</li>
+          <li>Start a new chat: <i>“Review this paper”</i> with a PDF attached.</li>
+        </ol>
+      </div>
+      <div class="panel" id="p-code" role="tabpanel">
+<pre><code>git clone https://github.com/Shyandram/academic-paper-reviewer.skill.git
+mkdir -p ~/.claude/skills
+cp -r academic-paper-reviewer.skill/academic-paper-reviewer ~/.claude/skills/</code></pre>
+        <p>Restart the session and ask <i>“review paper.pdf”</i>. In Claude Code the five reviewers can run as parallel subagents, which keeps them independent.</p>
+      </div>
+      <div class="panel" id="p-codex" role="tabpanel">
+<pre><code>python3 tools/install_codex_skill.py                         # project-local link
+python3 tools/install_codex_skill.py --skills-dir ~/.agents/skills   # personal</code></pre>
+        <p>Then start a new session and invoke <code>$academic-paper-reviewer Review /path/paper.pdf for CVPR</code>.</p>
+      </div>
+      <div class="panel" id="p-api" role="tabpanel">
+        <p style="margin-top:0">Upload the <code>academic-paper-reviewer/</code> folder through the Skills API and attach it to requests that use the code-execution tool. See Anthropic's Agent Skills documentation for current endpoints.</p>
+      </div>
+    </div>
+    <h3 style="margin-top:32px">Try</h3>
+<pre><code>Review this paper: [attach PDF]
+Quick look — is this ready for ECCV?
+Check my experiments only. Target venue: NeurIPS.
+Here are my three CVPR reviews. Help me write the one-page rebuttal.
+Compare this paper across CVPR, ICLR and TMLR — which venue fits best?</code></pre>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Responsible use</h2>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="card"><h3>Made for authors</h3><p>Stress-test your own drafts, learn to review, or give feedback with the authors' consent.</p></div>
+      <div class="card"><h3>Assigned reviewers: check first</h3><p>Many CV/ML venues restrict or forbid putting confidential submissions into AI tools. Check your venue's policy.</p></div>
+      <div class="card"><h3>Verify every citation</h3><p>Recommended references follow a no-fabrication rule, but check each one before you use it.</p></div>
+      <div class="card"><h3>Venue rules change yearly</h3><p>Profiles are a guide, not a substitute for the current call for papers.</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Academic Paper Reviewer · skill v2.10</span>
+    <span><a href="https://github.com/Shyandram/academic-paper-reviewer.skill">GitHub</a> · <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/main/CHANGELOG.md">Changelog</a></span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // theme toggle (per-viewer convenience only)
+  var root=document.documentElement, KEY="apr-theme";
+  try{var saved=localStorage.getItem(KEY); if(saved) root.setAttribute("data-theme",saved);}catch(e){}
+  document.getElementById("theme").addEventListener("click",function(){
+    var dark=root.getAttribute("data-theme")==="dark"||(!root.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
+    var next=dark?"light":"dark"; root.setAttribute("data-theme",next);
+    try{localStorage.setItem(KEY,next);}catch(e){}
+  });
+
+  // install tabs
+  var tabs=document.querySelectorAll(".tab");
+  tabs.forEach(function(t){t.addEventListener("click",function(){
+    tabs.forEach(function(x){x.setAttribute("aria-selected","false");});
+    document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
+    t.setAttribute("aria-selected","true"); document.getElementById(t.dataset.p).classList.add("on");
+  });});
+
+  // charts: values from evals/iclr2026_pilot_scores.json (pilot, n = 20)
+  function chart(id,rows,lo,hi,fmt){
+    var el=document.getElementById(id), span=hi-lo, pct=function(v){return (v-lo)/span*100;};
+    rows.forEach(function(r){
+      var row=document.createElement("div"); row.className="row";
+      var ci=r.ci?'<i class="ci" style="left:'+pct(r.ci[0])+'%;width:'+(pct(r.ci[1])-pct(r.ci[0]))+'%"></i>':"";
+      var bg=r.ref?"background:var(--surface);border:1px dashed var(--muted)":"background:"+r.c;
+      row.innerHTML='<div class="lab">'+r.l+(r.s?'<small>'+r.s+'</small>':'')+'</div>'+
+        '<div class="track"><i class="fill" style="width:'+pct(r.v)+'%;'+bg+'"></i>'+ci+'</div>'+
+        '<div class="val">'+fmt(r.v)+'</div>';
+      el.appendChild(row);
+    });
+    var ax=document.createElement("div"); ax.className="axis";
+    ax.innerHTML='<div></div><div><span>'+lo+'</span><span>'+((lo+hi)/2)+'</span><span>'+hi+'</span></div><div></div>';
+    el.appendChild(ax);
+  }
+  var sgn=function(v){return (v>=0?"+":"")+v.toFixed(2);}, two=function(v){return v.toFixed(2);};
+  chart("sp",[
+    {l:"Sonnet, high effort",s:"final rating",v:.48,ci:[.09,.74],c:"var(--bar-ai)"},
+    {l:"Haiku",s:"final rating",v:.20,ci:[0,.58],c:"var(--bar-weak)"},
+    {l:"Human vs human",s:"ICLR 2026 test split",v:.25,c:"var(--bar-human)"},
+    {l:"paperreview.ai",s:"AI vs human",v:.42,ref:true}
+  ],0,1,sgn);
+  chart("auc",[
+    {l:"Sonnet, high effort",s:"final rating",v:.67,c:"var(--bar-ai)"},
+    {l:"Haiku",s:"final rating",v:.56,c:"var(--bar-weak)"},
+    {l:"One human reviewer",s:"ICLR 2026 test split",v:.75,c:"var(--bar-human)"},
+    {l:"paperreview.ai",s:"AI score",v:.75,ref:true}
+  ],0.5,1,two);
+})();
+</script>
+</body>
+</html>
