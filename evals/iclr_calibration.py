@@ -327,7 +327,7 @@ def cmd_sources(a):
     submission PDF) or an arXiv ID. The map has IDs only, no text and no labels, so it
     can be committed and used by `fetch` on a CI runner."""
     rows = [json.loads(l) for l in open(a.sample)]
-    out = {}
+    out, late = {}, 0
     for r in rows:
         d = WORK / f"iclr{a.year % 100}-{r['paper_id']}"
         if not (d / "blinded.txt").exists():
@@ -335,7 +335,14 @@ def cmd_sources(a):
         if (d / "source.json").exists():
             out[r["paper_id"]] = json.loads((d / "source.json").read_text())["source"]
         elif (d / "arxiv.json").exists() and json.loads((d / "arxiv.json").read_text()):
-            out[r["paper_id"]] = "arxiv:" + json.loads((d / "arxiv.json").read_text())["arxiv_id"]
+            hit = json.loads((d / "arxiv.json").read_text())
+            if hit["published"] > (a.decision_date or DATES[a.year][1]):
+                late += 1  # first posted after the decision: may be revised; outcome leak
+                continue
+            out[r["paper_id"]] = "arxiv:" + hit["arxiv_id"]
+    if late:
+        print(f"{late} arXiv papers first posted after the decision date were left out",
+              file=sys.stderr)
     Path(a.out).write_text(json.dumps(dict(sorted(out.items())), indent=0) + "\n")
     print(f"{len(out)}/{len(rows)} sampled papers have a text source", file=sys.stderr)
 
@@ -699,6 +706,7 @@ def main():
     o.add_argument("sample")
     o.add_argument("--year", type=int, default=2026)
     o.add_argument("--out", required=True)
+    o.add_argument("--decision-date", help="default: the year's ICLR decision date")
     h = sub.add_parser("fetch", help="download text for selected rows from the source map")
     h.add_argument("sample")
     h.add_argument("sources")
