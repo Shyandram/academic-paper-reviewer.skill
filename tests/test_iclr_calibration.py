@@ -43,6 +43,22 @@ class CalibrationMath(unittest.TestCase):
         _, again = cal.draw([dict(r) for r in rows], n=300, train=150, seed=7)
         self.assertEqual([r["paper_id"] for r in kept], [r["paper_id"] for r in again])
 
+    def test_stratified_pick_keeps_decision_mix_and_spreads(self):
+        rng = random.Random(5)
+        dec = ["Accept (Poster)"] * 25 + ["Reject"] * 50 + ["Withdrawn"] * 20 + ["Desk rejected"] * 5
+        rows = [{"paper_id": f"p{i}", "decision": d, "mean_human": rng.uniform(0, 8),
+                 "primary_area": f"area{i % 7}", "split": "train"} for i, d in enumerate(dec)]
+        cands = [r for r in rows if r["paper_id"] not in {"p1", "p2", "p3"}]
+        got = cal.stratified(rows, cands, 20)
+        counts = {}
+        for r in got:
+            counts[cal.group(r)] = counts.get(cal.group(r), 0) + 1
+        self.assertEqual(counts, {"accepted": 5, "rejected": 10, "withdrawn": 4, "desk rejected": 1})
+        self.assertEqual(len({r["paper_id"] for r in got}), 20)
+        rej = sorted(r["mean_human"] for r in got if cal.group(r) == "rejected")
+        self.assertGreater(rej[-1] - rej[0], 4)  # spread over the score range
+        self.assertGreaterEqual(len({r["primary_area"] for r in got}), 7)
+
     def test_title_match(self):
         hits = [{"title": "Something Else Entirely"},
                 {"title": "DataEnvGym: Data Generation Agents in Teacher Environments with "

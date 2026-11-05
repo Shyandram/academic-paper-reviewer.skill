@@ -102,7 +102,14 @@ def rows_jerma(path):
     papers = {}
     for i, pid in enumerate(t["paper_id"]):
         p = papers.setdefault(pid, {"paper_id": pid, "title": t["title"][i],
-                                    "decision": t["decision"][i], "scores": [], "_seen": set()})
+                                    "decision": t["decision"][i], "scores": [], "_seen": set(),
+                                    "primary_area": None})
+        if p["primary_area"] is None and t["api_raw_submission"][i]:
+            try:
+                area = json.loads(t["api_raw_submission"][i])["content"].get("primary_area")
+                p["primary_area"] = area.get("value") if isinstance(area, dict) else area
+            except (ValueError, KeyError, TypeError, AttributeError):
+                pass
         if p["decision"] == "Unknown" and t["api_raw_submission"][i]:
             try:
                 venue = json.loads(t["api_raw_submission"][i])["content"]["venue"]["value"]
@@ -333,6 +340,40 @@ def cmd_sources(a):
     print(f"{len(out)}/{len(rows)} sampled papers have a text source", file=sys.stderr)
 
 
+def group(r):
+    d = r["decision"]
+    return "accepted" if accepted(d) else {"Withdrawn": "withdrawn",
+                                           "Desk rejected": "desk rejected"}.get(d, "rejected")
+
+
+def stratified(rows, candidates, n, seed=0):
+    """Pick n candidates that are representative of `rows` (the whole sample):
+    decision groups in the sample's proportions (largest remainder), and within each
+    group one paper per quantile of the mean human score, preferring primary areas
+    and text sources not used yet."""
+    rng = random.Random(seed)
+    share = {}
+    for r in rows:
+        share[group(r)] = share.get(group(r), 0) + 1
+    raw = {g: n * k / len(rows) for g, k in share.items()}
+    quota = {g: int(v) for g, v in raw.items()}
+    for g in sorted(raw, key=lambda g: raw[g] - quota[g], reverse=True)[:n - sum(quota.values())]:
+        quota[g] += 1
+    picked, areas, sources = [], {}, {}
+    for g in sorted(quota):
+        pool = sorted((c for c in candidates if group(c) == g), key=lambda c: c["mean_human"])
+        q = min(quota[g], len(pool))
+        for k in range(q):
+            chunk = pool[k * len(pool) // q:(k + 1) * len(pool) // q]
+            rng.shuffle(chunk)
+            best = min(chunk, key=lambda c: (areas.get(c.get("primary_area"), 0),
+                                             sources.get(c.get("source_kind"), 0)))
+            picked.append(best)
+            areas[best.get("primary_area")] = areas.get(best.get("primary_area"), 0) + 1
+            sources[best.get("source_kind")] = sources.get(best.get("source_kind"), 0) + 1
+    return picked
+
+
 def cmd_fetch(a):
     """Download the text for the selected rows from the committed source map."""
     import tarfile
@@ -340,8 +381,17 @@ def cmd_fetch(a):
     if a.split != "all":
         rows = [r for r in rows if r["split"] == a.split]
     src = json.load(open(a.sources))
+    everyone = [json.loads(l) for l in open(a.sample)]
     rows = [r for r in rows if r["paper_id"] in src]  # offset/limit count papers with text
-    rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
+    if a.pick == "stratified":
+        for r in rows:
+            r["source_kind"] = "arxiv" if src[r["paper_id"]].startswith("arxiv:") else "dump"
+        rows = stratified(everyone, rows, a.limit or len(rows))
+        for r in rows:
+            print(f"  pick {r['paper_id']}: {group(r)}, {r['split']}, mean {r['mean_human']}, "
+                  f"{r['source_kind']}, {r.get('primary_area')}", file=sys.stderr)
+    else:
+        rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
     need = {r["paper_id"]: src[r["paper_id"]] for r in rows}
     got = []
     by_batch = {}
@@ -596,6 +646,9 @@ def main():
     h.add_argument("--offset", type=int, default=0)
     h.add_argument("--limit", type=int, default=0)
     h.add_argument("--ids-out")
+    h.add_argument("--pick", choices=["order", "stratified"], default="order",
+                   help="stratified: decision mix of the whole sample, spread over scores, "
+                        "areas and sources (for pilots)")
     g = sub.add_parser("features")
     g.add_argument("results", help="directory of <id>/aggregate.json runs")
     g.add_argument("--out", required=True)

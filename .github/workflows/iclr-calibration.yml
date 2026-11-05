@@ -52,6 +52,7 @@ jobs:
       mode: ${{ steps.c.outputs.mode }}
       runs: ${{ steps.c.outputs.runs }}
       budget: ${{ steps.c.outputs.budget }}
+      pick: ${{ steps.c.outputs.pick }}
     steps:
       - uses: actions/checkout@v4
       - id: c
@@ -62,7 +63,7 @@ jobs:
           import json, os, re
           cfg = {"split": "all", "offset": "0", "limit": "2", "model": "claude-haiku-5-5",
                  "max_parallel": "2", "mode": "review", "runs": "",
-                 "budget": "3"}
+                 "budget": "3", "pick": "order"}
           given = json.loads(os.environ.get("INPUTS") or "null") or {}
           if not given and os.path.exists("evals/iclr_run.json"):
               given = json.load(open("evals/iclr_run.json"))
@@ -70,6 +71,7 @@ jobs:
               given["runs"] = ",".join(str(r) for r in given["runs"])
           cfg.update({k: str(v) for k, v in given.items() if k in cfg})
           assert cfg["mode"] in ("review", "evaluate")
+          assert cfg["pick"] in ("order", "stratified")
           assert re.fullmatch(r"[0-9]+(\.[0-9]+)?", cfg["budget"])  # USD cap per paper
           assert re.fullmatch(r"[0-9,]*", cfg["runs"])
           assert cfg["split"] in ("all", "train", "test")
@@ -101,7 +103,7 @@ jobs:
           # dump (submission PDFs) or arXiv v1. OpenReview returns 403 from runners.
           python3 -I evals/iclr_calibration.py fetch $W/sample.jsonl evals/iclr2026_sources.json \
             --split "${{ needs.config.outputs.split }}" --offset "${{ needs.config.outputs.offset }}" --limit "${{ needs.config.outputs.limit }}" \
-            --ids-out ids.json
+            --pick "${{ needs.config.outputs.pick }}" --ids-out ids.json
           echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
           mkdir -p ship
