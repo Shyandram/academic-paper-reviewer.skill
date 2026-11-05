@@ -128,6 +128,45 @@ class CalibrationMath(unittest.TestCase):
         self.assertLess(sub["n_test"], 60)
         self.assertEqual(sub["n_test"], sum(1 for r in rows if r["split"] == "test"
                                             and r["decision"] != "Withdrawn"))
+        errs = {m["metric"]: m for m in res["all_scored"]["errors"]}
+        self.assertLess(errs["NMAE(AI, mean human)"]["value"], 0.3)
+        self.assertIn("std", errs["NMAE(AI, mean human)"])
+
+    def test_nmae_nme(self):
+        self.assertAlmostEqual(cal.nmae([2, 6], [4, 4], 0, 10), 0.2)
+        self.assertAlmostEqual(cal.nme([2, 6], [4, 4], 0, 10), 0.0)
+        self.assertAlmostEqual(cal.nme([6, 6], [4, 4], 0, 10), 0.2)
+        self.assertAlmostEqual(cal.nmae([3], [1], 1, 10), 2 / 9)
+
+    def test_to_iclr_and_venue_rating(self):
+        self.assertEqual(cal.to_iclr(4), 6)
+        self.assertEqual(cal.to_iclr(1), 0)
+        self.assertAlmostEqual(cal.to_iclr(3.5), 5.0)
+        self.assertEqual(cal.to_iclr(3, 2025), 5)
+        self.assertAlmostEqual(cal.to_iclr(3.5, 2025), 5.5)
+        res = {"venue_views": [{"key": "iclr", "label": "4 on {0,2,4,6,8,10} (5 on {1,3,5,6,8,10})"}]}
+        self.assertEqual(cal.venue_rating(res), 4)
+        self.assertIsNone(cal.venue_rating({}))
+
+    def test_bootstrap_constant_scores_is_nan_safe(self):
+        lo, hi = cal.bootstrap(lambda I: cal.spearman([1] * len(I), list(I)), 10, reps=20)
+        self.assertIsNone(cal.r3(lo))
+        self.assertIsNone(cal.r3(hi))
+
+    def test_pilot(self):
+        rows, feats = [], {}
+        for i in range(12):
+            h = 2 + i * 0.5
+            rows.append({"paper_id": f"p{i}", "mean_human": h, "one_human": h,
+                         "other_human": h + 1, "accepted": i > 7})
+            feats[f"p{i}"] = {"official_rating": 1 + h / 2, "rating": 4}
+        out = cal.pilot(rows, feats, reps=50)
+        vals = {m["metric"]: m["value"] for m in out["results"] + out["reference"]}
+        self.assertEqual(vals["spearman(panel rating, mean human)"], 1.0)
+        self.assertEqual(vals["AUC(panel rating -> accept)"], 1.0)
+        self.assertEqual(vals["NMAE(panel rating, mean human)"], 0.0)
+        self.assertIsNone(vals["spearman(ICLR-scale rating, mean human)"])
+        self.assertEqual(vals["NMAE(one human, another human)"], 0.1)
 
 
 if __name__ == "__main__":

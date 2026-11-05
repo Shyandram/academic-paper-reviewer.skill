@@ -38,6 +38,32 @@ Without the 3 papers Sonnet recognized (n = 17):
 | Haiku, default effort | +0.07 [-0.39, +0.49] / 0.50 | -0.25 [-0.71, +0.27] / 0.33 | -0.10 [-0.62, +0.44] / 0.44 | $14.22 |
 | Sonnet, high effort | +0.46 [+0.09, +0.74] / 0.69 | +0.22 [-0.24, +0.66] / 0.53 | +0.10 [-0.41, +0.60] / 0.54 | $33.51 |
 
+## Error on the ICLR scale (NMAE / NME)
+
+CSPaper-style errors against the mean human rating on the ICLR 2026 scale (0–10):
+NMAE = mean |human − AI| / 10 (lower is better), NME = signed mean (0 is unbiased), ± std across
+papers, 95% bootstrap CI. "Panel rating" maps the reviewers' mean 1–6 Overall with the skill's
+ICLR map (2·(x − 1)); "final rating" is the skill's integer rating on the ICLR scale.
+Computed with `python3 evals/iclr_calibration.py pilot sample.jsonl features.jsonl`.
+
+| Predictor | NMAE ± std [CI] | NME ± std | Spearman | AUC |
+|---|---|---|---|---|
+| Haiku, panel rating | 0.093 ± 0.057 [0.068, 0.118] | +0.030 ± 0.105 | +0.21 | 0.56 |
+| Haiku, final rating | 0.085 ± 0.063 [0.058, 0.115] | −0.020 ± 0.104 | n/a (constant) | 0.50 |
+| Sonnet high, panel rating | **0.079 ± 0.061** [0.054, 0.106] | **+0.004** ± 0.100 | **+0.48** | **0.67** |
+| Sonnet high, final rating | 0.090 ± 0.064 [0.061, 0.119] | +0.010 ± 0.110 | +0.26 | 0.53 |
+| Constant (median of these papers' mean ratings) | 0.085 ± 0.060 | — | — | — |
+| One human vs another human | 0.180 ± 0.125 | — | +0.12 | — |
+| One human vs mean human | 0.102 ± 0.065 | — | — | 0.58 (one human) |
+
+- NMAE rewards staying near the middle: an oracle constant scores 0.085, so NMAE alone does not
+  show skill. Haiku's final rating is the same integer for every paper and still "beats" humans.
+  Read NMAE together with Spearman/AUC; only Sonnet's panel rating beats the constant and ranks papers.
+- NME ≈ 0: after the 2.10 calibration the ratings are no longer biased low or high on this pool.
+- The integer final rating loses ranking signal against the continuous panel mean (Spearman 0.26 vs 0.48).
+- Reference only (not comparable: unknown N and paper overlap): CSPaper reports NMAE 0.128,
+  NME −0.015, SRC 0.658 for Claude Sonnet 5.5 on ICLR main.
+
 ## Reading
 
 - Haiku has no signal: all scores sit near the acceptance bar (EIC pool position 38–50) whatever the paper.
