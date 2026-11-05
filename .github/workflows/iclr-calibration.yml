@@ -194,7 +194,8 @@ jobs:
           python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out sample.jsonl
           python3 -I evals/iclr_calibration.py fetch sample.jsonl evals/iclr2026_sources.json \
             --pick balanced --dry-run --splits-out splits.json \
-            $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json )
+            $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json ) \
+            $( [ -f evals/iclr2026_prefer.json ] && echo --prefer evals/iclr2026_prefer.json )
           python3 -I evals/iclr_calibration.py features results --out features.jsonl
           python3 - <<'PY'
           import json, glob
