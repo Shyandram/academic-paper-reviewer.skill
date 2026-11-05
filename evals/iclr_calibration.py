@@ -99,9 +99,7 @@ def norm_title(t):
     return re.sub(r"[^a-z0-9]+", " ", (t or "").lower()).strip()
 
 
-def arxiv_search(title):
-    words = [w for w in norm_title(title).split() if len(w) > 2][:12]
-    q = " AND ".join(f"ti:{w}" for w in words)
+def arxiv_query(q):
     url = "https://export.arxiv.org/api/query?" + urllib.parse.urlencode(
         {"search_query": q, "max_results": 5})
     req = urllib.request.Request(url, headers={"User-Agent": "paper-review-eval/1.0"})
@@ -115,6 +113,17 @@ def arxiv_search(title):
                     "title": " ".join(e.findtext("a:title", "", ns).split()),
                     "published": e.findtext("a:published", "", ns)[:10]})
     return out
+
+
+def arxiv_search(title):
+    """Exact title phrase first; if that finds nothing, the leading title words OR-ed
+    (best_match then filters by similarity). A plain AND of words often returns nothing."""
+    hits = arxiv_query(f'ti:"{norm_title(title)}"')
+    if not hits:
+        time.sleep(3)
+        words = [w for w in norm_title(title).split() if len(w) > 3][:8]
+        hits = arxiv_query(" AND ".join(f"ti:{w}" for w in words[:4])) if words else []
+    return hits
 
 
 def best_match(title, hits, threshold=0.92):
