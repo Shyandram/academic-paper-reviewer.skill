@@ -37,6 +37,7 @@ evals/work/ (git-ignored) and is never shown to the reviewer agents.
 import argparse
 import json
 import math
+import os
 import random
 import re
 import statistics
@@ -252,6 +253,64 @@ def report_coverage(rows, found):
           f"(outcome-leak risk; flag them in the report)", file=sys.stderr)
 
 
+# ---------- pdfs (paperreview.ai dump) ----------
+
+HF = "https://huggingface.co/datasets/paperreview/"
+# ICLR 2026 PDFs published by paperreview.ai, named <openreview id>.pdf. Batches 1-28
+# are in the gated repos (accept the terms on huggingface.co and use a token);
+# batches 29-40 are public.
+BATCHES = [(repo, b) for b in range(1, 41)
+           for repo in (("ICLR2026-part2",) if b > 28 else ("ICLR2026", "ICLR2026-part1"))]
+
+
+def extract_text(d, pdf_bytes):
+    """Write paper.pdf, paper.txt and the blinded text the reviewers read."""
+    d.mkdir(parents=True, exist_ok=True)
+    pdf = d / "paper.pdf"
+    pdf.write_bytes(pdf_bytes)
+    txt = d / "paper.txt"
+    subprocess.run(["pdftotext", "-layout", str(pdf), str(txt)], check=True)
+    text, _ = blind(txt.read_text(errors="replace"))
+    text, _ = ICLR_YEAR_MARK.subn("[REDACTED: venue/acceptance mark]", text)
+    (d / "blinded.txt").write_text(text)
+
+
+def cmd_pdfs(a):
+    """Stream the batches and keep only sampled papers; nothing else touches the disk."""
+    import tarfile
+    rows = [json.loads(l) for l in open(a.sample)]
+    want = {r["paper_id"] for r in rows}
+    done = {pid for pid in want
+            if (WORK / f"iclr{a.year % 100}-{pid}" / "source.json").exists()}
+    batches = [(repo, b) for repo, b in BATCHES if b in set(a.batches)] if a.batches else BATCHES
+    headers = {"User-Agent": "paper-review-eval/1.0"}
+    if os.environ.get("HF_TOKEN"):
+        headers["Authorization"] = "Bearer " + os.environ["HF_TOKEN"]
+    for repo, b in batches:
+        if want <= done:
+            break
+        url = f"{HF}{repo}/resolve/main/pdfs_batch_{b}.tar.gz"
+        n = 0
+        try:
+            with urllib.request.urlopen(urllib.request.Request(url, headers=headers),
+                                        timeout=120) as resp, \
+                    tarfile.open(fileobj=resp, mode="r|gz") as tar:
+                for m in tar:
+                    pid = Path(m.name).stem
+                    if not m.isfile() or pid not in want or pid in done:
+                        continue
+                    d = WORK / f"iclr{a.year % 100}-{pid}"
+                    extract_text(d, tar.extractfile(m).read())
+                    (d / "source.json").write_text(json.dumps({"source": f"{repo}/batch_{b}"}))
+                    done.add(pid)
+                    n += 1
+        except Exception as e:  # gated batch without a token, or network
+            print(f"batch {b} ({repo}): {e}", file=sys.stderr)
+            continue
+        print(f"batch {b}: {n} sampled papers; {len(done)}/{len(want)} so far", file=sys.stderr)
+    print(f"{len(done)}/{len(want)} sampled papers have the submission PDF", file=sys.stderr)
+
+
 # ---------- evaluate ----------
 
 def solve(A, b):
@@ -452,6 +511,10 @@ def main():
     f.add_argument("--limit", type=int, default=0)
     f.add_argument("--openreview", action="store_true", help="fall back to OpenReview PDFs")
     f.add_argument("--ids-out", help="write the ids that have text, as a JSON list")
+    q = sub.add_parser("pdfs", help="stream paperreview.ai's ICLR 2026 PDF dump")
+    q.add_argument("sample")
+    q.add_argument("--year", type=int, default=2026)
+    q.add_argument("--batches", type=int, nargs="*", help="batch numbers (default: all 40)")
     g = sub.add_parser("features")
     g.add_argument("results", help="directory of <id>/aggregate.json runs")
     g.add_argument("--out", required=True)
@@ -462,7 +525,7 @@ def main():
     e.add_argument("--low", type=float, default=5.0,
                    help="AI-score threshold for the calibration table (5.5 for ICLR 2025)")
     a = ap.parse_args()
-    {"sample": cmd_sample, "find": cmd_find, "features": cmd_features,
+    {"sample": cmd_sample, "find": cmd_find, "pdfs": cmd_pdfs, "features": cmd_features,
      "evaluate": cmd_evaluate}[a.cmd](a)
 
 

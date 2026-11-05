@@ -94,13 +94,17 @@ jobs:
           curl -sSfL --retry 4 -o /tmp/reviews.parquet "$DATA_URL"
           W=evals/work/benchmarks/iclr2026
           python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out $W/sample.jsonl
-          python3 -I evals/iclr_calibration.py find $W/sample.jsonl --openreview \
+          # OpenReview PDFs return 403 from GitHub runners too, so arXiv only.
+          python3 -I evals/iclr_calibration.py find $W/sample.jsonl \
             --split "${{ needs.config.outputs.split }}" --offset "${{ needs.config.outputs.offset }}" --limit "${{ needs.config.outputs.limit }}" \
             --ids-out ids.json
-          echo "ids=$(cat ids.json)" >> "$GITHUB_OUTPUT"
+          echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
-          mkdir -p ship && for d in evals/work/papers/iclr26-*; do
-            [ -f "$d/blinded.txt" ] && mkdir -p "ship/$(basename $d)" && cp "$d/blinded.txt" "ship/$(basename $d)/"
+          mkdir -p ship
+          for d in evals/work/papers/iclr26-*; do
+            if [ -f "$d/blinded.txt" ]; then
+              mkdir -p "ship/$(basename "$d")" && cp "$d/blinded.txt" "ship/$(basename "$d")/"
+            fi
           done
       - uses: actions/upload-artifact@v4
         with: {name: papers, path: ship, retention-days: 7}
