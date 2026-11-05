@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """ICLR score calibration, following the paperreview.ai (Stanford Agentic Reviewer) protocol.
 
+Default: ICLR 2026, which is newer than most model training data and so less likely to
+be memorized. paperreview.ai used ICLR 2025; that is still available with --year 2025
+--source berens.
+
 Protocol (paperreview.ai/tech-overview, ICLR 2025):
   randomly sample 300 submissions, drop withdrawn / desk-rejected ones that have no human
   scores, train a linear regression on 150 that maps the 7 dimension scores to one score,
@@ -13,12 +17,14 @@ Protocol (paperreview.ai/tech-overview, ICLR 2025):
 
 Subcommands (standard library only, except `sample`, which reads parquet via pyarrow):
 
-  sample    python3 -I evals/iclr_calibration.py sample iclr25v2.parquet --year 2025 \
-                --out evals/work/benchmarks/iclr2025/sample.jsonl
-            Source: github.com/berenslab/iclr-dataset (title, abstract, decision, scores).
+  sample    python3 -I evals/iclr_calibration.py sample jerma.parquet \
+                --out evals/work/benchmarks/iclr2026/sample.jsonl
+            2026 source: huggingface.co/datasets/JerMa88/ICLR_Peer_Reviews_2026
+            (every submission, including withdrawn ones). 2025 source:
+            github.com/berenslab/iclr-dataset (--source berens; its 2026 file predates reviews).
   find      python3 -I evals/iclr_calibration.py find sample.jsonl
             Matches each title on export.arxiv.org and downloads v1, the version closest
-            to submission. Writes blinded text to evals/work/papers/iclr25-<id>/.
+            to submission. Writes blinded text to evals/work/papers/iclr<yy>-<id>/.
   features  python3 -I evals/iclr_calibration.py features evals/work/results --out features.jsonl
   evaluate  python3 -I evals/iclr_calibration.py evaluate sample.jsonl features.jsonl
             features.jsonl: {"paper_id", "dims": {7 dimension keys: 0-100}}, one per line,
@@ -56,7 +62,7 @@ ICLR_YEAR_MARK = re.compile(r"\b(published as a conference paper at|under review
 # ---------- sample ----------
 
 def accepted(decision):
-    return decision.lower().startswith("accept")
+    return decision.lower().startswith(("accept", "conditional accept"))
 
 
 def draw(rows, n=300, train=150, seed=2025):
@@ -75,12 +81,49 @@ def draw(rows, n=300, train=150, seed=2025):
     return picked, kept
 
 
-def cmd_sample(a):
+def rows_berens(path, year):
+    """berenslab/iclr-dataset: one row per submission, scores as a list."""
     import pyarrow.parquet as pq
-    d = pq.read_table(a.parquet).to_pydict()
-    rows = [{"paper_id": d["id"][i], "title": d["title"][i], "decision": d["decision"][i],
+    d = pq.read_table(path).to_pydict()
+    return [{"paper_id": d["id"][i], "title": d["title"][i], "decision": d["decision"][i],
              "accepted": accepted(d["decision"][i]), "scores": list(d["scores"][i] or [])}
-            for i in range(len(d["id"])) if d["year"][i] == a.year]
+            for i in range(len(d["id"])) if d["year"][i] == year]
+
+
+def rows_jerma(path):
+    """JerMa88/ICLR_Peer_Reviews_2026: one row per review. Withdrawn and desk-rejected
+    submissions have decision "Unknown"; their venue field says which. Those with scores
+    are kept as not accepted, as in the paperreview.ai protocol."""
+    import pyarrow.parquet as pq
+    cols = ["paper_id", "title", "decision", "rating", "reviewer_id", "review_src",
+            "api_raw_submission"]
+    t = pq.read_table(path, columns=cols).to_pydict()
+    papers = {}
+    for i, pid in enumerate(t["paper_id"]):
+        p = papers.setdefault(pid, {"paper_id": pid, "title": t["title"][i],
+                                    "decision": t["decision"][i], "scores": [], "_seen": set()})
+        if p["decision"] == "Unknown" and t["api_raw_submission"][i]:
+            try:
+                venue = json.loads(t["api_raw_submission"][i])["content"]["venue"]["value"]
+                p["decision"] = ("Desk rejected" if "Desk Rejected" in venue
+                                 else "Withdrawn" if "Withdrawn" in venue else "Unknown")
+            except (ValueError, KeyError, TypeError):
+                pass
+        rid = t["reviewer_id"][i]
+        if t["review_src"][i] == "openreview" and t["rating"][i] is not None \
+                and rid not in p["_seen"]:
+            p["_seen"].add(rid)
+            p["scores"].append(t["rating"][i])
+    out = []
+    for p in papers.values():
+        del p["_seen"]
+        p["accepted"] = accepted(p["decision"])
+        out.append(p)
+    return out
+
+
+def cmd_sample(a):
+    rows = rows_jerma(a.parquet) if a.source == "jerma" else rows_berens(a.parquet, a.year)
     picked, kept = draw(rows, a.n, a.train, a.seed)
     for r in kept:
         r["mean_human"] = round(statistics.mean(r["scores"]), 3)
@@ -133,7 +176,12 @@ def best_match(title, hits, threshold=0.92):
     return scored[0][1] if scored and scored[0][0] >= threshold else None
 
 
+# Approximate dates: full-paper deadline (literature cutoff) and decision notification.
+DATES = {2025: ("2024-10-01", "2025-01-22"), 2026: ("2025-09-24", "2026-01-26")}
+
+
 def cmd_find(a):
+    a.decision_date = a.decision_date or DATES[a.year][1]
     rows = [json.loads(l) for l in open(a.sample)]
     if a.split != "all":
         rows = [r for r in rows if r["split"] == a.split]
@@ -285,7 +333,7 @@ def bootstrap(fn, n_items, reps=2000, seed=0):
     return vals[int(0.025 * len(vals))], vals[int(0.975 * len(vals)) - 1]
 
 
-def evaluate(rows, feats, target="mean_human", reps=2000):
+def evaluate(rows, feats, target="mean_human", reps=2000, low=5.0):
     rows = [r for r in rows if r["paper_id"] in feats]
     train = [r for r in rows if r["split"] == "train"]
     test = [r for r in rows if r["split"] == "test"]
@@ -316,17 +364,19 @@ def evaluate(rows, feats, target="mean_human", reps=2000):
             metric("AUC(AI score -> accept)",
                    lambda I: auc([ai[i] for i in I], [lab[i] for i in I]), allidx),
         ],
-        "calibration": calibration(test, ai),
+        "calibration": calibration(test, ai, low),
         "reference_paperreview_ai": {"spearman_human_human": 0.41, "spearman_ai_human": 0.42,
                                      "auc_one_human": 0.84, "auc_ai": 0.75},
     }
     return out
 
 
-def calibration(test, ai, low=5.5):
+def calibration(test, ai, low=5.0):
     """Share of test papers with an AI score at or below `low`, for each range of mean
-    human score (the paperreview.ai calibration plot)."""
-    bins = [(0, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 11)]
+    human score (the paperreview.ai calibration plot). paperreview.ai used 5.5 on the
+    ICLR 2025 scale {1,3,5,6,8,10}; on the 2026 scale {0,2,4,6,8,10} the reject/accept
+    boundary sits between 4 and 6, hence 5.0."""
+    bins = [(0, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 11)]
     rows = []
     for lo, hi in bins:
         idx = [i for i, r in enumerate(test) if lo <= r["mean_human"] < hi]
@@ -363,7 +413,7 @@ def cmd_features(a):
 
 def cmd_evaluate(a):
     rows = [json.loads(l) for l in open(a.sample)]
-    res = evaluate(rows, load_features(a.features), reps=a.reps)
+    res = evaluate(rows, load_features(a.features), reps=a.reps, low=a.low)
     print(json.dumps(res, indent=2))
 
 
@@ -372,15 +422,16 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     s = sub.add_parser("sample")
     s.add_argument("parquet")
-    s.add_argument("--year", type=int, default=2025)
+    s.add_argument("--year", type=int, default=2026)
+    s.add_argument("--source", choices=["jerma", "berens"], default="jerma")
     s.add_argument("--n", type=int, default=300)
     s.add_argument("--train", type=int, default=150)
     s.add_argument("--seed", type=int, default=2025)
     s.add_argument("--out", required=True)
     f = sub.add_parser("find")
     f.add_argument("sample")
-    f.add_argument("--year", type=int, default=2025)
-    f.add_argument("--decision-date", default="2025-01-22")
+    f.add_argument("--year", type=int, default=2026)
+    f.add_argument("--decision-date", help="default: the year's ICLR decision date")
     f.add_argument("--split", choices=["all", "train", "test"], default="all")
     f.add_argument("--offset", type=int, default=0)
     f.add_argument("--limit", type=int, default=0)
@@ -393,6 +444,8 @@ def main():
     e.add_argument("sample")
     e.add_argument("features")
     e.add_argument("--reps", type=int, default=2000)
+    e.add_argument("--low", type=float, default=5.0,
+                   help="AI-score threshold for the calibration table (5.5 for ICLR 2025)")
     a = ap.parse_args()
     {"sample": cmd_sample, "find": cmd_find, "features": cmd_features,
      "evaluate": cmd_evaluate}[a.cmd](a)

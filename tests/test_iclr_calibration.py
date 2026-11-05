@@ -13,6 +13,12 @@ class CalibrationMath(unittest.TestCase):
         self.assertAlmostEqual(cal.spearman([1, 2, 3, 4], [4, 3, 2, 1]), -1.0)
         self.assertEqual(cal.ranks([5, 1, 5]), [2.5, 1.0, 2.5])
 
+    def test_accepted_labels(self):
+        self.assertTrue(cal.accepted("Accept (Oral)"))
+        self.assertTrue(cal.accepted("Conditional Accept (Poster)"))
+        for d in ("Reject", "Withdrawn", "Desk rejected"):
+            self.assertFalse(cal.accepted(d))
+
     def test_auc(self):
         self.assertAlmostEqual(cal.auc([0.1, 0.2, 0.8, 0.9], [0, 0, 1, 1]), 1.0)
         self.assertAlmostEqual(cal.auc([1, 1, 1, 1], [0, 1, 0, 1]), 0.5)

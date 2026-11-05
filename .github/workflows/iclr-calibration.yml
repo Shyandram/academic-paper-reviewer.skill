@@ -1,6 +1,6 @@
 name: ICLR calibration (paperreview.ai protocol)
 
-# Runs the skill on ICLR 2025 submissions sampled by evals/iclr_calibration.py, then
+# Runs the skill on ICLR 2026 submissions sampled by evals/iclr_calibration.py, then
 # fits the 7-dimension linear map on the train split and reports Spearman and AUC on
 # the test split. Paid: every paper is a full panel review through the API.
 #
@@ -29,8 +29,9 @@ permissions:
   contents: read
 
 env:
-  BERENS: https://github.com/berenslab/iclr-dataset.git
-  BERENS_REV: main
+  # Every ICLR 2026 submission with its human reviews (withdrawn ones included).
+  DATA_URL: https://huggingface.co/datasets/JerMa88/ICLR_Peer_Reviews_2026/resolve/main/data/iclr_2026.parquet
+  CUTOFF: "2025-09-24"
 
 jobs:
   prepare:
@@ -44,15 +45,15 @@ jobs:
       - name: Sample (seeded) and find full text
         id: find
         run: |
-          git clone --depth 1 --branch "$BERENS_REV" "$BERENS" /tmp/berens
-          W=evals/work/benchmarks/iclr2025
-          python3 -I evals/iclr_calibration.py sample /tmp/berens/data/iclr25v2.parquet --out $W/sample.jsonl
+          curl -sSfL --retry 4 -o /tmp/reviews.parquet "$DATA_URL"
+          W=evals/work/benchmarks/iclr2026
+          python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out $W/sample.jsonl
           python3 -I evals/iclr_calibration.py find $W/sample.jsonl --openreview \
             --split "${{ inputs.split }}" --offset "${{ inputs.offset }}" --limit "${{ inputs.limit }}" \
             --ids-out ids.json
           echo "ids=$(cat ids.json)" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
-          mkdir -p ship && for d in evals/work/papers/iclr25-*; do
+          mkdir -p ship && for d in evals/work/papers/iclr26-*; do
             [ -f "$d/blinded.txt" ] && mkdir -p "ship/$(basename $d)" && cp "$d/blinded.txt" "ship/$(basename $d)/"
           done
       - uses: actions/upload-artifact@v4
@@ -89,7 +90,7 @@ jobs:
                 .replace("{VENUE_NAME}", "ICLR").replace("{VENUE_KEY}", "iclr"))
           t = t.replace("Full review, skip confirmation.",
                         "Full review, skip confirmation, literature check: strict, "
-                        "cutoff date 2024-10-01.")
+                        "cutoff date " + os.environ["CUTOFF"] + ".")
           t = t.replace("or access the web.",
                         "or access the web, except through the skill's own "
                         "scripts/related_search.py for the literature check.")
@@ -115,8 +116,8 @@ jobs:
       - name: Features, cost and metrics
         run: |
           for d in results/result-*; do mv "$d" "results/${d#results/result-}"; done
-          git clone --depth 1 --branch "$BERENS_REV" "$BERENS" /tmp/berens
-          python3 -I evals/iclr_calibration.py sample /tmp/berens/data/iclr25v2.parquet --out sample.jsonl
+          curl -sSfL --retry 4 -o /tmp/reviews.parquet "$DATA_URL"
+          python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out sample.jsonl
           python3 -I evals/iclr_calibration.py features results --out features.jsonl
           python3 - <<'PY'
           import json, glob
