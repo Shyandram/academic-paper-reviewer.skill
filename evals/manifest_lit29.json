@@ -1,0 +1,32 @@
+[
+  {
+    "arxiv_id": "2604.14684",
+    "title": "DETR-ViP: Detection Transformer with Robust Discriminative Visual Prompts",
+    "topic": "detseg",
+    "comment": "Published as a conference paper at ICLR 2026",
+    "primary_category": "cs.CV",
+    "published": "2026-04-16",
+    "venue": "iclr",
+    "id": "iclr-detseg-2604.14684-lit29",
+    "curation": "manual swap: JUDO is multimodal anomaly QA (VLM), not detection/segmentation (auto pick 2605.20284)",
+    "base_id": "iclr-detseg-2604.14684",
+    "skill": "2.9",
+    "lit_mode": "strict",
+    "cutoff": "2025-09-25"
+  },
+  {
+    "arxiv_id": "2609.16847",
+    "title": "RegRet: Enhancing Region-Level Retrieval in Large Multimodal Models",
+    "topic": "vlm",
+    "comment": "Accepted by ECCV 2026. 22 pages, including references and appendix",
+    "primary_category": "cs.CV",
+    "published": "2026-09-15",
+    "venue": "eccv",
+    "id": "eccv-vlm-2609.16847-lit29",
+    "curation": "auto pick, checked against abstract",
+    "base_id": "eccv-vlm-2609.16847",
+    "skill": "2.9",
+    "lit_mode": "strict",
+    "cutoff": "2026-03-06"
+  }
+]

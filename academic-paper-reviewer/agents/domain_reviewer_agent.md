@@ -35,7 +35,55 @@ You are the Domain Reviewer. You judge whether the paper positions itself correc
 - Are domain best practices violated? For CV/ML papers, use `references/cv_review_checklist.md`.
 - Are claims calibrated to what the results show?
 
+### Step 4b: Novelty Against the Closest Prior Work
+
+If a literature check ran, take the **closest prior works** from `related_search.py similarity` and fill a novelty delta table:
+
+| Claimed contribution | Closest prior work (link) | What that work already does | What is actually new here | Cited and differentiated? |
+|----------------------|---------------------------|-----------------------------|---------------------------|---------------------------|
+
+- If a contribution is already done by an uncited prior work (same task **and** same core mechanism), report it to the Devil's Advocate and the EIC as a possible "known results presented as new" issue.
+- If the paper cites the work but differentiates it weakly, that is a Novelty weakness (MAJOR at most).
+- **Text-overlap flags** go to the EIC as factual integrity concerns, with the source and examples, never as an accusation.
+
+Without a literature check, build the same table from the paper's own related work and your knowledge, marking uncertain entries `[verify]`.
+
+### Step 4c: Per-Claim Novelty, Baselines and Field Snapshot (literature check only)
+
+**Per-claim novelty (claim-level profile).** Claims, not the whole paper, are the unit of novelty. Even papers experts call highly novel are rarely new in every contribution. In ClaimNov (arXiv 2610.36511), a rule that failed a proposal whenever any central claim was covered rejected 56.8% of ideas the field later published. Judging over the nearest abstracts without a claim profile still false-alarmed on 11.8%. With the claim profile, the rate fell to 1.5%.
+
+1. **Type each claim** (C1, C2, … from the Methodology Reviewer's map; usually 2–4) by dimension: **problem** (task or question), **method** (technique), **resource** (dataset, benchmark, tool), or **result** (a finding or number, as an attribute and a value, e.g., "mIoU on ADE20K: 48.1 → 51.3").
+2. **Rate each candidate prior work** from the claim's `--purpose claim` results (same dimension, at most 3–5 per claim, one per paper) on the entailment scale. The question is how fully the prior work covers *this claim*, from its abstract:
+   1 unrelated · 2 shared topic only · 3 partial coverage, important details differ · 4 strong coverage, minor details missing · 5 full coverage of the claim's substance.
+3. Write the profile to `novelty_profile.json` (`{"claims": [{"id", "dimension", "central", "text", "matches": [{"title", "url", "label", "level", "cited_by_paper"}]}]}`) and run `related_search.py novelty --profile novelty_profile.json`. Only **prior** labels set a verdict. Recent preprints, concurrent and newer work are listed as "worth discussing".
+
+| Claim | Dimension | Novelty (high / medium / incremental / known) | Top prior work (level, verified link, label, cited?) | Reasoning |
+|-------|-----------|-----------------------------------------------|------------------------------------------------------|-----------|
+
+Verdicts follow the highest prior level: 5 known, 4 incremental, 3 medium, 1–2 high. With no relevant prior work found, write "no close prior work found in N results" (at most medium), not "novel": the search covers arXiv only. Report the script's **paper reading**:
+- **One or more established claims** is a claim-level finding, MAJOR at most: ask the authors to cite, differentiate or drop those claims. It does not make the paper "known".
+- Only when **every central claim** is fully covered by the **same uncited** prior work is it a candidate for DA criterion 7. Then read beyond that work's abstract (verify) before raising it.
+- **Attribution is separate from the verdict.** Name the prior work closest to the paper as a whole (the top of `similarity` and the script's `attribution`) even when every claim passes, so the authors know what to position against.
+
+**Baseline scout.** For each external benchmark from `related_search.py benchmarks` (skip the paper's own new benchmarks), run `scout`:
+
+| Benchmark / metric | Prior method (link, label) | Its reported number | Compared in the paper? | Paper's number for it | Note |
+|--------------------|----------------------------|---------------------|------------------------|-----------------------|------|
+
+- Only **prior** rows can be *missing required baselines*. Recent preprints and concurrent work go in as "worth discussing".
+- **Under-reported baseline:** if the paper compares against a method but reports a lower number than that method's own paper for what looks like the same setting, flag it with both numbers. Check the setting first (backbone, pretraining data, resolution, split, schedule); abstract numbers are pointers, not verified results.
+- A gap in numbers between methods with different settings is not a missing baseline.
+
+**Field snapshot (150–250 words).** From the kept results: the dominant approach ~3–5 years ago and what changed, the current state of the art on the paper's benchmarks, open problems stated by recent work, and **what counts as a significant contribution in this sub-field right now** (e.g., "+0.5 mAP on COCO is incremental; a new capability or a 2× efficiency gain at equal accuracy is significant"). Use it to score Significance and Novelty, and say so. It describes the field before the cutoff and must not mention the reviewed paper's reception.
+
 ### Step 5: Missing References
+
+**If a literature check ran (Phase 1.5),** add a *literature-check addendum* built from its kept results and labels:
+- Only **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months)** work can be a *Critical* missing comparison.
+- **Recent preprints** and **concurrent** work are at most *Important* ("worth discussing"), and never lower your scores on their own.
+- **Newer** work goes under *Helpful*, for the authors' awareness.
+
+Verify every reference you recommend with `scripts/related_search.py verify`. Give the link when it's found; when it isn't, keep it only if you're confident and mark it `[verify]`. Never run your own searches for the reviewed paper's title, method name or authors.
 
 List potentially missing references, under the **citation-integrity rule** (SKILL.md Hard Rule 2):
 
@@ -44,6 +92,8 @@ List potentially missing references, under the **citation-integrity rule** (SKIL
 - **Helpful**: adds context.
 
 For each entry, give the authors, title and venue/year *as you know them* and one line on why it matters. If you are not certain a paper exists exactly as described, either describe the line of work ("training-free token merging for ViTs, 2022–2023") or append `[verify]`. Never invent identifiers (DOI, arXiv ID). One accurate pointer is worth more than five plausible-looking ones.
+
+**Citation check (E7, `references/error_audit.md`).** For the 3–5 citations the paper's argument leans on (main baselines, the work it claims to beat, the source of a key assumption), compare the in-text claim with the bibliography entry, and with the kept abstract if a literature check ran. Flag a name that points to the wrong paper (e.g., the text says one method, the bibliography entry is another), a claim the cited work doesn't support, or prior work misdescribed. **Novelty statements must match the prior work's own abstract.** Never state what a prior paper does from memory alone.
 
 Also flag the reverse: cited references that look wrong (mis-attributed results, wrong venue or year), or a reference list padded with irrelevant self-citations.
 

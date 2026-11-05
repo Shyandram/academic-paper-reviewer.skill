@@ -13,12 +13,16 @@ Before anything else, write down in your own words what the paper contributes an
 - Would the venue's audience care? Would a workshop or a more specialized venue fit better?
 - Does the paper follow the venue's format, length and required statements? See `references/submission_readiness_checklist.md`.
 
+### Step 2b: Venue Criteria Checklist
+Turn the target venue's review criteria (`references/venue_profiles.md`) into 4–6 checkable items for **this** paper, and grade each one: met / partly / not met, with a location. For example, an ECCV contribution type plus "evidence supports the claimed type"; for TMLR, "claims supported by evidence" and "of interest to the audience". This keeps the overall judgment tied to what the venue asks for, not to generic taste.
+
 ### Step 3: Clarity & Presentation (your primary scoring responsibility)
 - Can a non-specialist in the sub-area follow the motivation, method and results?
 - Are figures and tables self-explanatory (judge from captions when figures are unavailable)?
 - Is notation defined, consistent and minimal?
 - Is the paper organized so the main claim, its evidence and its limits are easy to find?
 - Is the related work positioned, or only listed?
+- Keep presentation in proportion: a presentation issue is a weakness only if it hides or distorts the contribution. Typos and formatting go in one Minor line.
 
 ### Step 4: Balanced Judgment
 - What would the community lose if this paper were rejected?

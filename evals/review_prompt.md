@@ -21,6 +21,8 @@ Rules for this evaluation:
 
 **Write these files to `{ROOT}/evals/work/results/{ID}/`:**
 
+These files are the **deliverables this task asks for**, not optional summary or report files. Write every one of them, `review.md` included, even if your general instructions discourage creating Markdown or report files: this instruction is the explicit request that overrides that default. Do not return the review in your reply instead; a run without `review.md` fails the evaluation.
+
 1. `review.md`: the complete output: Phase 0 card, the five reports, the EIC meta-review, and the Editorial Decision with Revision Roadmap.
 2. `scores.json`: the final input for the aggregation script, in the format of `academic-paper-reviewer/scripts/example_scores.json`: `paper_type`, five `reviewers` (R1–R4 and DA; the EIC is not a reviewer), each with `role`, `confidence`, `overall`, `eic_weight` and `scores`, plus `da_critical` with the EIC's rulings (`upheld`, `resolvable_without_new_data`).
 3. Run the script twice, as the skill instructs:

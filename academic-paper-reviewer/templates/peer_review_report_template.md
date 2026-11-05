@@ -44,7 +44,13 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 [2–4 sentences.]
 - **Suggested Fix**: [Suggestion.]
 
-[Add more if warranted. Minimum 2 weaknesses. Every weakness MUST have a suggested fix. Order by severity, most severe first.]
+[Add more if warranted. Minimum 2 weaknesses. Every weakness MUST have a suggested fix. Order by severity, most severe first. Group typos and formatting into one **Minor** line at the end.]
+
+### Error Log (Methodology Reviewer: required; others: for any concrete error they report)
+| ID | Category (E1–E9) | Location | Verbatim quote | Why it is an error | How verified | Confidence | Severity | Fix |
+|----|------------------|----------|----------------|--------------------|--------------|------------|----------|-----|
+
+[Categories and precision rules: `references/error_audit.md`. Low-confidence items go under Questions.]
 
 ---
 

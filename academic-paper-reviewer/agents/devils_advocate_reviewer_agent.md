@@ -72,6 +72,12 @@ Systematically check for these patterns:
 - Are there confounding factors that aren't controlled for?
 - Could a simpler method achieve similar results?
 
+#### Protocol Sweep
+Run the same full-text search as the Methodology Reviewer (Step 0 in `agents/methodology_reviewer_agent.md`), appendix and supplement included, for statements on splits and selection. A paper that says it trained, tuned or selected on the held-out test set it reports meets criterion 3, whether or not it discloses this.
+
+#### Claim Distortion Check (E5)
+LLM reviewers detect claim distortion least reliably (PaperAudit-Bench), so check it deliberately. For each sentence in the abstract, introduction and conclusion that uses "first", "state of the art", "consistently", "always", "significantly", "generalizes", "robust" or "efficient", find the evidence and say whether it supports the claim **as worded**. Overclaiming that survives in weaker form is MAJOR at most. It is CRITICAL only if the evidence contradicts the main claim.
+
 #### Numerical Sanity Check
 - Recompute at least two headline numbers: improvements claimed in the abstract, averages in tables, percentage gains.
 - Do numbers in the abstract, text, tables and figures agree?
@@ -198,10 +204,30 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
 2. **The experiment cannot test the claim**: e.g., evaluation on the training set, or a metric that cannot measure the claimed property. (A confound that is only partly controlled, or a missing control, is MAJOR.)
 3. **Evaluation leakage**: the paper trains on, tunes on, or selects hyperparameters, checkpoints, prompts or thresholds on the **held-out test set** it reports its main results on. This holds **whether or not the paper discloses it**: disclosure makes the problem visible, it does not make the reported numbers valid. Concrete evidence in the paper is required.
    - *Not automatically critical (MAJOR):* tuning on a validation split that is also the standard reporting split because the test labels are hidden or unavailable (e.g., COCO val, ADE20K val, many medical datasets). That is field practice; ask for a held-out check.
+   - *Selection from the reported results table counts.* A sentence such as "according to the results in Table N, we select the best/top-performing strategy (per task)", where Table N is computed on the reporting split, is a statement of selection on that split. Choosing per task or per dataset is still selection.
+   - *A benchmark with no validation split is a held-out test set,* unless it is the field's standard reporting split under the bullet above (test labels hidden or unavailable). A new benchmark the authors built themselves without a validation split is a test set.
+   - **Decide with this table** (quote the selection sentence verbatim, with its location, in the DA-CRITICAL entry):
+
+     **Order of application:** apply the field-practice bullet first. If the reporting split is a validation split (its labels are public) that the field reports on because the **test split's** labels are hidden or held by an evaluation server, the issue is MAJOR, and the table below doesn't apply. Examples: COCO val (test-dev on a server), LVIS minival or val (test-dev on a server), ADE20K val. That the validation labels are public is the point, not an exception: the field has no other labelled split to report. Use the table only for a true held-out test set, including a benchmark without a validation split.
+
+     Criterion 3 is about choosing a configuration **because it scored best** on the reported split, which inflates the reported numbers. Before the table, check the selection table itself: is the chosen value the best-scoring option, and was it chosen by its score?
+
+     | The selected configuration… | Ruling |
+     |---|---|
+     | is **not** the best-scoring option in its selection table (e.g., a cheaper setting chosen over a better-scoring one to save compute or memory), or comes from a stated quality/cost trade-off on a resolution or capacity setting | Not criterion 3. At most MINOR (state the protocol). Choosing a worse-scoring setting cannot inflate the result. |
+     | is the best-scoring option, but the main claim (the comparison with baselines) holds at every other value in the sweep | MAJOR: the selection cannot change the conclusion. Ask for a held-out check. |
+     | is the best-scoring (or "top-performing") option, chosen by its score, and produces the headline numbers (the same values appear in the main results table, abstract or introduction) | **CRITICAL** (criterion 3) |
+     | affects only ablations or secondary results; the headline uses a configuration fixed in advance | MAJOR |
+     | was selected on a separate validation split, or the selection procedure is stated as independent of the test results | not an issue |
+     | is not stated, after the protocol sweep | MAJOR: a question about the selection protocol |
+
+     For the CRITICAL row, quote the selection table showing that the chosen value scores best, and quote the main table showing the same numbers. Robustness or sensitivity sweeps in a supplement, where the authors pick a value for cost reasons, belong in the first row.
    - *Resolvable by clarification only* if the paper already contains results selected without the test set (e.g., a separate validation protocol) that support the main claim. Otherwise it **needs new experiments**.
 4. **Fabrication or manipulation signal**: concrete evidence of manipulated data, images or p-hacking, stated factually as a concern for the editor.
 5. **Serious ethical violation**: unaddressed harm, data misuse, or undisclosed conflicts.
 6. **The method cannot be understood**: so much is missing that the method itself is undefined. (Missing hyperparameters, code or implementation details are MAJOR or MINOR.)
+
+7. **Known results presented as new**: a verified *prior* work (published before the cutoff, confirmed with a link) does the same task with the same core mechanism, and the paper neither cites it nor differentiates itself from it, while claiming that mechanism as its main contribution. If the paper cites the work and argues a difference, however weakly, this is MAJOR (insufficient novelty), not CRITICAL. It concerns the paper's **central claims as a whole**: one established claim among several is MAJOR (cite and differentiate), never CRITICAL. Use the Domain Reviewer's claim-level profile (`related_search.py novelty`); a candidate needs every central claim at entailment level 5 from the same uncited prior work.
 
 **Never CRITICAL on their own** (rate these MAJOR or MINOR):
 - single runs, no error bars or significance tests, even with small margins
@@ -212,6 +238,8 @@ An issue is CRITICAL (not just MAJOR) only if it meets at least one of these str
 - unclear or missing protocol details, missing implementation details, details deferred to supplementary material
 - text–table inconsistencies, unless they reverse a conclusion
 - limited datasets or settings, missing ablations, missing failure cases
+- similarity to concurrent or newer work, or a high similarity score without a verified match of task and mechanism
+- text overlap with another paper (report it as an integrity concern for the EIC instead)
 
 The EIC rules on every CRITICAL issue you raise, checking it against the paper. **Upheld CRITICAL issues cap the decision**: at Borderline Accept (4) if each one is resolvable by clarification or minor additions, and at Borderline Reject (3) otherwise. This is a hard constraint (see `references/editorial_decision_standards.md`). Because of this, rate an issue CRITICAL only when you would defend it to the EIC as fatal.
 
