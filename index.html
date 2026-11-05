@@ -5,411 +5,814 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Academic Paper Reviewer</title>
 <meta name="description" content="A multi-perspective peer-review skill for Claude and Codex: five independent reviewers and an Editor-in-Chief, tuned for computer vision and machine learning papers.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%232f5bd3'/><path d='M9 9h10l4 4v10H9z' fill='white'/><path d='M12 15h8M12 19h6' stroke='%232f5bd3' stroke-width='2'/></svg>">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231e3a5f'/><path d='M9 9h10l4 4v10H9z' fill='white'/><path d='M12 15h8M12 19h6' stroke='%231e3a5f' stroke-width='2'/></svg>">
+<script>
+// Runs before paint: mark JS available (enables reveal animations) and apply a saved theme.
+(function(){var r=document.documentElement;r.classList.add("js");try{var t=localStorage.getItem("apr-theme");if(t==="light"||t==="dark")r.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap">
 <style>
+/* Palette: "Academic Journal / Scholarly Publishing" (scholarly navy + citation gold) with a blue research accent.
+   Style: Swiss Modernism 2.0 grid + a restrained Aurora mesh backdrop + glass panels. */
 :root{
-  --bg:#fbfaf7; --surface:#ffffff; --surface-2:#f2f0ea; --ink:#1b1d22; --muted:#5c616c; --line:#e3e0d7;
-  --accent:#2f5bd3; --accent-soft:#e7edfc; --accent-ink:#1f3f9c;
-  --good:#1d7a4f; --warn:#a86108; --bad:#b4342d;
-  --bar-ai:#2f5bd3; --bar-weak:#a9b4cc; --bar-human:#c98a2b;
-  --code-bg:#f2f0ea; --shadow:0 1px 2px rgba(20,20,30,.05),0 6px 24px rgba(20,20,30,.05);
-  --radius:14px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --nav-h:60px;
+  --bg:#f7f9fc; --surface:#ffffff; --surface-2:#eef2f8; --glass:rgba(255,255,255,.72); --glass-line:rgba(30,58,95,.12);
+  --ink:#0f172a; --ink-2:#1e293b; --muted:#475569; --line:#d5dde8;
+  --primary:#1e3a5f; --on-primary:#ffffff; --accent:#1d4ed8; --accent-soft:#e3ebfb; --accent-ink:#1e3a8a;
+  --gold:#9a4708; --gold-soft:#fdf1e2;
+  --bar-ai:#1d4ed8; --bar-weak:#94a3b8; --bar-human:#c2770f;
+  --r1:#1d4ed8; --r2:#15803d; --r3:#7e22ce; --r4:#b45309; --r5:#b91c1c;
+  --mesh-a:rgba(37,99,235,.16); --mesh-b:rgba(180,83,9,.10); --mesh-c:rgba(126,34,206,.09);
+  --grid-line:rgba(30,58,95,.05);
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.14);
+  --radius:18px;
+  --serif:"Crimson Pro","Iowan Old Style","Palatino Linotype",Georgia,serif;
+  --sans:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --bg:#121418; --surface:#1a1d23; --surface-2:#22262e; --ink:#eceef2; --muted:#a2a8b4; --line:#2e333c;
-    --accent:#7d9cff; --accent-soft:#1f2a47; --accent-ink:#b8c8ff;
-    --good:#4cc28a; --warn:#e3a54a; --bad:#ef7a72;
-    --bar-ai:#7d9cff; --bar-weak:#4a5468; --bar-human:#e0a548;
-    --code-bg:#22262e; --shadow:none;
+    --bg:#0a101c; --surface:#111a2b; --surface-2:#18233a; --glass:rgba(17,26,43,.66); --glass-line:rgba(148,178,230,.14);
+    --ink:#e8edf5; --ink-2:#d3dbe8; --muted:#a3b0c4; --line:#26324a;
+    --primary:#9cbcff; --on-primary:#0a101c; --accent:#8db4ff; --accent-soft:#17264a; --accent-ink:#c3d5ff;
+    --gold:#f0b45a; --gold-soft:#2b2112;
+    --bar-ai:#8db4ff; --bar-weak:#56637c; --bar-human:#eba64a;
+    --r1:#8db4ff; --r2:#5fd08f; --r3:#c39bff; --r4:#f0b45a; --r5:#ff8a80;
+    --mesh-a:rgba(59,110,230,.22); --mesh-b:rgba(240,180,90,.08); --mesh-c:rgba(150,90,240,.14);
+    --grid-line:rgba(148,178,230,.05);
+    --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 16px 40px -16px rgba(0,0,0,.6);
   }
 }
 :root[data-theme="dark"]{
-  --bg:#121418; --surface:#1a1d23; --surface-2:#22262e; --ink:#eceef2; --muted:#a2a8b4; --line:#2e333c;
-  --accent:#7d9cff; --accent-soft:#1f2a47; --accent-ink:#b8c8ff;
-  --good:#4cc28a; --warn:#e3a54a; --bad:#ef7a72;
-  --bar-ai:#7d9cff; --bar-weak:#4a5468; --bar-human:#e0a548;
-  --code-bg:#22262e; --shadow:none;
+  --bg:#0a101c; --surface:#111a2b; --surface-2:#18233a; --glass:rgba(17,26,43,.66); --glass-line:rgba(148,178,230,.14);
+  --ink:#e8edf5; --ink-2:#d3dbe8; --muted:#a3b0c4; --line:#26324a;
+  --primary:#9cbcff; --on-primary:#0a101c; --accent:#8db4ff; --accent-soft:#17264a; --accent-ink:#c3d5ff;
+  --gold:#f0b45a; --gold-soft:#2b2112;
+  --bar-ai:#8db4ff; --bar-weak:#56637c; --bar-human:#eba64a;
+  --r1:#8db4ff; --r2:#5fd08f; --r3:#c39bff; --r4:#f0b45a; --r5:#ff8a80;
+  --mesh-a:rgba(59,110,230,.22); --mesh-b:rgba(240,180,90,.08); --mesh-c:rgba(150,90,240,.14);
+  --grid-line:rgba(148,178,230,.05);
+  --shadow:0 1px 0 rgba(255,255,255,.03) inset,0 16px 40px -16px rgba(0,0,0,.6);
 }
+
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
-a{color:var(--accent);text-decoration:none}
-a:hover{text-decoration:underline}
-.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
-code,pre{font-family:var(--mono);font-size:.88em}
-code{background:var(--code-bg);padding:.1em .35em;border-radius:5px}
-pre{background:var(--code-bg);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow-x:auto;margin:.6em 0 0;line-height:1.5}
+html{scroll-behavior:smooth;scroll-padding-top:var(--nav-h);-webkit-text-size-adjust:100%}
+@media (min-width:761px) and (min-height:640px){html{scroll-snap-type:y proximity}}
+body{margin:0;padding-top:var(--nav-h);background:var(--bg);color:var(--ink);font:17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:var(--accent);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,currentColor 40%,transparent)}
+a:hover{text-decoration-color:currentColor}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+code,pre{font-family:var(--mono);font-size:.86em}
+code{background:var(--surface-2);padding:.1em .38em;border-radius:5px}
+pre{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;margin:.6em 0 0;line-height:1.55}
 pre code{background:none;padding:0}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.skip{position:absolute;left:12px;top:-60px;z-index:50;background:var(--primary);color:var(--on-primary);padding:10px 14px;border-radius:8px}
+.skip:focus{top:10px}
+.wrap{max-width:1140px;margin:0 auto;padding:0 32px}
+@media (max-width:640px){.wrap{padding:0 16px}}
 
-/* nav */
-nav{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
-nav .wrap{display:flex;align-items:center;gap:20px;height:56px}
-.brand{font-weight:650;color:var(--ink);display:flex;align-items:center;gap:10px;white-space:nowrap}
+/* backdrop: aurora mesh + Swiss grid */
+.mesh{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:var(--bg)}
+.mesh::before{content:"";position:absolute;inset:-20%;background:
+  radial-gradient(40% 35% at 18% 20%,var(--mesh-a),transparent 70%),
+  radial-gradient(35% 30% at 85% 15%,var(--mesh-c),transparent 70%),
+  radial-gradient(45% 40% at 75% 85%,var(--mesh-b),transparent 70%),
+  radial-gradient(30% 30% at 10% 90%,var(--mesh-c),transparent 70%);
+  filter:blur(20px);animation:drift 24s ease-in-out infinite alternate}
+.mesh::after{content:"";position:absolute;inset:0;background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);background-size:64px 64px;mask-image:radial-gradient(80% 70% at 50% 30%,#000 30%,transparent 100%)}
+@keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(-3%,2%,0) scale(1.06)}}
+
+/* top bar */
+.top{position:fixed;top:0;left:0;right:0;z-index:20;height:var(--nav-h);background:var(--glass);backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);border-bottom:1px solid var(--glass-line)}
+.top .wrap{display:flex;align-items:center;gap:20px;height:100%}
+.brand{font-weight:700;color:var(--ink);display:flex;align-items:center;gap:10px;white-space:nowrap;text-decoration:none}
 .brand svg{flex:none}
-.links{display:flex;gap:18px;margin-left:auto;font-size:.93rem}
-.links a{color:var(--muted)}
-.links a:hover{color:var(--ink);text-decoration:none}
-#theme{border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px;flex:none}
-@media (max-width:760px){.links{display:none}#theme{margin-left:auto}}
+.links{display:flex;gap:4px;margin-left:auto;font-size:.94rem}
+.links a{color:var(--muted);text-decoration:none;padding:8px 12px;border-radius:8px}
+.links a:hover{color:var(--ink);background:var(--surface-2)}
+.links a[aria-current="true"]{color:var(--ink);background:var(--accent-soft)}
+#theme{border:1px solid var(--line);background:var(--surface);color:var(--ink-2);border-radius:10px;width:44px;height:44px;cursor:pointer;flex:none;display:grid;place-items:center}
+#theme:hover{border-color:var(--muted)}
+#theme .moon{display:none}
+:root[data-theme="dark"] #theme .moon{display:block}:root[data-theme="dark"] #theme .sun{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #theme .moon{display:block}:root:not([data-theme="light"]) #theme .sun{display:none}}
+.progress{position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--gold));transform-origin:left;transform:scaleX(0)}
+@media (max-width:860px){.links{display:none}#theme{margin-left:auto}}
+@media (max-width:400px){.brand span{font-size:.95rem}}
 
-/* hero */
-.hero{padding:72px 0 40px}
-.eyebrow{display:inline-flex;gap:8px;align-items:center;font-size:.82rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);padding:5px 12px;border-radius:999px}
-h1{font-family:var(--serif);font-weight:600;font-size:clamp(2.2rem,5.4vw,3.6rem);line-height:1.08;letter-spacing:-.01em;margin:18px 0 16px;max-width:15ch}
-.lede{font-size:1.15rem;color:var(--muted);max-width:62ch;margin:0}
-.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 18px;border-radius:10px;font-weight:600;font-size:.96rem;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
-.btn:hover{text-decoration:none;border-color:var(--muted)}
-.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-:root[data-theme="dark"] .btn.primary{color:#0e1120}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.primary{color:#0e1120}}
-.note{margin-top:22px;font-size:.9rem;color:var(--muted);display:flex;gap:8px;align-items:flex-start;max-width:70ch}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:44px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
-.stat b{display:block;font-family:var(--serif);font-size:1.9rem;line-height:1.1}
-.stat span{font-size:.88rem;color:var(--muted)}
-@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr)}}
+/* side navigator */
+.dots{position:fixed;right:22px;top:50%;transform:translateY(-50%);z-index:15}
+.dots ol{list-style:none;margin:0;padding:8px 0;display:flex;flex-direction:column;gap:2px}
+.dots a{position:relative;display:flex;align-items:center;justify-content:flex-end;width:36px;height:30px;text-decoration:none;border-radius:8px}
+.dots a::after{content:"";width:8px;height:8px;border-radius:50%;margin-right:13px;background:color-mix(in srgb,var(--muted) 45%,transparent);transition:transform .25s,background .25s,height .25s}
+.dots a[aria-current="true"]::after{background:var(--accent);height:22px;border-radius:5px}
+.dots a:hover::after{background:var(--ink-2)}
+.dots .lab{position:absolute;right:42px;white-space:nowrap;font-size:.82rem;font-weight:700;color:var(--ink);background:var(--surface);border:1px solid var(--line);box-shadow:var(--shadow);padding:5px 10px;border-radius:8px;opacity:0;transform:translateX(6px);transition:opacity .18s,transform .18s;pointer-events:none}
+.dots a:hover .lab,.dots a:focus-visible .lab{opacity:1;transform:none}
+.dots .lab small{color:var(--muted);font:600 .72rem var(--mono);margin-right:6px}
+@media (max-width:1240px){.dots{right:8px}}
+@media (max-width:1100px){.dots{display:none}}
 
-/* sections */
-section{padding:56px 0;border-top:1px solid var(--line)}
-h2{font-family:var(--serif);font-weight:600;font-size:clamp(1.6rem,3.4vw,2.2rem);line-height:1.15;margin:0 0 8px}
-.sub{color:var(--muted);margin:0 0 28px;max-width:68ch}
-h3{font-size:1.05rem;margin:0 0 6px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
-.grid{display:grid;gap:14px}
-.g3{grid-template-columns:repeat(3,1fr)}
-.g2{grid-template-columns:repeat(2,1fr)}
-@media (max-width:900px){.g3{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:640px){.g3,.g2{grid-template-columns:1fr}}
+/* slides */
+main{display:block}
+.slide{position:relative;min-height:calc(100vh - var(--nav-h));min-height:calc(100svh - var(--nav-h));padding:44px 0 48px;display:flex;align-items:center;scroll-snap-align:start}
+.slide>.wrap{width:100%}
+#top.slide{padding:28px 0 36px}
+.slide+.slide{border-top:1px solid var(--glass-line)}
+@media (max-width:760px),(max-height:639px){.slide{min-height:0;padding:48px 0}#top.slide{padding-top:36px}}
+.slide:target{scroll-snap-align:start}
+.num{position:absolute;right:max(32px,calc((100% - 1140px)/2 + 32px));top:16px;font:700 clamp(4rem,10vw,8.5rem)/1 var(--serif);color:transparent;-webkit-text-stroke:1px color-mix(in srgb,var(--muted) 28%,transparent);pointer-events:none;user-select:none}
+#eval .num{display:none}
+@media (max-width:760px){.num{display:none}}
+.kicker{display:inline-flex;align-items:center;gap:10px;font:700 .78rem/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent-ink);margin:0 0 14px}
+.kicker::before{content:"";width:22px;height:2px;background:var(--gold);border-radius:2px}
+h1,h2{font-family:var(--serif);font-weight:600;letter-spacing:-.012em;color:var(--ink)}
+h2{font-size:clamp(2rem,4.2vw,3rem);line-height:1.06;margin:0 0 12px;max-width:22ch}
+.sub{color:var(--muted);margin:0 0 32px;max-width:66ch;font-size:1.05rem}
+h3{font-size:1.06rem;line-height:1.3;margin:0 0 6px;color:var(--ink)}
+.glass{background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.card{padding:22px}
 .card p{margin:0;color:var(--muted);font-size:.95rem}
 
+/* entrance motion: content is never hidden by default. The hero animates on load (only when the
+   script has set .js); other topics are animated by script just before they scroll into view. */
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.js #top .rv{animation:rise .7s cubic-bezier(.16,.84,.3,1) both;animation-delay:calc(var(--i,0) * 70ms)}
+
+/* hero */
+.hero-grid{display:grid;grid-template-columns:1.25fr .9fr;gap:40px;align-items:center}
+.eyebrow{display:inline-flex;gap:10px;align-items:center;font:700 .8rem/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink);background:var(--accent-soft);border:1px solid var(--glass-line);padding:8px 14px;border-radius:999px}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+h1{font-size:clamp(2.4rem,5vw,3.8rem);line-height:1.02;margin:16px 0 14px;max-width:14ch}
+h1 em{font-style:italic;font-weight:500;padding:0 .12em 0 .02em;margin-right:-.06em;-webkit-box-decoration-break:clone;box-decoration-break:clone;background:linear-gradient(100deg,var(--accent),var(--r3) 60%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:1.14rem;color:var(--muted);max-width:58ch;margin:0}
+.cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:9px;min-height:46px;padding:11px 20px;border-radius:12px;font-weight:700;font-size:.97rem;border:1px solid var(--line);background:var(--surface);color:var(--ink);text-decoration:none;transition:transform .2s,border-color .2s,box-shadow .2s}
+.btn:hover{border-color:var(--muted);transform:translateY(-1px)}
+.btn.primary{background:var(--primary);border-color:var(--primary);color:var(--on-primary);box-shadow:0 8px 24px -10px color-mix(in srgb,var(--primary) 70%,transparent)}
+.btn svg{flex:none}
+.note{margin-top:22px;font-size:.92rem;color:var(--muted);display:flex;gap:10px;align-items:flex-start;max-width:62ch}
+.note svg{flex:none;margin-top:3px;color:var(--gold)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:32px}
+.stat{padding:16px 18px}
+.stat b{display:block;font:600 2.1rem/1.05 var(--serif);color:var(--ink)}
+.stat span{font-size:.88rem;color:var(--muted)}
+.orbit{width:100%;max-width:400px;justify-self:center}
+.orbit svg{width:100%;height:auto;display:block;overflow:visible}
+.orbit .ring{fill:none;stroke:var(--line);stroke-width:1.5;stroke-dasharray:3 7}
+.orbit .ring2{fill:none;stroke:var(--glass-line);stroke-width:1}
+.orbit .link{stroke:var(--line);stroke-width:1.5}
+.orbit .flow{stroke-width:2.5;stroke-linecap:round;stroke-dasharray:1 12;fill:none;animation:flow 2.4s linear infinite}
+@keyframes flow{to{stroke-dashoffset:-36}}
+.orbit .node{stroke:var(--surface);stroke-width:4}
+.orbit .ini{fill:#fff;font:700 15px var(--sans);text-anchor:middle;dominant-baseline:central}
+.orbit .lbl{fill:var(--ink-2);font:700 13.5px var(--sans);text-anchor:middle}
+.orbit .core{fill:var(--primary)}
+.orbit .core-t{fill:var(--on-primary);font:600 19px var(--serif);text-anchor:middle}
+.orbit .halo{fill:var(--accent);opacity:.12;transform-origin:200px 200px;animation:halo 4s ease-in-out infinite}
+@keyframes halo{50%{transform:scale(1.18);opacity:.04}}
+.orbit .spin{transform-origin:200px 200px;animation:spin 80s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+:root[data-theme="dark"] .orbit .ini{fill:#0a101c}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .orbit .ini{fill:#0a101c}}
+@media (max-width:960px){.hero-grid{grid-template-columns:1fr}.orbit{display:none}}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr);margin-top:32px}}
+
 /* pipeline */
-.pipe{display:grid;grid-template-columns:1fr auto 1.6fr auto 1fr auto 1fr;align-items:stretch;gap:10px}
-.stage{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
-.stage .ph{font:600 .74rem/1 var(--mono);letter-spacing:.05em;color:var(--accent-ink);text-transform:uppercase}
-.stage h3{margin:8px 0 6px}
-.stage p{margin:0;color:var(--muted);font-size:.9rem}
-.arrow{align-self:center;color:var(--muted);font-size:1.3rem}
-.revs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
-.rev{display:flex;gap:8px;align-items:baseline;font-size:.88rem;background:var(--surface-2);border-radius:8px;padding:6px 9px}
-.dot{width:9px;height:9px;border-radius:50%;flex:none}
-@media (max-width:900px){.pipe{grid-template-columns:1fr}.arrow{transform:rotate(90deg);justify-self:center}}
+.pipe{display:grid;grid-template-columns:1fr 34px 1.45fr 34px 1fr 34px 1fr;align-items:stretch}
+.stage{padding:20px;display:flex;flex-direction:column}
+.stage .ph{display:flex;align-items:center;gap:10px;font:700 .74rem/1 var(--mono);letter-spacing:.06em;color:var(--accent-ink);text-transform:uppercase}
+.stage .ph b{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);border:1px solid var(--glass-line);font-size:.8rem}
+.stage h3{margin:14px 0 8px;font:600 1.4rem/1.15 var(--serif)}
+.stage p{margin:0;color:var(--muted);font-size:.92rem}
+.stage.key{border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
+.stage.out .ph b{background:var(--gold-soft);color:var(--gold)}
+.arrow{align-self:center;justify-self:center;color:var(--muted);display:grid;place-items:center}
+.arrow svg{display:block}
+.revs{display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.rev{display:flex;gap:10px;align-items:baseline;font-size:.88rem;background:var(--surface-2);border-radius:10px;padding:8px 11px;border-left:3px solid var(--c);color:var(--muted)}
+.rev b{color:var(--ink);white-space:nowrap}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--c);align-self:center}
+@media (max-width:980px){.pipe{grid-template-columns:1fr}.arrow{transform:rotate(90deg);height:34px}}
 
-/* modes table */
-.table{width:100%;border-collapse:collapse;font-size:.94rem}
-.table th,.table td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top}
-.table th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
-.table td:first-child{white-space:nowrap}
-.tag{display:inline-block;font:600 .8rem/1 var(--mono);padding:5px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent-ink)}
-.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
-.scroll .table tr:last-child td{border-bottom:none}
-@media (max-width:640px){.table td:first-child{white-space:normal}.table th:nth-child(2),.table td:nth-child(2){display:none}}
+/* carousel */
+.car{position:relative}
+.car-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.car-ctrl{display:none;align-items:center;gap:10px;margin-bottom:32px}
+.js .car-ctrl{display:flex}
+.car-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:grid;place-items:center;transition:border-color .2s,opacity .2s}
+.car-btn:hover:not(:disabled){border-color:var(--muted)}
+.car-btn:disabled{opacity:.4;cursor:default}
+.car-status{font:700 .85rem var(--mono);color:var(--muted);min-width:9ch;text-align:center}
+.car-track{display:grid;grid-auto-flow:column;grid-auto-columns:calc((100% - 2 * 18px) / 3);gap:18px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;padding:6px 2px 18px;margin:0 -2px;scrollbar-width:thin;scroll-behavior:smooth}
+.js .car-track{scrollbar-width:none}
+.js .car-track::-webkit-scrollbar{display:none}
+.car-track:focus-visible{outline-offset:4px}
+.feat{scroll-snap-align:start;padding:24px;display:flex;flex-direction:column;gap:8px;min-height:240px}
+.feat .ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent-ink);border:1px solid var(--glass-line)}
+.feat .n{font:700 .74rem var(--mono);color:var(--muted);letter-spacing:.06em;margin-left:auto}
+.feat .top-row{display:flex;align-items:center}
+.feat h3{font:600 1.35rem/1.15 var(--serif);margin:8px 0 0}
+.feat p,.resp p{margin:0;color:var(--muted);font-size:.95rem}
+.pips{display:none;gap:6px;justify-content:center;margin-top:8px}
+.js .pips{display:flex}
+.pips i{width:18px;height:4px;border-radius:2px;background:var(--line);transition:background .25s,width .25s}
+.pips i.on{background:var(--accent);width:28px}
+@media (max-width:980px){.car-track{grid-auto-columns:calc((100% - 18px) / 2)}}
+@media (max-width:640px){.car-track{grid-auto-columns:86%}.car-ctrl{margin-bottom:20px}}
 
-/* venues */
+/* modes */
+.modes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.mode{padding:16px 20px;display:flex;flex-direction:column;gap:8px}
+.tag{align-self:flex-start;display:inline-block;font:700 .8rem/1 var(--mono);padding:6px 9px;border-radius:7px;background:var(--accent-soft);color:var(--accent-ink)}
+.say{font:italic 500 1.15rem/1.3 var(--serif);color:var(--ink);margin:2px 0 0}
+.get{margin:0;font-size:.9rem;color:var(--muted)}
+.get b{display:block;font:700 .7rem var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);opacity:.85;margin-bottom:2px}
+.venue-block{margin-top:20px;display:grid;grid-template-columns:minmax(220px,.8fr) 2fr;gap:24px;align-items:start;padding:22px}
+.venue-block h3{font:600 1.4rem/1.15 var(--serif);margin:0 0 6px}
+.venue-block p{margin:0;color:var(--muted);font-size:.93rem}
 .venues{display:flex;flex-wrap:wrap;gap:8px}
-.venue{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:.92rem;display:flex;gap:8px;align-items:center}
-.venue small{color:var(--muted);font-size:.78rem}
+.venue{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-size:.92rem;font-weight:700;display:flex;gap:8px;align-items:center}
+.venue small{color:var(--muted);font:500 .76rem var(--mono)}
+@media (max-width:980px){.modes-grid{grid-template-columns:repeat(2,1fr)}.venue-block{grid-template-columns:1fr}}
+@media (max-width:600px){.modes-grid{grid-template-columns:1fr}}
 
-/* eval chart */
-.chart{display:flex;flex-direction:column;gap:12px}
-.row{display:grid;grid-template-columns:minmax(150px,220px) 1fr 52px;gap:12px;align-items:center;font-size:.92rem}
-.row .lab small{display:block;color:var(--muted);font-size:.8rem}
-.track{position:relative;height:22px;background:var(--surface-2);border-radius:6px}
-.fill{position:absolute;left:0;top:0;bottom:0;border-radius:6px}
-.ci{position:absolute;top:50%;height:2px;background:var(--ink);opacity:.55}
+/* evaluation */
+.eval-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.pill{display:inline-flex;align-items:center;gap:8px;font:700 .76rem/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:7px 11px;border-radius:999px;background:var(--gold-soft);color:var(--gold);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent)}
+.eval-grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:36px;align-items:center}
+.eval-grid .sub{margin-bottom:0}
+.charts{display:grid;grid-template-columns:1fr;gap:14px}
+.chart-card{padding:18px 22px}
+.chart-card h3{font:600 1.35rem/1.15 var(--serif);margin:0 0 4px}
+.chart-card>p{margin:0 0 14px;color:var(--muted);font-size:.9rem}
+.chart{display:flex;flex-direction:column;gap:9px}
+.row{display:grid;grid-template-columns:minmax(130px,190px) 1fr 54px;gap:12px;align-items:center;font-size:.92rem}
+.row .lab{font-weight:700;line-height:1.25}
+.row .lab small{display:block;color:var(--muted);font-size:.78rem;font-weight:400}
+.track{position:relative;height:24px;background:var(--surface-2);border-radius:7px}
+.fill{position:absolute;left:0;top:0;bottom:0;width:var(--w);border-radius:7px;transform-origin:left center}
+.fill.ai{background:linear-gradient(90deg,color-mix(in srgb,var(--bar-ai) 75%,transparent),var(--bar-ai))}
+.fill.weak{background:var(--bar-weak)}
+.fill.human{background:var(--bar-human)}
+.fill.ref{background:transparent;border:1.5px dashed var(--muted)}
+.ci{position:absolute;top:50%;height:2px;background:var(--ink);opacity:.6}
 .ci::before,.ci::after{content:"";position:absolute;top:-5px;width:2px;height:12px;background:var(--ink)}
 .ci::before{left:0}.ci::after{right:0}
-.val{font:600 .9rem var(--mono);text-align:right}
-.axis{display:grid;grid-template-columns:minmax(150px,220px) 1fr 52px;gap:12px;font:.75rem var(--mono);color:var(--muted)}
-.axis div:nth-child(2){display:flex;justify-content:space-between}
-@media (max-width:640px){.row,.axis{grid-template-columns:110px 1fr 44px}}
-.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.85rem;color:var(--muted);margin-top:14px}
-.legend span{display:inline-flex;align-items:center;gap:6px}
-.sw{width:12px;height:12px;border-radius:3px;display:inline-block}
-.callout{border-left:3px solid var(--warn);background:var(--surface);padding:14px 16px;border-radius:0 10px 10px 0;font-size:.93rem;color:var(--muted);margin-top:20px}
-.callout b{color:var(--ink)}
+.val{font:700 .92rem var(--mono);text-align:right;color:var(--ink)}
+.row.hl .val{color:var(--accent)}
+.axis{display:grid;grid-template-columns:minmax(130px,190px) 1fr 54px;gap:12px;font:.74rem var(--mono);color:var(--muted)}
+.axis div:nth-child(2){display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:4px}
+@media (max-width:1100px){.eval-grid{grid-template-columns:minmax(0,1fr);gap:28px}}
+@media (max-width:640px){.row,.axis{grid-template-columns:104px 1fr 46px;gap:8px}.row{font-size:.86rem}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.84rem;color:var(--muted);margin-top:4px}
+.legend span{display:inline-flex;align-items:center;gap:7px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+.callout{display:flex;gap:14px;margin-top:22px;padding:18px 20px;border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-left:4px solid var(--gold);background:color-mix(in srgb,var(--gold-soft) 85%,transparent);border-radius:14px;font-size:.94rem;color:var(--ink-2)}
+.callout svg{flex:none;color:var(--gold);margin-top:2px}
+.callout b{color:var(--ink);font-size:1.02rem}
 
-/* install tabs */
-.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.tab{border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:8px 14px;border-radius:9px;cursor:pointer;font:600 .9rem var(--sans)}
-.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.panel{display:none}
-.panel.on{display:block}
-.panel ol{margin:0;padding-left:1.2em;color:var(--muted)}
-.panel ol li{margin:.3em 0}
-.panel p{color:var(--muted);margin:.6em 0 0;font-size:.94rem}
+/* install */
+.install-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:22px;align-items:start}
+.tabs{display:none;gap:6px;flex-wrap:wrap;margin-bottom:12px;padding:5px;background:var(--surface-2);border-radius:12px;width:fit-content;max-width:100%}
+.js .tabs{display:flex}
+.tab{border:0;background:transparent;color:var(--muted);min-height:40px;padding:8px 14px;border-radius:9px;cursor:pointer;font:700 .9rem var(--sans)}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(15,23,42,.12)}
+.panel-card{padding:22px}
+.js .panel{display:none}
+.js .panel.on{display:block}
+.panel+.panel{margin-top:20px}
+.js .panel+.panel{margin-top:0}
+.panel .nojs{margin:0 0 8px;font-size:1rem}
+.js .panel .nojs{display:none}
+.panel ol{margin:0;padding-left:1.25em;color:var(--muted)}
+.panel ol li{margin:.4em 0}
+.panel ol b,.panel ol i{color:var(--ink-2)}
+.panel p{color:var(--muted);margin:.7em 0 0;font-size:.94rem}
+.try{padding:22px}
+.try h3{font:600 1.4rem/1.15 var(--serif);margin:0 0 10px}
+.try pre{white-space:pre-wrap;word-break:break-word}
+@media (max-width:980px){.install-grid{grid-template-columns:minmax(0,1fr)}}
 
-footer{border-top:1px solid var(--line);padding:32px 0 48px;color:var(--muted);font-size:.88rem}
-footer .wrap{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between}
+/* responsible */
+.resp-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.resp{padding:22px;display:flex;flex-direction:column;gap:10px}
+.resp .ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--gold-soft);color:var(--gold)}
+.resp h3{font:600 1.3rem/1.15 var(--serif);margin:4px 0 0}
+@media (max-width:980px){.resp-grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.resp-grid{grid-template-columns:1fr}}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;display:flex;flex-wrap:wrap;gap:12px 20px;justify-content:space-between}
+
+/* motion preferences */
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .car-track{scroll-behavior:auto}
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="mesh" aria-hidden="true"></div>
 
-<nav>
+<header class="top">
   <div class="wrap">
     <a class="brand" href="#top">
-      <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="var(--accent)"/><path d="M9 9h10l4 4v10H9z" fill="var(--bg)"/><path d="M12 15h8M12 19h6" stroke="var(--accent)" stroke-width="2"/></svg>
-      Academic Paper Reviewer
+      <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--primary)"/><path d="M9 9h10l4 4v10H9z" fill="var(--bg)"/><path d="M12 15h8M12 19h6" stroke="var(--primary)" stroke-width="2"/></svg>
+      <span>Academic Paper Reviewer</span>
     </a>
-    <div class="links">
-      <a href="#how">How it works</a>
-      <a href="#modes">Modes</a>
-      <a href="#eval">Evaluation</a>
-      <a href="#install">Install</a>
+    <nav class="links" aria-label="Primary">
+      <a href="#how" data-s="how">How it works</a>
+      <a href="#modes" data-s="modes">Modes</a>
+      <a href="#eval" data-s="eval">Evaluation</a>
+      <a href="#install" data-s="install">Install</a>
       <a href="https://github.com/Shyandram/academic-paper-reviewer.skill">GitHub</a>
-    </div>
-    <button id="theme" aria-label="Toggle color theme" title="Toggle theme">◐</button>
+    </nav>
+    <button id="theme" type="button" aria-label="Toggle color theme" title="Toggle theme">
+      <svg class="sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
   </div>
-</nav>
-
-<header class="hero" id="top">
-  <div class="wrap">
-    <span class="eyebrow">Skill for Claude &amp; Codex · v2.10</span>
-    <h1>A full peer-review panel for your paper.</h1>
-    <p class="lede">Five independent reviewers, each looking from a different angle, and an Editor-in-Chief who checks the decisive points against your manuscript, weighs the reviews and decides. Tuned for computer vision, deep learning and ML; usable in any field.</p>
-    <div class="cta">
-      <a class="btn primary" href="#install">Install the skill</a>
-      <a class="btn" href="https://github.com/Shyandram/academic-paper-reviewer.skill/raw/main/academic-paper-reviewer.skill">Download .skill</a>
-      <a class="btn" href="https://github.com/Shyandram/academic-paper-reviewer.skill">View source</a>
-    </div>
-    <p class="note"><span aria-hidden="true">ⓘ</span><span>The output is a simulation to help you strengthen a paper, not a prediction of any venue's decision.</span></p>
-    <div class="stats">
-      <div class="stat"><b>5 + 1</b><span>reviewers plus an Editor-in-Chief</span></div>
-      <div class="stat"><b>6</b><span>modes, from quick check to rebuttal</span></div>
-      <div class="stat"><b>11</b><span>venue profiles with their own score forms</span></div>
-      <div class="stat"><b>0</b><span>dependencies: Markdown + standard-library Python</span></div>
-    </div>
-  </div>
+  <div class="progress" aria-hidden="true"><i></i></div>
 </header>
 
-<section id="how">
+<nav class="dots" aria-label="Topics">
+  <ol>
+    <li><a href="#top"><span class="lab"><small>01</small>Overview</span></a></li>
+    <li><a href="#how"><span class="lab"><small>02</small>How it works</span></a></li>
+    <li><a href="#different"><span class="lab"><small>03</small>What's different</span></a></li>
+    <li><a href="#modes"><span class="lab"><small>04</small>Modes &amp; venues</span></a></li>
+    <li><a href="#eval"><span class="lab"><small>05</small>Evaluation</span></a></li>
+    <li><a href="#install"><span class="lab"><small>06</small>Install</span></a></li>
+    <li><a href="#responsible"><span class="lab"><small>07</small>Responsible use</span></a></li>
+  </ol>
+</nav>
+
+<main id="main">
+
+<!-- 01 · Hero -->
+<section class="slide" id="top" aria-labelledby="t-hero" data-label="Overview">
   <div class="wrap">
-    <h2>How a review runs</h2>
-    <p class="sub">The same structure a program committee uses: configure a panel for the paper's real sub-field, collect independent reports, then let an area chair weigh them against the evidence.</p>
-    <div class="pipe">
-      <div class="stage">
-        <div class="ph">Phase 0</div>
+    <div class="hero-grid">
+      <div>
+        <span class="eyebrow rv"><i aria-hidden="true"></i>Skill for Claude &amp; Codex · v2.10</span>
+        <h1 id="t-hero" class="rv" style="--i:1">A full <em>peer-review panel</em> for your paper.</h1>
+        <p class="lede rv" style="--i:2">Five independent reviewers, each looking from a different angle, and an Editor-in-Chief who checks the decisive points against your manuscript, weighs the reviews and decides. Tuned for computer vision, deep learning and ML; usable in any field.</p>
+        <div class="cta rv" style="--i:3">
+          <a class="btn primary" href="#install">Install the skill
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7"/></svg></a>
+          <a class="btn" href="https://github.com/Shyandram/academic-paper-reviewer.skill/raw/main/academic-paper-reviewer.skill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download .skill</a>
+          <a class="btn" href="https://github.com/Shyandram/academic-paper-reviewer.skill">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>View source</a>
+        </div>
+        <p class="note rv" style="--i:4"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg><span>The output is a simulation to help you strengthen a paper, not a prediction of any venue's decision.</span></p>
+      </div>
+      <div class="orbit rv" style="--i:2" aria-hidden="true">
+        <svg viewBox="-30 0 460 400">
+          <circle class="ring2" cx="200" cy="200" r="186"/>
+          <g class="spin"><circle class="ring" cx="200" cy="200" r="150"/></g>
+          <line class="link" x1="200" y1="50" x2="200" y2="200"/>
+          <line class="link" x1="342.7" y1="153.6" x2="200" y2="200"/>
+          <line class="link" x1="288.2" y1="321.4" x2="200" y2="200"/>
+          <line class="link" x1="111.8" y1="321.4" x2="200" y2="200"/>
+          <line class="link" x1="57.3" y1="153.6" x2="200" y2="200"/>
+          <path class="flow" style="stroke:var(--r1)" d="M200 76 L200 140"/>
+          <path class="flow" style="stroke:var(--r2)" d="M318 161.5 L257 181.5"/>
+          <path class="flow" style="stroke:var(--r3)" d="M273 300.5 L235 248"/>
+          <path class="flow" style="stroke:var(--r4)" d="M127 300.5 L165 248"/>
+          <path class="flow" style="stroke:var(--r5)" d="M82 161.5 L143 181.5"/>
+          <circle class="halo" cx="200" cy="200" r="78"/>
+          <circle class="core" cx="200" cy="200" r="62"/>
+          <text class="core-t" x="200" y="194">Editor-in-</text>
+          <text class="core-t" x="200" y="218">Chief</text>
+          <circle class="node" cx="200" cy="50" r="26" style="fill:var(--r1)"/><text class="ini" x="200" y="50">M</text>
+          <circle class="node" cx="342.7" cy="153.6" r="26" style="fill:var(--r2)"/><text class="ini" x="342.7" y="153.6">D</text>
+          <circle class="node" cx="288.2" cy="321.4" r="26" style="fill:var(--r3)"/><text class="ini" x="288.2" y="321.4">P</text>
+          <circle class="node" cx="111.8" cy="321.4" r="26" style="fill:var(--r4)"/><text class="ini" x="111.8" y="321.4">G</text>
+          <circle class="node" cx="57.3" cy="153.6" r="26" style="fill:var(--r5)"/><text class="ini" x="57.3" y="153.6">DA</text>
+          <text class="lbl" x="200" y="12">Methodology</text>
+          <text class="lbl" x="342.7" y="203">Domain</text>
+          <text class="lbl" x="288.2" y="372">Perspective</text>
+          <text class="lbl" x="111.8" y="372">Generalist</text>
+          <text class="lbl" x="57.3" y="203">Devil's Advocate</text>
+        </svg>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat glass rv" style="--i:4"><b>5 + 1</b><span>reviewers plus an Editor-in-Chief</span></div>
+      <div class="stat glass rv" style="--i:5"><b>6</b><span>modes, from quick check to rebuttal</span></div>
+      <div class="stat glass rv" style="--i:6"><b>11</b><span>venue profiles with their own score forms</span></div>
+      <div class="stat glass rv" style="--i:7"><b>0</b><span>dependencies: Markdown + standard-library Python</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 · Pipeline -->
+<section class="slide" id="how" aria-labelledby="t-how" data-label="How it works">
+  <span class="num" aria-hidden="true">02</span>
+  <div class="wrap">
+    <p class="kicker rv">How it works</p>
+    <h2 id="t-how" class="rv" style="--i:1">How a review runs</h2>
+    <p class="sub rv" style="--i:2">The same structure a program committee uses: configure a panel for the paper's real sub-field, collect independent reports, then let an area chair weigh them against the evidence.</p>
+    <ol class="pipe" style="list-style:none;margin:0;padding:0">
+      <li class="stage glass rv" style="--i:2">
+        <div class="ph"><b>0</b>Phase 0</div>
         <h3>Field analysis</h3>
         <p>Reads the whole paper, identifies sub-field and technique (“token pruning + latency benchmarking”, not “deep learning”), scans for text addressed to AI reviewers, and configures the panel.</p>
-      </div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="stage">
-        <div class="ph">Phase 1 · independent</div>
+      </li>
+      <li class="arrow rv" style="--i:3" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></li>
+      <li class="stage glass key rv" style="--i:3">
+        <div class="ph"><b>1</b>Phase 1 · independent</div>
         <h3>Five reviewers</h3>
         <div class="revs">
-          <div class="rev"><i class="dot" style="background:#2f5bd3"></i><b>Methodology</b>&nbsp;— rigor, error audit, statistics</div>
-          <div class="rev"><i class="dot" style="background:#1d7a4f"></i><b>Domain</b>&nbsp;— positioning, baselines, literature</div>
-          <div class="rev"><i class="dot" style="background:#8a4fbf"></i><b>Perspective</b>&nbsp;— impact beyond the sub-field</div>
-          <div class="rev"><i class="dot" style="background:#c98a2b"></i><b>Generalist</b>&nbsp;— venue fit, presentation</div>
-          <div class="rev"><i class="dot" style="background:#b4342d"></i><b>Devil's Advocate</b>&nbsp;— strongest case against</div>
+          <div class="rev" style="--c:var(--r1)"><i class="dot"></i><span><b>Methodology</b> — rigor, error audit, statistics</span></div>
+          <div class="rev" style="--c:var(--r2)"><i class="dot"></i><span><b>Domain</b> — positioning, baselines, literature</span></div>
+          <div class="rev" style="--c:var(--r3)"><i class="dot"></i><span><b>Perspective</b> — impact beyond the sub-field</span></div>
+          <div class="rev" style="--c:var(--r4)"><i class="dot"></i><span><b>Generalist</b> — venue fit, presentation</span></div>
+          <div class="rev" style="--c:var(--r5)"><i class="dot"></i><span><b>Devil's Advocate</b> — strongest case against</span></div>
         </div>
-      </div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="stage">
-        <div class="ph">Phase 2</div>
+      </li>
+      <li class="arrow rv" style="--i:4" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></li>
+      <li class="stage glass rv" style="--i:4">
+        <div class="ph"><b>2</b>Phase 2</div>
         <h3>Editor-in-Chief</h3>
         <p>Verifies each decisive point in the paper, weights reviewers by review quality, rules on every critical issue, places the paper in the venue's submission pool and decides.</p>
-      </div>
-      <div class="arrow" aria-hidden="true">→</div>
-      <div class="stage">
-        <div class="ph">Output</div>
+      </li>
+      <li class="arrow rv" style="--i:5" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></li>
+      <li class="stage glass out rv" style="--i:5">
+        <div class="ph"><b><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg></b>Output</div>
         <h3>Decision &amp; roadmap</h3>
         <p>Decision letter, consensus map, both score lists in the venue's own form, and a prioritized revision roadmap. Optional Socratic coaching.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<!-- 03 · Features carousel -->
+<section class="slide" id="different" aria-labelledby="t-diff" data-label="What's different">
+  <span class="num" aria-hidden="true">03</span>
+  <div class="wrap">
+    <div class="car" role="region" aria-roledescription="carousel" aria-labelledby="t-diff">
+      <div class="car-head">
+        <div>
+          <p class="kicker rv">Design principles</p>
+          <h2 id="t-diff" class="rv" style="--i:1">What makes it different</h2>
+          <p class="sub rv" style="--i:2">Built around the failure modes of real reviewing — and of LLM reviewing.</p>
+        </div>
+        <div class="car-ctrl rv" style="--i:3">
+          <button class="car-btn" type="button" data-dir="-1" aria-label="Previous features" aria-controls="feat-track"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <span class="car-status" aria-live="polite">1–3 of 9</span>
+          <button class="car-btn" type="button" data-dir="1" aria-label="Next features" aria-controls="feat-track"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg></button>
+        </div>
+      </div>
+      <div class="car-track rv" style="--i:3" id="feat-track" tabindex="0" aria-label="Features, use left and right arrow keys to move">
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="1 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l4-4 3 3 5-6"/></svg></span><span class="n">01</span></div>
+          <h3>Calibrated to the submission pool</h3><p>Each reviewer first states where the paper sits among the venue's submissions (“better than about P%”), then scores in the matching band. Uncertainty is never a reason to call a paper borderline.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="2 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="16" rx="1.5"/><path d="M5.5 9h2M5.5 13h2M16.5 9h2M16.5 13h2"/></svg></span><span class="n">02</span></div>
+          <h3>Two score lists</h3><p>The official list keeps the reviewers' raw scores, never modified. The EIC's internal assessment weights each reviewer by confidence × review quality, and can come out higher or lower.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="3 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6z"/><path d="M12 8v5M12 16h.01"/></svg></span><span class="n">03</span></div>
+          <h3>A Devil's Advocate with teeth</h3><p>Steelmans the paper, then makes the strongest counter-argument and recomputes headline numbers. The EIC applies an area-chair test; only truly fatal issues cap the decision.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="4 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3M8 11h6"/></svg></span><span class="n">04</span></div>
+          <h3>Error audit with precision rules</h3><p>Nine error categories. Every claimed error needs a location, a verbatim quote and a concrete check. Suspicions become questions, never weaknesses.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="5 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5V5a2 2 0 0 1 2-2h14v15H6.5A2.5 2.5 0 0 0 4 20.5 2.5 2.5 0 0 0 6.5 23H20"/><path d="M9 8h7M9 12h5"/></svg></span><span class="n">05</span></div>
+          <h3>Literature check without self-leaks</h3><p>Claim-driven arXiv search, a baseline scout and a similarity check. A fingerprint filter never searches for the reviewed paper, its authors, reviews or outcome.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="6 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg></span><span class="n">06</span></div>
+          <h3>CV/ML depth</h3><p>Task checklists for detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models — backbone, pretraining, resolution, TTA and latency confounds.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="7 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="n">07</span></div>
+          <h3>Prompt-injection safe</h3><p>The manuscript is data, never instructions. Hidden or reviewer-directed text is flagged to the editor as an integrity concern and never changes a score.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="8 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9l3 3-3 3M13 15h4"/></svg></span><span class="n">08</span></div>
+          <h3>Reproducible scoring</h3><p><code>aggregate_scores.py</code> computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.</p></article>
+        <article class="feat glass" role="group" aria-roledescription="slide" aria-label="9 of 9">
+          <div class="top-row"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></span><span class="n">09</span></div>
+          <h3>Integrity guardrails</h3><p>No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the paper.</p></article>
+      </div>
+      <div class="pips" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 · Modes & venues -->
+<section class="slide" id="modes" aria-labelledby="t-modes" data-label="Modes & venues">
+  <span class="num" aria-hidden="true">04</span>
+  <div class="wrap">
+    <p class="kicker rv">Modes &amp; venues</p>
+    <h2 id="t-modes" class="rv" style="--i:1">Six modes</h2>
+    <p class="sub rv" style="--i:2">Say it naturally; the skill picks the mode.</p>
+    <div class="modes-grid">
+      <div class="mode glass rv" style="--i:2"><span class="tag">full</span><p class="say"><span class="sr-only">Say something like: </span>“Review this paper for CVPR”</p><p class="get"><b>You get</b>Five reports, EIC meta-review, editorial decision and revision roadmap</p></div>
+      <div class="mode glass rv" style="--i:3"><span class="tag">quick</span><p class="say"><span class="sr-only">Say something like: </span>“Is my paper ready for submission?”</p><p class="get"><b>You get</b>EIC quick assessment plus a submission-readiness check (anonymity, page limit, checklists)</p></div>
+      <div class="mode glass rv" style="--i:4"><span class="tag">methodology-focus</span><p class="say"><span class="sr-only">Say something like: </span>“Are my baselines fair?”</p><p class="get"><b>You get</b>Claim-to-evidence map, fairness and statistics audits, prioritized fixes with compute estimates</p></div>
+      <div class="mode glass rv" style="--i:3"><span class="tag">guided</span><p class="say"><span class="sr-only">Say something like: </span>“Walk me through the review”</p><p class="get"><b>You get</b>Socratic, one-issue-at-a-time dialogue</p></div>
+      <div class="mode glass rv" style="--i:4"><span class="tag">rebuttal</span><p class="say"><span class="sr-only">Say something like: </span>“Help me write the rebuttal” + reviews</p><p class="get"><b>You get</b>Triage of every point and a draft in the venue's format</p></div>
+      <div class="mode glass rv" style="--i:5"><span class="tag">re-review</span><p class="say"><span class="sr-only">Say something like: </span>“Does my revision address the reviews?”</p><p class="get"><b>You get</b>Item-by-item verification and a new decision</p></div>
+    </div>
+    <div class="venue-block glass rv" style="--i:3">
+      <div>
+        <h3>Venue profiles</h3>
+        <p>Scores are translated into each venue's own form, and a cross-venue outlook shows how the same paper would likely fare elsewhere.</p>
+      </div>
+      <div class="venues">
+        <span class="venue">CVPR · ICCV · ECCV <small>6-point</small></span>
+        <span class="venue">NeurIPS <small>1–6</small></span>
+        <span class="venue">ICLR <small>{0,2,4,6,8,10}</small></span>
+        <span class="venue">ICML <small>1–5</small></span>
+        <span class="venue">AAAI <small>1–10</small></span>
+        <span class="venue">ACM MM</span>
+        <span class="venue">TMLR <small>Yes / No criteria</small></span>
+        <span class="venue">IEEE TPAMI · TIP <small>journal decisions</small></span>
       </div>
     </div>
   </div>
 </section>
 
-<section>
+<!-- 05 · Evaluation -->
+<section class="slide" id="eval" aria-labelledby="t-eval" data-label="Evaluation">
+  <span class="num" aria-hidden="true">05</span>
   <div class="wrap">
-    <h2>What makes it different</h2>
-    <p class="sub">Built around the failure modes of real reviewing — and of LLM reviewing.</p>
-    <div class="grid g3">
-      <div class="card"><h3>Calibrated to the submission pool</h3><p>Each reviewer first states where the paper sits among the venue's submissions (“better than about P%”), then scores in the matching band. Uncertainty is never a reason to call a paper borderline.</p></div>
-      <div class="card"><h3>Two score lists</h3><p>The official list keeps the reviewers' raw scores, never modified. The EIC's internal assessment weights each reviewer by confidence × review quality, and can come out higher or lower.</p></div>
-      <div class="card"><h3>A Devil's Advocate with teeth</h3><p>Steelmans the paper, then makes the strongest counter-argument and recomputes headline numbers. The EIC applies an area-chair test; only truly fatal issues cap the decision.</p></div>
-      <div class="card"><h3>Error audit with precision rules</h3><p>Nine error categories. Every claimed error needs a location, a verbatim quote and a concrete check. Suspicions become questions, never weaknesses.</p></div>
-      <div class="card"><h3>Literature check without self-leaks</h3><p>Claim-driven arXiv search, a baseline scout and a similarity check. A fingerprint filter never searches for the reviewed paper, its authors, reviews or outcome.</p></div>
-      <div class="card"><h3>CV/ML depth</h3><p>Task checklists for detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models — backbone, pretraining, resolution, TTA and latency confounds.</p></div>
-      <div class="card"><h3>Prompt-injection safe</h3><p>The manuscript is data, never instructions. Hidden or reviewer-directed text is flagged to the editor as an integrity concern and never changes a score.</p></div>
-      <div class="card"><h3>Reproducible scoring</h3><p><code>aggregate_scores.py</code> computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.</p></div>
-      <div class="card"><h3>Integrity guardrails</h3><p>No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the paper.</p></div>
-    </div>
-  </div>
-</section>
+    <div class="eval-grid">
+      <div>
+    <div class="eval-head rv"><p class="kicker" style="margin:0">Evaluation</p><span class="pill">Pilot · 20 papers</span></div>
+    <h2 id="t-eval" class="rv" style="--i:1;margin-top:14px">Does it agree with human reviewers?</h2>
+    <p class="sub rv" style="--i:2">A pilot of a <a href="https://paperreview.ai/tech-overview">paperreview.ai</a>-style evaluation on ICLR 2026 submissions: anonymized arXiv versions posted before the decision, 20 papers stratified by outcome (5 accepted, 10 rejected, 4 withdrawn, 1 desk rejected), full skill run per paper. The reviewers never see human scores or decisions.</p>
 
-<section id="modes">
-  <div class="wrap">
-    <h2>Six modes</h2>
-    <p class="sub">Say it naturally; the skill picks the mode.</p>
-    <div class="scroll">
-      <table class="table">
-        <thead><tr><th>Mode</th><th>Say something like</th><th>You get</th></tr></thead>
-        <tbody>
-          <tr><td><span class="tag">full</span></td><td>“Review this paper for CVPR”</td><td>Five reports, EIC meta-review, editorial decision and revision roadmap</td></tr>
-          <tr><td><span class="tag">quick</span></td><td>“Is my paper ready for submission?”</td><td>EIC quick assessment plus a submission-readiness check (anonymity, page limit, checklists)</td></tr>
-          <tr><td><span class="tag">methodology-focus</span></td><td>“Are my baselines fair?”</td><td>Claim-to-evidence map, fairness and statistics audits, prioritized fixes with compute estimates</td></tr>
-          <tr><td><span class="tag">guided</span></td><td>“Walk me through the review”</td><td>Socratic, one-issue-at-a-time dialogue</td></tr>
-          <tr><td><span class="tag">rebuttal</span></td><td>“Help me write the rebuttal” + reviews</td><td>Triage of every point and a draft in the venue's format</td></tr>
-          <tr><td><span class="tag">re-review</span></td><td>“Does my revision address the reviews?”</td><td>Item-by-item verification and a new decision</td></tr>
-        </tbody>
-      </table>
+    <div class="callout rv" style="--i:4" role="note">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <div><b>Read as a pilot, not a result.</b> With 20 papers the interval is wide: the Sonnet final rating's Spearman of +0.48 has a 95% CI of +0.09 to +0.74 — clearly above zero, about the level of human–human agreement, but its AUC (0.67) is still below paperreview.ai's 0.75. Haiku showed no signal. Excluding the 3 papers Sonnet recognized gives +0.46 / 0.69. The full balanced evaluation (86 papers, linear regression over the 7 dimension scores) is pending. Details: <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/youthful-einstein-mpsrkh/evals/REPORT_iclr2026_pilots.md">pilot report</a>.</div>
     </div>
-    <h3 style="margin-top:36px">Venue profiles</h3>
-    <p class="sub" style="margin-bottom:14px">Scores are translated into each venue's own form, and a cross-venue outlook shows how the same paper would likely fare elsewhere.</p>
-    <div class="venues">
-      <span class="venue">CVPR · ICCV · ECCV <small>6-point</small></span>
-      <span class="venue">NeurIPS <small>1–6</small></span>
-      <span class="venue">ICLR <small>{0,2,4,6,8,10}</small></span>
-      <span class="venue">ICML <small>1–5</small></span>
-      <span class="venue">AAAI <small>1–10</small></span>
-      <span class="venue">ACM MM</span>
-      <span class="venue">TMLR <small>Yes / No criteria</small></span>
-      <span class="venue">IEEE TPAMI · TIP <small>journal decisions</small></span>
-    </div>
-  </div>
-</section>
-
-<section id="eval">
-  <div class="wrap">
-    <h2>Does it agree with human reviewers?</h2>
-    <p class="sub">A pilot of a <a href="https://paperreview.ai/tech-overview">paperreview.ai</a>-style evaluation on ICLR 2026 submissions: anonymized arXiv versions posted before the decision, 20 papers stratified by outcome (5 accepted, 10 rejected, 4 withdrawn, 1 desk rejected), full skill run per paper. The reviewers never see human scores or decisions.</p>
-
-    <div class="grid g2">
-      <div class="card">
+      </div>
+      <div>
+    <div class="charts">
+      <div class="chart-card glass rv" style="--i:2">
         <h3>Spearman with the mean human rating</h3>
-        <p style="margin-bottom:16px">Ranking agreement, −1 to 1. Bars from 0; whisker = bootstrap 95% CI (clipped at 0).</p>
-        <div class="chart" id="sp"></div>
+        <p>Ranking agreement, −1 to 1. Bars from 0; whisker = bootstrap 95% CI (clipped at 0).</p>
+        <!-- values from evals/iclr2026_pilot_scores.json (pilot, n = 20); scale 0 to 1 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>final rating</small></div><div class="track"><i class="fill ai" style="--w:48%"></i><i class="ci" style="left:9%;width:65%"></i><span class="sr-only">95% CI +0.09 to +0.74</span></div><div class="val">+0.48</div></div>
+          <div class="row"><div class="lab">Haiku<small>final rating</small></div><div class="track"><i class="fill weak" style="--w:20%"></i><i class="ci" style="left:0%;width:58%"></i><span class="sr-only">95% CI clipped at 0 to +0.58</span></div><div class="val">+0.20</div></div>
+          <div class="row"><div class="lab">Human vs human<small>ICLR 2026 test split</small></div><div class="track"><i class="fill human" style="--w:25%"></i></div><div class="val">+0.25</div></div>
+          <div class="row"><div class="lab">paperreview.ai<small>AI vs human</small></div><div class="track"><i class="fill ref" style="--w:42%"></i></div><div class="val">+0.42</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
+        </div>
       </div>
-      <div class="card">
+      <div class="chart-card glass rv" style="--i:3">
         <h3>AUC for acceptance</h3>
-        <p style="margin-bottom:16px">Chance that an accepted paper outscores a rejected one; 0.5 is chance.</p>
-        <div class="chart" id="auc"></div>
+        <p>Chance that an accepted paper outscores a rejected one; 0.5 is chance.</p>
+        <!-- scale 0.5 to 1 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>final rating</small></div><div class="track"><i class="fill ai" style="--w:34%"></i></div><div class="val">0.67</div></div>
+          <div class="row"><div class="lab">Haiku<small>final rating</small></div><div class="track"><i class="fill weak" style="--w:12%"></i></div><div class="val">0.56</div></div>
+          <div class="row"><div class="lab">One human reviewer<small>ICLR 2026 test split</small></div><div class="track"><i class="fill human" style="--w:50%"></i></div><div class="val">0.75</div></div>
+          <div class="row"><div class="lab">paperreview.ai<small>AI score</small></div><div class="track"><i class="fill ref" style="--w:50%"></i></div><div class="val">0.75</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0.5</span><span>0.75</span><span>1</span></div><div></div></div>
+        </div>
       </div>
     </div>
-    <div class="legend">
+      <div style="height:12px"></div>
+    <div class="legend rv" style="--i:3">
       <span><i class="sw" style="background:var(--bar-ai)"></i>This skill, Sonnet, high effort</span>
       <span><i class="sw" style="background:var(--bar-weak)"></i>This skill, Haiku</span>
       <span><i class="sw" style="background:var(--bar-human)"></i>Human reference</span>
-      <span><i class="sw" style="background:var(--surface-2);border:1px solid var(--line)"></i>paperreview.ai, ICLR 2025 (147 papers)</span>
+      <span><i class="sw" style="border:1.5px dashed var(--muted)"></i>paperreview.ai, ICLR 2025 (147 papers)</span>
     </div>
-    <div class="callout"><b>Read as a pilot, not a result.</b> With 20 papers the interval is wide: the Sonnet final rating's Spearman of +0.48 has a 95% CI of +0.09 to +0.74 — clearly above zero, about the level of human–human agreement, but its AUC (0.67) is still below paperreview.ai's 0.75. Haiku showed no signal. Excluding the 3 papers Sonnet recognized gives +0.46 / 0.69. The full balanced evaluation (86 papers, linear regression over the 7 dimension scores) is pending. Details: <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/youthful-einstein-mpsrkh/evals/REPORT_iclr2026_pilots.md">pilot report</a>.</div>
+      </div>
+    </div>
   </div>
 </section>
 
-<section id="install">
+<!-- 06 · Install -->
+<section class="slide" id="install" aria-labelledby="t-install" data-label="Install">
+  <span class="num" aria-hidden="true">06</span>
   <div class="wrap">
-    <h2>Install</h2>
-    <p class="sub">Everything is Markdown instructions plus optional standard-library Python. No API key or server needed.</p>
-    <div class="tabs" role="tablist">
-      <button class="tab" role="tab" aria-selected="true" data-p="p-app">Claude apps</button>
-      <button class="tab" role="tab" aria-selected="false" data-p="p-code">Claude Code</button>
-      <button class="tab" role="tab" aria-selected="false" data-p="p-codex">Codex</button>
-      <button class="tab" role="tab" aria-selected="false" data-p="p-api">Claude API</button>
-    </div>
-    <div class="card">
-      <div class="panel on" id="p-app" role="tabpanel">
-        <ol>
-          <li>Download <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/raw/main/academic-paper-reviewer.skill"><code>academic-paper-reviewer.skill</code></a>.</li>
-          <li>In Claude, open <b>Settings → Capabilities</b> and enable code execution / skills.</li>
-          <li>Under <b>Skills</b>, choose <b>Upload skill</b> and select the file (rename to <code>.zip</code> if asked — same format).</li>
-          <li>Start a new chat: <i>“Review this paper”</i> with a PDF attached.</li>
-        </ol>
-      </div>
-      <div class="panel" id="p-code" role="tabpanel">
+    <p class="kicker rv">Get started</p>
+    <h2 id="t-install" class="rv" style="--i:1">Install</h2>
+    <p class="sub rv" style="--i:2">Everything is Markdown instructions plus optional standard-library Python. No API key or server needed.</p>
+    <div class="install-grid">
+      <div class="rv" style="--i:2">
+        <div class="tabs" role="tablist" aria-label="Install target">
+          <button class="tab" type="button" role="tab" id="t-app" aria-selected="true" aria-controls="p-app">Claude apps</button>
+          <button class="tab" type="button" role="tab" id="t-code" aria-selected="false" aria-controls="p-code" tabindex="-1">Claude Code</button>
+          <button class="tab" type="button" role="tab" id="t-codex" aria-selected="false" aria-controls="p-codex" tabindex="-1">Codex</button>
+          <button class="tab" type="button" role="tab" id="t-api" aria-selected="false" aria-controls="p-api" tabindex="-1">Claude API</button>
+        </div>
+        <div class="panel-card glass">
+          <div class="panel on" id="p-app" role="tabpanel" aria-labelledby="t-app" tabindex="0">
+            <h3 class="nojs">Claude apps</h3>
+            <ol>
+              <li>Download <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/raw/main/academic-paper-reviewer.skill"><code>academic-paper-reviewer.skill</code></a>.</li>
+              <li>In Claude, open <b>Settings → Capabilities</b> and enable code execution / skills.</li>
+              <li>Under <b>Skills</b>, choose <b>Upload skill</b> and select the file (rename to <code>.zip</code> if asked — same format).</li>
+              <li>Start a new chat: <i>“Review this paper”</i> with a PDF attached.</li>
+            </ol>
+          </div>
+          <div class="panel" id="p-code" role="tabpanel" aria-labelledby="t-code" tabindex="0">
+            <h3 class="nojs">Claude Code</h3>
 <pre><code>git clone https://github.com/Shyandram/academic-paper-reviewer.skill.git
 mkdir -p ~/.claude/skills
 cp -r academic-paper-reviewer.skill/academic-paper-reviewer ~/.claude/skills/</code></pre>
-        <p>Restart the session and ask <i>“review paper.pdf”</i>. In Claude Code the five reviewers can run as parallel subagents, which keeps them independent.</p>
-      </div>
-      <div class="panel" id="p-codex" role="tabpanel">
+            <p>Restart the session and ask <i>“review paper.pdf”</i>. In Claude Code the five reviewers can run as parallel subagents, which keeps them independent.</p>
+          </div>
+          <div class="panel" id="p-codex" role="tabpanel" aria-labelledby="t-codex" tabindex="0">
+            <h3 class="nojs">Codex</h3>
 <pre><code>python3 tools/install_codex_skill.py                         # project-local link
 python3 tools/install_codex_skill.py --skills-dir ~/.agents/skills   # personal</code></pre>
-        <p>Then start a new session and invoke <code>$academic-paper-reviewer Review /path/paper.pdf for CVPR</code>.</p>
+            <p>Then start a new session and invoke <code>$academic-paper-reviewer Review /path/paper.pdf for CVPR</code>.</p>
+          </div>
+          <div class="panel" id="p-api" role="tabpanel" aria-labelledby="t-api" tabindex="0">
+            <h3 class="nojs">Claude API</h3>
+            <p style="margin-top:0">Upload the <code>academic-paper-reviewer/</code> folder through the Skills API and attach it to requests that use the code-execution tool. See Anthropic's Agent Skills documentation for current endpoints.</p>
+          </div>
+        </div>
       </div>
-      <div class="panel" id="p-api" role="tabpanel">
-        <p style="margin-top:0">Upload the <code>academic-paper-reviewer/</code> folder through the Skills API and attach it to requests that use the code-execution tool. See Anthropic's Agent Skills documentation for current endpoints.</p>
-      </div>
-    </div>
-    <h3 style="margin-top:32px">Try</h3>
+      <div class="try glass rv" style="--i:3">
+        <h3>Try</h3>
 <pre><code>Review this paper: [attach PDF]
 Quick look — is this ready for ECCV?
 Check my experiments only. Target venue: NeurIPS.
 Here are my three CVPR reviews. Help me write the one-page rebuttal.
 Compare this paper across CVPR, ICLR and TMLR — which venue fits best?</code></pre>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <h2>Responsible use</h2>
-    <div class="grid g2" style="margin-top:20px">
-      <div class="card"><h3>Made for authors</h3><p>Stress-test your own drafts, learn to review, or give feedback with the authors' consent.</p></div>
-      <div class="card"><h3>Assigned reviewers: check first</h3><p>Many CV/ML venues restrict or forbid putting confidential submissions into AI tools. Check your venue's policy.</p></div>
-      <div class="card"><h3>Verify every citation</h3><p>Recommended references follow a no-fabrication rule, but check each one before you use it.</p></div>
-      <div class="card"><h3>Venue rules change yearly</h3><p>Profiles are a guide, not a substitute for the current call for papers.</p></div>
+      </div>
     </div>
   </div>
 </section>
 
-<footer>
+<!-- 07 · Responsible use -->
+<section class="slide" id="responsible" aria-labelledby="t-resp" data-label="Responsible use">
+  <span class="num" aria-hidden="true">07</span>
   <div class="wrap">
-    <span>Academic Paper Reviewer · skill v2.10</span>
-    <span><a href="https://github.com/Shyandram/academic-paper-reviewer.skill">GitHub</a> · <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/main/CHANGELOG.md">Changelog</a></span>
+    <p class="kicker rv">Before you use it</p>
+    <h2 id="t-resp" class="rv" style="--i:1">Responsible use</h2>
+    <div class="resp-grid" style="margin-top:28px">
+      <div class="resp glass rv" style="--i:2"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><h3>Made for authors</h3><p>Stress-test your own drafts, learn to review, or give feedback with the authors' consent.</p></div>
+      <div class="resp glass rv" style="--i:3"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><h3>Assigned reviewers: check first</h3><p>Many CV/ML venues restrict or forbid putting confidential submissions into AI tools. Check your venue's policy.</p></div>
+      <div class="resp glass rv" style="--i:4"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></span><h3>Verify every citation</h3><p>Recommended references follow a no-fabrication rule, but check each one before you use it.</p></div>
+      <div class="resp glass rv" style="--i:5"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><h3>Venue rules change yearly</h3><p>Profiles are a guide, not a substitute for the current call for papers.</p></div>
+    </div>
+    <footer>
+      <span>Academic Paper Reviewer · skill v2.10</span>
+      <span><a href="https://github.com/Shyandram/academic-paper-reviewer.skill">GitHub</a> · <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/main/CHANGELOG.md">Changelog</a></span>
+    </footer>
   </div>
-</footer>
+</section>
+
+</main>
 
 <script>
 (function(){
-  // theme toggle (per-viewer convenience only)
   var root=document.documentElement, KEY="apr-theme";
-  try{var saved=localStorage.getItem(KEY); if(saved) root.setAttribute("data-theme",saved);}catch(e){}
-  document.getElementById("theme").addEventListener("click",function(){
-    var dark=root.getAttribute("data-theme")==="dark"||(!root.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
-    var next=dark?"light":"dark"; root.setAttribute("data-theme",next);
+  var reduce=matchMedia("(prefers-reduced-motion: reduce)");
+  function behavior(){return reduce.matches?"auto":"smooth";}
+
+  // theme toggle (per-viewer convenience only)
+  var themeBtn=document.getElementById("theme");
+  function isDark(){var t=root.getAttribute("data-theme");return t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches);}
+  function syncThemeLabel(){themeBtn.setAttribute("aria-label",isDark()?"Switch to light theme":"Switch to dark theme");themeBtn.title=themeBtn.getAttribute("aria-label");}
+  syncThemeLabel();
+  themeBtn.addEventListener("click",function(){
+    var next=isDark()?"light":"dark"; root.setAttribute("data-theme",next);
     try{localStorage.setItem(KEY,next);}catch(e){}
+    syncThemeLabel();
   });
 
-  // install tabs
-  var tabs=document.querySelectorAll(".tab");
-  tabs.forEach(function(t){t.addEventListener("click",function(){
-    tabs.forEach(function(x){x.setAttribute("aria-selected","false");});
-    document.querySelectorAll(".panel").forEach(function(p){p.classList.remove("on");});
-    t.setAttribute("aria-selected","true"); document.getElementById(t.dataset.p).classList.add("on");
-  });});
-
-  // charts: values from evals/iclr2026_pilot_scores.json (pilot, n = 20)
-  function chart(id,rows,lo,hi,fmt){
-    var el=document.getElementById(id), span=hi-lo, pct=function(v){return (v-lo)/span*100;};
-    rows.forEach(function(r){
-      var row=document.createElement("div"); row.className="row";
-      var ci=r.ci?'<i class="ci" style="left:'+pct(r.ci[0])+'%;width:'+(pct(r.ci[1])-pct(r.ci[0]))+'%"></i>':"";
-      var bg=r.ref?"background:var(--surface);border:1px dashed var(--muted)":"background:"+r.c;
-      row.innerHTML='<div class="lab">'+r.l+(r.s?'<small>'+r.s+'</small>':'')+'</div>'+
-        '<div class="track"><i class="fill" style="width:'+pct(r.v)+'%;'+bg+'"></i>'+ci+'</div>'+
-        '<div class="val">'+fmt(r.v)+'</div>';
-      el.appendChild(row);
-    });
-    var ax=document.createElement("div"); ax.className="axis";
-    ax.innerHTML='<div></div><div><span>'+lo+'</span><span>'+((lo+hi)/2)+'</span><span>'+hi+'</span></div><div></div>';
-    el.appendChild(ax);
+  // install tabs (ARIA tabs with arrow-key roving focus)
+  var tabs=[].slice.call(document.querySelectorAll(".tab"));
+  function selectTab(t,focus){
+    tabs.forEach(function(x){var on=x===t;x.setAttribute("aria-selected",on?"true":"false");x.tabIndex=on?0:-1;
+      document.getElementById(x.getAttribute("aria-controls")).classList.toggle("on",on);});
+    if(focus)t.focus();
   }
-  var sgn=function(v){return (v>=0?"+":"")+v.toFixed(2);}, two=function(v){return v.toFixed(2);};
-  chart("sp",[
-    {l:"Sonnet, high effort",s:"final rating",v:.48,ci:[.09,.74],c:"var(--bar-ai)"},
-    {l:"Haiku",s:"final rating",v:.20,ci:[0,.58],c:"var(--bar-weak)"},
-    {l:"Human vs human",s:"ICLR 2026 test split",v:.25,c:"var(--bar-human)"},
-    {l:"paperreview.ai",s:"AI vs human",v:.42,ref:true}
-  ],0,1,sgn);
-  chart("auc",[
-    {l:"Sonnet, high effort",s:"final rating",v:.67,c:"var(--bar-ai)"},
-    {l:"Haiku",s:"final rating",v:.56,c:"var(--bar-weak)"},
-    {l:"One human reviewer",s:"ICLR 2026 test split",v:.75,c:"var(--bar-human)"},
-    {l:"paperreview.ai",s:"AI score",v:.75,ref:true}
-  ],0.5,1,two);
+  tabs.forEach(function(t,i){
+    t.addEventListener("click",function(){selectTab(t);});
+    t.addEventListener("keydown",function(e){
+      var j=null;
+      if(e.key==="ArrowRight")j=(i+1)%tabs.length; else if(e.key==="ArrowLeft")j=(i-1+tabs.length)%tabs.length;
+      else if(e.key==="Home")j=0; else if(e.key==="End")j=tabs.length-1;
+      if(j!==null){e.preventDefault();selectTab(tabs[j],true);}
+    });
+  });
+
+  // slides: current-topic tracking for dots, top links and progress bar
+  var slides=[].slice.call(document.querySelectorAll(".slide"));
+  var dots=[].slice.call(document.querySelectorAll(".dots a"));
+  var topLinks=[].slice.call(document.querySelectorAll(".links a[data-s]"));
+  var bar=document.querySelector(".progress i");
+  var navH=function(){return document.querySelector(".top").offsetHeight;};
+  var current=0, ticking=false;
+  function currentIndex(){
+    var line=navH()+(innerHeight-navH())*0.4, idx=0;
+    for(var i=0;i<slides.length;i++){if(slides[i].getBoundingClientRect().top<=line)idx=i;}
+    if(innerHeight+scrollY>=document.documentElement.scrollHeight-2)idx=slides.length-1;
+    return idx;
+  }
+  function update(){
+    ticking=false;
+    current=currentIndex();
+    dots.forEach(function(d,i){if(i===current)d.setAttribute("aria-current","true");else d.removeAttribute("aria-current");});
+    var id=slides[current].id;
+    topLinks.forEach(function(a){if(a.getAttribute("data-s")===id)a.setAttribute("aria-current","true");else a.removeAttribute("aria-current");});
+    var max=document.documentElement.scrollHeight-innerHeight;
+    bar.style.transform="scaleX("+(max>0?Math.min(1,scrollY/max):0)+")";
+  }
+  addEventListener("scroll",function(){if(!ticking){ticking=true;requestAnimationFrame(update);}},{passive:true});
+  addEventListener("resize",update);
+  update();
+
+  // keyboard: PageUp/PageDown, j/k, and ↑/↓ (the latter only outside interactive or scrollable elements)
+  function inInteractive(el){return el&&el.closest&&el.closest("a,button,input,textarea,select,summary,[contenteditable],[role=tab],[role=tabpanel],.car-track,pre");}
+  function inScrollable(el){
+    for(;el&&el!==document.body&&el!==root;el=el.parentElement){
+      var s=getComputedStyle(el);
+      if((/(auto|scroll)/.test(s.overflowY)&&el.scrollHeight>el.clientHeight+1)||(/(auto|scroll)/.test(s.overflowX)&&el.scrollWidth>el.clientWidth+1))return true;
+    }
+    return false;
+  }
+  function go(dir){
+    current=currentIndex();
+    var s=slides[current], r=s.getBoundingClientRect(), top=navH(), step=innerHeight-top-48;
+    if(dir>0&&r.bottom>innerHeight+64){ // tall slide: read the rest of it first
+      scrollBy({top:Math.min(step,r.bottom-innerHeight),behavior:behavior()});return;
+    }
+    if(dir<0&&r.top<top-64){ // inside a slide: go back to its start (in steps if tall)
+      scrollBy({top:-Math.min(step,top-r.top),behavior:behavior()});return;
+    }
+    var t=slides[Math.max(0,Math.min(slides.length-1,current+dir))];
+    if(t!==s)t.scrollIntoView({behavior:behavior(),block:"start"});
+  }
+  document.addEventListener("keydown",function(e){
+    if(e.defaultPrevented||e.altKey||e.ctrlKey||e.metaKey)return;
+    var tgt=e.target, k=e.key, dir=0;
+    if(tgt&&tgt.closest&&tgt.closest("input,textarea,select,[contenteditable]"))return;
+    if(k==="PageDown"||k==="j"||k==="J")dir=1;
+    else if(k==="PageUp"||k==="k"||k==="K")dir=-1;
+    else if(k==="ArrowDown"||k==="ArrowUp"){
+      if(e.shiftKey||inInteractive(tgt)||inScrollable(tgt))return;
+      dir=k==="ArrowDown"?1:-1;
+    }
+    if(!dir)return;
+    e.preventDefault();go(dir);
+  });
+
+  // entrance animations: elements stay visible; each one plays a short rise as it is about to enter
+  // the viewport (fill "backwards" holds the start frame only during its stagger delay).
+  var ease="cubic-bezier(.16,.84,.3,1)";
+  if("IntersectionObserver" in window&&Element.prototype.animate&&!reduce.matches){
+    var io=new IntersectionObserver(function(es){es.forEach(function(en){
+      if(!en.isIntersecting)return;
+      var el=en.target, i=parseFloat(el.style.getPropertyValue("--i"))||0;
+      io.unobserve(el);
+      el.animate([{opacity:0,transform:"translateY(24px)"},{opacity:1,transform:"none"}],{duration:750,delay:i*80,easing:ease,fill:"backwards"});
+      el.querySelectorAll(".fill").forEach(function(f,k){
+        f.animate([{transform:"scaleX(0)"},{transform:"scaleX(1)"}],{duration:1100,delay:i*80+250+k*70,easing:ease,fill:"backwards"});
+      });
+    });},{rootMargin:"0px 0px 12% 0px"});
+    document.querySelectorAll("main .slide:not(#top) .rv").forEach(function(el){
+      var r=el.getBoundingClientRect();
+      if(r.top<innerHeight&&r.bottom>0)return; // already on screen at load (deep link): no replay
+      io.observe(el);
+    });
+  }
+
+  // feature carousel
+  document.querySelectorAll(".car").forEach(function(car){
+    var track=car.querySelector(".car-track"), cards=[].slice.call(track.children);
+    var btns=car.querySelectorAll(".car-btn"), status=car.querySelector(".car-status"), pips=[].slice.call(car.querySelectorAll(".pips i"));
+    function stepW(){return cards.length>1?cards[1].offsetLeft-cards[0].offsetLeft:track.clientWidth;}
+    function perView(){var g=parseFloat(getComputedStyle(track).columnGap)||0;return Math.max(1,Math.round((track.clientWidth+g)/stepW()));}
+    function first(){return Math.round(track.scrollLeft/stepW());}
+    function sync(){
+      var f=Math.min(first(),cards.length-1), pv=perView(), l=Math.min(cards.length,f+pv);
+      status.textContent=(pv>1?(f+1)+"–"+l:(f+1))+" of "+cards.length;
+      btns[0].disabled=track.scrollLeft<=2;
+      btns[1].disabled=track.scrollLeft>=track.scrollWidth-track.clientWidth-2;
+      pips.forEach(function(p,i){p.classList.toggle("on",i>=f&&i<l);});
+    }
+    function move(n){track.scrollBy({left:n*stepW(),behavior:behavior()});}
+    btns.forEach(function(b){b.addEventListener("click",function(){move(+b.getAttribute("data-dir")*perView());});});
+    track.addEventListener("keydown",function(e){
+      if(e.key==="ArrowRight"){e.preventDefault();move(1);}
+      else if(e.key==="ArrowLeft"){e.preventDefault();move(-1);}
+      else if(e.key==="Home"){e.preventDefault();track.scrollTo({left:0,behavior:behavior()});}
+      else if(e.key==="End"){e.preventDefault();track.scrollTo({left:track.scrollWidth,behavior:behavior()});}
+    });
+    var t=false;
+    track.addEventListener("scroll",function(){if(!t){t=true;requestAnimationFrame(function(){t=false;sync();});}},{passive:true});
+    addEventListener("resize",sync);
+    sync();
+  });
 })();
 </script>
 </body>
