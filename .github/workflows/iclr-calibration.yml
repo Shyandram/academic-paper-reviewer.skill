@@ -103,7 +103,8 @@ jobs:
           # dump (submission PDFs) or arXiv v1. OpenReview returns 403 from runners.
           python3 -I evals/iclr_calibration.py fetch $W/sample.jsonl evals/iclr2026_sources.json \
             --split "${{ needs.config.outputs.split }}" --offset "${{ needs.config.outputs.offset }}" --limit "${{ needs.config.outputs.limit }}" \
-            --pick "${{ needs.config.outputs.pick }}" --ids-out ids.json
+            --pick "${{ needs.config.outputs.pick }}" --ids-out ids.json \
+            $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json )
           echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
           mkdir -p ship
@@ -191,7 +192,8 @@ jobs:
           curl -sSfL --retry 4 -o /tmp/reviews.parquet "$DATA_URL"
           python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out sample.jsonl
           python3 -I evals/iclr_calibration.py fetch sample.jsonl evals/iclr2026_sources.json \
-            --pick balanced --dry-run --splits-out splits.json
+            --pick balanced --dry-run --splits-out splits.json \
+            $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json )
           python3 -I evals/iclr_calibration.py features results --out features.jsonl
           python3 - <<'PY'
           import json, glob

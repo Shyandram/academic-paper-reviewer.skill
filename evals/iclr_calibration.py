@@ -346,7 +346,7 @@ def group(r):
                                            "Desk rejected": "desk rejected"}.get(d, "rejected")
 
 
-def stratified(rows, candidates, n, seed=0):
+def stratified(rows, candidates, n, seed=0, prefer=()):
     """Pick n candidates that are representative of `rows` (the whole sample):
     decision groups in the sample's proportions (largest remainder), and within each
     group one paper per quantile of the mean human score, preferring primary areas
@@ -366,7 +366,8 @@ def stratified(rows, candidates, n, seed=0):
         for k in range(q):
             chunk = pool[k * len(pool) // q:(k + 1) * len(pool) // q]
             rng.shuffle(chunk)
-            best = min(chunk, key=lambda c: (areas.get(c.get("primary_area"), 0),
+            best = min(chunk, key=lambda c: (c["paper_id"] not in prefer,
+                                             areas.get(c.get("primary_area"), 0),
                                              sources.get(c.get("source_kind"), 0)))
             picked.append(best)
             areas[best.get("primary_area")] = areas.get(best.get("primary_area"), 0) + 1
@@ -374,7 +375,7 @@ def stratified(rows, candidates, n, seed=0):
     return picked
 
 
-def balanced(rows, candidates, seed=0):
+def balanced(rows, candidates, seed=0, prefer=()):
     """Fairness for a partial-text sample. Keep the largest subset of `candidates` whose
     decision mix matches the whole sample `rows` (spread over human-score quantiles via
     stratified), then split it into train and test halves with a seed, stratified by
@@ -388,7 +389,12 @@ def balanced(rows, candidates, seed=0):
     n = len(candidates)
     while n and any(round(n * k / len(rows)) > have.get(g, 0) for g, k in share.items()):
         n -= 1
-    kept = stratified(rows, candidates, n, seed)
+    kept = stratified(rows, candidates, n, seed, prefer)
+    # A preferred (already reviewed) paper may still lose its quantile slot to another
+    # preferred one; report it rather than silently dropping paid work.
+    lost = set(prefer) & {c["paper_id"] for c in candidates} - {r["paper_id"] for r in kept}
+    if lost:
+        print(f"  note: {len(lost)} reviewed papers fall outside the balanced set", file=sys.stderr)
     rng = random.Random(seed + 1)
     out = []
     for g in sorted({group(r) for r in kept}):
@@ -425,11 +431,13 @@ def cmd_fetch(a):
         r["source_kind"] = "arxiv" if src[r["paper_id"]].startswith("arxiv:") else "dump"
     if a.pick in ("stratified", "balanced"):
         print(coverage_report(everyone, set(src)), file=sys.stderr)
+    reviewed = set(json.load(open(a.reviewed))) if a.reviewed else set()
     if a.pick in ("balanced", "stratified"):
-        rows = balanced(everyone, rows)
+        rows = balanced(everyone, rows, prefer=reviewed)
         if a.splits_out:
             Path(a.splits_out).write_text(json.dumps({r["paper_id"]: r["split"] for r in rows}))
     if a.pick == "balanced":
+        rows = [r for r in rows if r["paper_id"] not in reviewed]  # already have results
         rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
     if a.pick == "stratified":  # pilot: drawn from the balanced set, so its runs count later
         rows = stratified(everyone, rows, a.limit or len(rows))
@@ -701,6 +709,8 @@ def main():
     h.add_argument("--ids-out")
     h.add_argument("--splits-out", help="with --pick balanced/stratified: write the balanced split")
     h.add_argument("--dry-run", action="store_true", help="select only; no downloads")
+    h.add_argument("--reviewed", help="JSON list of paper ids already reviewed: kept in the "
+                                      "balanced set (preferred) and not fetched again")
     h.add_argument("--pick", choices=["order", "stratified", "balanced"], default="order",
                    help="stratified: decision mix of the whole sample, spread over scores, "
                         "areas and sources (for pilots); balanced: per split, the largest "
