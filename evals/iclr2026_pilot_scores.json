@@ -131,6 +131,181 @@
    "n": 12,
    "pilot1_mean6_spearman": -0.25,
    "pilot1_mean6_auc": 0.5
+  },
+  "errors_iclr_scale": {
+   "scale": [
+    0,
+    10
+   ],
+   "note": "CSPaper-style NMAE/NME vs mean human rating; panel rating = reviewers' mean 1-6 Overall mapped to ICLR 2026 scale 2*(x-1); ICLR-scale rating = the skill's final integer rating",
+   "haiku": {
+    "spearman(panel rating, mean human)": {
+     "value": 0.205,
+     "ci95": [
+      -0.207,
+      0.561
+     ]
+    },
+    "AUC(panel rating -> accept)": {
+     "value": 0.56
+    },
+    "NMAE(panel rating, mean human)": {
+     "value": 0.093,
+     "std": 0.057,
+     "ci95": [
+      0.068,
+      0.118
+     ]
+    },
+    "NME(panel rating, mean human)": {
+     "value": 0.03,
+     "std": 0.105,
+     "ci95": [
+      -0.018,
+      0.076
+     ]
+    },
+    "spearman(ICLR-scale rating, mean human)": {
+     "value": null,
+     "ci95": [
+      null,
+      null
+     ]
+    },
+    "AUC(ICLR-scale rating -> accept)": {
+     "value": 0.5
+    },
+    "NMAE(ICLR-scale rating, mean human)": {
+     "value": 0.085,
+     "std": 0.063,
+     "ci95": [
+      0.058,
+      0.115
+     ]
+    },
+    "NME(ICLR-scale rating, mean human)": {
+     "value": -0.02,
+     "std": 0.104,
+     "ci95": [
+      -0.067,
+      0.025
+     ]
+    },
+    "NMAE(one human, another human)": {
+     "value": 0.18,
+     "std": 0.125,
+     "ci95": [
+      0.13,
+      0.23
+     ]
+    },
+    "NMAE(one human, mean human)": {
+     "value": 0.102,
+     "std": 0.065,
+     "ci95": [
+      0.074,
+      0.131
+     ]
+    },
+    "NMAE(constant median, mean human)": {
+     "value": 0.085,
+     "std": 0.06,
+     "ci95": [
+      0.059,
+      0.112
+     ]
+    },
+    "spearman(one human, another human)": {
+     "value": 0.122
+    },
+    "AUC(one human -> accept)": {
+     "value": 0.58
+    }
+   },
+   "sonnet_high": {
+    "spearman(panel rating, mean human)": {
+     "value": 0.479,
+     "ci95": [
+      0.097,
+      0.739
+     ]
+    },
+    "AUC(panel rating -> accept)": {
+     "value": 0.667
+    },
+    "NMAE(panel rating, mean human)": {
+     "value": 0.079,
+     "std": 0.061,
+     "ci95": [
+      0.054,
+      0.106
+     ]
+    },
+    "NME(panel rating, mean human)": {
+     "value": 0.004,
+     "std": 0.1,
+     "ci95": [
+      -0.043,
+      0.046
+     ]
+    },
+    "spearman(ICLR-scale rating, mean human)": {
+     "value": 0.256,
+     "ci95": [
+      -0.123,
+      0.578
+     ]
+    },
+    "AUC(ICLR-scale rating -> accept)": {
+     "value": 0.533
+    },
+    "NMAE(ICLR-scale rating, mean human)": {
+     "value": 0.09,
+     "std": 0.064,
+     "ci95": [
+      0.061,
+      0.119
+     ]
+    },
+    "NME(ICLR-scale rating, mean human)": {
+     "value": 0.01,
+     "std": 0.11,
+     "ci95": [
+      -0.04,
+      0.056
+     ]
+    },
+    "NMAE(one human, another human)": {
+     "value": 0.18,
+     "std": 0.125,
+     "ci95": [
+      0.13,
+      0.23
+     ]
+    },
+    "NMAE(one human, mean human)": {
+     "value": 0.102,
+     "std": 0.065,
+     "ci95": [
+      0.074,
+      0.131
+     ]
+    },
+    "NMAE(constant median, mean human)": {
+     "value": 0.085,
+     "std": 0.06,
+     "ci95": [
+      0.059,
+      0.112
+     ]
+    },
+    "spearman(one human, another human)": {
+     "value": 0.122
+    },
+    "AUC(one human -> accept)": {
+     "value": 0.58
+    }
+   }
   }
  },
  "papers": [

@@ -207,5 +207,7 @@ jobs:
           PY
           python3 -I evals/iclr_calibration.py evaluate sample.jsonl features.jsonl --splits splits.json > metrics.json || echo "too few runs to fit"
           cat metrics.json || true
+          python3 -I evals/iclr_calibration.py pilot sample.jsonl features.jsonl > pilot.json || echo "pilot metrics failed"
+          cat pilot.json || true
       - uses: actions/upload-artifact@v4
         with: {name: metrics, path: "*.json*", retention-days: 30}

@@ -627,14 +627,59 @@ def bootstrap(fn, n_items, reps=2000, seed=0):
         v = fn(idx)
         if not math.isnan(v):
             vals.append(v)
+    if not vals:  # e.g. a constant score: Spearman is undefined in every resample
+        return float("nan"), float("nan")
     vals.sort()
     return vals[int(0.025 * len(vals))], vals[int(0.975 * len(vals)) - 1]
 
 
+def r3(x):
+    """Round for the JSON report; undefined values become null."""
+    return None if x is None or (isinstance(x, float) and math.isnan(x)) else round(x, 3)
+
+
+def nmae(pred, gt, lo, hi):
+    """Normalized mean absolute error (CSPaper benchmark): mean |gt - pred| / (hi - lo),
+    with lo and hi the venue's rating-scale bounds. Lower is better."""
+    return statistics.mean(abs(g - p) for p, g in zip(pred, gt)) / (hi - lo)
+
+
+def nme(pred, gt, lo, hi):
+    """Normalized mean error (CSPaper benchmark): mean (pred - gt) / (hi - lo). Positive
+    means the AI scores higher than the humans; zero is ideal."""
+    return statistics.mean(p - g for p, g in zip(pred, gt)) / (hi - lo)
+
+
+def error_metric(name, fn, pred, gt, idx_all, scale, reps):
+    """NMAE/NME with the per-paper standard deviation (as CSPaper reports it) and a
+    bootstrap 95% CI of the mean."""
+    lo, hi = scale
+    point = fn([pred[i] for i in idx_all], [gt[i] for i in idx_all], lo, hi)
+    per = [fn([pred[i]], [gt[i]], lo, hi) for i in idx_all]
+    clo, chi = bootstrap(lambda idx: fn([pred[idx_all[i]] for i in idx],
+                                        [gt[idx_all[i]] for i in idx], lo, hi), len(idx_all), reps)
+    return {"metric": name, "value": r3(point),
+            "std": r3(statistics.pstdev(per)) if len(per) > 1 else 0.0,
+            "ci95": [r3(clo), r3(chi)]}
+
+
+SCALES = {2025: (1, 10), 2026: (0, 10)}  # ICLR overall rating bounds per year
+# The skill's 1-6 Overall -> ICLR rating, from academic-paper-reviewer/scripts/venues.json
+# ("map" for 2026, "legacy_map" for 2025). Interpolated linearly for panel means.
+ICLR_MAPS = {2026: {1: 0, 2: 2, 3: 4, 4: 6, 5: 8, 6: 10},
+             2025: {1: 1, 2: 3, 3: 5, 4: 6, 5: 8, 6: 10}}
+
+
+def to_iclr(overall, year=2026):
+    """Map a (possibly fractional) 1-6 Overall to the year's ICLR rating scale."""
+    m = ICLR_MAPS[year]
+    x = min(6.0, max(1.0, float(overall)))
+    lo = min(int(x), 5)
+    return m[lo] + (m[lo + 1] - m[lo]) * (x - lo)
 WITHDRAWN = ("Withdrawn", "Desk rejected")
 
 
-def evaluate(rows, feats, target="mean_human", reps=2000, low=5.0):
+def evaluate(rows, feats, target="mean_human", reps=2000, low=5.0, scale=(0, 10)):
     rows = [r for r in rows if r["paper_id"] in feats]
     train = [r for r in rows if r["split"] == "train"]
     test = [r for r in rows if r["split"] == "test"]
@@ -643,7 +688,8 @@ def evaluate(rows, feats, target="mean_human", reps=2000, low=5.0):
     ai = [predict(w, x) for x in X(test)]
     one = [r["one_human"] for r in test]
     lab = [int(r["accepted"]) for r in test]
-    pair = [i for i, r in enumerate(test) if r["other_human"] is not None]
+    mean = [r["mean_human"] for r in test]
+    other = [r["other_human"] for r in test]
 
     def metric(name, fn, idx_all):
         point = fn(idx_all)
@@ -664,6 +710,13 @@ def evaluate(rows, feats, target="mean_human", reps=2000, low=5.0):
                        lambda I: auc([one[i] for i in I], [lab[i] for i in I]), idx),
                 metric("AUC(AI score -> accept)",
                        lambda I: auc([ai[i] for i in I], [lab[i] for i in I]), idx),
+            ],
+            # CSPaper-style errors against the mean human rating, on the rating scale.
+            # The AI score here is the regression output, so it is calibrated to that scale.
+            "errors": [
+                error_metric("NMAE(AI, mean human)", nmae, ai, mean, idx, scale, reps),
+                error_metric("NME(AI, mean human)", nme, ai, mean, idx, scale, reps),
+                error_metric("NMAE(one human, another human)", nmae, one, other, p, scale, reps),
             ],
             "calibration": calibration([test[i] for i in idx], [ai[i] for i in idx], low),
         }
@@ -708,8 +761,20 @@ def load_features(path):
     return feats
 
 
+def venue_rating(res, venue="iclr"):
+    """The skill's own (uncalibrated) overall rating on the venue's current scale, e.g. 4
+    from the ICLR label "4 on {0,2,4,6,8,10} (5 on {1,3,5,6,8,10})"."""
+    for v in res.get("venue_views") or []:
+        if v.get("key") == venue:
+            m = re.match(r"\s*(\d+(?:\.\d+)?)", str(v.get("label", "")))
+            if m:
+                return float(m.group(1))
+    return None
+
+
 def cmd_features(a):
-    """Collect the 7 EIC-weighted dimension scores from each run's aggregate.json."""
+    """Collect the 7 EIC-weighted dimension scores from each run's aggregate.json, plus
+    the final 1-6 Overall and the skill's own ICLR-scale rating."""
     n = 0
     with open(a.out, "w") as out:
         for agg in sorted(Path(a.results).glob("*/aggregate.json")):
@@ -719,9 +784,80 @@ def cmd_features(a):
                 continue
             dims = {d["key"]: d["weighted_avg"] for d in res.get("dimensions", [])}
             pid = agg.parent.name.split("-", 1)[-1]
-            out.write(json.dumps({"paper_id": pid, "dims": dims}) + "\n")
+            out.write(json.dumps({"paper_id": pid, "dims": dims,
+                                  "overall": res.get("final_overall"),
+                                  "official_rating": res.get("official_rating"),
+                                  "rating": venue_rating(res)}) + "\n")
             n += 1
     print(f"{n} runs with aggregate.json", file=sys.stderr)
+
+
+def load_ratings(path):
+    out = {}
+    for line in open(path):
+        f = json.loads(line)
+        out[f["paper_id"]] = f
+    return out
+
+
+def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
+    """Metrics without a train/test split, for pilots too small to fit the regression.
+    Uses the skill's own outputs as they are, never fitted to the human scores:
+    - panel rating: the reviewers' mean 1-6 Overall ("official_rating"), mapped to the ICLR
+      scale. It is a mean of reviewers, like the mean human rating it is compared with.
+    - ICLR-scale rating: the skill's final (integer) rating on the ICLR scale.
+    Errors are CSPaper-style NMAE/NME against the mean human rating."""
+    rows = [r for r in rows if r["paper_id"] in feats]
+    lab = [int(r["accepted"]) for r in rows]
+    mean = [r["mean_human"] for r in rows]
+    out = {"n": len(rows), "n_accepted": sum(lab), "scale": list(scale), "results": []}
+    allidx = list(range(len(rows)))
+
+    def num(x):
+        return float(x) if isinstance(x, (int, float)) else None
+
+    preds = {
+        "panel rating": [None if num(feats[r["paper_id"]].get("official_rating")) is None
+                         else to_iclr(feats[r["paper_id"]]["official_rating"], year)
+                         for r in rows],
+        "ICLR-scale rating": [num(feats[r["paper_id"]].get("rating")) for r in rows],
+    }
+    for label, v in preds.items():
+        idx = [i for i in allidx if v[i] is not None]
+        if len(idx) < 3:
+            continue
+        sp = spearman([v[i] for i in idx], [mean[i] for i in idx])
+        lo, hi = bootstrap(lambda I: spearman([v[idx[i]] for i in I],
+                                              [mean[idx[i]] for i in I]), len(idx), reps)
+        out["results"] += [
+            {"metric": f"spearman({label}, mean human)", "value": r3(sp), "ci95": [r3(lo), r3(hi)]},
+            {"metric": f"AUC({label} -> accept)",
+             "value": r3(auc([v[i] for i in idx], [lab[i] for i in idx]))},
+            error_metric(f"NMAE({label}, mean human)", nmae, v, mean, idx, scale, reps),
+            error_metric(f"NME({label}, mean human)", nme, v, mean, idx, scale, reps)]
+    one = [r["one_human"] for r in rows]
+    other = [r["other_human"] for r in rows]
+    p = [i for i in allidx if other[i] is not None]
+    const = [statistics.median(mean)] * len(rows)
+    out["reference"] = [
+        error_metric("NMAE(one human, another human)", nmae, one, other, p, scale, reps),
+        error_metric("NMAE(one human, mean human)", nmae, one, mean, allidx, scale, reps),
+        # A constant at the median of these papers' own mean ratings (an oracle constant):
+        # NMAE rewards predicting the middle, so a useful system should beat this.
+        error_metric("NMAE(constant median, mean human)", nmae, const, mean, allidx, scale, reps),
+        {"metric": "spearman(one human, another human)",
+         "value": r3(spearman([one[i] for i in p], [other[i] for i in p]))},
+        {"metric": "AUC(one human -> accept)", "value": r3(auc(one, lab))}]
+    return out
+
+
+def cmd_pilot(a):
+    rows = [json.loads(l) for l in open(a.sample)]
+    if a.ids:
+        keep = set(json.load(open(a.ids)))
+        rows = [r for r in rows if r["paper_id"] in keep]
+    print(json.dumps(pilot(rows, load_ratings(a.features), reps=a.reps, year=a.year,
+                           scale=tuple(a.scale) if a.scale else SCALES[a.year]), indent=2))
 
 
 def cmd_evaluate(a):
@@ -729,7 +865,8 @@ def cmd_evaluate(a):
     if a.splits:  # the balanced split written by fetch --splits-out
         sp = json.load(open(a.splits))
         rows = [dict(r, split=sp[r["paper_id"]]) for r in rows if r["paper_id"] in sp]
-    res = evaluate(rows, load_features(a.features), reps=a.reps, low=a.low)
+    res = evaluate(rows, load_features(a.features), reps=a.reps, low=a.low,
+                   scale=tuple(a.scale) if a.scale else SCALES[a.year])
     print(json.dumps(res, indent=2))
 
 
@@ -794,10 +931,21 @@ def main():
     e.add_argument("--splits", help="JSON {paper_id: train|test} from fetch --splits-out")
     e.add_argument("--low", type=float, default=5.0,
                    help="AI-score threshold for the calibration table (5.5 for ICLR 2025)")
+    for sp in (e, sub.add_parser("pilot", help="metrics on all reviewed papers, no "
+                                 "regression: the skill's own ratings vs the mean human")):
+        sp.add_argument("--year", type=int, default=2026,
+                        help="sets the rating scale for NMAE/NME (2025: 1-10, 2026: 0-10)")
+        sp.add_argument("--scale", type=float, nargs=2, metavar=("MIN", "MAX"),
+                        help="rating-scale bounds for NMAE/NME (overrides --year)")
+    pl = sub.choices["pilot"]
+    pl.add_argument("sample")
+    pl.add_argument("features")
+    pl.add_argument("--ids", help="JSON list of paper ids to include (default: all with features)")
+    pl.add_argument("--reps", type=int, default=2000)
     a = ap.parse_args()
     {"sample": cmd_sample, "find": cmd_find, "pdfs": cmd_pdfs, "sources": cmd_sources,
      "fetch": cmd_fetch, "features": cmd_features,
-     "evaluate": cmd_evaluate}[a.cmd](a)
+     "evaluate": cmd_evaluate, "pilot": cmd_pilot}[a.cmd](a)
 
 
 if __name__ == "__main__":
