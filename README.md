@@ -11,6 +11,8 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
 
+**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.10 ([changelog](CHANGELOG.md))
+
 ---
 
 ## Features
@@ -29,7 +31,7 @@ What sets it apart:
 - **CV/ML depth.** Task-specific checklists cover detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models. They target the confounds that matter in practice: backbone, pretraining data, resolution, schedule, TTA and latency methodology.
 - **Devil's Advocate with teeth, and an EIC who checks it.** The DA steelmans the paper, gives the strongest counter-argument and recomputes headline numbers. The EIC checks each CRITICAL issue against the paper with an area-chair test ("would I reject on this alone?"). Only issues that are truly fatal cap the decision.
 - **Two score lists.** The **official** list holds the reviewers' raw ratings and scores and their plain means: what authors see, never modified. The **EIC assessment** is the EIC's internal view, weighting each reviewer by confidence × a quality weight (0.5–1.5); it can be higher or lower than the official one. The decision starts from the **EIC-weighted mean of the reviewers' Overall ratings**, like an area chair weighing recommendations. The 0–100 dimension composite is a cross-check, and the EIC must explain any disagreement.
-- **Calibrated to accepted papers.** Scores are anchored to what the target venue actually accepts, not to a flawless paper. See [`evals/`](evals/) for the evaluation on recently accepted ICLR/CVPR/ECCV papers.
+- **Calibrated to the submission pool.** Each reviewer, and the EIC, first states the paper's *pool position*: the share of the venue's submissions it is better than, using the venue's real acceptance rate (about 25% at the major ML/CV conferences). They then score within the matching band. The bar is what the venue actually accepts, not a flawless paper, and uncertainty is never a reason to call a paper borderline. See [Evaluation](#evaluation).
 - **Reproducible scoring.** `scripts/aggregate_scores.py` computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.
 - **Venue-aware scoring.** It covers 11 venues: **CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP**. Scores are translated into each venue's own form, for example ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria, or IEEE journal recommendations. A **Cross-Venue Outlook** shows how the same paper would likely fare at each venue. Every scale is labeled *official*, *confirmed*, *secondary*, *assumed* or *unpublished*, so nothing unverified is presented as official.
 - **Literature check without self-leaks.** With network access, reviewers search arXiv for related work and verify every recommended reference. A fingerprint filter refuses queries that could find the reviewed paper, drops the paper's own arXiv versions, code pages, reviews and acceptance lists unread, and labels the rest prior (peer-reviewed or 6+ months old) / recent preprint / concurrent / newer; only prior work can be a required comparison. The check runs after the reviewers have read the full paper. Every decision is logged (`literature check: on | strict | off`). Searches are driven by the paper's contribution claims and its benchmarks: each claim gets a novelty verdict with supporting papers, a **baseline scout** lists prior methods reported on the same benchmarks (and baselines the paper under-reports), a coverage check drives a second round of searches, and a short field snapshot calibrates significance. A **similarity check** then ranks the closest prior works (novelty is argued against them, in a delta table) and flags verbatim text overlap as an integrity concern for the editor, never as an accusation.
@@ -159,6 +161,38 @@ python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --all-ve
 
 ---
 
+## Evaluation
+
+[`evals/`](evals/) holds the evaluation tools and reports.
+
+- **Accepted papers** ([`evals/REPORT.md`](evals/REPORT.md)): 30 recently accepted ICLR/CVPR/ECCV papers, with grounding checks, planted-flaw controls and consistency checks.
+- **ICLR 2026 calibration** ([`evals/REPORT_iclr2026_pilots.md`](evals/REPORT_iclr2026_pilots.md)) follows the [paperreview.ai protocol](https://paperreview.ai/tech-overview):
+  - sample ICLR submissions with human scores;
+  - fit a linear map from the 7 dimension scores on a train split;
+  - report Spearman with a human score and acceptance AUC on the test split, with and without withdrawn papers.
+
+  Reviewers get anonymized arXiv versions posted before the decision, and never see human scores or decisions. The literature check runs in `strict` mode with the submission deadline as cutoff.
+
+Pilot on 20 stratified ICLR 2026 submissions, all using the final rating:
+
+| Run | Spearman with mean human rating [95% CI] | Acceptance AUC |
+|---|---|---|
+| Haiku, default effort | +0.20 [−0.21, +0.58] | 0.56 |
+| **Sonnet, high effort** | **+0.48 [+0.09, +0.74]** | **0.67** |
+| Human vs human (2026 test split) | 0.25 | 0.75 |
+| paperreview.ai (ICLR 2025, AI vs human) | 0.42 | 0.75 |
+
+This is a pilot, not a result. With 20 papers the intervals are wide, and the full balanced evaluation is still pending. Model capability matters: Haiku's scores did not separate papers. Use a strong model at high effort for scoring.
+
+**Running it.** `.github/workflows/iclr-calibration.yml` reviews papers through the API using the repository secret `ANTHROPIC_API_KEY`. Every paper costs money (about $2 with Sonnet at high effort), so start with a small pilot. Configure a run in `evals/iclr_run.json`:
+
+```json
+{"mode": "review", "pick": "stratified", "limit": 20, "model": "claude-sonnet-5-5",
+ "effort": "high", "max_parallel": 10, "budget": 6}
+```
+
+Then push `evals/iclr_run.json` on a branch listed in the workflow's `push` trigger. You can also start the workflow manually (`workflow_dispatch`), but the manual form has no `effort` field, so use the JSON file when you need that setting. A run with `{"mode": "evaluate", "runs": [...]}` collects earlier review runs and computes the metrics. To work locally, `python3 evals/iclr_calibration.py --help` lists the steps: `sample`, `find`, `sources`, `fetch`, `features`, `evaluate`. Manuscripts and review text stay in the ignored `evals/work/`; only scores and paper IDs are committed.
+
 ## Repository Layout
 
 ```
@@ -184,13 +218,15 @@ academic-paper-reviewer/               ← skill source
 └── examples/                          ← worked, fully fictional examples
 tools/install_codex_skill.py           ← safe, repeatable Codex installation
 tools/build_skill.py                   ← validate + package the skill
-tests/                                 ← unit tests for the scoring script
+evals/                                 ← evaluation tools, run configs and reports (see Evaluation)
+.github/workflows/                     ← ICLR calibration runs and an API smoke test
+tests/                                 ← unit tests for the scoring script and the evaluation tools
 ```
 
 ## Development
 
 ```bash
-python3 -m unittest discover -s tests     # test the scoring script
+python3 -m unittest discover -s tests     # test the scoring script and evaluation tools
 python3 tools/build_skill.py --check      # validate frontmatter, file references, script
 python3 tools/build_skill.py              # validate and rebuild academic-paper-reviewer.skill
 ```
