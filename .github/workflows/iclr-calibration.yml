@@ -24,6 +24,11 @@ on:
       max_parallel:
         description: "Concurrent review jobs"
         default: "2"
+  # Manual dispatch needs the workflow on the default branch. Until it is there, a
+  # push that changes evals/iclr_run.json (same keys as the inputs) starts a run.
+  push:
+    branches: [claude/youthful-einstein-mpsrkh]
+    paths: [evals/iclr_run.json]
 
 permissions:
   contents: read
@@ -34,7 +39,37 @@ env:
   CUTOFF: "2025-09-24"
 
 jobs:
+  config:
+    runs-on: ubuntu-latest
+    outputs:
+      split: ${{ steps.c.outputs.split }}
+      offset: ${{ steps.c.outputs.offset }}
+      limit: ${{ steps.c.outputs.limit }}
+      model: ${{ steps.c.outputs.model }}
+      max_parallel: ${{ steps.c.outputs.max_parallel }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: c
+        env:
+          INPUTS: ${{ toJSON(github.event.inputs) }}
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, re
+          cfg = {"split": "all", "offset": "0", "limit": "2", "model": "claude-haiku-5-5",
+                 "max_parallel": "2"}
+          given = json.loads(os.environ.get("INPUTS") or "null") or {}
+          if not given and os.path.exists("evals/iclr_run.json"):
+              given = json.load(open("evals/iclr_run.json"))
+          cfg.update({k: str(v) for k, v in given.items() if k in cfg})
+          assert cfg["split"] in ("all", "train", "test")
+          assert all(cfg[k].isdigit() for k in ("offset", "limit", "max_parallel"))
+          assert re.fullmatch(r"claude-[a-z0-9.-]+", cfg["model"])
+          for k, v in cfg.items():
+              print(f"{k}={v}")
+          PY
+
   prepare:
+    needs: config
     runs-on: ubuntu-latest
     timeout-minutes: 120
     outputs:
@@ -49,7 +84,7 @@ jobs:
           W=evals/work/benchmarks/iclr2026
           python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out $W/sample.jsonl
           python3 -I evals/iclr_calibration.py find $W/sample.jsonl --openreview \
-            --split "${{ inputs.split }}" --offset "${{ inputs.offset }}" --limit "${{ inputs.limit }}" \
+            --split "${{ needs.config.outputs.split }}" --offset "${{ needs.config.outputs.offset }}" --limit "${{ needs.config.outputs.limit }}" \
             --ids-out ids.json
           echo "ids=$(cat ids.json)" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
@@ -60,13 +95,13 @@ jobs:
         with: {name: papers, path: ship, retention-days: 7}
 
   review:
-    needs: prepare
+    needs: [config, prepare]
     if: needs.prepare.outputs.ids != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: ${{ fromJSON(inputs.max_parallel) }}
+      max-parallel: ${{ fromJSON(needs.config.outputs.max_parallel) }}
       matrix:
         id: ${{ fromJSON(needs.prepare.outputs.ids) }}
     steps:
@@ -96,7 +131,7 @@ jobs:
                         "scripts/related_search.py for the literature check.")
           print(t)
           PY
-          claude -p "$(cat prompt.md)" --model "${{ inputs.model }}" \
+          claude -p "$(cat prompt.md)" --model "${{ needs.config.outputs.model }}" \
             --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash(python3:*)" \
             --max-turns 300 --output-format json > "evals/work/results/$ID/run.json" || true
           python3 -c "import json;r=json.load(open('evals/work/results/$ID/run.json'));print('cost_usd',r.get('total_cost_usd'),'turns',r.get('num_turns'))" || true
