@@ -71,7 +71,7 @@ jobs:
               given["runs"] = ",".join(str(r) for r in given["runs"])
           cfg.update({k: str(v) for k, v in given.items() if k in cfg})
           assert cfg["mode"] in ("review", "evaluate")
-          assert cfg["pick"] in ("order", "stratified")
+          assert cfg["pick"] in ("order", "stratified", "balanced")
           assert re.fullmatch(r"[0-9]+(\.[0-9]+)?", cfg["budget"])  # USD cap per paper
           assert re.fullmatch(r"[0-9,]*", cfg["runs"])
           assert cfg["split"] in ("all", "train", "test")
@@ -190,13 +190,15 @@ jobs:
           for d in results/result-*; do [ -d "$d" ] && rm -rf "results/${d#results/result-}" && mv "$d" "results/${d#results/result-}"; done
           curl -sSfL --retry 4 -o /tmp/reviews.parquet "$DATA_URL"
           python3 -I evals/iclr_calibration.py sample /tmp/reviews.parquet --out sample.jsonl
+          python3 -I evals/iclr_calibration.py fetch sample.jsonl evals/iclr2026_sources.json \
+            --pick balanced --dry-run --splits-out splits.json
           python3 -I evals/iclr_calibration.py features results --out features.jsonl
           python3 - <<'PY'
           import json, glob
           c = [json.load(open(f)).get("total_cost_usd") or 0 for f in glob.glob("results/*/run.json")]
           print(f"runs {len(c)}, total cost ${sum(c):.2f}, mean ${sum(c) / max(len(c), 1):.2f}")
           PY
-          python3 -I evals/iclr_calibration.py evaluate sample.jsonl features.jsonl > metrics.json || echo "too few runs to fit"
+          python3 -I evals/iclr_calibration.py evaluate sample.jsonl features.jsonl --splits splits.json > metrics.json || echo "too few runs to fit"
           cat metrics.json || true
       - uses: actions/upload-artifact@v4
         with: {name: metrics, path: "*.json*", retention-days: 30}

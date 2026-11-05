@@ -374,6 +374,44 @@ def stratified(rows, candidates, n, seed=0):
     return picked
 
 
+def balanced(rows, candidates, seed=0):
+    """Fairness for a partial-text sample. Keep the largest subset of `candidates` whose
+    decision mix matches the whole sample `rows` (spread over human-score quantiles via
+    stratified), then split it into train and test halves with a seed, stratified by
+    decision group, so both halves have the sample's mix. The original split was random
+    too; nothing has been reviewed when this runs, so re-splitting costs nothing."""
+    share, have = {}, {}
+    for r in rows:
+        share[group(r)] = share.get(group(r), 0) + 1
+    for c in candidates:
+        have[group(c)] = have.get(group(c), 0) + 1
+    n = len(candidates)
+    while n and any(round(n * k / len(rows)) > have.get(g, 0) for g, k in share.items()):
+        n -= 1
+    kept = stratified(rows, candidates, n, seed)
+    rng = random.Random(seed + 1)
+    out = []
+    for g in sorted({group(r) for r in kept}):
+        members = sorted((r for r in kept if group(r) == g), key=lambda r: r["paper_id"])
+        rng.shuffle(members)
+        for i, r in enumerate(members):
+            out.append(dict(r, split="train" if i % 2 == 0 else "test"))
+    return sorted(out, key=lambda r: (r["split"] != "train", r["paper_id"]))
+
+
+def coverage_report(rows, have):
+    """Per decision group: share with text, and mean human score with vs without text."""
+    lines = []
+    for g in ("accepted", "rejected", "withdrawn", "desk rejected"):
+        rs = [r for r in rows if group(r) == g]
+        w = [r["mean_human"] for r in rs if r["paper_id"] in have]
+        wo = [r["mean_human"] for r in rs if r["paper_id"] not in have]
+        lines.append(f"{g:14s} {len(w):3d}/{len(rs):3d} with text; mean human "
+                     f"{statistics.mean(w) if w else float('nan'):.2f} with vs "
+                     f"{statistics.mean(wo) if wo else float('nan'):.2f} without")
+    return "\n".join(lines)
+
+
 def cmd_fetch(a):
     """Download the text for the selected rows from the committed source map."""
     import tarfile
@@ -383,9 +421,17 @@ def cmd_fetch(a):
     src = json.load(open(a.sources))
     everyone = [json.loads(l) for l in open(a.sample)]
     rows = [r for r in rows if r["paper_id"] in src]  # offset/limit count papers with text
-    if a.pick == "stratified":
-        for r in rows:
-            r["source_kind"] = "arxiv" if src[r["paper_id"]].startswith("arxiv:") else "dump"
+    for r in rows:
+        r["source_kind"] = "arxiv" if src[r["paper_id"]].startswith("arxiv:") else "dump"
+    if a.pick in ("stratified", "balanced"):
+        print(coverage_report(everyone, set(src)), file=sys.stderr)
+    if a.pick in ("balanced", "stratified"):
+        rows = balanced(everyone, rows)
+        if a.splits_out:
+            Path(a.splits_out).write_text(json.dumps({r["paper_id"]: r["split"] for r in rows}))
+    if a.pick == "balanced":
+        rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
+    if a.pick == "stratified":  # pilot: drawn from the balanced set, so its runs count later
         rows = stratified(everyone, rows, a.limit or len(rows))
         for r in rows:
             print(f"  pick {r['paper_id']}: {group(r)}, {r['split']}, mean {r['mean_human']}, "
@@ -393,6 +439,10 @@ def cmd_fetch(a):
     else:
         rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
     need = {r["paper_id"]: src[r["paper_id"]] for r in rows}
+    if a.dry_run:  # selection only: write ids and splits without downloading
+        if a.ids_out:
+            Path(a.ids_out).write_text(json.dumps([f"iclr{a.year % 100}-{p}" for p in need]))
+        return
     got = []
     by_batch = {}
     for pid, s in need.items():
@@ -606,6 +656,9 @@ def cmd_features(a):
 
 def cmd_evaluate(a):
     rows = [json.loads(l) for l in open(a.sample)]
+    if a.splits:  # the balanced split written by fetch --splits-out
+        sp = json.load(open(a.splits))
+        rows = [dict(r, split=sp[r["paper_id"]]) for r in rows if r["paper_id"] in sp]
     res = evaluate(rows, load_features(a.features), reps=a.reps, low=a.low)
     print(json.dumps(res, indent=2))
 
@@ -646,9 +699,12 @@ def main():
     h.add_argument("--offset", type=int, default=0)
     h.add_argument("--limit", type=int, default=0)
     h.add_argument("--ids-out")
-    h.add_argument("--pick", choices=["order", "stratified"], default="order",
+    h.add_argument("--splits-out", help="with --pick balanced/stratified: write the balanced split")
+    h.add_argument("--dry-run", action="store_true", help="select only; no downloads")
+    h.add_argument("--pick", choices=["order", "stratified", "balanced"], default="order",
                    help="stratified: decision mix of the whole sample, spread over scores, "
-                        "areas and sources (for pilots)")
+                        "areas and sources (for pilots); balanced: per split, the largest "
+                        "subset with the whole split's decision mix (for the full run)")
     g = sub.add_parser("features")
     g.add_argument("results", help="directory of <id>/aggregate.json runs")
     g.add_argument("--out", required=True)
@@ -656,6 +712,7 @@ def main():
     e.add_argument("sample")
     e.add_argument("features")
     e.add_argument("--reps", type=int, default=2000)
+    e.add_argument("--splits", help="JSON {paper_id: train|test} from fetch --splits-out")
     e.add_argument("--low", type=float, default=5.0,
                    help="AI-score threshold for the calibration table (5.5 for ICLR 2025)")
     a = ap.parse_args()

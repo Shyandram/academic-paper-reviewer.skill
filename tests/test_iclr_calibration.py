@@ -59,6 +59,24 @@ class CalibrationMath(unittest.TestCase):
         self.assertGreater(rej[-1] - rej[0], 4)  # spread over the score range
         self.assertGreaterEqual(len({r["primary_area"] for r in got}), 7)
 
+    def test_balanced_matches_mix_and_resplits(self):
+        rng = random.Random(9)
+        dec = ["Accept (Poster)"] * 26 + ["Reject"] * 50 + ["Withdrawn"] * 20 + ["Desk rejected"] * 4
+        rows = [{"paper_id": f"p{i:03d}", "decision": d, "mean_human": rng.uniform(0, 8),
+                 "primary_area": "a", "split": "train" if i % 3 else "test"}
+                for i, d in enumerate(dec * 3)]
+        # text for all accepted papers but only some of the others (arXiv-like bias)
+        cands = [r for i, r in enumerate(rows) if cal.group(r) == "accepted" or i % 2]
+        got = cal.balanced(rows, cands)
+        share = lambda rs, g: sum(cal.group(r) == g for r in rs) / len(rs)  # noqa: E731
+        for g in ("accepted", "rejected", "withdrawn"):
+            self.assertAlmostEqual(share(got, g), share(rows, g), delta=0.03)
+        tr = [r for r in got if r["split"] == "train"]
+        te = [r for r in got if r["split"] == "test"]
+        self.assertLessEqual(abs(len(tr) - len(te)), 4)
+        self.assertAlmostEqual(share(tr, "accepted"), share(te, "accepted"), delta=0.05)
+        self.assertEqual(got, cal.balanced(rows, cands))  # deterministic
+
     def test_title_match(self):
         hits = [{"title": "Something Else Entirely"},
                 {"title": "DataEnvGym: Data Generation Agents in Teacher Environments with "
