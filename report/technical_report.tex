@@ -1,0 +1,443 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.4cm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\setlist{nosep}\setlist[itemize,enumerate]{leftmargin=*}
+\emergencystretch=3em
+\newcommand{\code}[1]{\texttt{#1}}
+
+\title{Academic Paper Reviewer: A Multi-Perspective Review Skill\\
+for Computer Vision and Machine Learning Papers\\[4pt]
+\large Technical Report, version 2.10}
+\author{Academic Paper Reviewer project\\
+\small\url{https://github.com/Shyandram/academic-paper-reviewer.skill}}
+\date{November 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We describe \emph{Academic Paper Reviewer}, a Markdown skill for Claude and Codex agents that
+simulates an editorial process for a manuscript. The process has a field-aware panel of five
+independent reviewers, a literature check that cannot find the paper under review, a report check,
+and an Editor-in-Chief (EIC) who weights each review by its quality and makes the decision.
+Scores are aggregated by a deterministic, standard-library Python script and translated into the
+forms of 11 venues.
+
+We evaluate the skill in two ways.
+\begin{itemize}
+\item \textbf{Accepted papers with planted flaws.} On 30 recently accepted CVPR/ECCV/ICLR papers,
+96\% of cited locations, 99\% of quoted phrases and all but two of 842 quoted numbers are found in the
+paper, and the reviewers mention all six planted fatal flaws.
+\item \textbf{ICLR 2026 calibration.} This follows the paperreview.ai protocol. On a 20-paper
+stratified pilot with Sonnet at high effort, the reviewers' mean rating reaches Spearman $0.48$
+[$0.09$, $0.74$] with the mean human rating and an acceptance AUC of $0.67$. On the ICLR scale
+the normalized mean absolute error is $0.079$, with essentially no bias (NME $+0.004$).
+\end{itemize}
+A smaller model (Haiku) shows no reliable signal. We also report a negative result: NMAE alone
+does not measure skill on this pool, because a constant predictor scores $0.085$. All numbers here
+come from pilots. The full balanced evaluation is pending.
+\end{abstract}
+
+\section{Introduction}
+Large language models can now write fluent paper reviews. Fluency, however, is not the goal of a
+review. Authors need the decisive weaknesses found, grounded in the manuscript, and ranked by how
+much they matter at a target venue. Three failure modes are common:
+\begin{itemize}
+\item \textbf{Ungrounded criticism:} weaknesses that the paper already answers, or locations and
+numbers that do not exist.
+\item \textbf{Compressed scores:} every paper rated ``borderline''.
+\item \textbf{Leakage:} the reviewer finds the paper's own camera-ready version, reviews or
+acceptance status, through retrieval or memory.
+\end{itemize}
+
+Academic Paper Reviewer addresses these with structure rather than with a single prompt.
+\begin{itemize}
+\item Several reviewers with distinct roles write independently.
+\item A Devil's Advocate attacks the paper.
+\item A report check removes ungrounded points.
+\item An EIC acts as area chair.
+\end{itemize}
+The skill is tuned for computer vision, deep learning and ML papers, with task-specific checklists
+for detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging
+and efficient models, but it can be used in any field. Its output is a \emph{simulation} to help
+authors improve a paper, not a prediction of a venue's decision.
+
+\paragraph{Contributions.}
+\begin{enumerate}
+\item A review workflow with independent role-based reviewers, a quality-weighted EIC, and
+deterministic score aggregation into venue-specific forms (Section~\ref{sec:system}).
+\item Safeguards against prompt injection and self-leakage in literature search
+(Section~\ref{sec:safety}).
+\item A reproducible calibration harness following the paperreview.ai protocol, extended with
+CSPaper-style error metrics and a no-split pilot mode (Section~\ref{sec:iclr}).
+\item Pilot results, including what the skill did badly and the fixes that followed.
+\end{enumerate}
+
+\section{System design}\label{sec:system}
+
+\subsection{Workflow}
+A full review runs the following phases. The phases are Markdown instructions in
+\code{SKILL.md} and \code{agents/*.md}; scripts are optional helpers.
+\begin{description}
+\item[Phase 0: field analysis.] A field analyst identifies the paper's sub-field, technique, paper
+type (empirical, theoretical, dataset, system, benchmark, analysis, position) and target venue,
+and configures five reviewers with specific expertise. An example is ``token pruning + latency
+benchmarking'' rather than ``deep learning''. \code{integrity\_scan.py} flags text addressed to
+reviewers or AI systems, as well as hidden characters.
+\item[Phase 1: independent reviews.] Five reports are written independently: Methodology (R1),
+Domain (R2), Perspective (R3), Generalist (R4) and a Devil's Advocate (DA). In Claude Code they can
+run as parallel subagents. The Methodology reviewer runs an error audit in nine categories (result
+inconsistencies, equation and proof errors, assumptions, protocol flaws, claim distortion,
+inconsistent definitions, citation errors, omissions, figure/table integrity). It works from a
+shared factual \emph{paper memory}, and every error needs a location, a verbatim quote and a
+concrete check.
+\item[Phase 1.5: literature check.] This runs only with network access and after the reports are
+drafted. Searches are driven by contribution claims and benchmarks: a novelty verdict per claim, a
+baseline scout, a coverage pass, a field snapshot and a similarity ranking. Section~\ref{sec:safety}
+describes how the paper itself is excluded.
+\item[Phase 1.6: report check.] Before the EIC reads anything, vague weaknesses, points the paper
+already answers, and claims the paper contradicts are removed. Cosmetic issues are grouped as Minor.
+\item[Phase 2: EIC meta-review.] The EIC reads every report and checks the decisive points against
+the paper. It assigns each reviewer a quality weight in $[0.5, 1.5]$, states its own pool position,
+and decides. Each DA-CRITICAL issue gets an area-chair test (``would I reject on this alone?'').
+\end{description}
+Other modes reuse the same components: quick assessment, methodology focus, guided (Socratic)
+review, rebuttal drafting and re-review of a revision.
+
+\subsection{Scores}
+Every non-DA reviewer gives NeurIPS-style 1--4 ratings, an Overall 1--6 recommendation (6 Strong
+Accept \dots\ 1 Strong Reject), a confidence 1--5, and seven 0--100 dimension scores: technical
+rigor, clarity, novelty, significance, experimental validation, reproducibility and ethics. The DA
+gives the 0--100 set only. Dimensions are combined with paper-type weights
+(Table~\ref{tab:weights}).
+
+\begin{table}[t]
+\centering\small
+\caption{Paper-type weights of the seven 0--100 dimensions (each row sums to 1).}
+\label{tab:weights}
+\begin{tabular}{lccccccc}
+\toprule
+Type & Rigor & Clarity & Novelty & Signif. & Exp. val. & Repro. & Ethics\\
+\midrule
+empirical   & .20 & .10 & .15 & .15 & .20 & .10 & .10\\
+theoretical & .30 & .10 & .20 & .15 & .10 & .05 & .10\\
+dataset     & .15 & .10 & .10 & .20 & .15 & .15 & .15\\
+system      & .20 & .10 & .10 & .20 & .20 & .10 & .10\\
+benchmark   & .15 & .15 & .10 & .20 & .20 & .15 & .05\\
+analysis    & .25 & .10 & .20 & .20 & .15 & .05 & .05\\
+position    & .15 & .20 & .25 & .25 & .05 & .00 & .10\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Two score lists are kept. The \textbf{official} list holds the reviewers' raw ratings and their
+plain means, which is what authors see; it is never modified. The \textbf{EIC assessment} weights
+reviewer $i$ by
+\begin{equation}
+w_i = c(\text{conf}_i)\cdot q_i,\qquad c(5..1) = (1.00, 0.85, 0.70, 0.55, 0.40),\quad q_i\in[0.5,1.5],
+\end{equation}
+where $q_i$ is the EIC's quality weight. The decision starts from the EIC-weighted mean of the
+Overall ratings, rounded half up. The weighted 0--100 composite is a cross-check: it maps to
+Overall at thresholds 85/70/60/50/35. Two further rules apply:
+\begin{itemize}
+\item \textbf{DA cap.} Upheld DA-CRITICAL issues cap the decision at 4 if they can be resolved by
+clarification and at 3 otherwise.
+\item \textbf{Consistency warnings} flag disagreements that the EIC must explain.
+\end{itemize}
+
+\paragraph{Calibration to the submission pool (2.10).}
+Each reviewer and the EIC first state a \emph{pool position} $P$: the share of the venue's
+submissions the paper is better than, using real base rates (about 25\% acceptance at major ML/CV
+conferences; ICLR 2026 about 27\% accepted, 45\% rejected, 24\% withdrawn, 5\% desk rejected). They
+then score within the matching band:
+\begin{center}\small
+\begin{tabular}{lcccccc}
+\toprule
+$P$ & $\ge 95$ & 85--94 & 70--84 & 55--69 & 30--54 & $<30$\\
+composite & 85+ & 73--84 & 62--72 & 55--61 & 42--54 & $<42$\\
+\bottomrule
+\end{tabular}
+\end{center}
+A composite of 62 is the accept-side bar. Uncertainty is never a reason to score a paper as
+borderline. The aggregation script warns when a composite lies more than 5 points outside its
+pool band, and when all reviewers sit in the borderline band.
+
+\subsection{Venue forms}
+Internal scores are translated into 11 venue forms: CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML,
+AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP. Each translation applies the venue's emphasis
+weights, bar offset and scale. Each scale is labeled \emph{official}, \emph{confirmed},
+\emph{secondary}, \emph{assumed} or \emph{unpublished}. For ICLR 2026 the Overall maps to the
+rating set $\{0,2,4,6,8,10\}$ as $r = 2(x-1)$. The legacy (2025) set is $\{1,3,5,6,8,10\}$.
+
+\section{Safeguards}\label{sec:safety}
+\begin{itemize}
+\item \textbf{Prompt injection.} The manuscript is treated as data, never as instructions.
+Injected text is reported to the editor as an integrity concern and never raises a score.
+\item \textbf{Self-leak in literature search.} A fingerprint filter refuses queries that could
+find the reviewed paper. It drops the paper's own arXiv versions, code pages, reviews and
+acceptance lists unread, and labels every other result as prior (peer-reviewed or 6+ months old),
+recent preprint, concurrent or newer. Only prior work can be a required comparison. Each run logs
+the mode (\code{on}, \code{strict} or \code{off}). In \code{strict} mode a cutoff date applies; in
+evaluation this is the submission deadline.
+\item \textbf{Recognition.} Reviewers report when they recognize a paper from prior knowledge, and
+such papers are reported separately.
+\item \textbf{Integrity.} Reviewer personas are fictional, no citations may be fabricated, and
+every point is tied to a location in the manuscript.
+\end{itemize}
+
+\section{Evaluation I: accepted papers and planted flaws}\label{sec:accepted}
+An earlier release of the skill (before 2.10) reviewed 30 recently accepted papers: 10 each from
+CVPR, ECCV and ICLR, spread over 10 topics. All runs completed with every required section; the
+median review length was 10{,}214 words. Table~\ref{tab:grounding} reports grounding.
+
+\begin{table}[t]
+\centering\small
+\caption{Grounding on 30 accepted papers: share of cited items not found in the paper.
+Numbers the reviewers recomputed themselves (525) are excluded and were spot-checked by hand.}
+\label{tab:grounding}
+\begin{tabular}{lrrr}
+\toprule
+Check & Checked & Not found & Rate\\
+\midrule
+Cited locations (tables, figures, sections, equations) & 1101 & 48 & 4\%\\
+Quoted phrases & 778 & 9 & 1\%\\
+Quoted numbers & 842 & 2 & 0\%\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Planted flaws.} In six accepted papers we inserted one sentence admitting a fatal
+evaluation flaw: hyperparameters tuned on the test set, or the test split merged into training.
+\begin{itemize}
+\item The reviews mentioned the flaw in 6/6 papers.
+\item The Devil's Advocate raised it as DA-CRITICAL in 2/6, and the EIC upheld both.
+\item The final decision was $\le 3$ in 5/6.
+\end{itemize}
+The miss was an ICLR paper rated 4.
+
+\paragraph{Decisions.} 16/30 accepted papers landed on the accept side (Overall $\ge 4$); 14
+received 3. This compression motivated the pool-position calibration of version 2.10. The DA raised
+CRITICAL issues on 11/30 papers, and the EIC upheld none on real papers.
+
+\section{Evaluation II: ICLR 2026 calibration}\label{sec:iclr}
+
+\subsection{Protocol}
+We follow the paperreview.ai protocol.
+\begin{itemize}
+\item Sample ICLR 2026 submissions with human reviews, including withdrawn ones.
+\item Fit an ordinary least-squares map from the seven dimension scores to the human rating on a
+train split.
+\item Report on the test split: Spearman with one human rating, and the AUC of the score for
+acceptance. Confidence intervals come from bootstrap resampling; results are given for all scored
+papers and without withdrawn papers.
+\end{itemize}
+The harness (\code{evals/iclr\_calibration.py}, standard library only) runs in GitHub Actions
+through the API. Reviewers never see human scores or decisions.
+
+\paragraph{Error metrics.} Following the CSPaper benchmark, for predictions $\hat s_j$ and human
+ratings $s_j$ on a scale $[S_{\min}, S_{\max}]$ (ICLR 2026: $[0,10]$),
+\begin{equation}
+\mathrm{NMAE} = \frac{1}{n}\sum_{j}\frac{|s_j - \hat s_j|}{S_{\max}-S_{\min}},\qquad
+\mathrm{NME} = \frac{1}{n}\sum_{j}\frac{\hat s_j - s_j}{S_{\max}-S_{\min}}.
+\end{equation}
+We report each with its per-paper standard deviation and a bootstrap 95\% CI. Pilots are too small
+to fit the regression, so the \code{pilot} command scores the skill's own outputs as they are,
+without any fitting to human scores:
+\begin{itemize}
+\item the \emph{panel rating}: the reviewers' mean Overall, mapped to the ICLR scale by $2(x-1)$;
+\item the \emph{final rating}: the integer decision on the ICLR scale.
+\end{itemize}
+
+\subsection{Data and a decision leak}
+The sample is ICLR 2026 with seed 2025: 300 papers drawn, 295 with human scores. Our first pilot
+used the PDFs from paperreview.ai's dump. These turned out to leak the decision: every accepted
+paper was a camera-ready version (author names, acknowledgments, no line numbers), while all other
+papers were anonymous submissions. Overall, 0/29 accepted papers and 56/56 other papers showed
+``Anonymous authors''. We therefore use only arXiv versions posted before the 2026-01-26 decision
+date, normalized identically. The header before the abstract is replaced by the title, and line
+numbers, arXiv stamps, emails, affiliation footnotes, code links, acknowledgments and acceptance
+marks are removed. The literature check runs in \code{strict} mode with the submission deadline as
+cutoff.
+
+The pilot set has 20 papers stratified by decision and human score: 5 accepted, 10 rejected,
+4 withdrawn and 1 desk rejected.
+
+\subsection{Pilots}
+\begin{center}\small
+\begin{tabularx}{\linewidth}{cllX}
+\toprule
+Pilot & Skill & Model / effort & Outcome\\
+\midrule
+1 & 2.9  & Haiku / default & decision leak in the text; scores compressed; Spearman $-0.12$, AUC $0.47$\\
+2 & 2.10 & Haiku / default & normalized text; Spearman $-0.01$, AUC $0.49$ (mean of 6 dimensions)\\
+3 & 2.10 & Sonnet / high   & normalized text; Tables~\ref{tab:rank}--\ref{tab:err}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+In pilot 1 nearly every paper received Overall 3, including papers with human means of 2.0 and
+6.0. The anchors described papers only relative to \emph{accepted} papers, and the anti-harshness
+rule could only raise scores. Version 2.10 added pool positions, base rates, two-sided checks and
+EIC rulings on borderline panels.
+
+\begin{table}[t]
+\centering\small
+\caption{Ranking on the 20-paper pilot: Spearman with the mean human rating [bootstrap 95\% CI] /
+acceptance AUC. Human references are on the same papers unless noted.}
+\label{tab:rank}
+\setlength{\tabcolsep}{4pt}\footnotesize
+\begin{tabular}{lccc}
+\toprule
+Run & Panel rating (1--6) & EIC pool position & Mean of 6 dimensions\\
+\midrule
+Haiku, default & $+0.20$ [$-0.21$, $0.58$] / 0.56 & $-0.06$ [$-0.55$, $0.42$] / 0.42 & $-0.01$ [$-0.52$, $0.49$] / 0.49\\
+Sonnet, high   & $\mathbf{+0.48}$ [$0.09$, $0.74$] / \textbf{0.67} & $+0.30$ [$-0.14$, $0.69$] / 0.55 & $+0.22$ [$-0.27$, $0.64$] / 0.57\\
+\midrule
+\multicolumn{4}{l}{Without the 3 papers Sonnet recognized ($n=17$):}\\
+Haiku, default & $+0.07$ / 0.50 & $-0.25$ / 0.33 & $-0.10$ / 0.44\\
+Sonnet, high   & $+0.46$ [$0.09$, $0.74$] / 0.69 & $+0.22$ / 0.53 & $+0.10$ / 0.54\\
+\midrule
+\multicolumn{4}{l}{References: one human vs another $+0.12$, one-human AUC 0.58 (same papers);}\\
+\multicolumn{4}{l}{our ICLR 2026 test split $0.25$ / $0.75$; paperreview.ai (ICLR 2025) AI $0.42$ / $0.75$, human $0.41$ / $0.84$.}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[t]
+\centering\small
+\caption{Error on the ICLR 2026 scale (0--10) against the mean human rating, 20 papers.
+NMAE $\pm$ std [95\% CI]; NME $\pm$ std.}
+\label{tab:err}
+\setlength{\tabcolsep}{4pt}\footnotesize
+\begin{tabular}{lcccc}
+\toprule
+Predictor & NMAE $\downarrow$ & NME & Spearman & AUC\\
+\midrule
+Haiku, panel rating  & $0.093\pm0.057$ [0.068, 0.118] & $+0.030\pm0.105$ & $+0.21$ & 0.56\\
+Haiku, final rating  & $0.085\pm0.063$ [0.058, 0.115] & $-0.020\pm0.104$ & n/a (constant) & 0.50\\
+Sonnet, panel rating & $\mathbf{0.079}\pm0.061$ [0.054, 0.106] & $\mathbf{+0.004}\pm0.100$ & $\mathbf{+0.48}$ & \textbf{0.67}\\
+Sonnet, final rating & $0.090\pm0.064$ [0.061, 0.119] & $+0.010\pm0.110$ & $+0.26$ & 0.53\\
+\midrule
+Constant at the median human mean & $0.085\pm0.060$ & -- & -- & --\\
+One human vs another human        & $0.180\pm0.125$ & -- & $+0.12$ & --\\
+One human vs mean human           & $0.102\pm0.065$ & -- & -- & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Findings}
+\begin{itemize}
+\item \textbf{Model capability matters.} Haiku's scores did not separate papers. Its integer final
+rating was the same for all 20 papers, so Spearman is undefined. Sonnet at high effort gave the
+first signal whose CI excludes zero, at about the level of human--human agreement.
+\item \textbf{NMAE rewards the middle.} An oracle constant at the median human mean scores 0.085.
+That beats one human against another (0.180), and Haiku's constant output scores the same.
+NMAE must therefore be read together with a ranking metric. Only Sonnet's panel rating beats the
+constant \emph{and} ranks papers.
+\item \textbf{No bias after calibration.} NME is close to zero for both models, so the 2.10 bands
+no longer shift scores up or down on this pool.
+\item \textbf{The integer decision loses signal.} Rounding the panel mean to an integer decision
+lowers Spearman from 0.48 to 0.26 for Sonnet. For ranking, the continuous panel rating should be the
+primary score.
+\item \textbf{Recognition.} The three papers Sonnet recognized all scored high (EIC pool position
+65--70) regardless of outcome. Removing them changes the Sonnet results little.
+\item \textbf{Cost.} About \$0.86 per paper for Haiku and \$1.97 per paper for Sonnet at high
+effort.
+\end{itemize}
+For reference only: CSPaper reports NMAE 0.128, NME $-0.015$ and SRC 0.658 for Claude Sonnet 5.5
+on ICLR main. That benchmark's sample size and paper overlap are unknown, so the numbers are not
+directly comparable with ours.
+
+\section{Related benchmarks}\label{sec:related}
+\begin{description}
+\item[paperreview.ai.] Score agreement and acceptance AUC on ICLR; our protocol follows it.
+\item[CSPaper.] A score-prediction leaderboard with NMAE, NME, SRC and average word count; we
+adopt its error metrics.
+\item[CoCoReviewBench.] (Deng et al., arXiv 2605.07905, CC BY 4.0.) This benchmark scores review
+\emph{content} rather than scores. It covers 3{,}900 ICLR 2017--2025 and NeurIPS 2021--2024 papers
+with human references filtered for correctness through reviewer--reviewer and reviewer--author
+conflicts, using the meta-review as context. An LLM judge scores correctness, thoroughness,
+grounding, verifiability and clarity per category, and the benchmark also reports category
+completeness. Its findings are that lexical metrics reward overlap rather than correctness, that
+reasoning models match or beat humans on grounding and verifiability, and that AI reviews are broad
+but shallow. Integrating it needs a GPU-served split/classify model and a judge API; its paper text
+must also be blinded, and every year predates current training cutoffs.
+\item[IntelLabs AI-Peer-Review-Detection-Benchmark.] About 789k paired human and AI reviews for
+\emph{detecting} AI-written reviews. It has a different goal and a restrictive license (internal
+R\&D only), so we do not use it.
+\end{description}
+
+\section{Limitations and future work}
+\begin{itemize}
+\item \textbf{Small samples.} With 20 papers the intervals are wide, so these are pilot numbers.
+The planned balanced evaluation has 86 papers (45 train, 41 test) and fits the seven-dimension
+regression.
+\item \textbf{One venue and one year.} Calibration covers ICLR 2026 only. Other venues use
+assumed or secondary scales.
+\item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers
+separately but cannot detect unreported recognition.
+\item \textbf{Scores are not the review.} Ranking agreement says nothing about whether the stated
+weaknesses are correct. A content-level evaluation (for example CoCoReviewBench) is the natural
+next step.
+\item \textbf{Human labels are noisy.} On our pilot papers, one human agrees with another at only
+Spearman 0.12. Mean human ratings are a weak target, and acceptance is a coarse one.
+\end{itemize}
+
+\section*{Reproducibility}
+The skill, the scoring script, the evaluation harness, per-paper scores and paper IDs are in the
+repository. Manuscripts and review text are not committed. Key commands:
+{\small\begin{verbatim}
+python3 -m unittest discover -s tests -v
+python3 evals/iclr_calibration.py features RESULTS_DIR --out features.jsonl
+python3 evals/iclr_calibration.py pilot sample.jsonl features.jsonl
+python3 evals/iclr_calibration.py evaluate sample.jsonl features.jsonl \
+        --splits splits.json
+\end{verbatim}}
+Paid runs use the workflow \code{.github/workflows/}\allowbreak\code{iclr-calibration.yml},
+configured by \code{evals/iclr\_run.json}.
+
+\appendix
+\section{Per-paper pilot scores}
+\begin{center}\small
+\begin{tabular}{llrrrrrc}
+\toprule
+& & Human & \multicolumn{2}{c}{Haiku} & \multicolumn{2}{c}{Sonnet high} & \\
+\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Paper & Decision & mean & panel & pool & panel & pool & Recognized\\
+\midrule
+\texttt{AIKURJjxXT} & Withdrawn & 2.50 & 3.2 & 40 & 2.8 & 40 &  \\
+\texttt{KtocialdxS} & Reject & 2.67 & 3.4 & 48 & 3.0 & 45 &  \\
+\texttt{8xcmfwomnI} & Reject & 3.00 & 3.0 & 40 & 3.0 & 42 &  \\
+\texttt{g4HpTtgsn2} & Withdrawn & 3.00 & 3.2 & 46 & 2.6 & 38 &  \\
+\texttt{E5mL07Fbq8} & Reject & 3.33 & 3.0 & 38 & 2.6 & 42 &  \\
+\texttt{Z6z4AnXGhw} & Reject & 3.50 & 3.4 & 50 & 3.2 & 50 &  \\
+\texttt{gUw8n109ki} & Withdrawn & 3.50 & 3.2 & 50 & 2.6 & 40 &  \\
+\texttt{0xObmDmsKY} & Reject & 4.00 & 3.2 & 46 & 3.0 & 45 &  \\
+\texttt{BxeJLOrKDF} & Withdrawn & 4.00 & 3.2 & 45 & 3.2 & 45 &  \\
+\texttt{Jw7khYzYzl} & Reject & 4.00 & 3.6 & 45 & 4.0 & 70 & \checkmark \\
+\texttt{9jcB40wjk3} & Accept & 4.40 & 2.8 & 40 & 2.8 & 38 &  \\
+\texttt{be4ey66fhk} & Reject & 4.40 & 3.2 & 45 & 3.4 & 52 &  \\
+\texttt{9R2iUHhVfr} & Reject & 4.50 & 3.4 & 50 & 3.6 & 65 & \checkmark \\
+\texttt{PJdMrK79Mo} & Accept & 4.50 & 3.6 & 48 & 3.4 & 50 &  \\
+\texttt{qfW4IrUuig} & Reject & 4.50 & 3.0 & 40 & 2.8 & 40 &  \\
+\texttt{Lvkbe0CgmZ} & Reject & 5.00 & 3.4 & 40 & 3.2 & 45 &  \\
+\texttt{tlYSbw5GXY} & Accept & 5.20 & 3.2 & 38 & 3.4 & 55 &  \\
+\texttt{euMVC1DO4k} & Accept & 6.00 & 3.6 & 50 & 3.8 & 68 & \checkmark \\
+\texttt{kwro5432AI} & Desk rej. & 6.00 & 3.2 & 45 & 3.0 & 42 &  \\
+\texttt{rubeJmT1XM} & Accept & 6.00 & 3.2 & 40 & 3.0 & 40 &  \\
+\bottomrule
+\end{tabular}
+\end{center}
+Human mean is on the ICLR 2026 scale (0--10). ``Panel'' is the reviewers' mean Overall (1--6) and
+``pool'' is the EIC pool position (0--100).
+
+\end{document}
