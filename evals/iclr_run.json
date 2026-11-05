@@ -1,1 +1,1 @@
-{"mode": "review", "pick": "stratified", "split": "all", "offset": 0, "limit": 20, "model": "claude-haiku-5-5", "max_parallel": 10, "budget": 3, "note": "pilot 2: skill 2.10, normalized arXiv-only text"}
+{"mode": "review", "pick": "stratified", "split": "all", "offset": 0, "limit": 20, "model": "claude-sonnet-5-5", "max_parallel": 10, "budget": 6, "note": "pilot 3: same 20 papers as pilot 2, Sonnet"}
