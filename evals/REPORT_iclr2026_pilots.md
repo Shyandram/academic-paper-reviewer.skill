@@ -274,11 +274,39 @@ Numbers: `evals/iclr2026_pilot4_hits.json`.
 - The checker dropped 0.85 Scout items per paper, losing 2 hits.
 - The Devil's Advocate now attacks the argument chain rather than listing issues, and almost
   never matches a human issue; its role is the DA-CRITICAL ceiling (one raised and upheld).
-- **Ratings ranked worse.** Spearman with the human mean: panel rating 0.32 [−0.19, 0.74]
-  (pilot 3: 0.48; paired difference −0.15 [−0.48, 0.17]), EIC-weighted 0.36, the checker's
-  independent rating 0.51 (AUC 0.67, panel 0.55), panel + checker as a fifth voice 0.43.
-  Ratings were compressed: R1 gave 2 on 13 papers, R4 gave 3 on 17, and 10 papers have a
-  panel rating of 2.75. Individual reviewers: R1 0.17, R2 0.12, R3 0.38, R4 0.26.
+- **Ratings ranked worse** (paired difference of the panel rating, pilot 4 − pilot 3:
+  −0.15 [−0.48, 0.17]; the two pilots' panel ratings correlate at 0.78). Ratings were
+  compressed: R1 gave 2 on 13 papers, R4 gave 3 on 17, and 10 papers have a panel rating of
+  2.75. Individual reviewers (Spearman): R1 0.17, R2 0.12, R3 0.38, R4 0.26 (pilot 3: 0.27,
+  0.35, 0.46, 0.41).
+
+Ranking and error, same papers (`iclr_calibration.py pilot`; numbers:
+`evals/iclr2026_pilot4_scores.json`):
+
+| Predictor | Pilot 3 Spearman / AUC | Pilot 4 Spearman [95% CI] / AUC | Pilot 3 NMAE / NME | Pilot 4 NMAE / NME |
+|---|---|---|---|---|
+| Panel rating | **0.48** / **0.67** | 0.32 [−0.19, 0.74] / 0.55 | **0.079** / +0.004 | 0.083 / −0.028 |
+| Final integer rating (ICLR scale) | 0.26 / 0.53 | 0.24 [−0.36, 0.70] / 0.47 | 0.090 / +0.010 | 0.102 / −0.050 |
+| Constant (median) | — | — | 0.085 | 0.085 |
+
+| Stage | Pilot 3 Spearman / AUC | Pilot 4 Spearman / AUC | Panel − stage, pilot 4 [95% CI] |
+|---|---|---|---|
+| Panel rating | 0.48 / 0.67 | 0.32 / 0.55 | — |
+| Reviewers' pool position | 0.45 / 0.63 | 0.35 / 0.54 | −0.03 [−0.24, 0.19] |
+| EIC-weighted rating | 0.42 / 0.63 | 0.36 / 0.57 | −0.04 [−0.20, 0.11] |
+| EIC pool position | 0.30 / 0.55 | 0.35 / 0.54 | −0.03 [−0.24, 0.19] |
+| Checker-weighted rating | — | 0.38 / 0.57 | −0.06 [−0.22, 0.10] |
+| Checker's pool position | — | 0.39 / 0.59 | −0.07 [−0.35, 0.19] |
+| **Checker's rating** | — | **0.51 / 0.67** | −0.19 [−0.73, 0.32] |
+| Panel rating, voters + checker | — | 0.43 / 0.60 | −0.11 [−0.28, 0.02] |
+
+- The panel rating barely beats the constant on NMAE (0.083 vs 0.085); the integer rating is
+  worse than the constant and ranks at chance (AUC 0.47), and is slightly low (NME −0.05).
+- Unlike pilot 3, the later stages rank slightly better than the panel, because the panel is
+  weaker; no difference excludes 0.
+- Decisions: 3 on 15 papers (leaning 2 on 7, leaning 4 on 6), 2 on 4, 4 on 1 (pilot 3: 3 on
+  17). The EIC changed the starting decision on 1 paper (pilot 3: 0). 4 papers recognized
+  (pilot 3: 3), no injection found.
 - Reading: the hit count comes from the Gap Scout; the 2.11 panel changes cost money and some
   ranking signal without adding hits. The fresh-context checker's own estimate was the best
   single rating signal. n = 20; all intervals are wide.

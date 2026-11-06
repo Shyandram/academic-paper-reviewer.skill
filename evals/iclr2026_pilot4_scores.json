@@ -1,0 +1,219 @@
+{
+  "n": 20,
+  "n_accepted": 5,
+  "scale": [
+    0,
+    10
+  ],
+  "results": [
+    {
+      "metric": "spearman(panel rating, mean human)",
+      "value": 0.32,
+      "ci95": [
+        -0.191,
+        0.737
+      ]
+    },
+    {
+      "metric": "AUC(panel rating -> accept)",
+      "value": 0.547
+    },
+    {
+      "metric": "NMAE(panel rating, mean human)",
+      "value": 0.083,
+      "std": 0.077,
+      "ci95": [
+        0.052,
+        0.121
+      ]
+    },
+    {
+      "metric": "NME(panel rating, mean human)",
+      "value": -0.028,
+      "std": 0.11,
+      "ci95": [
+        -0.079,
+        0.017
+      ]
+    },
+    {
+      "metric": "spearman(ICLR-scale rating, mean human)",
+      "value": 0.242,
+      "ci95": [
+        -0.355,
+        0.701
+      ]
+    },
+    {
+      "metric": "AUC(ICLR-scale rating -> accept)",
+      "value": 0.473
+    },
+    {
+      "metric": "NMAE(ICLR-scale rating, mean human)",
+      "value": 0.102,
+      "std": 0.091,
+      "ci95": [
+        0.064,
+        0.144
+      ]
+    },
+    {
+      "metric": "NME(ICLR-scale rating, mean human)",
+      "value": -0.05,
+      "std": 0.127,
+      "ci95": [
+        -0.111,
+        -0.0
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "stage": "EIC-weighted rating",
+      "spearman": 0.361,
+      "auc": 0.567,
+      "panel_minus_stage": -0.041,
+      "ci95": [
+        -0.203,
+        0.113
+      ]
+    },
+    {
+      "stage": "reviewers' pool position",
+      "spearman": 0.353,
+      "auc": 0.54,
+      "panel_minus_stage": -0.033,
+      "ci95": [
+        -0.235,
+        0.192
+      ]
+    },
+    {
+      "stage": "EIC pool position",
+      "spearman": 0.353,
+      "auc": 0.54,
+      "panel_minus_stage": -0.033,
+      "ci95": [
+        -0.235,
+        0.192
+      ]
+    },
+    {
+      "stage": "panel rating without DA",
+      "spearman": 0.32,
+      "auc": 0.547,
+      "panel_minus_stage": 0.0,
+      "ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "stage": "reviewers' pool position without DA",
+      "spearman": 0.353,
+      "auc": 0.54,
+      "panel_minus_stage": -0.033,
+      "ci95": [
+        -0.235,
+        0.192
+      ]
+    },
+    {
+      "stage": "checker-weighted rating",
+      "spearman": 0.376,
+      "auc": 0.573,
+      "panel_minus_stage": -0.055,
+      "ci95": [
+        -0.223,
+        0.104
+      ]
+    },
+    {
+      "stage": "checker's pool position",
+      "spearman": 0.387,
+      "auc": 0.593,
+      "panel_minus_stage": -0.066,
+      "ci95": [
+        -0.347,
+        0.189
+      ]
+    },
+    {
+      "stage": "checker's rating",
+      "spearman": 0.514,
+      "auc": 0.673,
+      "panel_minus_stage": -0.194,
+      "ci95": [
+        -0.73,
+        0.322
+      ]
+    },
+    {
+      "stage": "pool position, voters + checker",
+      "spearman": 0.34,
+      "auc": 0.56,
+      "panel_minus_stage": -0.02,
+      "ci95": [
+        -0.234,
+        0.197
+      ]
+    },
+    {
+      "stage": "panel rating, voters + checker",
+      "spearman": 0.434,
+      "auc": 0.6,
+      "panel_minus_stage": -0.114,
+      "ci95": [
+        -0.282,
+        0.022
+      ]
+    },
+    {
+      "stage": "ICLR-scale rating",
+      "spearman": 0.242,
+      "auc": 0.473,
+      "panel_minus_stage": 0.078,
+      "ci95": [
+        -0.244,
+        0.431
+      ]
+    }
+  ],
+  "reference": [
+    {
+      "metric": "NMAE(one human, another human)",
+      "value": 0.18,
+      "std": 0.125,
+      "ci95": [
+        0.13,
+        0.23
+      ]
+    },
+    {
+      "metric": "NMAE(one human, mean human)",
+      "value": 0.102,
+      "std": 0.065,
+      "ci95": [
+        0.074,
+        0.131
+      ]
+    },
+    {
+      "metric": "NMAE(constant median, mean human)",
+      "value": 0.085,
+      "std": 0.06,
+      "ci95": [
+        0.059,
+        0.112
+      ]
+    },
+    {
+      "metric": "spearman(one human, another human)",
+      "value": 0.122
+    },
+    {
+      "metric": "AUC(one human -> accept)",
+      "value": 0.58
+    }
+  ]
+}
