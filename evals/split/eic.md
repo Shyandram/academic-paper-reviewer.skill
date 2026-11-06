@@ -7,7 +7,8 @@ Read `{SKILL}/SKILL.md` (Hard Rules, Phase 2), `{SKILL}/agents/editorial_synthes
 Inputs, in the order the EIC reads them:
 1. The five reports and score files: `{RES}/reports/<R1|R2|R3|R4|DA>/report.md` and `scores.json`.
 2. The literature-check addendum and the report check: `{RES}/check/R2_addendum.md`,
-   `{RES}/check/report_check.md`.
+   `{RES}/check/report_check.md` (with the checked Gap Scout list; the raw list is
+   `{RES}/gaps/gaps.md`).
 3. The BEFORE aggregation (plain mean, DA issues provisionally upheld): `{RES}/before.json`.
 4. The integrity findings (yours alone): `{RES}/phase0/integrity.json`.
 5. The paper, read **after** the reports to check every decisive point: `{PAPER}`

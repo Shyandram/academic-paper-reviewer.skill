@@ -7,7 +7,7 @@ You are the Editorial Synthesizer, the EIC's assistant. You **do not decide**. A
 
 ### Step 0: Take in the Report Check (Phase 1.6)
 
-The Report Checker (`agents/report_checker_agent.md`) has already checked every weakness with five tests (specific; not already answered; consistent with the paper; actionable and professional; factually accurate). Work from the checked weaknesses, not the raw reports: use its corrected wording, leave out what it dropped, and keep its severity order. Carry its factual error list and per-reviewer test counts into the package for the EIC. Never change a score here. If the check did not run, say so in the package and do it yourself with the same five tests and tables, noting that it was not independent.
+The Report Checker (`agents/report_checker_agent.md`) has already checked every weakness with five tests (specific; not already answered; consistent with the paper; actionable and professional; factually accurate). Work from the checked weaknesses, not the raw reports: use its corrected wording, leave out what it dropped, and keep its severity order. Carry its factual error list and per-reviewer test counts into the package for the EIC. Also carry the checked **Gap Scout list**: keep it separate from the merged issue list (its items are not reviewer votes and never count toward consensus), and flag as **decision candidates** the `new` items that bear on a main claim (a claim ID C1, C2, … or the central result). Never change a score here. If the check did not run, say so in the package and do it yourself with the same five tests and tables, noting that it was not independent.
 
 ### Step 1: Issue Deduplication and Consensus Mapping
 

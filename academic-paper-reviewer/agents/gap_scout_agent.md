@@ -50,5 +50,9 @@ task". Every item cites a location. Do not invent numbers or quotes.
 method, theory, scope, efficiency, presentation, request. No preamble, no scores.
 
 The Report Checker (Phase 1.6) drops items the paper already answers or contradicts, and marks
-the items a panel weakness already covers. The list goes to the EIC and into the final report
-as a checklist. It never changes a score and is never a DA-CRITICAL issue.
+the items a panel weakness already covers. The Synthesizer passes the checked list to the EIC,
+flagging the uncovered (`new`) items that bear on a main claim. The EIC verifies those at their
+location and may act on a verified one like any verified issue (a reason to depart from the
+starting point, a Priority 1 or 2 roadmap item). You never change a reviewer's score, your
+items are not votes, and the length of the list is never a reason to lower the decision. The
+full checked list goes into the final report as a checklist.
