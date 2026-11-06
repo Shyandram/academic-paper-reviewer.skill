@@ -9,14 +9,14 @@
 ## Submission ID: [if available]
 ## Date: [YYYY-MM-DD]
 ## Target Venue: [venue] | Paper Type: [type]
-## Review Team (fictional personas): EIC (meta-reviewer) [name]; R1 Methodology, R2 Domain, R3 Perspective, R4 Generalist, DA [names]
+## Review Team (fictional personas): EIC (meta-reviewer) [name]; R1 Methodology, R2 Domain, R3 Perspective, R4 Generalist [names]; Gap Scout and Report Checker (runs the Devil's Advocate challenge) are functions, not personas
 
 ---
 
 ## Decision: [Strong Accept (6) / Accept (5) / Borderline Accept (4) / Borderline Reject (3) / Reject (2) / Strong Reject (1)]
 
 **Primary score: panel rating [x.xx]** · panel pool position [P] · decision [n, leaning m]
-**Official ratings** (shown to authors): R1 [n], R2 [n], R3 [n], R4 [n] → mean [x.xx] · DA [n] (shown, does not vote) · official composite [xx.x]
+**Official ratings** (shown to authors): R1 [n], R2 [n], R3 [n], R4 [n] → mean [x.xx] · official composite [xx.x]
 **EIC assessment** (internal): weighted rating [x.xx] → starting point [n] · weighted composite [xx.x] → [band] (cross-check) · **DA ceiling**: [none / 4 / 3] · **Final (EIC)**: [n]
 **Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
 
@@ -40,7 +40,6 @@
 | R2 (Domain) | | | | |
 | R3 (Perspective) | | | | |
 | R4 (Generalist) | | | | |
-| DA | | | | |
 
 ### DA-CRITICAL Rulings
 | Issue | AC test: fatal on its own? | Ruling | Resolvable by |
@@ -58,8 +57,8 @@
 
 *Paste the markdown output of `python3 scripts/aggregate_scores.py scores.json --venue <target>` (run with the EIC's `eic_weight` values): the reviewer-weight table and the official/EIC-assessment dimension table. Or fill them in by hand with the same formulas.*
 
-| Dimension | R1 | R2 | R3 | R4 | DA | Official (raw mean) | EIC assessment (weighted) | Spread |
-|-----------|----|----|----|----|----|---------------------|----------------------|--------|
+| Dimension | R1 | R2 | R3 | R4 | Official (raw mean) | EIC assessment (weighted) | Spread |
+|-----------|----|----|----|----|---------------------|----------------------|--------|
 | Technical Rigor | | | | | | | | |
 | Clarity & Presentation | | | | | | | | |
 | Novelty & Originality | | | | | | | | |
@@ -103,8 +102,8 @@ Thank you for submitting your paper "[Title]" to [venue].
 2. [Concern]
 3. [Concern]
 
-[If Devil's Advocate raised CRITICAL issues:]
-**Critical Challenge (Devil's Advocate):**
+[If the Devil's Advocate challenge raised CRITICAL issues:]
+**Critical Challenge (Devil's Advocate, run by the Report Checker):**
 [Summarize the DA's strongest objection. Explain why it must be addressed.]
 
 **Decision: [Decision]**
@@ -140,7 +139,7 @@ Editor-in-Chief (meta-reviewer)
 [For each dimension flagged ⚠ (spread > 20): which reviewers diverge, why, and which view the editor adopts]
 
 ### Devil's Advocate Highlights
-| Issue ID | Severity | Issue | Raised by Others? | Ruling | Resolvable by |
+| Issue ID | Severity | Issue | Raised by a reviewer? | Ruling | Resolvable by |
 |----------|----------|-------|-------------------|--------|---------------|
 | DA-C1 | CRITICAL | [issue] | [Yes/No; which reviewer] | [Upheld / Downgraded to MAJOR: reason] | [Clarification/minor additions / New data/experiments] |
 | DA-M1 | MAJOR | [issue] | [Yes/No] | n/a | n/a |

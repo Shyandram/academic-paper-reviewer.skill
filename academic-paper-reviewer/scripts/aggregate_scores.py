@@ -445,7 +445,7 @@ def to_markdown(res):
         pool = (f", panel pool position **{res['panel_pool_position']}**"
                 if res.get("panel_pool_position") is not None else "")
         lines += ["", f"**Primary score: panel rating {res['panel_rating']:.2f}**{pool} "
-                  "(plain mean of the voting reviewers; the Devil's Advocate does not vote)"
+                  "(plain mean of the voting reviewers R1-R4)"
                   + (f" · decision **{res['decision_with_lean']}**" if res.get("decision_with_lean") else "")]
     overalls = [(p["role"], p["overall"]) for p in res["per_reviewer"]
                 if p["overall"] is not None and p.get("votes", True)]

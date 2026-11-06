@@ -55,6 +55,23 @@ class Extraction(unittest.TestCase):
         self.assertEqual(sorted(v[1] for v in key.values() if v[0] == "A"), sorted(io.ROLES))
 
 
+class CheckerDevilsAdvocate(unittest.TestCase):
+    def test_da_comes_from_the_check_from_skill_2_11(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            for r in io.VOTING:
+                (tmp / "reports" / r).mkdir(parents=True)
+                (tmp / "reports" / r / "report.md").write_text(REPORT)
+            self.assertEqual(sorted(io.ai_reports(tmp)), sorted(io.VOTING))
+            (tmp / "check").mkdir()
+            (tmp / "check" / "da.md").write_text(DA)
+            reps = io.ai_reports(tmp)
+            self.assertEqual(sorted(reps), sorted(io.ROLES))
+            self.assertIn("confounded", io.weaknesses(reps["DA"], "DA"))
+        finally:
+            shutil.rmtree(tmp)
+
+
 class GapScout(unittest.TestCase):
     def test_gap_list_is_an_optional_source(self):
         tmp = Path(tempfile.mkdtemp())

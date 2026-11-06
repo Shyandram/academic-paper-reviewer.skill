@@ -118,25 +118,35 @@ class SplitPipeline(unittest.TestCase):
             s = {"role": "ignored", "confidence": 4, "overall": 3 + (i % 2), "pool_position": 40 + 5 * i,
                  "scores": {k: 50 + i for k in ("technical_rigor", "clarity", "novelty", "significance",
                                                 "experimental_validation", "reproducibility", "ethics")},
-                 "da_critical": [], "recognized": False}
-            if key == "DA":
-                s["da_critical"] = [{"id": "DA-C1", "resolvable_without_new_data": True}]
+                 "recognized": False}
             (d / "scores.json").write_text(json.dumps(s))
             (d / "report.md").write_text(f"report {key}")
 
+    def write_da(self):
+        """The check's Devil's Advocate challenge (skill 2.11): no scores, one CRITICAL."""
+        self.p["check"].mkdir(parents=True, exist_ok=True)
+        (self.p["check"] / "da.json").write_text(json.dumps(
+            {"da_critical": [{"id": "DA-C1", "resolvable_without_new_data": True}], "da_major": []}))
+        (self.p["check"] / "da.md").write_text("report DA")
+
     def test_before_and_finish(self):
         self.write_reviewers()
-        run(["before"] + self.base)
+        run(["before"] + self.base)   # before the check: no DA issues yet
         before = json.loads((self.p["res"] / "scores_before.json").read_text())
         self.assertEqual([r["role"] for r in before["reviewers"]],
                          [v[0] for v in rs.ROLES.values()])
+        self.assertEqual(len(before["reviewers"]), 4)
+        self.assertEqual(before["da_critical"], [])
+        self.write_da()
+        run(["before"] + self.base)   # again after the check
+        before = json.loads((self.p["res"] / "scores_before.json").read_text())
         self.assertTrue(before["da_critical"][0]["upheld"])
         self.assertTrue((self.p["res"] / "before.json").exists())
 
         self.p["eic"].mkdir(parents=True)
         (self.p["eic"] / "eic.json").write_text(json.dumps({
             "final_overall": 4, "eic_pool_position": 61,
-            "eic_weights": {"R1": 1.5, "R2": 1.0, "R3": 0.5, "R4": 1.0, "DA": 1.0},
+            "eic_weights": {"R1": 1.5, "R2": 1.0, "R3": 0.5, "R4": 1.0},
             "da_rulings": [{"id": "DA-C1", "upheld": False, "resolvable_without_new_data": True}],
             "top_concerns": ["a"], "recognized": False, "injection_found": None, "notes": ""}))
         (self.p["eic"] / "decision.md").write_text("decision text")
@@ -163,7 +173,8 @@ class SplitPipeline(unittest.TestCase):
         review = (self.p["res"] / "review.md").read_text()
         self.assertIn("report DA", review)
         self.assertIn("decision text", review)
-        self.assertIn("(missing)", review)  # no check phase output
+        self.assertIn("(missing)", review)  # no report check output
+        self.assertIn("Devil's Advocate challenge", review)
         self.assertEqual(summary["pipeline"], "split")
 
     def test_finish_records_check_pipeline(self):

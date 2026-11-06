@@ -5,7 +5,7 @@
 keep `pipeline: single` with skill 2.10. Only the independent check phase is carried into the
 next skill version.
 
-The single-agent evaluation (`evals/review_prompt.md`) plays all five reviewers in one
+The single-agent evaluation (`evals/review_prompt.md`) plays all four reviewers in one
 context, so every reviewer after the first has already read the earlier reports. In the
 Sonnet pilot the reviewers' composite scores agreed with each other at Spearman 0.88
 (human reviewers: 0.12–0.25). This pipeline gives each phase its own fresh `claude -p`
@@ -14,9 +14,9 @@ context instead. The skill itself is unchanged.
 | Phase | Context gets | Writes |
 |---|---|---|
 | `phase0` | the unredacted paper, SKILL.md, field analyst, error audit §3 | `phase0/`: card, paper memory, `panel.json`, redacted copy, integrity findings, fingerprint |
-| `R1`–`R4`, `DA` (parallel) | the shared prefix plus its own role file; Read rules deny the other reports, the unredacted paper and the integrity findings; no Bash | `reports/<role>/report.md`, `scores.json` |
-| `before` (script) | the five score files | `scores_before.json`, `before.json` |
-| `check` | the reports, the redacted copy, the fingerprint | `check/R2_addendum.md` (Phase 1.5), `check/report_check.md` (Phase 1.6) |
+| `R1`–`R4` (parallel) | the shared prefix plus its own role file; Read rules deny the other reports, the unredacted paper and the integrity findings; no Bash | `reports/<role>/report.md`, `scores.json` |
+| `before` (script, after the reviewers and again after the check) | the four score files and `check/da.json` | `scores_before.json`, `before.json` |
+| `check` | the reports, the redacted copy, the fingerprint | `check/R2_addendum.md` (Phase 1.5), `check/report_check.md`, then the Devil's Advocate challenge `check/da.md` and `check/da.json` (Phase 1.6) |
 | `eic` | the reports, the check, `before.json`, the integrity findings, then the paper | `eic/decision.md`, `eic/eic.json`, `evidence.json` |
 | `finish` (script) | `eic.json` | `scores.json`, `aggregate.json`, `summary.json`, `review.md`, `run.json` |
 
@@ -26,7 +26,7 @@ context instead. The skill itself is unchanged.
 **Prompt cache.** The shared prefix (skill text, panel card, paper memory, redacted paper;
 about 190k characters for a typical paper) is passed with `--append-system-prompt-file`,
 and `--exclude-dynamic-system-prompt-sections` moves the per-machine sections out of the
-system prompt, so the five reviewer system prompts are byte-identical. The first reviewer
+system prompt, so the four reviewer system prompts are byte-identical. The first reviewer
 starts `WARMUP` seconds before the others so they read the prefix from the cache.
 
 **Cost log.** `runs/<phase>.json` is each phase's CLI result and `runs/<phase>.wall.json`
@@ -40,7 +40,7 @@ the check independent, as the skill's Independent Check does:
 
 | Phase | Context |
 |---|---|
-| `panel` | one context: Phase 0 and the five reviewers (`panel.md`); the session is kept |
+| `panel` | one context: Phase 0 and the four reviewers (`panel.md`); the session is kept |
 | `check` | fresh: the Report Checker (`agents/report_checker_agent.md`); the unredacted paper and the integrity findings are denied |
 | `novelty` | the `panel` session resumed: Phase 1.7, Reviewer 2 may revise Novelty once (`novelty.md`); then `before` again |
 | `eic` | the same session resumed (`eic_resume.md` + `eic.md`) |

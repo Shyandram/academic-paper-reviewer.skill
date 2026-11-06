@@ -20,7 +20,7 @@ Tool: `scripts/related_search.py` (standard library; uses the arXiv API). It can
 
 ### 1. Fingerprint the paper (Phase 0, Field Analyst)
 
-The searches themselves run in **Phase 1.5, after the five reports are drafted**: reviewers read the whole paper first, appendix and supplement included, so the search adds to their reading rather than competing with it.
+The searches themselves run in **Phase 1.5, after the four reports are drafted**: reviewers read the whole paper first, appendix and supplement included, so the search adds to their reading rather than competing with it.
 
 ```bash
 python3 scripts/related_search.py fingerprint --paper <paper text file> --out <work dir>/fingerprint.json

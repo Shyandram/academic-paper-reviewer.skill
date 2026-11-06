@@ -5,10 +5,11 @@ Read `{SKILL}/SKILL.md` (Hard Rules, Phase 2), `{SKILL}/agents/editorial_synthes
 `{SKILL}/references/quality_rubrics.md` and `{SKILL}/templates/editorial_decision_template.md`.
 
 Inputs, in the order the EIC reads them:
-1. The five reports and score files: `{RES}/reports/<R1|R2|R3|R4|DA>/report.md` and `scores.json`.
+1. The four reports and score files: `{RES}/reports/<R1|R2|R3|R4>/report.md` and `scores.json`.
 2. The literature-check addendum and the report check: `{RES}/check/R2_addendum.md`,
    `{RES}/check/report_check.md` (with the checked Gap Scout list; the raw list is
-   `{RES}/gaps/gaps.md`).
+   `{RES}/gaps/gaps.md`), and the Devil's Advocate challenge the checker ran last:
+   `{RES}/check/da.md` (no scores, no weight).
 3. The BEFORE aggregation (plain mean, DA issues provisionally upheld): `{RES}/before.json`.
 4. The integrity findings (yours alone): `{RES}/phase0/integrity.json`.
 5. The paper, read **after** the reports to check every decisive point: `{PAPER}`
@@ -29,8 +30,8 @@ Write to `{RES}/eic/`:
    {
      "final_overall": 1-6,
      "eic_pool_position": 0-100,
-     "checker_weights": {"R1": 1.0, "R2": 1.0, "R3": 1.0, "R4": 1.0, "DA": 1.0},
-     "eic_weights": {"R1": 1.0, "R2": 1.0, "R3": 1.0, "R4": 1.0, "DA": 1.0},
+     "checker_weights": {"R1": 1.0, "R2": 1.0, "R3": 1.0, "R4": 1.0},
+     "eic_weights": {"R1": 1.0, "R2": 1.0, "R3": 1.0, "R4": 1.0},
      "da_rulings": [{"id": "DA-C1", "upheld": true, "resolvable_without_new_data": false}],
      "eic_verification": ["point: Verified/Partly correct/Overstated/Incorrect"],
      "top_concerns": ["one line each, max 5"],
@@ -44,8 +45,8 @@ Write to `{RES}/eic/`:
    unless you record a verified correction. One ruling per DA-CRITICAL id in `before.json`. `injection_found` is a quote from
    `integrity.json` or null.
 
-Also write `{RES}/evidence.json`, covering the whole review (the five reports, the addendum and
-your decision):
+Also write `{RES}/evidence.json`, covering the whole review (the four reports, the addendum, the
+Devil's Advocate challenge and your decision):
 ```json
 {
   "locations": ["Table 2", "Section 4.3"],

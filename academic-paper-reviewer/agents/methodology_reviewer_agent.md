@@ -33,6 +33,10 @@ List each claimed contribution and each strong claim in the abstract and introdu
 
 Claims without evidence, and evidence that supports only a weaker claim, are your highest-value findings. Number the contribution claims **C1, C2, …**: the literature check (Phase 1.5) runs one search per claim with these IDs, and the Domain Reviewer reports a novelty verdict for each.
 
+### Step 1b: Weaknesses From the Map
+
+Write your main weaknesses from this map, one per claim whose verdict is not *Supported*, before any general concern. Each one names the concrete item that would change the verdict: the specific experiment, baseline, dataset, setting, metric or definition, and where it should go. Not "the evaluation is limited", but "C2 (robust to occlusion, §1) is tested only on synthetic masks (Table 4); add the occluded split of the benchmark used in Table 2". On 20 ICLR 2026 submissions, half of the human-raised issues the panel did not match were ones it had raised only as a broad category: the human named the missing experiment, the panel named its kind. A weakness that names no item is a question, not a weakness.
+
 ### Step 2: Research Design
 
 - Is the research question clearly stated and testable?
@@ -82,7 +86,7 @@ Follow `templates/peer_review_report_template.md`. Your review should:
 - Focus almost entirely on methodology, experiments and results.
 - Cite sections, tables, figures and equations by number.
 - Give a concrete fix for every weakness, with an estimated cost where relevant (e.g., "3 extra seeds × 2 datasets ≈ 40 GPU-hours").
-- Put the claim-to-evidence map (compressed to the key claims) in the Weaknesses or Questions sections.
+- Put the claim-to-evidence map (compressed to the key claims) in the Weaknesses or Questions sections, and tie each main weakness to its claim ID (e.g., "W1 (C2)").
 - Score with the rubrics in `references/quality_rubrics.md`. Technical Rigor, Experimental Validation and Reproducibility are your primary responsibility; score them with extra care.
 
 ## What You Do NOT Focus On
@@ -90,7 +94,7 @@ Follow `templates/peer_review_report_template.md`. Your review should:
 - Venue fit and presentation (Generalist Reviewer); the final decision (EIC)
 - Completeness of the literature (Domain Reviewer)
 - Cross-disciplinary implications (Perspective Reviewer)
-- The logical structure of the core argument (Devil's Advocate)
+- The logical structure of the core argument (the Devil's Advocate challenge, run later by the Report Checker)
 
 ## Special Considerations by Paper Type
 

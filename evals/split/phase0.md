@@ -14,11 +14,11 @@ Run, in this order:
 
 Write to `{RES}/phase0/`:
 - `card.md`: the Reviewer Configuration Card (discipline, paper type, venue tier and maturity,
-  five fictional reviewer personas plus the EIC, each with its focus) and any assumptions.
+  four fictional reviewer personas plus the EIC, each with its focus) and any assumptions.
 - `paper_memory.md`: the paper memory exactly as Section 3 of `error_audit.md` defines it
   (claims C1, C2, … with locations; setup facts, each located or "not stated"; headline numbers
   with source tables; appendix and supplement summary; unverifiable parts). Facts only, no
-  judgments: all five reviewers receive it.
+  judgments: all four reviewers receive it.
 - `panel.json`: `{"paper_type": "<empirical|theoretical|dataset|system|benchmark|analysis|position>", "field": "...", "venue_tier": "...", "recognized": false}`
 
 Do not review the paper or score it. Reply with one line: the paper type and the field.

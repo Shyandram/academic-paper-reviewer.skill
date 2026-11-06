@@ -3,9 +3,9 @@
 #
 #   evals/split/run_paper.sh <paper id>
 #
-# PIPELINE=split (default): Phase 0, five parallel reviewers, check and EIC, each fresh.
-# PIPELINE=check (skill 2.11): Phase 0 and the five reviewers in one context, the Gap Scout
-# and the check each in a fresh context, then the first context resumed for the Novelty
+# PIPELINE=split (default): Phase 0, four parallel reviewers, check and EIC, each fresh.
+# PIPELINE=check (skill 2.11): Phase 0 and the four reviewers in one context, the Gap Scout
+# and the check (with the Devil's Advocate challenge) each in a fresh context, then the first context resumed for the Novelty
 # update and the EIC.
 #
 # Run from the repository root. Needs evals/work/papers/<id>/blinded.txt and an
@@ -13,7 +13,7 @@
 # CLAUDE_CODE_OAUTH_TOKEN / a local login (subscription, no API billing).
 # Settings (environment): MODEL (default claude-sonnet-5-5), EFFORT (high),
 # BUDGET (USD cap per phase, API only; 3), LIT (strict|on|off), CUTOFF,
-# WARMUP (seconds between the first reviewer and the other four, so they read
+# WARMUP (seconds between the first reviewer and the other three, so they read
 # the shared prefix from the prompt cache; 20).
 set -uo pipefail
 ID="$1"
@@ -23,7 +23,7 @@ PIPELINE="${PIPELINE:-split}"
 R="evals/work/results/$ID"; S="python3 -I evals/split/run_split.py"
 ARGS=(--id "$ID" --lit "$LIT" --cutoff "$CUTOFF" --pipeline "$PIPELINE")
 TOOLS=(Read Write Edit Glob Grep "Bash(python3:*)")
-mkdir -p "$R"/{phase0,reports/{R1,R2,R3,R4,DA},gaps,check,eic,runs,prompts}
+mkdir -p "$R"/{phase0,reports/{R1,R2,R3,R4},gaps,check,eic,runs,prompts}
 
 # run <name> <prompt file> [extra claude args...]: one context, its own run log.
 # PERSIST=1 keeps the session so it can be resumed (`--resume <session id>` in the args).
@@ -76,7 +76,7 @@ for f in card.md paper_memory.md panel.json reviewer_copy.txt; do
   [ -s "$R/phase0/$f" ] || { echo "phase0 did not write $f"; exit 1; }
 done
 
-# Phase 1: five reviewers, each in its own context, sharing one cached prefix.
+# Phase 1: four reviewers, each in its own context, sharing one cached prefix.
 $S shared "${ARGS[@]}" --out "$R/prompts/shared.md"
 reviewer() {
   local role="$1"; local deny=()
@@ -86,7 +86,7 @@ reviewer() {
     --allowedTools Read Write Edit Glob Grep --disallowedTools Bash "${deny[@]}"
 }
 reviewer R1 & sleep "$WARMUP"
-for role in R2 R3 R4 DA; do reviewer "$role" & done
+for role in R2 R3 R4; do reviewer "$role" & done
 wait
 $S before "${ARGS[@]}" || exit 1
 
@@ -97,6 +97,8 @@ mapfile -t GDENY < <($S deny --id "$ID" --role GAP)
 run gaps "$R/prompts/gaps.md" --allowedTools Read Write Glob Grep --disallowedTools Bash "${GDENY[@]}"
 $S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
 run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}"
+# BEFORE again, now with the check's DA-CRITICAL list.
+$S before "${ARGS[@]}" || exit 1
 $S prompt eic "${ARGS[@]}" > "$R/prompts/eic.md"
 run eic "$R/prompts/eic.md" --allowedTools "${TOOLS[@]}" \
   --disallowedTools "Read(./$R/check/checker_estimate.json)"

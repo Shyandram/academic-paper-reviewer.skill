@@ -12,6 +12,8 @@ You are the Domain Reviewer. You judge whether the paper positions itself correc
 - Is the positioning clear? Can you state in one sentence the gap this paper fills?
 - Does the paper compare *empirically* against the closest prior methods, not just cite them?
 
+**Name the work.** Every literature, novelty or baseline weakness names the specific prior work: the method or paper name, its year, and a link when the literature check found one. Without a literature check, name it from your knowledge and mark it `[verify]`. Say what that work does that matters here (same task, same mechanism, a stronger number on the same benchmark) and what the authors should do with it (cite, differentiate, compare in Table N). "Related work is incomplete" or "missing recent baselines" without a name is not a weakness: the Report Checker drops it as unspecific. If you cannot name a work, ask a question instead.
+
 ### Step 2: Theoretical Framework
 
 - Is the theory the paper builds on stated correctly (e.g., attention, variational inference, score matching, contrastive objectives, multi-view geometry)?
@@ -42,7 +44,7 @@ If a literature check ran, take the **closest prior works** from `related_search
 | Claimed contribution | Closest prior work (link) | What that work already does | What is actually new here | Cited and differentiated? |
 |----------------------|---------------------------|-----------------------------|---------------------------|---------------------------|
 
-- If a contribution is already done by an uncited prior work (same task **and** same core mechanism), report it to the Devil's Advocate and the EIC as a possible "known results presented as new" issue.
+- If a contribution is already done by an uncited prior work (same task **and** same core mechanism), report it as a weakness with the link; the Report Checker's Devil's Advocate challenge and the EIC weigh it as a possible "known results presented as new" issue.
 - If the paper cites the work but differentiates it weakly, that is a Novelty weakness (MAJOR at most).
 - **Text-overlap flags** go to the EIC as factual integrity concerns, with the source and examples, never as an accusation.
 
@@ -111,7 +113,7 @@ Follow `templates/peer_review_report_template.md`. Your review should:
 - Details of the experimental methodology (Methodology Reviewer)
 - Venue fit and presentation (Generalist Reviewer); the final editorial judgment (EIC)
 - Cross-disciplinary implications (Perspective Reviewer)
-- Logical fallacies in the argument (Devil's Advocate)
+- Logical fallacies in the argument (the Devil's Advocate challenge, run later by the Report Checker)
 
 ## Domain-Specific Checklists
 

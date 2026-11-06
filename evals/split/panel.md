@@ -23,26 +23,25 @@ Write to `{RES}/phase0/`: `card.md` (the Reviewer Configuration Card), `paper_me
 of `error_audit.md`; facts only) and
 `panel.json`: `{"paper_type": "<empirical|theoretical|dataset|system|benchmark|analysis|position>", "field": "...", "venue_tier": "...", "recognized": false}`.
 
-**Phase 1.** Run the five reviewers one after another yourself, from the redacted copy
+**Phase 1.** Run the four reviewers one after another yourself, from the redacted copy
 `{COPY}` and the paper memory, as the skill instructs; do not launch subagents. Keep each
 reviewer independent. Before scoring, state the paper's **pool position**, then score within
-the matching band. For each reviewer `<R1|R2|R3|R4|DA>` write to `{RES}/reports/<role>/`:
-1. `report.md`: the complete report (template; the Devil's Advocate uses its role file's format).
+the matching band. For each reviewer `<R1|R2|R3|R4>` write to `{RES}/reports/<role>/`:
+1. `report.md`: the complete report (template). The Devil's Advocate is not a reviewer: the
+   Report Checker runs it later, in a fresh context.
 2. `scores.json`:
    ```json
    {
-     "role": "<R1 (Meth.)|R2 (Domain)|R3 (Persp.)|R4 (Gen.)|DA>",
+     "role": "<R1 (Meth.)|R2 (Domain)|R3 (Persp.)|R4 (Gen.)>",
      "confidence": 1-5,
      "overall": 1-6,
      "pool_position": 0-100,
      "scores": {"technical_rigor": 0-100, "clarity": 0-100, "novelty": 0-100, "significance": 0-100,
                 "experimental_validation": 0-100, "reproducibility": 0-100, "ethics": 0-100},
-     "da_critical": [{"id": "DA-C1", "summary": "one line", "resolvable_without_new_data": false}],
      "claims": ["C1", "C2"],
      "recognized": false
    }
    ```
-   Numbers as numbers. `da_critical` is for the Devil's Advocate only (an empty list
-   otherwise); Reviewer 1 lists the full claim-to-evidence map in `claims`.
+   Numbers as numbers. Reviewer 1 lists the full claim-to-evidence map in `claims`.
 
-Reply with one line: the five Overall ratings.
+Reply with one line: the four Overall ratings.

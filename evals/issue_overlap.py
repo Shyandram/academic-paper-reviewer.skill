@@ -58,21 +58,39 @@ def weaknesses(report, role):
 
 
 def ai_reports(res, gaps=False):
-    """The five reports of one result directory: reports/<role>/report.md (split and check
-    pipelines) or the five "## Reviewer:" sections of review.md (single pipeline). With
-    `gaps`, also the Gap Scout list (gaps/gaps.md) when the run has one."""
+    """The AI reports of one result directory, keyed by role.
+
+    Split and check pipelines: reports/<role>/report.md. Up to skill 2.10 the Devil's
+    Advocate was a fifth reviewer (reports/DA); from 2.11 the Report Checker runs it after
+    the check (check/da.md), so DA comes from there when present. Single pipeline: the
+    "## Reviewer:" sections of review.md (five up to 2.10; four plus a "Devil's Advocate
+    Report" from 2.11). With `gaps`, also the Gap Scout list (gaps/gaps.md)."""
     res = Path(res)
-    if all((res / "reports" / r / "report.md").exists() for r in ROLES):
-        out = {r: (res / "reports" / r / "report.md").read_text(encoding="utf-8") for r in ROLES}
+    if all((res / "reports" / r / "report.md").exists() for r in VOTING):
+        out = {r: (res / "reports" / r / "report.md").read_text(encoding="utf-8")
+               for r in VOTING}
+        for da in (res / "reports" / "DA" / "report.md", res / "check" / "da.md"):
+            if da.exists():
+                out["DA"] = da.read_text(encoding="utf-8")
+                break
     else:
         review = res / "review.md"
         if not review.exists():
             return None
-        parts = re.split(r"^## Reviewer: .*$", review.read_text(encoding="utf-8"),
-                         flags=re.M)[1:6]
-        if len(parts) != 5:
+        text = review.read_text(encoding="utf-8")
+        parts = re.split(r"^## Reviewer: .*$", text, flags=re.M)[1:6]
+        if len(parts) == 5:
+            out = dict(zip(ROLES, parts))
+        elif len(parts) == 4:
+            out = dict(zip(VOTING, parts))
+            m = re.search(r"^#{1,3} Devil'?s Advocate (?:Report|challenge).*$", text, re.M | re.I)
+            if m:
+                out["DA"] = text[m.end():]
+                # The DA text is not part of the preceding reviewer's section.
+                for r in VOTING:
+                    out[r] = out[r].split(m.group(0))[0]
+        else:
             return None
-        out = dict(zip(ROLES, parts))
     if gaps and (res / "gaps" / "gaps.md").exists():
         out[GAP] = (res / "gaps" / "gaps.md").read_text(encoding="utf-8")
     return out

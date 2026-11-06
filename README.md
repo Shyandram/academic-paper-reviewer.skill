@@ -1,6 +1,6 @@
 # Academic Paper Reviewer for Codex and Claude
 
-A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process: five independent reviewers, then an Editor-in-Chief who acts as area chair. The EIC reads every review, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision. Scores are aggregated reproducibly as two lists (the reviewers' official scores and the EIC's internal weighted assessment), and the skill turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
+A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process: four independent reviewers, an unscored Gap Scout, an independent Report Checker that also runs a Devil's Advocate challenge, then an Editor-in-Chief who acts as area chair. The EIC reads every review, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision. Scores are aggregated reproducibly as two lists (the reviewers' official scores and the EIC's internal weighted assessment), and the skill turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
 
 ```
 You:    Review this paper for CVPR: [attach PDF]
@@ -19,7 +19,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 
 | Mode | Say something like | You get |
 |------|-------------------|---------|
-| **full** (default) | "Review this paper" | 5 reports (Methodology, Domain, Perspective, Generalist, Devil's Advocate) + EIC meta-review + Editorial Decision + Revision Roadmap |
+| **full** (default) | "Review this paper" | 4 reports (Methodology, Domain, Perspective, Generalist) + Gap Scout checklist + report check and Devil's Advocate challenge + EIC meta-review + Editorial Decision + Revision Roadmap |
 | **quick** | "Is my paper ready for submission?" | EIC quick assessment + submission-readiness check (anonymity, page limit, checklists…) |
 | **methodology-focus** | "Are my baselines fair?" / "Check my experiments" | Claim-to-evidence map, fairness-of-comparison audit, statistics audit, prioritized fixes with compute estimates |
 | **guided** | "Walk me through the review" | Socratic, one-issue-at-a-time dialogue |
@@ -29,7 +29,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 What sets it apart:
 - **Field-aware panel.** Reviewers are configured from the paper's actual sub-field and technique (e.g., "token pruning + latency benchmarking" rather than "deep learning").
 - **CV/ML depth.** Task-specific checklists cover detection, segmentation, 3D/NeRF/3DGS, restoration, generation, VLMs, video, medical imaging and efficient models. They target the confounds that matter in practice: backbone, pretraining data, resolution, schedule, TTA and latency methodology.
-- **Devil's Advocate with teeth, and an EIC who checks it.** The DA steelmans the paper, gives the strongest counter-argument and recomputes headline numbers. The EIC checks each CRITICAL issue against the paper with an area-chair test ("would I reject on this alone?"). Only issues that are truly fatal cap the decision.
+- **Devil's Advocate with teeth, and an EIC who checks it.** After the report check, the Report Checker runs a Devil's Advocate challenge in its fresh context (no scores, no vote): it steelmans the paper, gives the strongest counter-argument and recomputes headline numbers. The EIC checks each CRITICAL issue against the paper with an area-chair test ("would I reject on this alone?"). Only issues that are truly fatal cap the decision.
 - **Two score lists.** The **official** list holds the reviewers' raw ratings and scores and their plain means: what authors see, never modified. The **EIC assessment** is the EIC's internal view, weighting each reviewer by confidence × a quality weight (0.5–1.5); it can be higher or lower than the official one. The decision starts from the **EIC-weighted mean of the reviewers' Overall ratings**, like an area chair weighing recommendations. The 0–100 dimension composite is a cross-check, and the EIC must explain any disagreement.
 - **Calibrated to the submission pool.** Each reviewer, and the EIC, first states the paper's *pool position*: the share of the venue's submissions it is better than, using the venue's real acceptance rate (about 25% at the major ML/CV conferences). They then score within the matching band. The bar is what the venue actually accepts, not a flawless paper, and uncertainty is never a reason to call a paper borderline. See [Evaluation](#evaluation).
 - **Reproducible scoring.** `scripts/aggregate_scores.py` computes confidence-weighted scores, paper-type composites, spread flags, the DA cap and consistency warnings.
@@ -107,7 +107,7 @@ Or unzip the packaged file directly:
 unzip academic-paper-reviewer.skill -d ~/.claude/skills/
 ```
 
-Claude Code discovers skills at startup. Restart the session, then ask *"review paper.pdf"*. In Claude Code the five reviewers can run as parallel subagents, which keeps them independent.
+Claude Code discovers skills at startup. Restart the session, then ask *"review paper.pdf"*. In Claude Code the four reviewers and the Gap Scout can run as parallel subagents, which keeps them independent.
 
 ### Claude API (Agent Skills)
 

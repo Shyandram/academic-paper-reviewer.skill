@@ -242,6 +242,14 @@ Checker adds the 3–5 key concerns; the report template asks each weakness to n
 missing experiment, baseline or definition. A new unscored Gap Scout pass lists the concrete concerns reviewers are likely to raise
 (Anticipated Reviewer Concerns checklist in the final report). To be measured with the same tool on the 2.11 runs.
 
+**Later 2.11 changes from the role analysis.** With the Gap Scout in place, no human issue was
+hit by the Devil's Advocate alone (unique hits: R1 0, R2 10, R3 3, R4 2, DA 0), and its rating
+was the weakest panel signal (individual Overall vs human mean, Spearman: R1 0.27, R2 0.35,
+R3 0.46, R4 0.41, DA 0.28). The Devil's Advocate is therefore no longer a panel reviewer: the
+Report Checker runs the challenge after the report check, with no scores. R1 now writes its
+main weaknesses from the claim-to-evidence map, naming the concrete item per claim, and R2
+names the prior work behind every literature or baseline weakness. Not yet measured on runs.
+
 ## Split pipeline trial (3 papers)
 
 Sonnet high, `evals/split/` (one fresh context per phase), run as in-session subagents

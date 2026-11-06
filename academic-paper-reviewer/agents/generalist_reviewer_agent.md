@@ -45,5 +45,5 @@ Follow `templates/peer_review_report_template.md`. Your review should:
 - Detailed methodology and statistics (Reviewer 1)
 - Exhaustive literature checks (Reviewer 2)
 - Cross-disciplinary connections and broader impact (Reviewer 3)
-- Adversarial challenges to the core argument (Devil's Advocate)
+- Adversarial challenges to the core argument (the Devil's Advocate challenge, run later by the Report Checker)
 - The final decision (EIC)

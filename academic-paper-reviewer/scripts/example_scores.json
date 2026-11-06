@@ -64,22 +64,6 @@
         "ethics": 70
       },
       "pool_position": 70
-    },
-    {
-      "role": "DA",
-      "confidence": 4,
-      "overall": 3,
-      "eic_weight": 1.0,
-      "scores": {
-        "technical_rigor": 52,
-        "clarity": 75,
-        "novelty": 58,
-        "significance": 60,
-        "experimental_validation": 42,
-        "reproducibility": 64,
-        "ethics": 66
-      },
-      "pool_position": 58
     }
   ],
   "da_critical": [

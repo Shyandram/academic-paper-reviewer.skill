@@ -29,12 +29,13 @@ def uniform(score, confidence=5, overall=None):
 class AggregateTests(unittest.TestCase):
     def test_example_matches_documented_output(self):
         res = agg.aggregate(copy.deepcopy(EXAMPLE))
-        self.assertEqual(res["before_composite"], 63.2)   # official: plain mean
-        self.assertEqual(res["panel_composite"], 62.5)
+        self.assertEqual(res["before_composite"], 64.7)   # official: plain mean
+        self.assertEqual(res["panel_composite"], 63.9)
         self.assertEqual(res["suggested_overall"], 4)
         self.assertEqual(res["final_overall_ceiling"], 6)   # DA-C1 downgraded by the EIC
         tr = next(d for d in res["dimensions"] if d["key"] == "technical_rigor")
-        self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (62.0, 61.0))
+        self.assertEqual((tr["before_avg"], tr["weighted_avg"]), (64.5, 63.2))
+        self.assertEqual((res["official_rating"], res["eic_rating"]), (3.75, 3.64))
 
     def test_pool_position_band_and_warning(self):
         self.assertEqual(agg.pool_band(50), (42, 54))   # the median submission
@@ -157,8 +158,14 @@ class AggregateTests(unittest.TestCase):
         self.assertEqual(agg.venue_view(res, "cvpr", venues["cvpr"], final=3)["label"], "3 Borderline Reject")
         self.assertEqual(agg.venue_view(res, "iclr", venues["iclr"], final=5)["label"],
                          "8 on {0,2,4,6,8,10} (8 on {1,3,5,6,8,10})")
-        # TPAMI keeps its harder bar relative to the decision
-        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["final"], 3)
+        # TPAMI keeps its harder bar relative to the decision: one point lower on every
+        # dimension puts the example under TPAMI's +3 bar.
+        self.assertEqual(agg.venue_view(res, "tpami", venues["tpami"], final=4)["final"], 4)
+        lower = copy.deepcopy(EXAMPLE)
+        for r in lower["reviewers"]:
+            r["scores"] = {k: v - 1 for k, v in r["scores"].items()}
+        low = agg.aggregate(lower)
+        self.assertEqual(agg.venue_view(low, "tpami", venues["tpami"], final=4)["final"], 3)
 
     def test_target_venue_label_equals_decision(self):
         # Knife-edge: panel composite exactly 60.0 (band 4); CVPR's emphasis on
@@ -225,7 +232,7 @@ class AggregateTests(unittest.TestCase):
         views = {k: agg.venue_view(res, k, venues[k]) for k in venues}
         self.assertEqual(views["cvpr"]["label"], "4 Borderline Accept")
         self.assertEqual(views["icml"]["label"], "3 Weak accept (leaning accept)")
-        self.assertEqual(views["tpami"]["label"], "Major Revision")      # +3 bar
+        self.assertEqual(views["tpami"]["label"], "Minor Revision")      # clears the +3 bar narrowly
         self.assertEqual(views["iclr"]["subscores"],
                          {"Soundness": 2, "Presentation": 3, "Contribution": 3})
         self.assertEqual(views["tmlr"]["label"], "Accept with minor revision")

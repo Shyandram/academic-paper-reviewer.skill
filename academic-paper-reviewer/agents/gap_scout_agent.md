@@ -16,7 +16,7 @@ items: 46%, 30 items: 65%).
 
 ## Inputs and independence
 Read only the reviewers' copy of the manuscript (redacted), the target venue, and this file.
-Do not read the five reports, the literature-check addendum, the scores or the integrity
+Do not read the four reports, the literature-check addendum, the scores or the integrity
 findings: an independent list catches what the panel misses. When the host permits
 delegation, run in a fresh context. Without delegation, write the list before reading the
 reports and disclose that it was not independent. Do not search the web; name methods from
