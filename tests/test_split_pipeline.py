@@ -57,21 +57,35 @@ class SplitPipeline(unittest.TestCase):
         self.assertNotRegex(panel, r"\{[A-Z_]+\}")
         self.assertIn("do not launch subagents", panel)
         self.assertIn("Do not run Phases 1.5, 1.6 or 2 now", panel)
-        check = run(["prompt", "check"] + self.base)
-        self.assertIn("report_checker_agent.md", check)
-        self.assertIn("factually accurate", check)
-        self.assertIn("checker_estimate.json", check)
-        self.assertLess(check.index("checker_estimate.json"), check.index("**Phase 1.5**"))
         resumed = run(["prompt", "eic", "--resumed"] + self.base)
         fresh = run(["prompt", "eic"] + self.base)
         self.assertNotRegex(resumed, r"\{[A-Z_]+\}")
-        self.assertTrue(resumed.startswith("## Phase 2 (resumed context)"))  # no repeated rules
+        self.assertTrue(resumed.startswith("## Phases 1.5, 1.6 and 2"))  # no repeated rules
         self.assertIn("Evaluation rules", fresh)
         self.assertIn("eic.json", resumed)
-        self.assertIn("Report Checker ran", resumed)
+        self.assertIn("R2_addendum.md", resumed)
         self.assertIn("<R1|R2|R3|R4|DA>", panel)     # five reviewers, the DA included
-        self.assertIn("gaps_checked.md", check)       # the checked list is kept apart
-        self.assertNotIn("gaps", fresh.lower())       # the EIC never reads the Gap Scout list
+        for text in (panel, resumed, fresh, run(["prompt", "check"] + self.base)):
+            # the review never uses the post-review analysis
+            self.assertNotIn("checker_estimate", text)
+            self.assertNotIn("gaps", text.lower())
+
+    def test_post_review_prompts_and_isolation(self):
+        est = run(["prompt", "estimate"] + self.base)
+        post = run(["prompt", "post"] + self.base)
+        for text in (est, post):
+            self.assertNotRegex(text, r"\{[A-Z_]+\}")
+            self.assertIn("report_checker_agent.md", text)
+        self.assertIn("post/checker_estimate.json", est)
+        self.assertIn("post/fact_check.md", post)
+        self.assertIn("Change nothing that the review wrote", post)
+        joined = "\n".join(rs.deny_rules(self.tmp, PID, "EST"))
+        for k in rs.ROLES:
+            self.assertIn(f"reports/{k}/**", joined)
+        for d in ("check/**", "eic/**", "gaps/**", "integrity.json", "paper_memory.md"):
+            self.assertIn(d, joined)
+        self.assertNotIn("phase0/**", joined)          # the redacted copy stays readable
+        self.assertIn("post/**", "\n".join(rs.deny_rules(self.tmp, PID, "R1")))
 
     def test_shared_prefix_is_redacted_and_role_free(self):
         a = argparse.Namespace(
@@ -182,8 +196,8 @@ class SplitPipeline(unittest.TestCase):
             "final_overall": 3, "eic_pool_position": 40, "eic_weights": {}, "da_rulings": []}))
         self.p["runs"].mkdir(parents=True)
         (self.p["runs"] / "panel.json").write_text(json.dumps({"total_cost_usd": 1.5}))
-        self.p["check"].mkdir(parents=True)
-        (self.p["check"] / "checker_estimate.json").write_text(json.dumps(
+        self.p["post"].mkdir(parents=True)
+        (self.p["post"] / "checker_estimate.json").write_text(json.dumps(
             {"pool_position": 35, "overall": 3, "reasons": "x"}))
         run(["finish", "--pipeline", "check"] + self.base)
         summary = json.loads((self.p["res"] / "summary.json").read_text())
@@ -193,13 +207,17 @@ class SplitPipeline(unittest.TestCase):
         self.assertEqual(summary["checker_pool_position"], 35)   # recorded, never averaged
         self.assertEqual(summary["checker_overall"], 3)
         self.assertEqual(summary["eic_pool_position"], 40)
-        (self.p["check"] / "gaps_checked.md").write_text("## Anticipated Reviewer Concerns\n- G1 x")
+        (self.p["post"] / "gaps_checked.md").write_text("## Anticipated Reviewer Concerns\n- G1 x")
+        (self.p["post"] / "fact_check.md").write_text("no factual errors")
         run(["finish", "--pipeline", "check"] + self.base)
         review = (self.p["res"] / "review.md").read_text()
         self.assertIn("check pipeline", review)
-        self.assertIn("Anticipated Reviewer Concerns (Gap Scout)", review)
-        self.assertGreater(review.index("Anticipated Reviewer Concerns (Gap Scout)"),
-                           review.index("Phase 2: EIC"))   # after the decision
+        for title in ("Anticipated Reviewer Concerns (Gap Scout)", "fact check (Report Checker)",
+                      "independent estimate (Report Checker)"):
+            self.assertIn("Post-review analysis: " + title, review)
+            self.assertGreater(review.index(title), review.index("Phase 2: EIC"))  # after it
+        self.assertEqual(json.loads((self.p["res"] / "summary.json").read_text())
+                         ["final_overall"], 3)   # the analysis changes nothing
 
     def test_before_requires_all_five(self):
         self.write_reviewers(missing=("R3",))

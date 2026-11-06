@@ -15,10 +15,10 @@ context instead. The skill itself is unchanged.
 | `phase0` | the unredacted paper, SKILL.md, field analyst, error audit §3 | `phase0/`: card, paper memory, `panel.json`, redacted copy, integrity findings, fingerprint |
 | `R1`–`R4`, `DA` (parallel) | the shared prefix plus its own role file; Read rules deny the other reports, the unredacted paper and the integrity findings; no Bash | `reports/<role>/report.md`, `scores.json` |
 | `before` (script, after the reviewers) | the five score files | `scores_before.json`, `before.json` |
-| `gaps` (optional, `GAPS=1` default) | the redacted copy only | `gaps/gaps.md` (Gap Scout; never shown to the EIC) |
-| `check` | the reports, the redacted copy, the fingerprint | `check/checker_estimate.json`, `check/R2_addendum.md` (Phase 1.5), `check/report_check.md` (Phase 1.6), `check/gaps_checked.md` |
+| `check` | the reports, the redacted copy, the fingerprint | `check/R2_addendum.md` (Phase 1.5), `check/report_check.md` (Phase 1.6) |
 | `eic` | the reports, the check, `before.json`, the integrity findings, then the paper | `eic/decision.md`, `eic/eic.json`, `evidence.json` |
 | `finish` (script) | `eic.json` | `scores.json`, `aggregate.json`, `summary.json`, `review.md`, `run.json` |
+| post-review (optional, below) | | `post/`, `gaps/`; `finish` runs again |
 
 `summary.json` and `aggregate.json` keep the single-pipeline format, so
 `iclr_calibration.py features`, `evaluate` and `pilot` work on these results unchanged.
@@ -33,22 +33,30 @@ starts `WARMUP` seconds before the others so they read the prefix from the cache
 its wall time. `run.json` sums cost, turns and tokens (input, output, cache write, cache
 read) and keeps the per-phase breakdown.
 
-## Check pipeline (skill 2.10.1, optional extensions)
+## Check pipeline (skill 2.10.1)
 
-`PIPELINE=check` keeps the five reviewers in one context, as in the single pipeline, and runs
-the two optional extensions in fresh contexts:
+`PIPELINE=check` runs the review as the single pipeline does, in one context:
 
 | Phase | Context |
 |---|---|
 | `panel` | one context: Phase 0 and the five reviewers (`panel.md`); the session is kept |
-| `gaps` | fresh (skipped with `GAPS=0`): the Gap Scout reads the redacted copy only |
-| `check` | fresh: the Report Checker (`agents/report_checker_agent.md`); the unredacted paper and the integrity findings are denied |
-| `eic` | the `panel` session resumed (`eic_resume.md` + `eic.md`); the Gap Scout list and the checker's estimate are denied |
+| `eic` | the `panel` session resumed: Phases 1.5 and 1.6 (`eic_resume.md`), then Phase 2 (`eic.md`) |
 
-The output files are the same as the split pipeline's, and `summary.json` records
-`"pipeline": "check"` and the checker's estimate. Skill 2.11 runs (four reviewers, the
-Devil's Advocate in `check/da.md`, Phase 1.7 `novelty`) are still read by `run_split.py
-before`/`finish` and `issue_overlap.py`.
+`summary.json` records `"pipeline": "check"`.
+
+## Post-review analysis (both pipelines)
+
+After `finish`, the optional analyses run, each in a fresh context that cannot change the
+review; `finish` then runs again to add them to `review.md` and `summary.json`:
+
+| Phase | Context | Writes |
+|---|---|---|
+| `estimate` (`EST=0` skips) | the redacted copy only; every result file denied | `post/checker_estimate.json` |
+| `gaps` (`GAPS=0` skips) | the redacted copy only; every result file denied | `gaps/gaps.md` |
+| `post` (`POST=0` skips) | the finished review and the redacted copy; edits to the review denied | `post/fact_check.md`, `post/gaps_checked.md` |
+
+Skill 2.11 runs (four reviewers, the Devil's Advocate in `check/da.md`, the estimate in
+`check/`) are still read by `run_split.py before`/`finish` and `issue_overlap.py`.
 
 ## Running
 

@@ -7,7 +7,7 @@ You are the Editorial Synthesizer, the EIC's assistant. You **do not decide**. A
 
 ### Step 0: Report Check (Phase 1.6)
 
-Before deduplicating, check every weakness in the five reports with four tests. When the optional Report Checker ran (`SKILL.md`, *Optional Extensions*), use its output instead: its change table, its factual error list and each report's checked weaknesses; do not run the check again.
+Before deduplicating, check every weakness in the five reports with four tests:
 
 | Test | Fails when | Action |
 |------|-----------|--------|

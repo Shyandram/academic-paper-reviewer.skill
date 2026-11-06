@@ -4,9 +4,11 @@
 #   evals/split/run_paper.sh <paper id>
 #
 # PIPELINE=split (default): Phase 0, five parallel reviewers, check and EIC, each fresh.
-# PIPELINE=check (skill 2.10.1 with its optional extensions): Phase 0 and the five reviewers
-# in one context, the Gap Scout and the Report Checker each in a fresh context, then the
-# first context resumed for the EIC. GAPS=0 skips the Gap Scout.
+# PIPELINE=check (skill 2.10.1): the review as in the single pipeline (Phase 0 and the five
+# reviewers in one context, resumed for Phases 1.5, 1.6 and 2).
+# Both then run the optional post-review analysis, each step in a fresh context that cannot
+# change the review: the Report Checker's independent estimate (EST=0 skips it), the Gap
+# Scout (GAPS=0 skips it) and the Report Checker's fact check (POST=0 skips it).
 #
 # Run from the repository root. Needs evals/work/papers/<id>/blinded.txt and an
 # authenticated `claude` CLI: ANTHROPIC_API_KEY (API, billed per token) or
@@ -19,11 +21,11 @@ set -uo pipefail
 ID="$1"
 MODEL="${MODEL:-claude-sonnet-5-5}"; EFFORT="${EFFORT:-high}"; BUDGET="${BUDGET:-3}"
 LIT="${LIT:-strict}"; CUTOFF="${CUTOFF:-}"; WARMUP="${WARMUP:-20}"
-PIPELINE="${PIPELINE:-split}"; GAPS="${GAPS:-1}"
+PIPELINE="${PIPELINE:-split}"; GAPS="${GAPS:-1}"; EST="${EST:-1}"; POST="${POST:-1}"
 R="evals/work/results/$ID"; S="python3 -I evals/split/run_split.py"
 ARGS=(--id "$ID" --lit "$LIT" --cutoff "$CUTOFF" --pipeline "$PIPELINE")
 TOOLS=(Read Write Edit Glob Grep "Bash(python3:*)")
-mkdir -p "$R"/{phase0,reports/{R1,R2,R3,R4,DA},gaps,check,eic,runs,prompts}
+mkdir -p "$R"/{phase0,reports/{R1,R2,R3,R4,DA},gaps,check,eic,post,runs,prompts}
 
 # run <name> <prompt file> [extra claude args...]: one context, its own run log.
 # PERSIST=1 keeps the session so it can be resumed (`--resume <session id>` in the args).
@@ -39,30 +41,39 @@ run() {
     "$R/runs/$name.json" "$name" 2>/dev/null || echo "$name: no run log"
 }
 
+# post_review: optional analysis after the review is finished; it never changes the review.
+post_review() {
+  local deny=()
+  if [ "$EST" = 1 ]; then   # from the redacted copy only, before seeing anything else
+    $S prompt estimate "${ARGS[@]}" > "$R/prompts/estimate.md"
+    mapfile -t deny < <($S deny --id "$ID" --role EST)
+    run estimate "$R/prompts/estimate.md" --allowedTools Read Write Glob Grep --disallowedTools Bash "${deny[@]}"
+  fi
+  if [ "$GAPS" = 1 ]; then  # from the redacted copy only
+    $S prompt gaps "${ARGS[@]}" > "$R/prompts/gaps.md"
+    mapfile -t deny < <($S deny --id "$ID" --role GAP)
+    run gaps "$R/prompts/gaps.md" --allowedTools Read Write Glob Grep --disallowedTools Bash "${deny[@]}"
+  fi
+  if [ "$POST" = 1 ]; then  # fact check of the finished review, and the Gap Scout list
+    $S prompt post "${ARGS[@]}" > "$R/prompts/post.md"
+    run post "$R/prompts/post.md" --allowedTools Read Write Glob Grep --disallowedTools Bash \
+      "Read(./evals/work/papers/**)" "Read(./$R/phase0/integrity.json)" \
+      "Edit(./$R/reports/**)" "Edit(./$R/check/**)" "Edit(./$R/eic/**)"   # Edit rules cover Write
+  fi
+  $S finish "${ARGS[@]}"   # again, to add the analysis to review.md and summary.json
+}
+
 if [ "$PIPELINE" = check ]; then
-  # Phase 0 and Phase 1 in one context, kept for the EIC.
+  # Phase 0 and Phase 1 in one context, kept for Phases 1.5, 1.6 and 2.
   $S prompt panel "${ARGS[@]}" > "$R/prompts/panel.md"
   PERSIST=1 run panel "$R/prompts/panel.md" --allowedTools "${TOOLS[@]}"
   SID=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('session_id',''))" "$R/runs/panel.json" 2>/dev/null)
   [ -n "$SID" ] || { echo "panel: no session id"; exit 1; }
   $S before "${ARGS[@]}" || exit 1
-  # Optional Gap Scout: a fresh context that reads the redacted copy only.
-  if [ "$GAPS" = 1 ]; then
-    $S prompt gaps "${ARGS[@]}" > "$R/prompts/gaps.md"
-    mapfile -t GDENY < <($S deny --id "$ID" --role GAP)
-    run gaps "$R/prompts/gaps.md" --allowedTools Read Write Glob Grep --disallowedTools Bash "${GDENY[@]}"
-  fi
-  # Optional Report Checker: a fresh context that did not write the reports.
-  $S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
-  run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}" \
-    --disallowedTools "Read(./evals/work/papers/**)" "Read(./$R/phase0/integrity.json)"
-  # Phase 2 in the resumed panel context. The EIC never sees the Gap Scout list or the
-  # checker's estimate.
   $S prompt eic --resumed "${ARGS[@]}" > "$R/prompts/eic.md"
-  run eic "$R/prompts/eic.md" --resume "$SID" --allowedTools "${TOOLS[@]}" \
-    --disallowedTools "Read(./$R/check/checker_estimate.json)" "Read(./$R/check/gaps_checked.md)" \
-    "Read(./$R/gaps/**)"
+  run eic "$R/prompts/eic.md" --resume "$SID" --allowedTools "${TOOLS[@]}"
   $S finish "${ARGS[@]}"
+  post_review
   exit
 fi
 
@@ -88,16 +99,9 @@ wait
 $S before "${ARGS[@]}" || exit 1
 
 # Phase 1.5 + 1.6, then Phase 2, each fresh.
-# Optional Gap Scout: a fresh context that reads the redacted copy only.
-if [ "$GAPS" = 1 ]; then
-  $S prompt gaps "${ARGS[@]}" > "$R/prompts/gaps.md"
-  mapfile -t GDENY < <($S deny --id "$ID" --role GAP)
-  run gaps "$R/prompts/gaps.md" --allowedTools Read Write Glob Grep --disallowedTools Bash "${GDENY[@]}"
-fi
 $S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
 run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}"
 $S prompt eic "${ARGS[@]}" > "$R/prompts/eic.md"
-run eic "$R/prompts/eic.md" --allowedTools "${TOOLS[@]}" \
-  --disallowedTools "Read(./$R/check/checker_estimate.json)" "Read(./$R/check/gaps_checked.md)" \
-  "Read(./$R/gaps/**)"
+run eic "$R/prompts/eic.md" --allowedTools "${TOOLS[@]}"
 $S finish "${ARGS[@]}"
+post_review

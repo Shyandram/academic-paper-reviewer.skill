@@ -324,10 +324,11 @@ so its drops are mostly right but too few to change the list. Its factual-error 
 not verified against the papers in this pilot.
 
 **Decision (2.10.1):** the panel, its instructions, the scoring and the decision rule go back to
-2.10. The Gap Scout and the Report Checker (with its independent estimate) become optional
-extensions that never change a score or the decision; the Gap Scout list goes into the output
-as a checklist, not to the EIC. Whether the checker's estimate should vote is left to a larger
-evaluation on other papers than these 20.
+2.10. The Gap Scout and the Report Checker are taken out of the review: they run only on
+request, after the review, each in a context that has not seen it, and never change it. The
+checker's estimate is now formed from the paper alone with the review files denied, so a later
+evaluation (on papers other than these 20) can test whether its signal is independent of the
+panel.
 
 ## Split pipeline trial (3 papers)
 

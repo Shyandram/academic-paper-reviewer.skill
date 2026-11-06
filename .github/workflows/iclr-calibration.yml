@@ -8,10 +8,10 @@ name: ICLR calibration (paperreview.ai protocol)
 # blinded paper text only. The evaluate job rebuilds the sample from the seed.
 #
 # pipeline "split" (evals/split/) runs each phase in a fresh context instead:
-# Phase 0, four parallel reviewers, the Gap Scout, the literature and report check
-# (with the Devil's Advocate challenge), then the EIC.
-# pipeline "check" (skill 2.11) runs Phase 0 and the reviewers in one context, the Gap
-# Scout and the check each in a fresh context, and resumes the first context for the EIC.
+# Phase 0, five parallel reviewers, the literature and report check, then the EIC.
+# pipeline "check" (skill 2.10.1) runs the review in one context, as "single" does.
+# Both then run the optional post-review analysis (independent estimate, Gap Scout, fact
+# check), each in a fresh context that cannot change the review.
 # budget is then the cap per phase. auth "subscription" uses CLAUDE_CODE_OAUTH_TOKEN.
 on:
   workflow_dispatch:

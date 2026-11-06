@@ -180,13 +180,14 @@ Editor-in-Chief (meta-reviewer)
 
 ---
 
-## Anticipated Reviewer Concerns (optional: Gap Scout)
-Concrete concerns reviewers are likely to raise; a checklist, not part of the decision.
+## Post-Review Analysis (only if requested after the review; not part of the decision)
+
+### Anticipated Reviewer Concerns (Gap Scout)
 - [ ] G1 [category] [concrete gap] (location) — [covered: R1-W2 / new]
 
-## Independent Check (optional: Report Checker)
-- Factual errors found: [N] ([report and item → what the paper says, location])
-- Checker's independent estimate (before reading the reports): pool position [X], Overall [N]; not part of any score
+### Independent Estimate and Fact Check (Report Checker)
+- Independent estimate (formed without the review): pool position [X], Overall [N]; panel rating [Y], decision [Z]
+- Factual errors: [N] ([report and item → what the paper says, location]; [bears on a decisive point: yes/no])
 ```
 
 ---

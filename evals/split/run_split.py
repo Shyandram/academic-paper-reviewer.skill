@@ -7,27 +7,29 @@ is its own process:
 
     phase0      field analysis, panel, paper memory, redacted copy, fingerprint
     R1..R4, DA  five reviewers in parallel; each sees the shared context only
-    gaps        optional Gap Scout: concrete weaknesses reviewers are likely to raise,
-                from the redacted copy only (fresh context, cannot read the reports;
-                never shown to the EIC)
-    check       literature check (Phase 1.5) and report check (Phase 1.6) by the
-                optional Report Checker, in one fresh context
+    check       literature check (Phase 1.5) and report check (Phase 1.6)
     eic         Synthesizer A, EIC meta-review and decision, Synthesizer B
+
+Post-review analysis (optional, after the review is finished; never changes it):
+    estimate    the Report Checker's independent estimate, from the redacted copy only
+    gaps        the Gap Scout list, from the redacted copy only
+    post        the Report Checker's fact check of the finished review and its check of
+                the Gap Scout list
 
 The five reviewer runs get the same system-prompt suffix (`shared`: skill text,
 redacted paper, paper memory, panel card) so the second to fifth runs read it
 from the prompt cache; the role file and instructions come last, in the user
 prompt. Standard library only. `run_paper.sh` drives one paper.
 
-With `--pipeline check` (skill 2.10.1 with its optional extensions), Phase 0 and the
-five reviewers run in one context (`panel`), as in the single pipeline; the Gap Scout
-and the Report Checker run fresh, and the panel context is resumed for the EIC.
+With `--pipeline check` (skill 2.10.1), the review runs as in the single pipeline:
+Phase 0 and the five reviewers in one context (`panel`), resumed for Phases 1.5, 1.6
+and 2; then the post-review analysis runs in fresh contexts.
 
 Subcommands:
-    prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, gaps, check,
-                   eic; `eic --resumed` is for the resumed panel context)
+    prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, check, eic,
+                   estimate, gaps, post; `eic --resumed` is for the resumed panel context)
     shared         write the shared system-prompt suffix for the reviewers
-    deny           print the Read() deny rules for one reviewer (or GAP), one per line
+    deny           print the Read() deny rules for one reviewer (or GAP, EST), one per line
     before         merge the five reviewer score files (the DA-CRITICAL list from the
                    Devil's Advocate's) and run the BEFORE aggregation
     finish         build scores.json, run the AFTER aggregation, write summary.json,
@@ -60,7 +62,8 @@ SHARED_SKILL_FILES = [
 ]
 PHASE0_FILES = ["card.md", "paper_memory.md"]
 # "novelty" was a skill 2.11 phase; kept so older run logs are still summed.
-PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "gaps", "check", "novelty", "eic"]
+PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "check", "novelty", "eic",
+          "estimate", "gaps", "post"]
 PIPELINES = {"split": "one fresh context per phase",
              "check": "one context for the panel, a fresh context for the check"}
 
@@ -76,6 +79,7 @@ def paths(root, pid):
         "p0": res / "phase0",
         "reports": res / "reports",
         "gaps": res / "gaps",
+        "post": res / "post",
         "check": res / "check",
         "eic": res / "eic",
         "runs": res / "runs",
@@ -162,11 +166,14 @@ def deny_rules(root, pid, role):
              f"Read({rel(p['p0'])}/integrity.json)",
              f"Read({rel(p['check'])}/**)", f"Read({rel(p['eic'])}/**)"]
     rules += [f"Read({rel(p['reports'] / k)}/**)" for k in ROLES if k != role]
-    if role == "GAP":  # the Gap Scout reads the reviewers' copy only
+    if role in ("GAP", "EST"):  # post-review, from the reviewers' copy only
         rules += [f"Read({rel(p['reports'])}/**)", f"Read({rel(p['res'])}/review.md)",
-                  f"Read({rel(p['res'])}/*.json)"]
+                  f"Read({rel(p['res'])}/*.json)", f"Read({rel(p['post'])}/**)",
+                  f"Read({rel(p['p0'])}/paper_memory.md)", f"Read({rel(p['p0'])}/card.md)"]
+        if role == "EST":
+            rules.append(f"Read({rel(p['gaps'])}/**)")
     else:
-        rules.append(f"Read({rel(p['gaps'])}/**)")
+        rules += [f"Read({rel(p['gaps'])}/**)", f"Read({rel(p['post'])}/**)"]
     return rules
 
 
@@ -248,6 +255,15 @@ def run_stats(p):
     return phases, total
 
 
+def checker_estimate(p):
+    """The Report Checker's independent estimate: post/ (2.10.1) or check/ (2.11)."""
+    for f in (p["post"] / "checker_estimate.json", p["check"] / "checker_estimate.json"):
+        r = load(f)
+        if isinstance(r, dict):
+            return r
+    return {}
+
+
 def assemble_review(p, pipeline="split"):
     def part(path, title):
         try:
@@ -261,11 +277,18 @@ def assemble_review(p, pipeline="split"):
     out += part(p["check"] / "R2_addendum.md", "Phase 1.5: Literature-check addendum (Reviewer 2)")
     out += part(p["check"] / "report_check.md", "Phase 1.6: Report check")
     out += part(p["eic"] / "decision.md", "Phase 2: EIC meta-review and Editorial Decision")
-    gaps = p["check"] / "gaps_checked.md"
-    if not gaps.exists():
-        gaps = p["gaps"] / "gaps.md"
-    if gaps.exists():
-        out += part(gaps, "Optional: Anticipated Reviewer Concerns (Gap Scout)")
+    # Post-review analysis (optional; after the decision, never part of it).
+    gaps = next((f for f in (p["post"] / "gaps_checked.md", p["check"] / "gaps_checked.md",
+                             p["gaps"] / "gaps.md") if f.exists()), None)
+    if gaps:
+        out += part(gaps, "Post-review analysis: Anticipated Reviewer Concerns (Gap Scout)")
+    if (p["post"] / "fact_check.md").exists():
+        out += part(p["post"] / "fact_check.md", "Post-review analysis: fact check (Report Checker)")
+    est = checker_estimate(p)
+    if est:
+        out += ("\n\n## Post-review analysis: independent estimate (Report Checker)\n\n"
+                f"Pool position {est.get('pool_position')}, Overall {est.get('overall')}: "
+                f"{est.get('reasons', '')}\n")
     return out
 
 
@@ -317,10 +340,8 @@ def cmd_finish(a):
         "eic_weights": {k: weights.get(k, 1.0) for k in ROLES},
         # The Report Checker's own placement, recorded before it read the reports
         # (diagnostic only: never averaged into a score).
-        "checker_pool_position": (load(p["check"] / "checker_estimate.json", {}) or {}).get(
-            "pool_position"),
-        "checker_overall": (load(p["check"] / "checker_estimate.json", {}) or {}).get(
-            "overall"),
+        "checker_pool_position": checker_estimate(p).get("pool_position"),
+        "checker_overall": checker_estimate(p).get("overall"),
         "decision_differs_from_starting_point": final != agg.get("suggested_overall"),
         "da_critical_raised": len(before.get("da_critical", [])),
         "da_critical_upheld": sum(d["upheld"] for d in scores["da_critical"]),
@@ -351,7 +372,8 @@ def main(argv=None):
         return s
 
     s = common(sub.add_parser("prompt"))
-    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "gaps", "check", "eic"])
+    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "check", "eic",
+                                     "estimate", "gaps", "post"])
     s.add_argument("--role", default="")
     s.add_argument("--resumed", action="store_true",
                    help="eic only: the prompt for the resumed panel context")
@@ -360,7 +382,7 @@ def main(argv=None):
     s.add_argument("--out", required=True)
     s.set_defaults(fn=cmd_shared)
     s = common(sub.add_parser("deny"))
-    s.add_argument("--role", required=True, choices=list(ROLES) + ["GAP"])
+    s.add_argument("--role", required=True, choices=list(ROLES) + ["GAP", "EST"])
     s.set_defaults(fn=cmd_deny)
     common(sub.add_parser("before")).set_defaults(fn=cmd_before)
     common(sub.add_parser("finish")).set_defaults(fn=cmd_finish)
