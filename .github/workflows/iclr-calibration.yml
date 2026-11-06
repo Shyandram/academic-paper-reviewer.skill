@@ -9,6 +9,8 @@ name: ICLR calibration (paperreview.ai protocol)
 #
 # pipeline "split" (evals/split/) runs each phase in a fresh context instead:
 # Phase 0, five parallel reviewers, the literature and report check, then the EIC.
+# pipeline "check" (skill 2.11) runs Phase 0 and the reviewers in one context, the check
+# in a fresh context, and resumes the first context for the EIC.
 # budget is then the cap per phase. auth "subscription" uses CLAUDE_CODE_OAUTH_TOKEN.
 on:
   workflow_dispatch:
@@ -29,7 +31,7 @@ on:
         description: "Concurrent review jobs"
         default: "2"
       pipeline:
-        description: "single (one context, evals/review_prompt.md) or split (one fresh context per phase, evals/split/)"
+        description: "single (one context, evals/review_prompt.md), split (one fresh context per phase, evals/split/) or check (one context plus a fresh check context)"
         default: "single"
       auth:
         description: "api (ANTHROPIC_API_KEY, billed per token) or subscription (CLAUDE_CODE_OAUTH_TOKEN)"
@@ -91,7 +93,7 @@ jobs:
           assert cfg["split"] in ("all", "train", "test")
           assert all(cfg[k].isdigit() for k in ("offset", "limit", "max_parallel"))
           assert re.fullmatch(r"claude-[a-z0-9.-]+", cfg["model"])
-          assert cfg["pipeline"] in ("single", "split")
+          assert cfg["pipeline"] in ("single", "split", "check")
           assert cfg["auth"] in ("api", "subscription")
           assert cfg["effort"] in ("", "low", "medium", "high", "xhigh", "max")
           for k, v in cfg.items():
@@ -138,7 +140,7 @@ jobs:
     needs: [config, prepare]
     if: needs.prepare.outputs.ids != '[]'
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ needs.config.outputs.pipeline == 'split' && 180 || 90 }}
+    timeout-minutes: ${{ needs.config.outputs.pipeline == 'single' && 90 || 180 }}
     strategy:
       fail-fast: false
       max-parallel: ${{ fromJSON(needs.config.outputs.max_parallel) }}
@@ -178,8 +180,8 @@ jobs:
             --max-budget-usd "${{ needs.config.outputs.budget }}" --output-format json > "evals/work/results/$ID/run.json" || true
           python3 -c "import json;r=json.load(open('evals/work/results/$ID/run.json'));print('cost_usd',r.get('total_cost_usd'),'turns',r.get('num_turns'))" || true
           ls -la "evals/work/results/$ID"
-      - name: Review (split, one fresh context per phase)
-        if: needs.config.outputs.pipeline == 'split'
+      - name: Review (split or check, evals/split/)
+        if: needs.config.outputs.pipeline != 'single'
         env:
           ANTHROPIC_API_KEY: ${{ needs.config.outputs.auth == 'api' && secrets.ANTHROPIC_API_KEY || '' }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ needs.config.outputs.auth == 'subscription' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
@@ -188,6 +190,7 @@ jobs:
           EFFORT: ${{ needs.config.outputs.effort }}
           BUDGET: ${{ needs.config.outputs.budget }}
           LIT: strict
+          PIPELINE: ${{ needs.config.outputs.pipeline }}
         run: |
           [ -n "$ANTHROPIC_API_KEY" ] || unset ANTHROPIC_API_KEY
           [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || unset CLAUDE_CODE_OAUTH_TOKEN

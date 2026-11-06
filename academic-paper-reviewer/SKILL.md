@@ -2,11 +2,11 @@
 name: academic-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides. Modes: full review with editorial decision and revision roadmap, quick assessment and submission-readiness check, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.10"
-  last_updated: "2026-11-05"
+  version: "2.11"
+  last_updated: "2026-11-06"
 ---
 
-# Academic Paper Reviewer v2.10
+# Academic Paper Reviewer v2.11
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
 
@@ -127,6 +127,10 @@ Each report uses `templates/peer_review_report_template.md`, except the Devil's 
 
 The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
 
+### Independent Check (Phases 1.5 and 1.6)
+
+The **Report Checker** (`agents/report_checker_agent.md`) runs Phases 1.5 and 1.6. When the host permits delegation, run it as a separate agent in a fresh context that did not write the reports. It gets the five reports and score files, the reviewers' copy, the paper memory and the fingerprint, never the integrity findings or the unredacted paper. It cannot change scores or reports. Its two documents, the literature-check addendum and the report check, go to the EIC. Without delegation, run the checker role in the same context and disclose that the check was not independent. The reviewers themselves stay in one context in either case.
+
 ### Phase 1.5: Literature Check (after the five reports are drafted; needs network access)
 
 The literature check comes **after** the reviewers have read the whole paper, so it supplements their reading and never replaces it. Follow `references/literature_search.md`:
@@ -135,7 +139,7 @@ The literature check comes **after** the reviewers have read the whole paper, so
    - one query per external benchmark the paper reports on (`related_search.py benchmarks` lists them; `--purpose baseline`), then `scout` to find prior work reporting on that benchmark.
 2. **Round 2, expansion:** run `coverage` and fill its gaps (years with no prior work, dataset or foundational papers behind the baselines, claims with no query) with `--purpose expansion`. At most 12 queries in total; stop earlier when the gaps are closed.
 3. Run `related_search.py similarity` to find the **closest prior works** and any **text overlap**.
-4. The Domain Reviewer adds a **literature-check addendum** to its report: a per-claim novelty verdict from the claim-level profile (typed claims, prior works rated 1–5 for coverage, `related_search.py novelty`; one established claim is MAJOR at most, never "the paper is known"), a novelty delta table against the closest prior works, a **baseline scout table**, a short **field snapshot** (what counts as significant in this sub-field right now), and verified missing references. The Devil's Advocate may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
+4. The Report Checker, acting for the Domain Reviewer, writes a **literature-check addendum** to that report: a per-claim novelty verdict from the claim-level profile (typed claims, prior works rated 1–5 for coverage, `related_search.py novelty`; one established claim is MAJOR at most, never "the paper is known"), a novelty delta table against the closest prior works, a **baseline scout table**, a short **field snapshot** (what counts as significant in this sub-field right now), and verified missing references. The Devil's Advocate may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
 5. Only results labelled **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months before the cutoff)** can be required comparisons. **Recent preprints**, **concurrent** and **newer** work are "worth discussing" only: never a weakness on their own, and never a reason to lower a score.
 
 Default mode is `on`. Use `strict` (drops everything after the cutoff) to simulate a review as of submission. Without network access, skip this phase, say so, and rely on knowledge with `[verify]`.
@@ -144,13 +148,14 @@ Default mode is `on`. Use `strict` (drops everything after the cutoff) to simula
 
 **Order:** Phase 1 → Phase 1.5 → Phase 1.6 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
 
-The Synthesizer checks every weakness in the five reports before it builds the package (`agents/editorial_synthesizer_agent.md`, Step 0). This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass four tests:
+The Report Checker checks every weakness in the five reports before the Synthesizer builds the package. This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass five tests:
 1. **Specific.** It names a location, what is wrong, and why it matters. Rewrite a vague weakness, or drop it.
 2. **Not already answered.** Search the paper, appendix included, for the point. If the paper answers it, drop it or turn it into a question about clarity.
 3. **Consistent with the paper.** It makes no claim the paper contradicts. Novelty statements about prior work must match that work's abstract.
 4. **Actionable and professional.** It gives a concrete fix and critiques the work, never the authors.
+5. **Factually accurate.** Every number, count, quote and attribution matches the cited location. The checker opens the location and recounts; it does not trust the report. This test also covers the evidence behind strengths and scores. Errors go to a factual error list, once per error, with every report that repeated it.
 
-Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with reasons). Scores are not changed here. The EIC sees the table.
+Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with the test and reason), plus the factual error list. Scores are not changed here. The EIC sees both and uses them when setting quality weights.
 
 ### Phase 2: EIC Meta-Review and Decision
 
@@ -280,6 +285,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | `agents/domain_reviewer_agent.md` | Full |
 | `agents/perspective_reviewer_agent.md` | Full |
 | `agents/devils_advocate_reviewer_agent.md` | Full, guided |
+| `agents/report_checker_agent.md` | Phases 1.5 and 1.6 (independent check), full mode |
 | `agents/editorial_synthesizer_agent.md` | Phase 2 |
 | `agents/rebuttal_strategist_agent.md` | Rebuttal mode |
 | `references/codex_runtime.md` | Codex runtime, input tools, permissions and output paths |

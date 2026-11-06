@@ -52,6 +52,21 @@ class SplitPipeline(unittest.TestCase):
             self.assertNotRegex(out, r"\{[A-Z_]+\}", role)
             self.assertIn(rs.ROLES[role][1], out)
 
+    def test_check_pipeline_prompts(self):
+        panel = run(["prompt", "panel", "--pipeline", "check"] + self.base)
+        self.assertNotRegex(panel, r"\{[A-Z_]+\}")
+        self.assertIn("do not launch subagents", panel)
+        self.assertIn("Do not run Phases 1.5, 1.6 or 2 now", panel)
+        check = run(["prompt", "check"] + self.base)
+        self.assertIn("report_checker_agent.md", check)
+        self.assertIn("factually accurate", check)
+        resumed = run(["prompt", "eic", "--resumed"] + self.base)
+        fresh = run(["prompt", "eic"] + self.base)
+        self.assertNotRegex(resumed, r"\{[A-Z_]+\}")
+        self.assertTrue(resumed.startswith("## Resumed"))  # no repeated rules
+        self.assertIn("Evaluation rules", fresh)
+        self.assertIn("eic.json", resumed)
+
     def test_shared_prefix_is_redacted_and_role_free(self):
         a = argparse.Namespace(
             id=PID, root=str(self.tmp), venue="iclr", venue_name="ICLR", lit="strict",
@@ -129,6 +144,22 @@ class SplitPipeline(unittest.TestCase):
         self.assertIn("report DA", review)
         self.assertIn("decision text", review)
         self.assertIn("(missing)", review)  # no check phase output
+        self.assertEqual(summary["pipeline"], "split")
+
+    def test_finish_records_check_pipeline(self):
+        self.write_reviewers()
+        run(["before"] + self.base)
+        self.p["eic"].mkdir(parents=True)
+        (self.p["eic"] / "eic.json").write_text(json.dumps({
+            "final_overall": 3, "eic_pool_position": 40, "eic_weights": {}, "da_rulings": []}))
+        self.p["runs"].mkdir(parents=True)
+        (self.p["runs"] / "panel.json").write_text(json.dumps({"total_cost_usd": 1.5}))
+        run(["finish", "--pipeline", "check"] + self.base)
+        summary = json.loads((self.p["res"] / "summary.json").read_text())
+        self.assertEqual(summary["pipeline"], "check")
+        runlog = json.loads((self.p["res"] / "run.json").read_text())
+        self.assertAlmostEqual(runlog["phases"]["panel"]["cost_usd"], 1.5)
+        self.assertIn("check pipeline", (self.p["res"] / "review.md").read_text())
 
     def test_before_requires_all_five(self):
         self.write_reviewers(missing=("R3",))

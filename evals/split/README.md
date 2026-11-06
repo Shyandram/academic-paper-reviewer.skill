@@ -33,6 +33,20 @@ starts `WARMUP` seconds before the others so they read the prefix from the cache
 its wall time. `run.json` sums cost, turns and tokens (input, output, cache write, cache
 read) and keeps the per-phase breakdown.
 
+## Check pipeline (skill 2.11)
+
+`PIPELINE=check` keeps the reviewers in one context, as in the single pipeline, and makes only
+the check independent, as the skill's Independent Check does:
+
+| Phase | Context |
+|---|---|
+| `panel` | one context: Phase 0 and the five reviewers (`panel.md`); the session is kept |
+| `check` | fresh: the Report Checker (`agents/report_checker_agent.md`); the unredacted paper and the integrity findings are denied |
+| `eic` | the `panel` session resumed (`eic_resume.md` + `eic.md`) |
+
+The output files are the same as the split pipeline's, and `summary.json` records
+`"pipeline": "check"`. Compare with skill 2.10 single runs on the same papers.
+
 ## Running
 
 From the repository root, with `evals/work/papers/<id>/blinded.txt` in place:

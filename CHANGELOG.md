@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.11
+
+Independent check. In a 3-paper ICLR 2026 trial (Sonnet), running Phases 1.5 and 1.6 in a fresh context caught factual errors in the reports: miscounted tallies, a metric value misquoted the same way by three reviewers, and an unverified attribution. Running every reviewer in its own context did not make the reviewers' scores more diverse and cost about 2.2× as much, so the reviewers stay in one context.
+
+- **Report Checker** (`agents/report_checker_agent.md`): a new role that runs Phase 1.5 (literature check and the Domain Reviewer's addendum) and Phase 1.6 (report check). When the host permits delegation it runs as a separate agent that did not write the reports. It gets the reports, the reviewers' copy, the paper memory and the fingerprint, never the integrity findings. Without delegation it runs in the same context and says so.
+- **Fifth report-check test, factually accurate:** every number, count, quote and attribution must match the cited location. The checker reopens the location and recounts. This test also covers the evidence behind strengths and scores. Errors go to a factual error list, once per error, with every report that repeated it.
+- **Synthesizer Step 0** takes in the checker's output instead of running the check itself, and falls back to running it (marked not independent) when no check ran.
+- **EIC:** reads the factual error list when setting quality weights and spot-checks at least one entry.
+- **Evals:** `evals/split/run_paper.sh` gains `PIPELINE=check` (the default stays the full split): one context for Phase 0 and the five reviewers, a fresh context for the check, then the first context resumed for Phase 2. This compares with 2.10's single context on the check alone.
+
 ## 2.10
 
 Score calibration against the whole submission pool. On the first ICLR 2026 calibration pilot (20 stratified submissions, Haiku), scores did not separate papers. Each dimension's standard deviation across papers was 2–5 points, the mean of 6 dimensions stayed between 55 and 61, and nearly every paper got Overall 3. Spearman with the human mean was −0.12 and acceptance AUC 0.47. A paper with human mean 2.0 and one with 6.0 both got 3. The anchors described papers only relative to the venue's *accepted* papers, and the anti-harshness rule only ever raised scores, so unsure reviewers defaulted to "borderline".

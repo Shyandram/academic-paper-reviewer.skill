@@ -15,8 +15,13 @@ redacted paper, paper memory, panel card) so the second to fifth runs read it
 from the prompt cache; the role file and instructions come last, in the user
 prompt. Standard library only. `run_paper.sh` drives one paper.
 
+With `--pipeline check` (skill 2.11), Phase 0 and the five reviewers run in one
+context (`panel`), the check runs fresh, and the panel context is resumed for the
+EIC: only the check is independent, as in the skill's Independent Check.
+
 Subcommands:
-    prompt PHASE   print the user prompt for a phase (phase0, reviewer, check, eic)
+    prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, check,
+                   eic; `eic --resumed` for the resumed panel context)
     shared         write the shared system-prompt suffix for the reviewers
     deny           print the Read() deny rules for one reviewer, one per line
     before         merge the five reviewer score files and run the BEFORE aggregation
@@ -49,7 +54,9 @@ SHARED_SKILL_FILES = [
     "templates/peer_review_report_template.md",
 ]
 PHASE0_FILES = ["card.md", "paper_memory.md"]
-PHASES = ["phase0", "R1", "R2", "R3", "R4", "DA", "check", "eic"]
+PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "check", "eic"]
+PIPELINES = {"split": "one fresh context per phase",
+             "check": "one context for the panel, a fresh context for the check"}
 
 
 def paths(root, pid):
@@ -106,6 +113,9 @@ def cmd_prompt(a):
                   "AGENT_TEXT": (p["skill"] / "agents" / agent).read_text(encoding="utf-8")})
         # The rules are already in the shared system prompt.
         out = fill(template("reviewer.md"), v)
+    elif a.phase == "eic" and a.resumed:
+        # The rules are already in the resumed context.
+        out = fill(template("eic_resume.md"), v) + fill(template("eic.md"), v)
     else:
         out = rules + "\n" + fill(template(a.phase + ".md"), v)
     sys.stdout.write(out)
@@ -222,13 +232,13 @@ def run_stats(p):
     return phases, total
 
 
-def assemble_review(p):
+def assemble_review(p, pipeline="split"):
     def part(path, title):
         try:
             return f"\n\n## {title}\n\n" + Path(path).read_text(encoding="utf-8").strip() + "\n"
         except OSError:
             return f"\n\n## {title}\n\n(missing)\n"
-    out = "# Review (split pipeline: one fresh context per phase)\n"
+    out = f"# Review ({pipeline} pipeline: {PIPELINES[pipeline]})\n"
     out += part(p["p0"] / "card.md", "Phase 0: Reviewer Configuration Card")
     for key, (_, _, title) in ROLES.items():
         out += part(p["reports"] / key / "report.md", f"Phase 1: {title}")
@@ -242,12 +252,12 @@ def cmd_finish(a):
     p = paths(a.root, a.id)
     eic = load(p["eic"] / "eic.json")
     phases, total = run_stats(p)
-    run = {"pipeline": "split", "total_cost_usd": round(total["cost_usd"], 4),
+    run = {"pipeline": a.pipeline, "total_cost_usd": round(total["cost_usd"], 4),
            "num_turns": total["turns"], "duration_ms": total["duration_ms"],
            "tokens": {k: total[k] for k in ("input", "output", "cache_write", "cache_read")},
            "phases": phases}
     (p["res"] / "run.json").write_text(json.dumps(run, indent=2))
-    (p["res"] / "review.md").write_text(assemble_review(p), encoding="utf-8")
+    (p["res"] / "review.md").write_text(assemble_review(p, a.pipeline), encoding="utf-8")
     if not isinstance(eic, dict):
         sys.exit("eic/eic.json missing or invalid; run.json and review.md written")
     before = load(p["res"] / "scores_before.json")
@@ -274,7 +284,7 @@ def cmd_finish(a):
     flags.append(load(p["p0"] / "panel.json", {}) or {})
     flags.append(eic)
     summary = {
-        "id": a.id, "pipeline": "split",
+        "id": a.id, "pipeline": a.pipeline,
         "paper_type": scores.get("paper_type"),
         "final_overall": agg.get("final_overall", final),
         "venue_recommendation": views[0].get("label"),
@@ -310,11 +320,14 @@ def main(argv=None):
         s.add_argument("--venue-name", default="ICLR")
         s.add_argument("--lit", default="strict", choices=["on", "strict", "off"])
         s.add_argument("--cutoff", default="")
+        s.add_argument("--pipeline", default="split", choices=list(PIPELINES))
         return s
 
     s = common(sub.add_parser("prompt"))
-    s.add_argument("phase", choices=["phase0", "reviewer", "check", "eic"])
+    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "check", "eic"])
     s.add_argument("--role", default="")
+    s.add_argument("--resumed", action="store_true",
+                   help="eic only: the prompt for the resumed panel context")
     s.set_defaults(fn=cmd_prompt)
     s = common(sub.add_parser("shared"))
     s.add_argument("--out", required=True)

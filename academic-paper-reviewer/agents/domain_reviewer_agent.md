@@ -78,7 +78,7 @@ Verdicts follow the highest prior level: 5 known, 4 incremental, 3 medium, 1–2
 
 ### Step 5: Missing References
 
-**If a literature check ran (Phase 1.5),** add a *literature-check addendum* built from its kept results and labels:
+**If a literature check ran (Phase 1.5),** the Report Checker (`agents/report_checker_agent.md`) writes a *literature-check addendum* to this report for you, from the kept results and labels, under these rules:
 - Only **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months)** work can be a *Critical* missing comparison.
 - **Recent preprints** and **concurrent** work are at most *Important* ("worth discussing"), and never lower your scores on their own.
 - **Newer** work goes under *Helpful*, for the authors' awareness.
