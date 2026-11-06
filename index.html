@@ -660,6 +660,81 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
   </div>
 </section>
 
+<!-- 06 · Issues -->
+<section class="slide" id="issues" aria-labelledby="t-issues" data-label="Issues vs humans">
+  <span class="num" aria-hidden="true">06</span>
+  <div class="wrap">
+    <div class="eval-grid">
+      <div>
+    <div class="eval-head rv"><p class="kicker" style="margin:0">Evaluation</p><span class="pill">Pilot · 20 papers · 247 human issues</span></div>
+    <h2 id="t-issues" class="rv" style="--i:1;margin-top:14px">Does it raise the same concerns as humans?</h2>
+    <p class="sub rv" style="--i:2">We matched the weaknesses in the skill's five reports with those in the real ICLR 2026 reviews of the same papers. A blinded annotator split both into issues and matched them, without knowing which side was human.</p>
+    <ul class="take rv" style="--i:3">
+      <li><span class="tk ok">✓</span><span><b>Finds what humans agree on</b>: 78% of the issues raised by two or more human reviewers, 45% of all.</span></li>
+      <li><span class="tk ok">✓</span><span><b>As good as another human</b>: three AI reviewers anticipate a reviewer's issues as often as the other humans do (0.40 vs 0.39).</span></li>
+      <li><span class="tk no">!</span><span><b>Too broad, not blind</b>: most missed issues are ones it raised only as a category (&ldquo;more ablations&rdquo;) while a human named the item. Only 26 of 247 had nothing close.</span></li>
+      <li><span class="tk no">!</span><span><b>Too many and repetitive</b>: 21 main issues per paper vs 12 for humans; the Devil's Advocate repeats others 91% of the time.</span></li>
+    </ul>
+    <div class="callout small rv" style="--i:4" role="note">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+      <div><b>What changes in 2.11.</b> Each weakness names the concrete missing experiment, baseline or definition; the Devil's Advocate attacks only the core argument; an independent checker lists the 3–5 key concerns.</div>
+    </div>
+    <p class="rv" style="--i:5;font-size:.82rem;color:var(--muted);margin:12px 0 0">Caveats: 20 papers; LLM annotators; humans saw the figures, the AI read the text; agreeing with humans is not the same as being right.</p>
+    <div class="btn-row rv" style="--i:5">
+      <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#issue-overlap-and-hit-rate-reviewers-vs-human-reviews">Issue study</a>
+      <a class="btn sm" href="report/technical_report.pdf">Technical report (PDF)</a>
+    </div>
+      </div>
+      <div>
+    <div class="charts">
+      <div class="chart-card glass rv" style="--i:2">
+        <h3>How many human concerns does it raise?</h3>
+        <p>Share of the human reviewers' main issues that the AI panel also raised. Higher is better.</p>
+        <!-- values from evals/iclr2026_issue_overlap.json (pilot, n = 20); scale 0 to 1 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">Raised by 2+ humans<small>consensus issues</small></div><div class="track"><i class="fill ai" style="--w:78%"></i></div><div class="val">0.78</div></div>
+          <div class="row"><div class="lab">All human issues<small>main issues</small></div><div class="track"><i class="fill ai" style="--w:45%"></i></div><div class="val">0.45</div></div>
+          <div class="row"><div class="lab">One human's issues<small>by the other humans</small></div><div class="track"><i class="fill human" style="--w:39%"></i></div><div class="val">0.39</div></div>
+          <div class="row"><div class="lab">One human's issues<small>by 3 AI reviewers</small></div><div class="track"><i class="fill ai" style="--w:40%"></i></div><div class="val">0.40</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
+        </div>
+      </div>
+      <div class="chart-card glass rv" style="--i:3">
+        <h3>Which concerns does it catch?</h3>
+        <p>Hit rate of the human issues, by topic.</p>
+        <!-- values from evals/iclr2026_issue_misses.json; scale 0 to 1 -->
+        <div class="chart">
+          <div class="row"><div class="lab">Efficiency<small>10 issues</small></div><div class="track"><i class="fill ai" style="--w:90%"></i></div><div class="val">0.90</div></div>
+          <div class="row"><div class="lab">Baselines<small>33 issues</small></div><div class="track"><i class="fill ai" style="--w:58%"></i></div><div class="val">0.58</div></div>
+          <div class="row"><div class="lab">Theory<small>19 issues</small></div><div class="track"><i class="fill ai" style="--w:58%"></i></div><div class="val">0.58</div></div>
+          <div class="row"><div class="lab">Novelty, related work<small>25 issues</small></div><div class="track"><i class="fill ai" style="--w:56%"></i></div><div class="val">0.56</div></div>
+          <div class="row"><div class="lab">Scope, limitations<small>33 issues</small></div><div class="track"><i class="fill weak" style="--w:39%"></i></div><div class="val">0.39</div></div>
+          <div class="row hl"><div class="lab">Missing experiments<small>75 issues, the largest group</small></div><div class="track"><i class="fill weak" style="--w:33%"></i></div><div class="val">0.33</div></div>
+          <div class="row"><div class="lab">Method clarity<small>23 issues</small></div><div class="track"><i class="fill weak" style="--w:30%"></i></div><div class="val">0.30</div></div>
+          <div class="row"><div class="lab">Presentation<small>8 issues</small></div><div class="track"><i class="fill weak" style="--w:12%"></i></div><div class="val">0.12</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
+        </div>
+      </div>
+      <div class="chart-card glass rv" style="--i:4">
+        <h3>Why does it miss the rest?</h3>
+        <p>Likely reason for the 141 human issues it did not raise (number of issues).</p>
+        <!-- counts from evals/iclr2026_issue_misses.json; bar = share of the 141 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">Same area, but only as a broad category<small>&ldquo;more baselines&rdquo; vs a named method</small></div><div class="track"><i class="fill weak" style="--w:48.9%"></i></div><div class="val">69</div></div>
+          <div class="row"><div class="lab">Related concern, different diagnosis<small></small></div><div class="track"><i class="fill weak" style="--w:20.6%"></i></div><div class="val">29</div></div>
+          <div class="row"><div class="lab">Subjective request<small>more scope, another setting</small></div><div class="track"><i class="fill base" style="--w:13.5%"></i></div><div class="val">19</div></div>
+          <div class="row"><div class="lab">Fine technical detail<small></small></div><div class="track"><i class="fill base" style="--w:7.1%"></i></div><div class="val">10</div></div>
+          <div class="row"><div class="lab">Needs figures<small>the AI reads text only</small></div><div class="track"><i class="fill base" style="--w:3.5%"></i></div><div class="val">5</div></div>
+          <div class="row"><div class="lab">Needs a specific prior work<small></small></div><div class="track"><i class="fill base" style="--w:2.8%"></i></div><div class="val">4</div></div>
+        </div>
+        <span class="hint">Issues that need knowledge of prior work are caught more often (0.52) than text-only ones (0.41).</span>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- 06 · How it compares -->
 <section class="slide" id="compare" aria-labelledby="t-cmp" data-label="How it compares">
   <div class="wrap">
@@ -684,7 +759,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
 
 <!-- 07 · Install -->
 <section class="slide" id="install" aria-labelledby="t-install" data-label="Install">
-  <span class="num" aria-hidden="true">06</span>
+  <span class="num" aria-hidden="true">07</span>
   <div class="wrap">
     <p class="kicker rv">Get started</p>
     <h2 id="t-install" class="rv" style="--i:1">Install</h2>
@@ -740,7 +815,7 @@ Compare this paper across CVPR, ICLR and TMLR — which venue fits best?</code><
 
 <!-- 07 · Responsible use -->
 <section class="slide" id="responsible" aria-labelledby="t-resp" data-label="Responsible use">
-  <span class="num" aria-hidden="true">07</span>
+  <span class="num" aria-hidden="true">08</span>
   <div class="wrap">
     <p class="kicker rv">Before you use it</p>
     <h2 id="t-resp" class="rv" style="--i:1">Responsible use</h2>

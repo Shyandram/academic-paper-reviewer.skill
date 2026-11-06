@@ -367,7 +367,7 @@ EIC rulings on borderline panels.
 \caption{Ranking on the 20-paper pilot: Spearman with the mean human rating [bootstrap 95\% CI] /
 acceptance AUC. Human references are on the same papers unless noted.}
 \label{tab:rank}
-\setlength{\tabcolsep}{4pt}\footnotesize
+\setlength{\tabcolsep}{3pt}\footnotesize
 \begin{tabular}{lccc}
 \toprule
 Run & Panel rating (1--6) & EIC pool position & Mean of 6 dimensions\\
@@ -390,7 +390,7 @@ Sonnet, high   & $+0.46$ [$0.09$, $0.74$] / 0.69 & $+0.22$ / 0.53 & $+0.10$ / 0.
 \caption{Error on the ICLR 2026 scale (0--10) against the mean human rating, 20 papers.
 NMAE $\pm$ std [95\% CI]; NME $\pm$ std.}
 \label{tab:err}
-\setlength{\tabcolsep}{4pt}\footnotesize
+\setlength{\tabcolsep}{3pt}\footnotesize
 \begin{tabular}{lcccc}
 \toprule
 Predictor & NMAE $\downarrow$ & NME & Spearman & AUC\\
@@ -429,6 +429,119 @@ effort.
 For reference only: CSPaper reports NMAE 0.128, NME $-0.015$ and SRC 0.658 for Claude Sonnet 5.5
 on ICLR main. That benchmark's sample size and paper overlap are unknown, so the numbers are not
 directly comparable with ours.
+
+\subsection{Issue overlap and hit rate}\label{sec:overlap}
+Scores say nothing about \emph{which} weaknesses a review raises. On the same 20 papers (Sonnet,
+high effort, skill 2.10) we compared the weakness sections of the AI panel with those of the ICLR
+2026 human reviews (3--5 per paper). For each paper, one Sonnet annotator saw both panels under
+random names, in random order and without roles. It split them into atomic points, grouped the
+points into issues within each panel and matched issues across panels; it did not judge
+correctness. We count main issues only (minor and cosmetic points excluded) and give 95\%
+bootstrap intervals over papers. Four papers annotated twice by independent annotators differ by
+at most 0.04 on every metric. The tool and the annotation prompt are in the repository
+(\texttt{evals/issue\_overlap.py}).
+
+\begin{table}[h]
+\centering
+\small
+\caption{Issue overlap and hit rate, 20 ICLR 2026 papers, main issues.}\label{tab:overlap}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lccc}
+\toprule
+ & Human & AI, 5 reviewers & AI, R1--R4\\
+\midrule
+Main issues per paper & 12.4 [10.8, 13.9] & 20.9 [19.0, 22.9] & --\\
+One reviewer only & 0.77 [0.69, 0.83] & 0.49 [0.46, 0.53] & 0.73 [0.69, 0.77]\\
+Pairwise Jaccard & 0.10 [0.07, 0.14] & 0.16 [0.14, 0.18] & 0.10 [0.08, 0.12]\\
+\midrule
+\multicolumn{4}{l}{\emph{Hit rate}}\\
+Human issues hit by the AI panel & \multicolumn{3}{l}{\textbf{0.45} [0.37, 0.54]}\\
+\quad raised by 2+ humans & \multicolumn{3}{l}{\textbf{0.78} [0.64, 0.90]}\\
+\quad raised by one human & \multicolumn{3}{l}{0.38 [0.28, 0.48]}\\
+AI issues also raised by humans & \multicolumn{3}{l}{0.26 [0.22, 0.29]}\\
+One human's issues, by other humans & \multicolumn{3}{l}{0.39 [0.31, 0.48]}\\
+One human's issues, raised by 1 / 3 / 5 AI reviewers & \multicolumn{3}{l}{0.20 / 0.40 / 0.50}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\caption{Per-role contribution (means per paper).}\label{tab:roles}
+\begin{tabular}{lcccc}
+\toprule
+Role & Issues & Raised by no other role & Human issues hit & Hit by no other role\\
+\midrule
+R1 Methodology & 10.1 & 0.23 & 0.19 & 0.01\\
+R2 Domain & 5.5 & 0.53 & 0.19 & 0.10\\
+R3 Perspective & 5.0 & 0.62 & 0.16 & 0.07\\
+R4 Generalist & 5.3 & 0.20 & 0.14 & 0.01\\
+Devil's Advocate & 9.2 & 0.09 & 0.20 & 0.02\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+\item \textbf{Redundancy comes from two roles.} The five-reviewer panel repeats itself more than
+a human panel, but at equal size (R1--R4) its overlap matches the humans' (Jaccard 0.10). The
+Devil's Advocate raises 91\% of its issues together with another role, and R4 80\%.
+\item \textbf{The panel finds what humans agree on.} It raises 45\% of the humans' main issues and
+78\% of those two or more humans share. Three AI reviewers anticipate a given human's issues as
+well as the other humans do (0.40 vs 0.39). Coverage grows with panel size (0.17, 0.29, 0.36,
+0.41, 0.45 for 1--5 reviewers).
+\item \textbf{Too many issues.} The panel raises 1.7$\times$ as many main issues, and a quarter
+are also raised by a human. Unmatched issues are not necessarily wrong, but the reader needs a
+short list.
+\item \textbf{Votes and issues differ.} R4 adds few issues, yet the Spearman of the mean Overall
+drops without it (R1--R4 0.52, R1--R3 0.48). Version 2.11 therefore keeps R4's vote but limits its
+weaknesses to clarity, venue fit and presentation; the Devil's Advocate lists only attacks on the
+core argument chain and does not vote; and an independent Report Checker lists the 3--5 key
+concerns.
+\end{itemize}
+\paragraph{What the panel misses.} Of the 247 human main issues, 106 were hit, 115 had only a
+related AI issue and 26 had nothing close. A Sonnet labeler gave each issue a topic and the
+evidence needed to raise it (before seeing which were hit) and, for the 141 non-hits, the likely
+reason, by comparing it with the AI issue summaries (Table~\ref{tab:misses}). Half of the non-hits
+(69) are issues the panel raised only as a broad category (``more baselines'') while the human
+named the item (a specific method or dataset); 29 more are related concerns with a different
+diagnosis. True misses are mostly subjective scope requests (13) and fine technical detail (7).
+Missing experiments, the largest topic (30\% of human issues), are among the least often hit
+(0.33). Issues that need outside knowledge are hit \emph{more} often than text-only ones (0.52 vs
+0.41), so the literature check is not the bottleneck; figure-dependent issues are hit least (0.20)
+but are rare (10). Version 2.11 therefore asks each weakness to name the concrete missing
+experiment, baseline or definition.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Hit rate of the human main issues by topic and evidence needed, and the likely reason for
+the 141 non-hits (related: a partial AI overlap; missed: nothing close).}\label{tab:misses}
+\begin{tabular}{lcc@{\qquad}lcc}
+\toprule
+Topic & $n$ & Hit & Reason (non-hits) & Related & Missed\\
+\midrule
+Missing experiments & 75 & 0.33 & Raised only as a broad category & 69 & 0\\
+Baselines & 33 & 0.58 & Different diagnosis & 29 & 0\\
+Scope, limitations & 33 & 0.39 & Subjective request & 6 & 13\\
+Novelty, related work & 25 & 0.56 & Fine technical detail & 3 & 7\\
+Method clarity & 23 & 0.30 & Needs figures & 2 & 3\\
+Unsupported claims & 19 & 0.37 & Needs a specific prior work & 3 & 1\\
+Theory & 19 & 0.58 & Unclear & 3 & 2\\
+Efficiency & 10 & 0.90 & & & \\
+Presentation & 8 & 0.12 & & & \\
+\midrule
+\multicolumn{3}{l}{\emph{Evidence needed}} & & & \\
+Text and tables & 175 & 0.41 & & & \\
+Outside knowledge & 46 & 0.52 & & & \\
+Derivation & 16 & 0.50 & & & \\
+Figures & 10 & 0.20 & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Caveats: $n=20$; one LLM annotator per paper; human reviewers saw the figures, the AI read the
+extracted text; agreement with humans is not correctness.
 
 \section{Related work}\label{sec:related}
 
@@ -550,7 +663,8 @@ assumed or secondary scales.
 \item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers
 separately but cannot detect unreported recognition.
 \item \textbf{Scores are not the review.} Ranking agreement says nothing about whether the stated
-weaknesses are correct. A content-level evaluation (for example
+weaknesses are correct, and the overlap study (Section~\ref{sec:overlap}) measures agreement with
+humans, not correctness. A content-level evaluation (for example
 CoCoReviewBench~\citep{deng2026cocoreviewbench}) is the natural next step, together with
 open-weight baselines~\citep{zhu2025deepreview,weng2025cycleresearcher} run on the same ICLR 2026
 papers.
