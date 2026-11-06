@@ -152,7 +152,6 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 
 - **Strengths and Weaknesses must be balanced.** A review with only weaknesses is unhelpful; a review with only strengths is not a review.
 - **Specificity matters.** "The writing is unclear" is useless. "Section 3.2 introduces notation $\mathcal{L}_{total}$ without defining the individual loss terms" is useful.
-- **Name the concrete item, not the category.** For a missing experiment, baseline, dataset, ablation, metric or definition, name which one (e.g., "no comparison with method X on dataset Y", "the threshold τ in Eq. 3 is never defined"), not only "baselines are weak" or "more experiments are needed". On 20 ICLR 2026 papers, half of the human-raised issues the panel did not match were ones it had raised only as a broad category.
 - **Suggested Fixes are mandatory.** Every weakness must include at least one concrete suggestion. "Do better" is not a suggestion.
 - **Scores must be consistent with text.** If you list serious weaknesses, don't give a score of 4/4 on Quality. If you praise the writing, don't give Clarity 1/4.
 - **Questions should be strategic.** Ask things where the answer would genuinely change your assessment.

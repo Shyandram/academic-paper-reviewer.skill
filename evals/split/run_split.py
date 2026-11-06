@@ -1,36 +1,35 @@
 #!/usr/bin/env python3
 """Split evaluation pipeline: one fresh `claude -p` context per phase.
 
-The single-agent run (evals/review_prompt.md) plays all four reviewers in one
+The single-agent run (evals/review_prompt.md) plays all five reviewers in one
 context, so each reviewer has already seen the others' reports. Here every phase
 is its own process:
 
     phase0      field analysis, panel, paper memory, redacted copy, fingerprint
-    R1..R4      four reviewers in parallel; each sees the shared context only
-    gaps        Gap Scout: concrete weaknesses reviewers are likely to raise, from the
-                redacted copy only (fresh context, cannot read the reports)
-    check       literature check (Phase 1.5), report check and Devil's Advocate
-                challenge (Phase 1.6), in one fresh context (skill 2.11: the DA is
-                no longer a panel reviewer)
+    R1..R4, DA  five reviewers in parallel; each sees the shared context only
+    gaps        optional Gap Scout: concrete weaknesses reviewers are likely to raise,
+                from the redacted copy only (fresh context, cannot read the reports;
+                never shown to the EIC)
+    check       literature check (Phase 1.5) and report check (Phase 1.6) by the
+                optional Report Checker, in one fresh context
     eic         Synthesizer A, EIC meta-review and decision, Synthesizer B
 
-The four reviewer runs get the same system-prompt suffix (`shared`: skill text,
-redacted paper, paper memory, panel card) so the second to fourth runs read it
+The five reviewer runs get the same system-prompt suffix (`shared`: skill text,
+redacted paper, paper memory, panel card) so the second to fifth runs read it
 from the prompt cache; the role file and instructions come last, in the user
 prompt. Standard library only. `run_paper.sh` drives one paper.
 
-With `--pipeline check` (skill 2.11), Phase 0 and the four reviewers run in one
-context (`panel`), the check runs fresh, and the panel context is resumed for the
-EIC: only the check is independent, as in the skill's Independent Check.
+With `--pipeline check` (skill 2.12 with its optional extensions), Phase 0 and the
+five reviewers run in one context (`panel`), as in the single pipeline; the Gap Scout
+and the Report Checker run fresh, and the panel context is resumed for the EIC.
 
 Subcommands:
     prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, gaps, check,
-                   novelty, eic; `novelty` and `eic --resumed` are for the resumed
-                   panel context)
+                   eic; `eic --resumed` is for the resumed panel context)
     shared         write the shared system-prompt suffix for the reviewers
     deny           print the Read() deny rules for one reviewer (or GAP), one per line
-    before         merge the four reviewer score files and the check's DA-CRITICAL list
-                   (check/da.json) and run the BEFORE aggregation
+    before         merge the five reviewer score files (the DA-CRITICAL list from the
+                   Devil's Advocate's) and run the BEFORE aggregation
     finish         build scores.json, run the AFTER aggregation, write summary.json,
                    review.md and run.json (per-phase cost, tokens and wall time)
 """
@@ -46,9 +45,8 @@ ROLES = {  # key -> (role label used by aggregate_scores.py, agent file, title)
     "R2": ("R2 (Domain)", "domain_reviewer_agent.md", "Reviewer 2 (Domain)"),
     "R3": ("R3 (Persp.)", "perspective_reviewer_agent.md", "Reviewer 3 (Perspective)"),
     "R4": ("R4 (Gen.)", "generalist_reviewer_agent.md", "Reviewer 4 (Generalist)"),
+    "DA": ("DA", "devils_advocate_reviewer_agent.md", "Devil's Advocate"),
 }
-# Older runs (skill <= 2.10) had the Devil's Advocate as a fifth reviewer in reports/DA.
-LEGACY_DA = "DA"
 # Skill files every reviewer reads, in a fixed order (the cached prefix).
 SHARED_SKILL_FILES = [
     "SKILL.md",
@@ -61,7 +59,8 @@ SHARED_SKILL_FILES = [
     "templates/peer_review_report_template.md",
 ]
 PHASE0_FILES = ["card.md", "paper_memory.md"]
-PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "gaps", "check", "novelty", "eic"]
+# "novelty" was a skill 2.11 phase; kept so older run logs are still summed.
+PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "gaps", "check", "novelty", "eic"]
 PIPELINES = {"split": "one fresh context per phase",
              "check": "one context for the panel, a fresh context for the check"}
 
@@ -121,8 +120,6 @@ def cmd_prompt(a):
                   "AGENT_TEXT": (p["skill"] / "agents" / agent).read_text(encoding="utf-8")})
         # The rules are already in the shared system prompt.
         out = fill(template("reviewer.md"), v)
-    elif a.phase == "novelty":
-        out = fill(template("novelty.md"), v)  # resumed panel context: rules already there
     elif a.phase == "eic" and a.resumed:
         # The rules are already in the resumed context.
         out = fill(template("eic_resume.md"), v) + fill(template("eic.md"), v)
@@ -164,8 +161,7 @@ def deny_rules(root, pid, role):
     rules = [f"Read({rel(p['paper'].parent)}/**)",
              f"Read({rel(p['p0'])}/integrity.json)",
              f"Read({rel(p['check'])}/**)", f"Read({rel(p['eic'])}/**)"]
-    rules += [f"Read({rel(p['reports'] / k)}/**)" for k in list(ROLES) + [LEGACY_DA]
-              if k != role]
+    rules += [f"Read({rel(p['reports'] / k)}/**)" for k in ROLES if k != role]
     if role == "GAP":  # the Gap Scout reads the reviewers' copy only
         rules += [f"Read({rel(p['reports'])}/**)", f"Read({rel(p['res'])}/review.md)",
                   f"Read({rel(p['res'])}/*.json)"]
@@ -206,11 +202,11 @@ def reviewer_entries(p):
 
 
 def da_issues(p):
-    """DA-CRITICAL issues from the check's Devil's Advocate challenge (check/da.json),
-    or from a legacy fifth-reviewer run (reports/DA/scores.json)."""
-    r = load(p["check"] / "da.json")
-    if not isinstance(r, dict):
-        r = load(p["reports"] / LEGACY_DA / "scores.json", {}) or {}
+    """DA-CRITICAL issues from the Devil's Advocate's score file (reports/DA/scores.json),
+    or, for a skill 2.11 run, from the check's Devil's Advocate challenge (check/da.json)."""
+    r = load(p["reports"] / "DA" / "scores.json")
+    if not isinstance(r, dict) or "da_critical" not in r:
+        r = load(p["check"] / "da.json", {}) or {}
     return [{"id": i.get("id"), "upheld": True,
              "resolvable_without_new_data": bool(i.get("resolvable_without_new_data"))}
             for i in r.get("da_critical", []) if isinstance(i, dict)]
@@ -262,15 +258,14 @@ def assemble_review(p, pipeline="split"):
     out += part(p["p0"] / "card.md", "Phase 0: Reviewer Configuration Card")
     for key, (_, _, title) in ROLES.items():
         out += part(p["reports"] / key / "report.md", f"Phase 1: {title}")
-    if (p["reports"] / LEGACY_DA / "report.md").exists():
-        out += part(p["reports"] / LEGACY_DA / "report.md", "Phase 1: Devil's Advocate (legacy)")
-    out += part(p["gaps"] / "gaps.md", "Phase 1: Gap Scout (unscored)")
     out += part(p["check"] / "R2_addendum.md", "Phase 1.5: Literature-check addendum (Reviewer 2)")
     out += part(p["check"] / "report_check.md", "Phase 1.6: Report check")
-    if not (p["reports"] / LEGACY_DA / "report.md").exists():
-        out += part(p["check"] / "da.md",
-                    "Phase 1.6: Devil's Advocate challenge (Report Checker, no scores)")
     out += part(p["eic"] / "decision.md", "Phase 2: EIC meta-review and Editorial Decision")
+    gaps = p["check"] / "gaps_checked.md"
+    if not gaps.exists():
+        gaps = p["gaps"] / "gaps.md"
+    if gaps.exists():
+        out += part(gaps, "Optional: Anticipated Reviewer Concerns (Gap Scout)")
     return out
 
 
@@ -320,17 +315,12 @@ def cmd_finish(a):
         "before_composite": pre.get("before_composite", pre.get("official_composite")),
         "after_composite": agg.get("eic_composite"),
         "eic_weights": {k: weights.get(k, 1.0) for k in ROLES},
-        "checker_weights": eic.get("checker_weights"),
         # The Report Checker's own placement, recorded before it read the reports
         # (diagnostic only: never averaged into a score).
         "checker_pool_position": (load(p["check"] / "checker_estimate.json", {}) or {}).get(
             "pool_position"),
         "checker_overall": (load(p["check"] / "checker_estimate.json", {}) or {}).get(
             "overall"),
-        "panel_rating": agg.get("panel_rating"),
-        "panel_pool_position": agg.get("panel_pool_position"),
-        "decision_with_lean": agg.get("decision_with_lean"),
-        "novelty_update": (load(p["reports"] / "R2" / "scores.json", {}) or {}).get("novelty_update"),
         "decision_differs_from_starting_point": final != agg.get("suggested_overall"),
         "da_critical_raised": len(before.get("da_critical", [])),
         "da_critical_upheld": sum(d["upheld"] for d in scores["da_critical"]),
@@ -361,7 +351,7 @@ def main(argv=None):
         return s
 
     s = common(sub.add_parser("prompt"))
-    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "gaps", "check", "novelty", "eic"])
+    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "gaps", "check", "eic"])
     s.add_argument("--role", default="")
     s.add_argument("--resumed", action="store_true",
                    help="eic only: the prompt for the resumed panel context")

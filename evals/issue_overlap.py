@@ -61,10 +61,10 @@ def ai_reports(res, gaps=False):
     """The AI reports of one result directory, keyed by role.
 
     Split and check pipelines: reports/<role>/report.md. Up to skill 2.10 the Devil's
-    Advocate was a fifth reviewer (reports/DA); from 2.11 the Report Checker runs it after
+    Advocate is a fifth reviewer (reports/DA); in 2.11 the Report Checker ran it after
     the check (check/da.md), so DA comes from there when present. Single pipeline: the
-    "## Reviewer:" sections of review.md (five up to 2.10; four plus a "Devil's Advocate
-    Report" from 2.11). With `gaps`, also the Gap Scout list (gaps/gaps.md)."""
+    "## Reviewer:" sections of review.md (five; in 2.11 four plus a "Devil's Advocate
+    Report"). With `gaps`, also the Gap Scout list (gaps/gaps.md)."""
     res = Path(res)
     if all((res / "reports" / r / "report.md").exists() for r in VOTING):
         out = {r: (res / "reports" / r / "report.md").read_text(encoding="utf-8")
@@ -567,7 +567,8 @@ def run_items(res):
     each reviewer's main weaknesses (`W<n>` headings, Minor left out), the Devil's
     Advocate issues (DA-C/DA-M rows), and the Gap Scout list with the Report Checker's
     verdict (dropped or kept) from the `Anticipated Reviewer Concerns` section of
-    check/report_check.md. Returns [(source, item id, text, extra)]."""
+    check/gaps_checked.md (2.12) or check/report_check.md (2.11). Returns
+    [(source, item id, text, extra)]."""
     res = Path(res)
     reps = ai_reports(res, gaps=True) or {}
     out = []
@@ -581,8 +582,10 @@ def run_items(res):
         cells = [c.strip() for c in m.group(2).split("|") if c.strip()]
         out.append(("DA", m.group(1), " | ".join(cells)[:600], {}))
     dropped = set()
-    rc = res / "check" / "report_check.md"
-    if rc.exists():
+    # 2.12: check/gaps_checked.md; 2.11: a section of check/report_check.md.
+    rc = next((f for f in (res / "check" / "gaps_checked.md", res / "check" / "report_check.md")
+               if f.exists()), None)
+    if rc:
         text = rc.read_text(encoding="utf-8")
         m = re.search(r"^(#+)[^\n]*Anticipated Reviewer Concerns[^\n]*$", text, re.M | re.I)
         if m:
@@ -602,7 +605,7 @@ def run_items(res):
 
 
 def cmd_run_prepare(a):
-    """Blind matching files for one run directory (skill 2.11 layout): the human main
+    """Blind matching files for one run directory (skill 2.11/2.12 layout): the human main
     issues from `misses` against every item of the run, all sources mixed at random."""
     rows = {}
     for r in map(json.loads, open(a.issues)):

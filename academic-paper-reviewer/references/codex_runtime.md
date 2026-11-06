@@ -42,9 +42,7 @@ conversion services.
 
 Read the selected mode's files, create the evidence ledger, then perform the
 required reviewer passes. Delegation is optional and subject to host policy.
-Disclose sequential passes as perspectives from a shared context. If you can delegate only one thing, delegate the Report Checker
-(Phases 1.5 and 1.6, `agents/report_checker_agent.md`) to a fresh context:
-an independent check of the finished reports matters more than separate reviewer contexts. Keep claims
+Disclose sequential passes as perspectives from a shared context. Keep claims
 traceable to source locations; uncertain extraction should lower confidence.
 Do not invent missing scores solely to make aggregation succeed.
 

@@ -311,6 +311,12 @@ Ranking and error, same papers (`iclr_calibration.py pilot`; numbers:
   ranking signal without adding hits. The fresh-context checker's own estimate was the best
   single rating signal. n = 20; all intervals are wide.
 
+**Decision (2.12):** the panel, its instructions, the scoring and the decision rule go back to
+2.10. The Gap Scout and the Report Checker (with its independent estimate) become optional
+extensions that never change a score or the decision; the Gap Scout list goes into the output
+as a checklist, not to the EIC. Whether the checker's estimate should vote is left to a larger
+evaluation on other papers than these 20.
+
 ## Split pipeline trial (3 papers)
 
 Sonnet high, `evals/split/` (one fresh context per phase), run as in-session subagents

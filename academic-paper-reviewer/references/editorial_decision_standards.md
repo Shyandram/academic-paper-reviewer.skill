@@ -68,12 +68,12 @@ This matrix helps map reviewer consensus to editorial decisions.
 
 | Reviewer Consensus Pattern | Recommended Decision |
 |---------------------------|---------------------|
-| All 4 reviewers: Accept (5–6) | Strong Accept (6) |
-| 3 Accept + 1 Borderline | Accept (5) |
-| 2 Accept + 2 Borderline | Accept (5) or Borderline Accept (4) |
+| All 5 reviewers: Accept (5–6) | Strong Accept (6) |
+| 4 Accept + 1 Borderline | Accept (5) |
+| 3 Accept + 2 Borderline | Accept (5) |
 | Majority Accept + upheld DA-CRITICAL | Borderline Accept (4) at best; Borderline Reject (3) if the fix needs new data/experiments |
-| Mixed: 2 Accept + 2 Reject | Requires arbitration → typically Borderline (3–4) |
-| Majority Borderline (3–4) | Borderline Accept (4) or Borderline Reject (3) based on the Devil's Advocate challenge and the verified key concerns |
+| Mixed: 2 Accept + 2 Reject + 1 Borderline | Requires arbitration → typically Borderline (3–4) |
+| Majority Borderline (3–4) | Borderline Accept (4) or Borderline Reject (3) based on DA |
 | 3+ Reject (1–2) | Reject (2) |
 | Any reviewer: Strong Reject + valid justification | Discuss carefully; likely Reject (2) |
 | Upheld DA-CRITICAL present | Cannot be Accept (5–6); see the DA-CRITICAL Ceiling below |
@@ -103,7 +103,7 @@ The **EIC** rules on every DA-CRITICAL issue after checking it against the paper
 
 ### Who Decides
 
-The EIC (meta-reviewer) makes the final decision. The **official** rating is the plain mean of the voting reviewers' (R1–R4) raw Overall ratings, and the official scores are the plain means of the reviewers' dimension scores; they are what the authors see. The Devil's Advocate's Overall is shown but not averaged. The official rating is also the **primary score** (the panel rating), reported to two decimals with the panel pool position and the integer decision's lean. The EIC's quality weights produce the **EIC assessment**, which can be higher or lower. Its **EIC-weighted rating** (the weighted mean of the reviewers' Overall ratings, rounded half up) is the starting point, and the 0–100 composite is a cross-check. The EIC may decide above or below the starting point with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
+The EIC (meta-reviewer) makes the final decision. The **official** ratings and scores are the plain means of the reviewers' raw Overall ratings and dimension scores; they are what the authors see. The EIC's quality weights produce the **EIC assessment**, which can be higher or lower. Its **EIC-weighted rating** (the weighted mean of the reviewers' Overall ratings, rounded half up) is the starting point, and the 0–100 composite is a cross-check. The EIC may decide above or below the starting point with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
 
 ### Conference ↔ Journal Mapping
 

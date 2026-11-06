@@ -9,14 +9,13 @@
 ## Submission ID: [if available]
 ## Date: [YYYY-MM-DD]
 ## Target Venue: [venue] | Paper Type: [type]
-## Review Team (fictional personas): EIC (meta-reviewer) [name]; R1 Methodology, R2 Domain, R3 Perspective, R4 Generalist [names]; Gap Scout and Report Checker (runs the Devil's Advocate challenge) are functions, not personas
+## Review Team (fictional personas): EIC (meta-reviewer) [name]; R1 Methodology, R2 Domain, R3 Perspective, R4 Generalist, DA [names]
 
 ---
 
 ## Decision: [Strong Accept (6) / Accept (5) / Borderline Accept (4) / Borderline Reject (3) / Reject (2) / Strong Reject (1)]
 
-**Primary score: panel rating [x.xx]** · panel pool position [P] · decision [n, leaning m]
-**Official ratings** (shown to authors): R1 [n], R2 [n], R3 [n], R4 [n] → mean [x.xx] · official composite [xx.x]
+**Official ratings** (shown to authors): R1 [n], R2 [n], R3 [n], R4 [n], DA [n] → mean [x.xx] · official composite [xx.x]
 **EIC assessment** (internal): weighted rating [x.xx] → starting point [n] · weighted composite [xx.x] → [band] (cross-check) · **DA ceiling**: [none / 4 / 3] · **Final (EIC)**: [n]
 **Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
 
@@ -40,6 +39,7 @@
 | R2 (Domain) | | | | |
 | R3 (Perspective) | | | | |
 | R4 (Generalist) | | | | |
+| DA | | | | |
 
 ### DA-CRITICAL Rulings
 | Issue | AC test: fatal on its own? | Ruling | Resolvable by |
@@ -57,8 +57,8 @@
 
 *Paste the markdown output of `python3 scripts/aggregate_scores.py scores.json --venue <target>` (run with the EIC's `eic_weight` values): the reviewer-weight table and the official/EIC-assessment dimension table. Or fill them in by hand with the same formulas.*
 
-| Dimension | R1 | R2 | R3 | R4 | Official (raw mean) | EIC assessment (weighted) | Spread |
-|-----------|----|----|----|----|---------------------|----------------------|--------|
+| Dimension | R1 | R2 | R3 | R4 | DA | Official (raw mean) | EIC assessment (weighted) | Spread |
+|-----------|----|----|----|----|----|---------------------|----------------------|--------|
 | Technical Rigor | | | | | | | | |
 | Clarity & Presentation | | | | | | | | |
 | Novelty & Originality | | | | | | | | |
@@ -102,8 +102,8 @@ Thank you for submitting your paper "[Title]" to [venue].
 2. [Concern]
 3. [Concern]
 
-[If the Devil's Advocate challenge raised CRITICAL issues:]
-**Critical Challenge (Devil's Advocate, run by the Report Checker):**
+[If Devil's Advocate raised CRITICAL issues:]
+**Critical Challenge (Devil's Advocate):**
 [Summarize the DA's strongest objection. Explain why it must be addressed.]
 
 **Decision: [Decision]**
@@ -139,7 +139,7 @@ Editor-in-Chief (meta-reviewer)
 [For each dimension flagged ⚠ (spread > 20): which reviewers diverge, why, and which view the editor adopts]
 
 ### Devil's Advocate Highlights
-| Issue ID | Severity | Issue | Raised by a reviewer? | Ruling | Resolvable by |
+| Issue ID | Severity | Issue | Raised by Others? | Ruling | Resolvable by |
 |----------|----------|-------|-------------------|--------|---------------|
 | DA-C1 | CRITICAL | [issue] | [Yes/No; which reviewer] | [Upheld / Downgraded to MAJOR: reason] | [Clarification/minor additions / New data/experiments] |
 | DA-M1 | MAJOR | [issue] | [Yes/No] | n/a | n/a |
@@ -170,13 +170,6 @@ Editor-in-Chief (meta-reviewer)
 |---|-------|--------|-----------|
 | N1 | [issue] | [reviewer] | [suggestion] |
 
-### Anticipated Reviewer Concerns (checklist)
-*From the Gap Scout, after the Report Checker. Concrete items real reviewers are likely to raise; not scored. Items marked `new` are not covered by the roadmap above: fix them or prepare a rebuttal answer.*
-
-| # | Concern | Category | Location | Covered by |
-|---|---------|----------|----------|------------|
-| G1 | [concrete item] | [category] | [location] | [R1-W2 / new] |
-
 ---
 
 ## Estimated Revision Effort
@@ -184,6 +177,16 @@ Editor-in-Chief (meta-reviewer)
 - Priority 2: [X items, estimated Y hours/days]
 - Priority 3: [X items]
 - **Total estimated revision time**: [estimate]
+
+---
+
+## Anticipated Reviewer Concerns (optional: Gap Scout)
+Concrete concerns reviewers are likely to raise; a checklist, not part of the decision.
+- [ ] G1 [category] [concrete gap] (location) — [covered: R1-W2 / new]
+
+## Independent Check (optional: Report Checker)
+- Factual errors found: [N] ([report and item → what the paper says, location])
+- Checker's independent estimate (before reading the reports): pool position [X], Overall [N]; not part of any score
 ```
 
 ---

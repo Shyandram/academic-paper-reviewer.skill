@@ -21,12 +21,12 @@
 **Claimed contributions**: (C1) a learned, content-adaptive token-pruning module for dense prediction; (C2) a token-restoration decoder that recovers full-resolution outputs; (C3) "2.1× faster than the strongest ViT segmenters at comparable accuracy" on ADE20K and Cityscapes.
 
 **Team (fictional personas)**
-- **EIC (meta-reviewer)**: Dr. Ilse Marquardt, vision group, large public research university (Europe). Dense prediction; long-time area chair. Reads the four reviews and the Report Checker's documents, checks the decisive points, weights the reviewers and decides.
+- **EIC (meta-reviewer)**: Dr. Ilse Marquardt, vision group, large public research university (Europe). Dense prediction; long-time area chair. Reads all five reviews, checks the decisive points, weights the reviewers and decides.
 - **R1 (Methodology)**: Dr. Tomás Okafor-Reyes, industrial research lab (North America). Token pruning and merging, latency benchmarking. Insists on measured latency under matched settings.
 - **R2 (Domain)**: Prof. Hye-jin Baek, vision lab, public research university (East Asia). Semantic segmentation architectures and benchmarks.
 - **R3 (Perspective)**: Dr. Arjun Venkataraman, embedded-systems group, technical university (South Asia). Hardware-aware ML, edge accelerators.
 - **R4 (Generalist)**: Dr. Sofia Lindqvist, vision group, mid-size university (Northern Europe). Broad CV background (recognition, video); a typical committee member.
-- The Gap Scout and the Report Checker (which also runs the Devil's Advocate challenge) are functions, not personas.
+- **Devil's Advocate**: Dr. Noor Haddad, evaluation-methodology group, research institute (Middle East). Benchmarking methodology, confound analysis.
 
 ---
 
@@ -51,18 +51,19 @@
 - **Strengths**: clear motivation and Fig. 2; the trade-off curve (Fig. 5) is the most convincing evidence.
 - **Weaknesses**: the abstract's "comparable accuracy" hides that accuracy is only comparable at the higher resolution (Table 2 footnote). *Fix*: state the setting in the abstract.
 
-## Phase 1.6, last step: Devil's Advocate challenge (run by the Report Checker; no scores)
+### Devil's Advocate (Dr. Haddad): Overall 3, Confidence 4
 **Steelman**: if content-adaptive pruning preserves accuracy at half the cost, it is a practical win for every ViT segmenter.
 **Strongest counter-argument**: the headline claim (C3) rests on Table 2, where the proposed model uses a higher input resolution *and* a longer schedule (160k vs. 80k iterations, Appendix B) than the copied baseline numbers. "Comparable accuracy" may come from these advantages, with pruning actually costing accuracy that they hide.
-- **DA-C1 (CRITICAL; resolvable by: new experiments)**: confounded main comparison (Table 2 + Appendix B). Builds on R1-W1 (resolution) and adds the schedule difference, which no reviewer raised.
-- **DA-M1 (MAJOR; attacks P2, "pruning keeps the tokens that matter")**: small-object accuracy is not reported (per-class IoU missing).
+- **DA-C1 (CRITICAL; resolvable by: new experiments)**: confounded main comparison (Table 2 + Appendix B).
+- **DA-M1 (MAJOR)**: small-object accuracy is not reported (per-class IoU missing).
+- **DA-m1 (MINOR)**: Fig. 6 qualitative examples are not stated as random.
 
 ---
 
 ## Phase 2: EIC Meta-Review and Decision
 
 ### Official Score (prepared by the synthesizer)
-Official composite (plain mean of the raw scores) **64.7 → 4 (Borderline Accept)**; official reviewer ratings R1 3, R2 4, R3 4, R4 4 (mean 3.75), with DA-C1 pending the EIC's ruling.
+Official composite (plain mean of the raw scores) **63.2 → 4 (Borderline Accept)**; official reviewer ratings R1 3, R2 4, R3 4, R4 4, DA 3, with DA-C1 pending the EIC's ruling.
 
 ### The case for and against
 - **For**: a simple, general module with a clear 2× latency win (Table 4, recomputed by R1), a convincing trade-off curve (Fig. 5) and clear writing (R4, R2).
@@ -83,6 +84,7 @@ Official composite (plain mean of the raw scores) **64.7 → 4 (Borderline Accep
 | R2 (Domain) | 4 | 4 | 1.0 | Sound; the closest-competitor gap is real |
 | R3 (Perspective) | 4 | 3 | **0.75** | Deployment point useful, but the ethics concern doesn't apply to this paper |
 | R4 (Generalist) | 4 | 4 | 1.0 | Well calibrated to CVPR; identified the abstract overclaim |
+| DA | 3 | 4 | 1.0 | The confound is real (verified); its severity is addressed by the ruling below |
 
 ### DA-CRITICAL ruling
 | Issue | AC test: fatal on its own? | Ruling | Resolvable by |
@@ -93,41 +95,42 @@ Official composite (plain mean of the raw scores) **64.7 → 4 (Borderline Accep
 
 | Reviewer | Confidence | Confidence weight | EIC quality weight | Share of final score |
 |---|---|---|---|---|
-| R1 (Meth.) | 5 | 1.00 | 1.25 | 36% |
-| R2 (Domain) | 4 | 0.85 | 1.00 | 24% |
-| R3 (Persp.) | 3 | 0.70 | 0.75 | 15% |
-| R4 (Gen.) | 4 | 0.85 | 1.00 | 24% |
+| R1 (Meth.) | 5 | 1.00 | 1.25 | 29% |
+| R2 (Domain) | 4 | 0.85 | 1.00 | 20% |
+| R3 (Persp.) | 3 | 0.70 | 0.75 | 12% |
+| R4 (Gen.) | 4 | 0.85 | 1.00 | 20% |
+| DA | 4 | 0.85 | 1.00 | 20% |
 
-| Dimension | R1 (Meth.) | R2 (Domain) | R3 (Persp.) | R4 (Gen.) | Official (raw mean) | EIC assessment (weighted) | Spread |
-|---|---|---|---|---|---|---|---|
-| Technical Rigor | 58 | 66 | 70 | 64 | 64.5 | 63.2 | 12 |
-| Clarity & Presentation | 74 | 76 | 80 | 78 | 77.0 | 76.4 | 6 |
-| Novelty & Originality | 60 | 55 | 68 | 62 | 61.2 | 60.5 | 13 |
-| Significance & Impact | 64 | 68 | 74 | 66 | 68.0 | 67.0 | 10 |
-| Experimental Validation | 48 | 60 | 62 | 58 | 57.0 | 55.5 | 14 |
-| Reproducibility | 62 | 66 | 68 | 66 | 65.5 | 64.9 | 6 |
-| Ethical Compliance | 70 | 72 | 58 | 70 | 67.5 | 68.7 | 14 |
-| **Composite** | 60.4 | 65.0 | 68.3 | 65.0 | **64.7** | **63.9** | |
+| Dimension | R1 (Meth.) | R2 (Domain) | R3 (Persp.) | R4 (Gen.) | DA | Official (raw mean) | EIC assessment (weighted) | Spread |
+|---|---|---|---|---|---|---|---|---|
+| Technical Rigor | 58 | 66 | 70 | 64 | 52 | 62.0 | 61.0 | 18 |
+| Clarity & Presentation | 74 | 76 | 80 | 78 | 75 | 76.6 | 76.1 | 6 |
+| Novelty & Originality | 60 | 55 | 68 | 62 | 58 | 60.6 | 60.0 | 13 |
+| Significance & Impact | 64 | 68 | 74 | 66 | 60 | 66.4 | 65.6 | 14 |
+| Experimental Validation | 48 | 60 | 62 | 58 | 42 | 54.0 | 52.8 | 20 |
+| Reproducibility | 62 | 66 | 68 | 66 | 64 | 65.2 | 64.7 | 6 |
+| Ethical Compliance | 70 | 72 | 58 | 70 | 66 | 67.2 | 68.2 | 14 |
+| **Composite** | 60.4 | 65.0 | 68.3 | 65.0 | 57.0 | **63.2** | **62.5** | |
 
-**Official** ratings 3/4/4/4 → mean 3.75; composite 64.7 · **EIC assessment** (internal): weighted rating **3.64 → starting point 4**; weighted composite 63.9 → 4 (cross-check agrees) · **DA ceiling**: none (DA-C1 downgraded) · **Final (EIC)**: **4, Borderline Accept**
+**Official** ratings 3/4/4/4/3 → mean 3.60; composite 63.2 · **EIC assessment** (internal): weighted rating **3.51 → starting point 4**; weighted composite 62.5 → 4 (cross-check agrees) · **DA ceiling**: none (DA-C1 downgraded) · **Final (EIC)**: **4, Borderline Accept**
 
-The authors see the **official** scores (64.7, ratings 3/4/4/4). The EIC's internal assessment is **lower** (63.9), because the EIC trusted the stricter, fully verified R1 more and the more lenient R3 less. Weights reflect review quality, not a leniency knob, and they can move the assessment in either direction.
+The authors see the **official** scores (63.2, ratings 3/4/4/4/3). The EIC's internal assessment is **lower** (62.5), because the EIC trusted the stricter, fully verified R1 more and the more lenient R3 less. Weights reflect review quality, not a leniency knob, and they can move the assessment in either direction.
 
 ### Final decision and justification
-**4, Borderline Accept.** The decision follows the starting point: official ratings 3/4/4/4 (mean 3.75), EIC-weighted rating 3.64 → 4. The composite cross-check agrees (63.9 → 4). The contribution is useful and clearly presented, and the core speedup is verified. The main weakness is a real but bounded confound in the headline comparison. The paper's own matched ablation supports a narrower claim, so this is the kind of weakness accepted CVPR papers commonly have, provided the rebuttal adds matched baselines and the abstract is reworded.
+**4, Borderline Accept.** The decision follows the starting point: official ratings 3/4/4/4/3 (mean 3.60), EIC-weighted rating 3.51 → 4. The composite cross-check agrees (62.5 → 4). The contribution is useful and clearly presented, and the core speedup is verified. The main weakness is a real but bounded confound in the headline comparison. The paper's own matched ablation supports a narrower claim, so this is the kind of weakness accepted CVPR papers commonly have, provided the rebuttal adds matched baselines and the abstract is reworded.
 
 ### Cross-Venue Outlook (user asked "compare venues"; rendered with `--final 4`)
 
 | Venue | Venue-weighted composite | Bar offset | Venue shift | Band → with DA cap | Venue recommendation | Venue sub-scores | Scale status |
 |---|---|---|---|---|---|---|---|
-| CVPR (2026) | 63.2 | +0 | +0 | 4 → 4 | 4 Borderline Accept | — | confirmed |
-| ICLR (2026) | 63.9 | +0 | +0 | 4 → 4 | 6 on {0,2,4,6,8,10} (6 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 3 | secondary |
-| ICML (2025) | 63.6 | +0 | +0 | 4 → 4 | 3 Weak accept (leaning accept) | — | official |
-| ACM Multimedia (2026) | 63.8 | +0 | +0 | 4 → 4 | Weak accept | — | unpublished |
-| TMLR (2025) | 63.8 | -5 | +0 | 4 → 4 | Accept with minor revision | Claims & evidence Yes, Audience interest Yes | official |
-| IEEE TPAMI (2025) | 63.5 | +3 | +0 | 4 → 4 | Minor Revision | — | secondary |
+| CVPR (2026) | 61.8 | +0 | +0 | 4 → 4 | 4 Borderline Accept | — | confirmed |
+| ICLR (2026) | 62.5 | +0 | +0 | 4 → 4 | 6 on {0,2,4,6,8,10} (6 on {1,3,5,6,8,10}) | Soundness 2, Presentation 3, Contribution 3 | secondary |
+| ICML (2025) | 62.1 | +0 | +0 | 4 → 4 | 3 Weak accept (leaning accept) | — | official |
+| ACM Multimedia (2026) | 62.5 | +0 | +0 | 4 → 4 | Weak accept | — | unpublished |
+| TMLR (2025) | 62.2 | -5 | +0 | 4 → 4 | Accept with minor revision | Claims & evidence Yes, Audience interest Yes | official |
+| IEEE TPAMI (2025) | 62.0 | +3 | -1 | 3 → 3 | Major Revision | — | secondary |
 
-**EIC's venue advice**: CVPR is the natural fit. TMLR would accept the paper with a narrowed C3, since it doesn't penalize modest gains. ACM MM would need a multimedia angle to pass its scope gate. TPAMI clears its higher bar only narrowly; expect the edge-device study and broader backbones to be requested in revision.
+**EIC's venue advice**: CVPR is the natural fit. TMLR would accept the paper with a narrowed C3, since it doesn't penalize modest gains. ACM MM would need a multimedia angle to pass its scope gate. TPAMI's higher bar would require the edge-device study and broader backbones.
 
 ### Revision Roadmap (Priority 1)
 
@@ -137,4 +140,4 @@ The authors see the **official** scores (64.7, ratings 3/4/4/4). The EIC's inter
 | R2 | Latency conditions unstated | R1-W2 | Table 4, §4.1 | Same precision/framework/batch for all rows | Low | Yes |
 
 **Priority 2**: token-merging comparison (R2-W1); per-class IoU / small objects (DA-M1); 3-seed ablation (R1-W3); edge-device deployment (R3); decoder novelty (R2-W2); abstract wording (R4).
-**Priority 3**: random qualitative samples (R4, Minor).
+**Priority 3**: random qualitative samples (DA-m1).

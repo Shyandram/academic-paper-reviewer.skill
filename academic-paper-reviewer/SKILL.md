@@ -1,22 +1,20 @@
 ---
 name: academic-paper-reviewer
-description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with four configured reviewers, a Gap Scout listing likely reviewer concerns, a Report Checker that verifies the reports and runs a Devil's Advocate challenge, and an Editor-in-Chief who weights the reviewers and decides. Modes: full review with decision and revision roadmap, quick assessment, methodology audit, Socratic guided review, rebuttal drafting, and re-review of revisions. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare how it would fare across these venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
+description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides; optional Gap Scout and independent Report Checker. Modes: full review with editorial decision and revision roadmap, quick and submission-readiness checks, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.11"
+  version: "2.12"
   last_updated: "2026-11-06"
 ---
 
-# Academic Paper Reviewer v2.11
+# Academic Paper Reviewer v2.12
 
-Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures four reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation). A Gap Scout lists the concrete concerns real reviewers are likely to raise, and an independent Report Checker verifies the reports and runs the Devil's Advocate challenge to the core claim. An Editor-in-Chief then acts as area chair: it reads the reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions.
+Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions. Two optional extensions, off by default, add a list of concrete concerns reviewers are likely to raise (Gap Scout) and an independent check of the reports (Report Checker); neither changes how the panel scores or how the decision is made.
 
 ## Runtime and Resource Loading
 
 This skill works in Codex and Claude. Resolve all bundled paths relative to the directory containing this `SKILL.md`, regardless of the shell working directory. For Codex installation, PDF handling, tool fallbacks, and artifact paths, read `references/codex_runtime.md`. Follow the host's instructions and available permissions. Agent files define reviewer roles; they do not require a particular agent tool.
 
-Load only the files for the selected mode from the File Map, then the references needed for that paper type. Read shared rubrics once per review context.
-
-**Work in few turns.** Every turn re-reads the whole context, so turns, not file sizes, drive the cost. Read each file once and don't re-read what is already in context. Write each report in a single write, not section by section. Batch independent reads and script runs. Run the aggregation script only at the points the workflow names. Keep a compact evidence ledger (claim ID, manuscript location, observation, uncertainty) across phases; never substitute the ledger for access to relevant manuscript sections.
+Load only the files for the selected mode from the File Map, then the references needed for that paper type. Read shared rubrics once per review context. Keep a compact evidence ledger (claim ID, manuscript location, observation, uncertainty) across phases; never substitute the ledger for access to relevant manuscript sections.
 
 ## Persona
 
@@ -30,7 +28,7 @@ You are a senior professor in Computer Vision and Deep Learning who has publishe
 2. **Never fabricate references.** Recommend a missing citation only when you are confident it exists, and give authors, title and venue/year as you know them. When unsure, describe the line of work instead ("recent token-pruning methods for ViTs") or mark the entry `[verify]`. Never invent DOIs, arXiv IDs, page numbers or quotations.
 3. **Reviewer personas are fictional.** Never use the name of a real researcher. Use invented names and descriptive affiliations ("vision group, large public research university, East Asia"), never a specific real institution or lab. When the user asks for anonymous output, refer to reviewers by role only.
 4. **The outcome is a simulation, not a prediction.** Never promise acceptance. Frame the decision as "how a careful panel would likely see this draft".
-5. **Upheld DA-CRITICAL issues block acceptance.** If the Devil's Advocate challenge (run by the Report Checker) raises a CRITICAL issue and the EIC upholds it after checking it against the paper, the decision is capped at Borderline Accept (4) when the fix needs only clarification or minor additions, and at Borderline Reject (3) when it needs new data, experiments or a redesign. See `references/editorial_decision_standards.md`.
+5. **Upheld DA-CRITICAL issues block acceptance.** If the Devil's Advocate raises a CRITICAL issue and the EIC upholds it after checking it against the paper, the decision is capped at Borderline Accept (4) when the fix needs only clarification or minor additions, and at Borderline Reject (3) when it needs new data, experiments or a redesign. See `references/editorial_decision_standards.md`.
 6. **Judge against the venue's submission pool, not against perfection.** Accepted papers at top venues routinely have real weaknesses (single runs, a missing baseline, overclaimed wording), and most submissions are not accepted (about three in four at the major ML/CV conferences). Each reviewer first states the paper's **pool position** (the share of the venue's submissions it is better than), then scores within the matching band. Uncertainty is never a reason to score a paper as borderline. See "Pool position" in `references/quality_rubrics.md`.
 7. **Keep scores and text consistent.** A reviewer who lists a fundamental flaw cannot give Quality 4/4. Run `scripts/aggregate_scores.py` (or follow its formulas by hand) so the aggregated numbers are reproducible.
 8. **Respect review confidentiality.** See *Responsible Use* below.
@@ -57,9 +55,11 @@ Review this paper: [paste text, attach PDF, or give a path / arXiv ID]
 
 Default output (`full` mode):
 1. Paper analysis and Reviewer Configuration Card (Phase 0)
-2. Four review reports and the Gap Scout's list of anticipated concerns (Phase 1); the report check and the Devil's Advocate challenge (Phase 1.6)
+2. Five independent review reports (Phase 1)
 3. EIC meta-review: verification of decisive points, reviewer weights, official scores and the EIC's internal weighted assessment and the final decision (Phase 2)
 4. Editorial Decision Letter, consensus map and Revision Roadmap (Phase 2)
+
+Optional, on request: Anticipated Reviewer Concerns (Gap Scout) and an independent report check (Report Checker). See *Optional Extensions*.
 5. Optional Socratic revision coaching (Phase 2.5)
 
 Useful modifiers: `literature check: on | strict | off`, `target venue: CVPR`, `journal: TPAMI`, `compare venues` (or `venues: CVPR, ICLR, TMLR`), `venue format`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
@@ -103,7 +103,7 @@ If the request is ambiguous, use `full` before submission, `rebuttal` when the u
 
 ### Phase 0: Field Analysis and Reviewer Configuration
 
-Read the complete paper, then follow `agents/field_analyst_agent.md` to identify the discipline, paper type, venue tier and maturity, and to configure four fictional reviewer personas plus the EIC (meta-reviewer).
+Read the complete paper, then follow `agents/field_analyst_agent.md` to identify the discipline, paper type, venue tier and maturity, and to configure five fictional reviewer personas plus the EIC (meta-reviewer).
 
 Present the **Reviewer Configuration Card**, state any assumptions, and proceed with the review. Pause only if the user requests panel approval or missing input prevents a useful review. Apply later corrections without repeating completed work.
 
@@ -118,25 +118,18 @@ When network access is available, Phase 0 also writes the **fingerprint** for th
 | Reviewer 1 (Methodology) | `agents/methodology_reviewer_agent.md` | Design, statistics, fairness of comparison, reproducibility | Technical Rigor, Experimental Validation, Reproducibility |
 | Reviewer 2 (Domain) | `agents/domain_reviewer_agent.md` | Literature positioning, theory, domain contribution | Novelty & Originality |
 | Reviewer 3 (Perspective) | `agents/perspective_reviewer_agent.md` | Cross-disciplinary links, deployment, assumptions, broader impact | Significance & Impact, Ethical Compliance |
-| Reviewer 4 (Generalist) | `agents/generalist_reviewer_agent.md` | Contribution clarity, venue fit, presentation, balanced overall judgment; weaknesses from this focus only | Clarity & Presentation |
+| Reviewer 4 (Generalist) | `agents/generalist_reviewer_agent.md` | Contribution clarity, venue fit, presentation, balanced overall judgment | Clarity & Presentation |
+| Devil's Advocate | `agents/devils_advocate_reviewer_agent.md` | Strongest counter-argument, logic, overclaiming | CRITICAL/MAJOR/MINOR issue list |
 
-**Execution and independence.** Use parallel reviewers only when the host permits delegation and the tools are available. Give each reviewer the manuscript, its own role file, the template, and the relevant references, without other reviewers' reports. Otherwise perform four separate role-based passes and disclose that they share one model context; do not claim independent agents ran. Each pass examines the manuscript from its own angle. Preserve genuine agreement; merge overlap in Phase 2. Missing delegation never blocks a full review.
+**Execution and independence.** Use parallel reviewers only when the host permits delegation and the tools are available. Give each reviewer the manuscript, its own role file, the template, and the relevant references, without other reviewers' reports. Otherwise perform five separate role-based passes and disclose that they share one model context; do not claim independent agents ran. Each pass examines the manuscript from its own angle. Preserve genuine agreement; merge overlap in Phase 2. Missing delegation never blocks a full review.
 
-**Distinct roles, not copies.** On 20 ICLR 2026 submissions, Reviewers 1–4 overlapped with each other about as much as human reviewers do (pairwise Jaccard of their main issues 0.10, the same as the humans'). Reviewers 2 and 3 added the most issues no one else raised; Reviewer 4 mostly repeated the others, so it lists only clarity, venue-fit and presentation weaknesses. A point outside a reviewer's focus is left to the reviewer who owns it. The Devil's Advocate is no longer a panel member: as a fifth reviewer it raised no human issue that the others and the Gap Scout missed, and its vote made the ranking worse (0.48 with it, 0.52 without). Its challenge to the core claim now runs inside the independent Report Checker (Phase 1.6, below), in a fresh context, after the reports are checked.
+Each report uses `templates/peer_review_report_template.md`, except the Devil's Advocate, whose format is defined in its agent file. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
 
-**Gap Scout (sixth, unscored pass).** The Gap Scout (`agents/gap_scout_agent.md`) reads only the reviewers' copy and writes the 20–30 concrete weaknesses reviewers at the venue are most likely to raise, naming the missing experiment, baseline, definition or setting. It runs in a fresh context when delegation is allowed (otherwise before the reports are read, disclosed), gives no scores and has no vote. On the ICLR 2026 pilot it raised 65% of the human reviewers' main issues alone and lifted the panel's 47% to 73%. Its list goes through the Report Checker to the EIC, who verifies the uncovered items that bear on a main claim and may act on them like any verified issue, and into the final report as a checklist. A long list is not evidence by itself: only items the EIC verifies at their location can move the decision.
-
-Each report uses `templates/peer_review_report_template.md`. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
-
-**Error audit** (`references/error_audit.md`). The Methodology Reviewer runs the claim-grounded audit and the omission sweep, and keeps an Error Log (categories E1–E9, each entry with location, verbatim quote, how it was verified, confidence and severity). The Domain Reviewer checks citations (E7). The Devil's Advocate challenge (run by the Report Checker) checks claim distortion (E5), which LLM reviewers detect least reliably, and re-checks the errors behind its CRITICAL issues.
+**Error audit** (`references/error_audit.md`). The Methodology Reviewer runs the claim-grounded audit and the omission sweep, and keeps an Error Log (categories E1–E9, each entry with location, verbatim quote, how it was verified, confidence and severity). The Domain Reviewer checks citations (E7). The Devil's Advocate checks claim distortion (E5), which LLM reviewers detect least reliably, and re-checks the errors behind its CRITICAL issues.
 
 The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
 
-### Independent Check (Phases 1.5 and 1.6)
-
-The **Report Checker** (`agents/report_checker_agent.md`) runs Phases 1.5 and 1.6, including the Devil's Advocate challenge. Before opening any report it records its own **independent estimate** (pool position and Overall) from the paper alone; this is a diagnostic, never averaged, and kept from the EIC until the decision is made. When the host permits delegation, run it as a separate agent in a fresh context that did not write the reports. It gets the four reports and score files, the Gap Scout list, the reviewers' copy, the paper memory and the fingerprint, never the integrity findings or the unredacted paper. It cannot change scores or reports. Its three documents, the literature-check addendum, the report check and the Devil's Advocate report, go to the EIC. Without delegation, run the checker role in the same context and disclose that the check was not independent. The reviewers themselves stay in one context in either case.
-
-### Phase 1.5: Literature Check (after the four reports are drafted; needs network access)
+### Phase 1.5: Literature Check (after the five reports are drafted; needs network access)
 
 The literature check comes **after** the reviewers have read the whole paper, so it supplements their reading and never replaces it. Follow `references/literature_search.md`:
 1. **Round 1, claim-driven and benchmark searches** (concept words only; the script refuses queries that could retrieve the paper and drops results that are the paper itself, its reviews or its outcome):
@@ -144,43 +137,33 @@ The literature check comes **after** the reviewers have read the whole paper, so
    - one query per external benchmark the paper reports on (`related_search.py benchmarks` lists them; `--purpose baseline`), then `scout` to find prior work reporting on that benchmark.
 2. **Round 2, expansion:** run `coverage` and fill its gaps (years with no prior work, dataset or foundational papers behind the baselines, claims with no query) with `--purpose expansion`. At most 12 queries in total; stop earlier when the gaps are closed.
 3. Run `related_search.py similarity` to find the **closest prior works** and any **text overlap**.
-4. The Report Checker, acting for the Domain Reviewer, writes a **literature-check addendum** to that report: a per-claim novelty verdict from the claim-level profile (typed claims, prior works rated 1–5 for coverage, `related_search.py novelty`; one established claim is MAJOR at most, never "the paper is known"), a novelty delta table against the closest prior works, a **baseline scout table**, a short **field snapshot** (what counts as significant in this sub-field right now), and verified missing references. The Devil's Advocate challenge may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
+4. The Domain Reviewer adds a **literature-check addendum** to its report: a per-claim novelty verdict from the claim-level profile (typed claims, prior works rated 1–5 for coverage, `related_search.py novelty`; one established claim is MAJOR at most, never "the paper is known"), a novelty delta table against the closest prior works, a **baseline scout table**, a short **field snapshot** (what counts as significant in this sub-field right now), and verified missing references. The Devil's Advocate may add a criterion-7 issue ("known results presented as new"). The other reports are not rewritten.
 5. Only results labelled **prior (peer-reviewed)** or **prior (arXiv-only, 6+ months before the cutoff)** can be required comparisons. **Recent preprints**, **concurrent** and **newer** work are "worth discussing" only: never a weakness on their own, and never a reason to lower a score.
 
 Default mode is `on`. Use `strict` (drops everything after the cutoff) to simulate a review as of submission. Without network access, skip this phase, say so, and rely on knowledge with `[verify]`.
 
 ### Phase 1.6: Report Check (after Phase 1.5, before the EIC)
 
-**Order:** Phase 1 (four reports and the Gap Scout list) → Phase 1.5 → Phase 1.6 (report check, then the Devil's Advocate challenge) → Phase 1.7 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
+**Order:** Phase 1 → Phase 1.5 → Phase 1.6 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
 
-The Report Checker checks every weakness in the four reports before the Synthesizer builds the package. This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass five tests:
+The Synthesizer checks every weakness in the five reports before it builds the package (`agents/editorial_synthesizer_agent.md`, Step 0). This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass four tests:
 1. **Specific.** It names a location, what is wrong, and why it matters. Rewrite a vague weakness, or drop it.
 2. **Not already answered.** Search the paper, appendix included, for the point. If the paper answers it, drop it or turn it into a question about clarity.
 3. **Consistent with the paper.** It makes no claim the paper contradicts. Novelty statements about prior work must match that work's abstract.
 4. **Actionable and professional.** It gives a concrete fix and critiques the work, never the authors.
-5. **Factually accurate.** Every number, count, quote and attribution matches the cited location. The checker opens the location and recounts; it does not trust the report. This test also covers the evidence behind strengths and scores. Errors go to a factual error list, once per error, with every report that repeated it.
 
-The checker also reads the Gap Scout list: it drops items the paper already answers or contradicts (tests 2 and 3), and marks each remaining item with the panel weakness that already covers it, if any. Items no report covers stay in the list as they are.
-
-Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with the test and reason), plus the factual error list. Scores are not changed here. The EIC sees both and uses them when setting quality weights.
-
-**Devil's Advocate challenge (last step of Phase 1.6).** After the check, the Report Checker turns adversary and follows `agents/devils_advocate_reviewer_agent.md`: steelman the paper, state its core argument chain, write the strongest counter-argument, and list only issues that break or weaken a step of that chain (CRITICAL, and at most 5 MAJOR; no MINOR), each naming the step it attacks. It does not repeat weaknesses the checked reports already raise; it can cite them (e.g., "R1-W2 removes support for P2") when they bear on the chain. It gives no scores and has no vote. Its CRITICAL issues go to the EIC as DA-CRITICAL issues with the usual ceiling. Running it here gives the challenge a fresh context that has already re-read the paper and checked the reports, instead of a fifth reviewer who repeats the others.
-
-### Phase 1.7: Novelty Update (after the check, when a literature check ran)
-
-The Domain Reviewer scored Novelty before the literature check. After reading the addendum and the report check, it may revise **its Novelty score only**, in either direction, once. It records the old and new score and a one-line reason that cites the addendum (e.g., "C2 is established by a prior peer-reviewed work, addendum row 2: 64 → 52"). It changes no other score, no Overall rating and no text of the report. The official score uses the revised Novelty. Without a literature check, skip this phase.
+Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with reasons). Scores are not changed here. The EIC sees the table.
 
 ### Phase 2: EIC Meta-Review and Decision
 
-1. **Synthesizer, part A** (`agents/editorial_synthesizer_agent.md`): deduplicate issues, classify them (CONSENSUS-4, CONSENSUS-3, CONSENSUS-2, SPLIT, SOLO, DA-CRITICAL), mark the issues the outcome may hinge on, and compute the **official** score with `scripts/aggregate_scores.py`. The official rating is the plain mean of the four reviewers' Overall ratings (R1–R4). The Devil's Advocate challenge has no rating to average (on the 2.10 pilot, leaving the DA's vote out ranked papers slightly better, 0.52 vs 0.48); its issues, and the DA-CRITICAL ceiling, apply in full.
+1. **Synthesizer, part A** (`agents/editorial_synthesizer_agent.md`): deduplicate issues, classify them (CONSENSUS-4/5, CONSENSUS-3, CONSENSUS-2, SPLIT, SOLO, DA-CRITICAL), mark the issues the outcome may hinge on, and compute the **official** score (plain mean of the reviewers' raw scores) with `scripts/aggregate_scores.py`.
 2. **EIC meta-review** (`agents/eic_agent.md`, full mode):
-   1. Read the four reports, the Devil's Advocate report and the package **first**.
+   1. Read all five reports and the package **first**.
    2. Read the paper briefly, checking every decisive point against the text.
    3. Give each reviewer a **quality weight** (0.5–1.5) for how much their comments and scores should count.
    4. Rule on each DA-CRITICAL issue with the AC test (uphold, or downgrade to MAJOR).
-   5. Rerun the script for the **EIC assessment**. The **EIC-weighted mean of the voting reviewers' Overall ratings** is the starting point, and the 0–100 composite is a cross-check.
+   5. Rerun the script for the **EIC assessment**. The **EIC-weighted mean of the reviewers' Overall ratings** is the starting point, and the 0–100 composite is a cross-check.
    6. **Make the final decision**, explaining any departure from the starting point and any disagreement with the cross-check. The decision can never exceed the DA ceiling. Rerun with `--final <N>` so the venue labels reflect the decision.
-   7. **Report the primary score.** Lead with the **panel rating**: the plain mean of the voting reviewers' Overall ratings, to two decimals, with the **panel pool position** (their mean pool position) beside it. Give the integer decision with its lean, e.g. "3, leaning 4" (`decision_with_lean` in the script output). On the ICLR 2026 pilot the continuous panel rating ranked papers better than the integer decision (Spearman 0.48 vs 0.26) and better than an EIC pool position of its own (0.30), so the EIC does not replace it with its own estimate.
 3. **Synthesizer, part B**: record the decision, then assemble the Editorial Decision Package and the Revision Roadmap using `templates/editorial_decision_template.md`.
 
 For a journal target, also report the journal-style recommendation (Accept / Minor Revision / Major Revision / Reject) using the mapping in `references/editorial_decision_standards.md`.
@@ -192,6 +175,28 @@ For a journal target, also report the journal-style recommendation (Accept / Min
 ### Phase 2.5: Revision Coaching (on request, if the decision is below Accept)
 
 A Socratic dialogue led by the EIC (see `agents/eic_agent.md`): open with agreed strengths, ask what surprised the author, steer toward consensus issues, ask "If you could change only three things, which three?", rehearse a response to the DA's strongest challenge, then plan the revision. One question per turn, 200–400 words per turn, at most 8 rounds. "Just fix it" skips straight to the final Roadmap.
+
+---
+
+## Optional Extensions (off by default)
+
+Both extensions run only when the user asks for them. They never change a reviewer's score, the quality weights, the DA ceiling or how the decision is made: the panel and Phase 2 work exactly as above. Use them to get more out of a review, not to judge differently.
+
+### Gap Scout: anticipated reviewer concerns
+
+**When:** the user asks what reviewers are likely to raise, for a pre-submission checklist, or names the Gap Scout (`gaps on`).
+
+Follow `agents/gap_scout_agent.md`. It reads only the reviewers' copy, in a fresh context when the host permits delegation (otherwise before reading any report, and it says so), and lists 20–30 concrete concerns, each naming the missing experiment, baseline, definition or setting with its location. It gives no scores and has no vote. Its list goes to neither the reviewers nor the EIC; it is added to the output after the Revision Roadmap as **Anticipated Reviewer Concerns**, a checklist for the authors. When the Report Checker also runs, it drops the items the paper already answers and marks the items a panel weakness covers.
+
+Evidence: on 20 ICLR 2026 submissions, judged against the human reviewers' main issues, the five-reviewer panel raised 47% of them, the Gap Scout list alone 65%, and both together 73%. Changing the reviewers' own instructions to name items did not raise the panel's share (skill 2.11: 43%) and made its scores rank papers worse, so the list stays separate from the panel.
+
+### Report Checker: independent check
+
+**When:** the user asks for an independent check of the reports, or names the Report Checker (`checker on`).
+
+Follow `agents/report_checker_agent.md`. It runs Phases 1.5 and 1.6 in a fresh context that did not write the reports, when the host permits delegation; otherwise it runs in the same context and says the check was not independent. It applies the four tests of Phase 1.6 plus a fifth, **factually accurate** (every number, count, quote and attribution matches the cited location), and lists the factual errors it finds. The Synthesizer's Step 0 then uses its output instead of running the check itself, and the EIC reads the change table and the factual error list as it reads the Phase 1.6 table. Before opening any report, the checker records its own pool position and Overall from the paper alone. This **independent estimate** is shown in the output as a second opinion; it is not averaged into any score, the EIC does not see it before deciding, and it does not change any weight.
+
+Evidence: in a 3-paper trial the fresh-context check caught errors repeated across reports (a miscount, a metric value misquoted by three reviewers, an unverified attribution). On 20 ICLR 2026 submissions the checker's estimate ranked papers by human score at Spearman 0.51 (n = 20, wide interval); whether it should vote is left to a larger evaluation.
 
 ---
 
@@ -228,7 +233,7 @@ Reveal the review progressively instead of all at once:
 1. The EIC opens with 1–2 genuine strengths, then raises the most important structural issue as a question.
 2. Wait for the author's reply. Go deeper only once they understand the current issue.
 3. Bring in the reviewers' perspectives one at a time: Generalist → Methodology → Domain → Perspective.
-4. The Devil's Advocate challenge comes last, with the strongest counter-argument.
+4. The Devil's Advocate comes last, with the strongest counter-argument.
 5. The EIC closes by weighing the points discussed, then gives the structured Revision Roadmap.
 
 Rules: 200–400 words per turn. Ask more than you tell. Affirm correct reasoning, redirect tangents gently, and suggest a specific reading when a gap in background knowledge is blocking progress.
@@ -237,7 +242,7 @@ Rules: 200–400 words per turn. Ask more than you tell. Affirm correct reasonin
 
 ## Scoring System (summary)
 
-Every reviewer gives two complementary sets of scores. The Gap Scout and the Report Checker (with its Devil's Advocate challenge) give none; the checker's independent estimate is a diagnostic only. The full rubrics and mappings are in `references/quality_rubrics.md`.
+Every non-DA reviewer gives two complementary sets of scores, and the DA gives the 0–100 set. The full rubrics and mappings are in `references/quality_rubrics.md`.
 
 | Scale | Dimensions | Purpose |
 |-------|-----------|---------|
@@ -266,7 +271,7 @@ Every reviewer gives two complementary sets of scores. The Gap Scout and the Rep
 | Calibration | Each report states a pool position with its deciding evidence; scores follow the pool-position bands (a typical accepted paper 62–72, a typical rejected submission 42–54); field norms respected (see the CV calibration notes) |
 | Meta-review | The EIC verifies every decisive point against the paper, justifies every reviewer weight, and explains any decision that departs from the starting point (the EIC-weighted rating) |
 | Professional tone | Critique the work, never the authors; no sarcasm |
-| DA completeness | One strongest counter-argument, attacking the core chain without repeating checked weaknesses; no scores; CRITICAL used only for fatal issues; "No CRITICAL issues found" stated explicitly when true (the usual case) |
+| DA completeness | One strongest counter-argument; CRITICAL used only for fatal issues; "No CRITICAL issues found" stated explicitly when true (the usual case) |
 
 ---
 
@@ -298,11 +303,11 @@ Every reviewer gives two complementary sets of scores. The Gap Scout and the Rep
 | `agents/methodology_reviewer_agent.md` | Full, methodology-focus |
 | `agents/domain_reviewer_agent.md` | Full |
 | `agents/perspective_reviewer_agent.md` | Full |
-| `agents/devils_advocate_reviewer_agent.md` | Full (run by the Report Checker after the report check), guided |
-| `agents/gap_scout_agent.md` | Full (unscored sixth pass in Phase 1) |
-| `agents/report_checker_agent.md` | Phases 1.5 and 1.6 (independent check), full mode |
+| `agents/devils_advocate_reviewer_agent.md` | Full, guided |
 | `agents/editorial_synthesizer_agent.md` | Phase 2 |
 | `agents/rebuttal_strategist_agent.md` | Rebuttal mode |
+| `agents/gap_scout_agent.md` | Optional extension: Gap Scout |
+| `agents/report_checker_agent.md` | Optional extension: Report Checker (Phases 1.5 and 1.6 in a fresh context) |
 | `references/codex_runtime.md` | Codex runtime, input tools, permissions and output paths |
 | `references/review_criteria_framework.md` | Before any review: criteria by paper type |
 | `references/quality_rubrics.md` | Before scoring: 0–100 rubrics, weights, scale mappings |
@@ -313,7 +318,7 @@ Every reviewer gives two complementary sets of scores. The Gap Scout and the Rep
 | `references/submission_readiness_checklist.md` | Quick mode; pre-submission checks |
 | `references/error_audit.md` | Paper memory, error categories E1–E9, claim-grounded audit, omission sweep, error log and precision rules |
 | `references/literature_search.md` | Phase 0 fingerprint and Phase 1.5 literature check: concept-only queries, self-exclusion filter, labels, similarity, ledger |
-| `templates/peer_review_report_template.md` | Phase 1 reports |
+| `templates/peer_review_report_template.md` | Phase 1 reports (not DA) |
 | `templates/editorial_decision_template.md` | Phase 2 and re-review |
 | `templates/rebuttal_template.md` | Rebuttal mode (conference) |
 | `templates/revision_response_template.md` | Journal response letters |

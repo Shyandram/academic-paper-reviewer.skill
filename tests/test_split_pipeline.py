@@ -68,11 +68,10 @@ class SplitPipeline(unittest.TestCase):
         self.assertTrue(resumed.startswith("## Phase 2 (resumed context)"))  # no repeated rules
         self.assertIn("Evaluation rules", fresh)
         self.assertIn("eic.json", resumed)
-        self.assertIn("checker_weights", resumed)
-        novelty = run(["prompt", "novelty"] + self.base)
-        self.assertNotRegex(novelty, r"\{[A-Z_]+\}")
-        self.assertIn("novelty_update", novelty)
-        self.assertIn("Change nothing else", novelty)
+        self.assertIn("Report Checker ran", resumed)
+        self.assertIn("<R1|R2|R3|R4|DA>", panel)     # five reviewers, the DA included
+        self.assertIn("gaps_checked.md", check)       # the checked list is kept apart
+        self.assertNotIn("gaps", fresh.lower())       # the EIC never reads the Gap Scout list
 
     def test_shared_prefix_is_redacted_and_role_free(self):
         a = argparse.Namespace(
@@ -119,34 +118,32 @@ class SplitPipeline(unittest.TestCase):
                  "scores": {k: 50 + i for k in ("technical_rigor", "clarity", "novelty", "significance",
                                                 "experimental_validation", "reproducibility", "ethics")},
                  "recognized": False}
+            if key == "DA":
+                s["da_critical"] = [{"id": "DA-C1", "resolvable_without_new_data": True}]
             (d / "scores.json").write_text(json.dumps(s))
             (d / "report.md").write_text(f"report {key}")
 
-    def write_da(self):
-        """The check's Devil's Advocate challenge (skill 2.11): no scores, one CRITICAL."""
+    def test_legacy_211_da_from_check(self):
+        """A skill 2.11 run: four reviewers, the DA-CRITICAL list in check/da.json."""
         self.p["check"].mkdir(parents=True, exist_ok=True)
         (self.p["check"] / "da.json").write_text(json.dumps(
-            {"da_critical": [{"id": "DA-C1", "resolvable_without_new_data": True}], "da_major": []}))
-        (self.p["check"] / "da.md").write_text("report DA")
+            {"da_critical": [{"id": "DA-C9", "resolvable_without_new_data": False}], "da_major": []}))
+        self.assertEqual(rs.da_issues(self.p)[0]["id"], "DA-C9")
 
     def test_before_and_finish(self):
         self.write_reviewers()
-        run(["before"] + self.base)   # before the check: no DA issues yet
+        run(["before"] + self.base)
         before = json.loads((self.p["res"] / "scores_before.json").read_text())
         self.assertEqual([r["role"] for r in before["reviewers"]],
                          [v[0] for v in rs.ROLES.values()])
-        self.assertEqual(len(before["reviewers"]), 4)
-        self.assertEqual(before["da_critical"], [])
-        self.write_da()
-        run(["before"] + self.base)   # again after the check
-        before = json.loads((self.p["res"] / "scores_before.json").read_text())
-        self.assertTrue(before["da_critical"][0]["upheld"])
+        self.assertEqual(len(before["reviewers"]), 5)
+        self.assertTrue(before["da_critical"][0]["upheld"])  # provisionally upheld
         self.assertTrue((self.p["res"] / "before.json").exists())
 
         self.p["eic"].mkdir(parents=True)
         (self.p["eic"] / "eic.json").write_text(json.dumps({
             "final_overall": 4, "eic_pool_position": 61,
-            "eic_weights": {"R1": 1.5, "R2": 1.0, "R3": 0.5, "R4": 1.0},
+            "eic_weights": {"R1": 1.5, "R2": 1.0, "R3": 0.5, "R4": 1.0, "DA": 1.0},
             "da_rulings": [{"id": "DA-C1", "upheld": False, "resolvable_without_new_data": True}],
             "top_concerns": ["a"], "recognized": False, "injection_found": None, "notes": ""}))
         (self.p["eic"] / "decision.md").write_text("decision text")
@@ -174,7 +171,7 @@ class SplitPipeline(unittest.TestCase):
         self.assertIn("report DA", review)
         self.assertIn("decision text", review)
         self.assertIn("(missing)", review)  # no report check output
-        self.assertIn("Devil's Advocate challenge", review)
+        self.assertNotIn("Anticipated Reviewer Concerns", review)  # no Gap Scout run
         self.assertEqual(summary["pipeline"], "split")
 
     def test_finish_records_check_pipeline(self):
@@ -193,12 +190,16 @@ class SplitPipeline(unittest.TestCase):
         self.assertEqual(summary["pipeline"], "check")
         runlog = json.loads((self.p["res"] / "run.json").read_text())
         self.assertAlmostEqual(runlog["phases"]["panel"]["cost_usd"], 1.5)
-        self.assertIn("panel_rating", summary)
-        self.assertIn("decision_with_lean", summary)
         self.assertEqual(summary["checker_pool_position"], 35)   # recorded, never averaged
         self.assertEqual(summary["checker_overall"], 3)
         self.assertEqual(summary["eic_pool_position"], 40)
-        self.assertIn("check pipeline", (self.p["res"] / "review.md").read_text())
+        (self.p["check"] / "gaps_checked.md").write_text("## Anticipated Reviewer Concerns\n- G1 x")
+        run(["finish", "--pipeline", "check"] + self.base)
+        review = (self.p["res"] / "review.md").read_text()
+        self.assertIn("check pipeline", review)
+        self.assertIn("Anticipated Reviewer Concerns (Gap Scout)", review)
+        self.assertGreater(review.index("Anticipated Reviewer Concerns (Gap Scout)"),
+                           review.index("Phase 2: EIC"))   # after the decision
 
     def test_before_requires_all_five(self):
         self.write_reviewers(missing=("R3",))

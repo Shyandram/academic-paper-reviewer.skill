@@ -24,7 +24,7 @@
 - **R2 (Domain)**: Dr. Mei Takahara, ophthalmic imaging lab (East Asia). Fundus image analysis, DR grading.
 - **R3 (Perspective)**: Dr. Lucía Paredes, global-health program (South America). Screening programs in low-resource settings.
 - **R4 (Generalist)**: Dr. Hana Kovář, medical image computing group, technical university (Central Europe). Broad medical-imaging background.
-- The Gap Scout and the Report Checker (which also runs the Devil's Advocate challenge) are functions, not personas.
+- **Devil's Advocate**: Dr. Erik Solberg, ML-robustness group, research institute (Northern Europe). Shortcut learning, dataset shift.
 
 ---
 
@@ -34,28 +34,28 @@
 - **R2 (Overall 4)**: positioning omits prior smartphone-fundus screening studies. The grading protocol (number and type of graders, adjudication) is under-specified.
 - **R3 (Overall 4)**: a strong case for low-resource screening. Cost per screen, offline inference and the referral pathway are not discussed. Suggests testing image-quality gating, since many real captures are ungradable.
 - **R4 Generalist (Overall 4)**: clinically important and well motivated; the smartphone setting is novel for this venue. The intended clinical workflow (screening vs. referral) is unclear.
-- **Devil's Advocate challenge** (run by the Report Checker after the report check; no scores)
+- **Devil's Advocate (Overall 2)**
   - *Strongest counter-argument*: the frozen features may detect *capture conditions* (clinic vs. field, phone model, illumination) correlated with disease prevalence in the collected data, not retinopathy itself. Positive cases come mostly from the tertiary clinic site (Table 1), so site is confounded with label.
-  - **DA-C1 (CRITICAL; needs new data/experiments)**: confounded site and label (new), plus the image-level splits R1 raised (R1-W1). The reported AUC may reflect shortcut learning and leakage.
+  - **DA-C1 (CRITICAL; needs new data/experiments)**: confounded site and label, plus image-level splits. The reported AUC may reflect shortcut learning and leakage.
   - **DA-M1 (MAJOR)**: no subgroup analysis (age, sex, skin and fundus pigmentation) despite the global-health framing.
 
 ## Phase 2: EIC Meta-Review and Decision
 
 | Consensus map | Sources | Class |
 |---------------|---------|-------|
-| Leakage / confounded evaluation | R1, DA-C1 | SOLO + DA-CRITICAL |
+| Leakage / confounded evaluation | R1, DA | CONSENSUS-2 + DA-CRITICAL |
 | Clinical workflow & metrics underspecified | R4, R1, R3 | CONSENSUS-3 |
 | Grading protocol unclear | R2, R1 | CONSENSUS-2 |
-| Subgroup / fairness analysis missing | DA-M1 | DA-MAJOR (no reviewer raised it) |
+| Subgroup / fairness analysis missing | DA, R3 | CONSENSUS-2 |
 | Low-resource relevance is a real strength | R4, R3 | CONSENSUS-2 (positive) |
 
 **EIC verification**: Table 1 confirms that 81% of positive cases come from the tertiary clinic site, and §4.1 confirms that splits are at the image level, with repeat visits per patient. *Verified.*
 
 **DA-CRITICAL ruling**: **upheld.** AC test: yes, fatal on its own. With site confounded with label and patient-level leakage, the experiment **cannot test** whether the model detects retinopathy. This meets the strict criteria ("cannot test the claim", "evaluation leakage"). It is not a confound that one more baseline could resolve. Needs new experiments → ceiling 3.
 
-**Reviewer weights**: R1 1.25 (verified leakage, decisive) · R2 1.0 · R4 1.0 · R3 1.0. The Devil's Advocate challenge has no weight; it acts through the ruling above.
+**Reviewer weights**: R1 1.25 (verified leakage, decisive) · DA 1.25 (verified, correctly scoped) · R2 1.0 · R4 1.0 · R3 1.0.
 
-**Official** ratings 3/4/4/4 (mean 3.75) → 4 · **EIC assessment** → 4 · **DA ceiling**: 3 · **Final (EIC): 3, Borderline Reject** (journal equivalent: Major Revision). Three reviewers lean accept, but no score can override an upheld fatal flaw in the evaluation.
+**Official** 59.4 → 3 · **EIC assessment** 58.7 → 3 · **DA ceiling**: 3 · **Final (EIC): 3, Borderline Reject** (journal equivalent: Major Revision). Strengths are real, but no score can override an upheld fatal flaw in the evaluation.
 
 **Priority 1 roadmap**
 | # | Issue | Fix | Effort |
@@ -65,4 +65,4 @@
 | R3 | Clinical metrics | Sensitivity at 80/90% specificity with 95% bootstrap CIs; define the workflow | Low |
 | R4 | External validation on a different phone model or capture protocol | Add a site with a different device, or state the limitation explicitly | High |
 
-*Key lesson*: only one reviewer (R1) saw the leakage, and none saw the site–label confound. The Devil's Advocate challenge, run after the check in a fresh context, connected R1's split problem to Table 1 and turned a SOLO point into the decisive one. The EIC checked it against Table 1 before deciding, so the ceiling rests on verified evidence, not on a vote count.
+*Key lesson*: the cross-disciplinary reviewer (R3) and the DA reach the same concern from different directions (deployment realism vs. shortcut learning). The synthesizer merges them without double-counting, and the EIC checks the shared concern against Table 1 before deciding.
