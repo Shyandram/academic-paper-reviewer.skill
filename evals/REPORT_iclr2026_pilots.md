@@ -248,7 +248,40 @@ was the weakest panel signal (individual Overall vs human mean, Spearman: R1 0.2
 R3 0.46, R4 0.41, DA 0.28). The Devil's Advocate is therefore no longer a panel reviewer: the
 Report Checker runs the challenge after the report check, with no scores. R1 now writes its
 main weaknesses from the claim-to-evidence map, naming the concrete item per claim, and R2
-names the prior work behind every literature or baseline weakness. Not yet measured on runs.
+names the prior work behind every literature or baseline weakness. Measured in pilot 4 below.
+
+### Pilot 4: skill 2.11 on the same 20 papers
+
+Sonnet high, `check` pipeline over the API (four voting reviewers, Gap Scout, Report Checker
+with the Devil's Advocate challenge, EIC). 20/20 runs finished; $138.61 in total, $6.93 per
+paper (pilot 3: $1.97). Hits were annotated as in the Gap Scout study, with one fresh annotator
+per paper on the same 247 human main issues (`issue_overlap.py run-prepare`, `run-score`).
+Numbers: `evals/iclr2026_pilot4_hits.json`.
+
+| Source (2.11) | Items per paper | Human main issues hit | Per-paper hit rate [95% CI] | Pilot 3 |
+|---|---|---|---|---|
+| Panel R1–R4 | 19.6 | 102 / 247 | 0.43 [0.35, 0.53] | 0.47 (five reviewers) |
+| Devil's Advocate (in the checker) | 3.8 | 5 | 0.01 [0.01, 0.03] | — |
+| Gap Scout, all items | 29.6 | 155 | 0.65 [0.58, 0.72] | 0.65 |
+| Gap Scout, kept by the checker | 28.8 | 153 | 0.65 [0.57, 0.71] | — |
+| Panel + Gap Scout | 49.2 | 178 | **0.74** [0.68, 0.80] | 0.73 |
+| Everything | 53.0 | 180 | 0.75 [0.69, 0.81] | — |
+
+- **No gain in hits.** The panel hits about what pilot 3's panel did on the same issues
+  (0.43 vs 0.45 for pilot 3's panel under the original annotation); the named-item
+  instructions for R1 and R2 did not raise the panel's hit rate. Unique hits (no other source):
+  R1 2, R2 9, R3 4, R4 4, DA 2, Gap Scout 75.
+- The checker dropped 0.85 Scout items per paper, losing 2 hits.
+- The Devil's Advocate now attacks the argument chain rather than listing issues, and almost
+  never matches a human issue; its role is the DA-CRITICAL ceiling (one raised and upheld).
+- **Ratings ranked worse.** Spearman with the human mean: panel rating 0.32 [−0.19, 0.74]
+  (pilot 3: 0.48; paired difference −0.15 [−0.48, 0.17]), EIC-weighted 0.36, the checker's
+  independent rating 0.51 (AUC 0.67, panel 0.55), panel + checker as a fifth voice 0.43.
+  Ratings were compressed: R1 gave 2 on 13 papers, R4 gave 3 on 17, and 10 papers have a
+  panel rating of 2.75. Individual reviewers: R1 0.17, R2 0.12, R3 0.38, R4 0.26.
+- Reading: the hit count comes from the Gap Scout; the 2.11 panel changes cost money and some
+  ranking signal without adding hits. The fresh-context checker's own estimate was the best
+  single rating signal. n = 20; all intervals are wide.
 
 ## Split pipeline trial (3 papers)
 
