@@ -6,6 +6,10 @@ name: ICLR calibration (paperreview.ai protocol)
 #
 # Ground truth (human scores, decisions) never reaches the review jobs: they get the
 # blinded paper text only. The evaluate job rebuilds the sample from the seed.
+#
+# pipeline "split" (evals/split/) runs each phase in a fresh context instead:
+# Phase 0, five parallel reviewers, the literature and report check, then the EIC.
+# budget is then the cap per phase. auth "subscription" uses CLAUDE_CODE_OAUTH_TOKEN.
 on:
   workflow_dispatch:
     inputs:
@@ -24,6 +28,12 @@ on:
       max_parallel:
         description: "Concurrent review jobs"
         default: "2"
+      pipeline:
+        description: "single (one context, evals/review_prompt.md) or split (one fresh context per phase, evals/split/)"
+        default: "single"
+      auth:
+        description: "api (ANTHROPIC_API_KEY, billed per token) or subscription (CLAUDE_CODE_OAUTH_TOKEN)"
+        default: "api"
   # Manual dispatch needs the workflow on the default branch. Until it is there, a
   # push that changes evals/iclr_run.json (same keys as the inputs) starts a run.
   # {"mode": "evaluate", "runs": [<run ids>]} only collects earlier runs' results
@@ -54,6 +64,8 @@ jobs:
       budget: ${{ steps.c.outputs.budget }}
       effort: ${{ steps.c.outputs.effort }}
       pick: ${{ steps.c.outputs.pick }}
+      pipeline: ${{ steps.c.outputs.pipeline }}
+      auth: ${{ steps.c.outputs.auth }}
     steps:
       - uses: actions/checkout@v4
       - id: c
@@ -64,7 +76,8 @@ jobs:
           import json, os, re
           cfg = {"split": "all", "offset": "0", "limit": "2", "model": "claude-haiku-5-5",
                  "max_parallel": "2", "mode": "review", "runs": "",
-                 "budget": "3", "pick": "order", "effort": ""}
+                 "budget": "3", "pick": "order", "effort": "",
+                 "pipeline": "single", "auth": "api"}
           given = json.loads(os.environ.get("INPUTS") or "null") or {}
           if not given and os.path.exists("evals/iclr_run.json"):
               given = json.load(open("evals/iclr_run.json"))
@@ -78,6 +91,8 @@ jobs:
           assert cfg["split"] in ("all", "train", "test")
           assert all(cfg[k].isdigit() for k in ("offset", "limit", "max_parallel"))
           assert re.fullmatch(r"claude-[a-z0-9.-]+", cfg["model"])
+          assert cfg["pipeline"] in ("single", "split")
+          assert cfg["auth"] in ("api", "subscription")
           assert cfg["effort"] in ("", "low", "medium", "high", "xhigh", "max")
           for k, v in cfg.items():
               print(f"{k}={v}")
@@ -123,7 +138,7 @@ jobs:
     needs: [config, prepare]
     if: needs.prepare.outputs.ids != '[]'
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: ${{ needs.config.outputs.pipeline == 'split' && 180 || 90 }}
     strategy:
       fail-fast: false
       max-parallel: ${{ fromJSON(needs.config.outputs.max_parallel) }}
@@ -134,7 +149,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with: {name: papers, path: evals/work/papers}
       - run: npm install -g @anthropic-ai/claude-code
-      - name: Review
+      - name: Review (single context)
+        if: needs.config.outputs.pipeline == 'single'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ID: ${{ matrix.id }}
@@ -162,6 +178,24 @@ jobs:
             --max-budget-usd "${{ needs.config.outputs.budget }}" --output-format json > "evals/work/results/$ID/run.json" || true
           python3 -c "import json;r=json.load(open('evals/work/results/$ID/run.json'));print('cost_usd',r.get('total_cost_usd'),'turns',r.get('num_turns'))" || true
           ls -la "evals/work/results/$ID"
+      - name: Review (split, one fresh context per phase)
+        if: needs.config.outputs.pipeline == 'split'
+        env:
+          ANTHROPIC_API_KEY: ${{ needs.config.outputs.auth == 'api' && secrets.ANTHROPIC_API_KEY || '' }}
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ needs.config.outputs.auth == 'subscription' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
+          ID: ${{ matrix.id }}
+          MODEL: ${{ needs.config.outputs.model }}
+          EFFORT: ${{ needs.config.outputs.effort }}
+          BUDGET: ${{ needs.config.outputs.budget }}
+          LIT: strict
+        run: |
+          [ -n "$ANTHROPIC_API_KEY" ] || unset ANTHROPIC_API_KEY
+          [ -n "$CLAUDE_CODE_OAUTH_TOKEN" ] || unset CLAUDE_CODE_OAUTH_TOKEN
+          find evals/work/papers -mindepth 1 -maxdepth 1 ! -name "$ID" -exec rm -rf {} +
+          evals/split/run_paper.sh "$ID" || true
+          # The shared prompt holds the paper text; the redacted copy stays in phase0/.
+          rm -f "evals/work/results/$ID/prompts/shared.md"
+          ls -laR "evals/work/results/$ID" | head -60
       - uses: actions/upload-artifact@v4
         with: {name: "result-${{ matrix.id }}", path: "evals/work/results/${{ matrix.id }}", retention-days: 30}
 

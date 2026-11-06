@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Split pipeline for one paper: a fresh `claude -p` per phase (see run_split.py).
+#
+#   evals/split/run_paper.sh <paper id>
+#
+# Run from the repository root. Needs evals/work/papers/<id>/blinded.txt and an
+# authenticated `claude` CLI: ANTHROPIC_API_KEY (API, billed per token) or
+# CLAUDE_CODE_OAUTH_TOKEN / a local login (subscription, no API billing).
+# Settings (environment): MODEL (default claude-sonnet-5-5), EFFORT (high),
+# BUDGET (USD cap per phase, API only; 3), LIT (strict|on|off), CUTOFF,
+# WARMUP (seconds between the first reviewer and the other four, so they read
+# the shared prefix from the prompt cache; 20).
+set -uo pipefail
+ID="$1"
+MODEL="${MODEL:-claude-sonnet-5-5}"; EFFORT="${EFFORT:-high}"; BUDGET="${BUDGET:-3}"
+LIT="${LIT:-strict}"; CUTOFF="${CUTOFF:-}"; WARMUP="${WARMUP:-20}"
+R="evals/work/results/$ID"; S="python3 -I evals/split/run_split.py"
+ARGS=(--id "$ID" --lit "$LIT" --cutoff "$CUTOFF")
+TOOLS=(Read Write Edit Glob Grep "Bash(python3:*)")
+mkdir -p "$R"/{phase0,reports/{R1,R2,R3,R4,DA},check,eic,runs,prompts}
+
+# run <name> <prompt file> [extra claude args...]: one fresh context, its own run log.
+run() {
+  local name="$1" prompt="$2"; shift 2
+  local t0; t0=$(date +%s)
+  claude -p "$(cat "$prompt")" --model "$MODEL" ${EFFORT:+--effort "$EFFORT"} \
+    --max-budget-usd "$BUDGET" --output-format json --no-session-persistence \
+    --exclude-dynamic-system-prompt-sections "$@" > "$R/runs/$name.json" || true
+  echo "{\"wall_s\": $(( $(date +%s) - t0 ))}" > "$R/runs/$name.wall.json"
+  python3 -c "import json,sys;r=json.load(open(sys.argv[1]));print(sys.argv[2],'cost',r.get('total_cost_usd'),'turns',r.get('num_turns'),'error',r.get('is_error'))" \
+    "$R/runs/$name.json" "$name" 2>/dev/null || echo "$name: no run log"
+}
+
+# Phase 0: reads the unredacted paper, writes the redacted copy and the paper memory.
+$S prompt phase0 "${ARGS[@]}" > "$R/prompts/phase0.md"
+run phase0 "$R/prompts/phase0.md" --allowedTools "${TOOLS[@]}"
+for f in card.md paper_memory.md panel.json reviewer_copy.txt; do
+  [ -s "$R/phase0/$f" ] || { echo "phase0 did not write $f"; exit 1; }
+done
+
+# Phase 1: five reviewers, each in its own context, sharing one cached prefix.
+$S shared "${ARGS[@]}" --out "$R/prompts/shared.md"
+reviewer() {
+  local role="$1"; local deny=()
+  mapfile -t deny < <($S deny --id "$ID" --role "$role")
+  $S prompt reviewer --role "$role" "${ARGS[@]}" > "$R/prompts/$role.md"
+  run "$role" "$R/prompts/$role.md" --append-system-prompt-file "$R/prompts/shared.md" \
+    --allowedTools Read Write Edit Glob Grep --disallowedTools Bash "${deny[@]}"
+}
+reviewer R1 & sleep "$WARMUP"
+for role in R2 R3 R4 DA; do reviewer "$role" & done
+wait
+$S before --id "$ID" || exit 1
+
+# Phase 1.5 + 1.6, then Phase 2, each fresh.
+$S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
+run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}"
+$S prompt eic "${ARGS[@]}" > "$R/prompts/eic.md"
+run eic "$R/prompts/eic.md" --allowedTools "${TOOLS[@]}"
+$S finish --id "$ID"
