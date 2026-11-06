@@ -15,7 +15,8 @@
 
 ## Decision: [Strong Accept (6) / Accept (5) / Borderline Accept (4) / Borderline Reject (3) / Reject (2) / Strong Reject (1)]
 
-**Official ratings** (shown to authors): R1 [n], R2 [n], R3 [n], R4 [n], DA [n] → mean [x.xx] · official composite [xx.x]
+**Primary score: panel rating [x.xx]** · panel pool position [P] · decision [n, leaning m]
+**Official ratings** (shown to authors): R1 [n], R2 [n], R3 [n], R4 [n] → mean [x.xx] · DA [n] (shown, does not vote) · official composite [xx.x]
 **EIC assessment** (internal): weighted rating [x.xx] → starting point [n] · weighted composite [xx.x] → [band] (cross-check) · **DA ceiling**: [none / 4 / 3] · **Final (EIC)**: [n]
 **Journal recommendation** (if journal target): [Accept / Minor Revision / Major Revision / Reject]
 

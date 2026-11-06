@@ -5,7 +5,7 @@
 #
 # PIPELINE=split (default): Phase 0, five parallel reviewers, check and EIC, each fresh.
 # PIPELINE=check (skill 2.11): Phase 0 and the five reviewers in one context, the check
-# in a fresh context, then the first context resumed for the EIC.
+# in a fresh context, then the first context resumed for the Novelty update and the EIC.
 #
 # Run from the repository root. Needs evals/work/papers/<id>/blinded.txt and an
 # authenticated `claude` CLI: ANTHROPIC_API_KEY (API, billed per token) or
@@ -49,7 +49,14 @@ if [ "$PIPELINE" = check ]; then
   $S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
   run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}" \
     --disallowedTools "Read(./evals/work/papers/**)" "Read(./$R/phase0/integrity.json)"
-  # Phase 2 in the resumed panel context.
+  # Phase 1.7 (Novelty update) in the resumed panel context, then BEFORE again.
+  $S prompt novelty "${ARGS[@]}" > "$R/prompts/novelty.md"
+  PERSIST=1 run novelty "$R/prompts/novelty.md" --resume "$SID" --allowedTools Read Write Edit Glob Grep
+  $S before "${ARGS[@]}" || exit 1
+  # Continue from the Novelty turn (a resume may return a new session id).
+  SID2=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('session_id',''))" "$R/runs/novelty.json" 2>/dev/null)
+  SID="${SID2:-$SID}"
+  # Phase 2 in the same resumed context.
   $S prompt eic --resumed "${ARGS[@]}" > "$R/prompts/eic.md"
   run eic "$R/prompts/eic.md" --resume "$SID" --allowedTools "${TOOLS[@]}"
   $S finish "${ARGS[@]}"

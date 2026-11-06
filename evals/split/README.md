@@ -42,7 +42,8 @@ the check independent, as the skill's Independent Check does:
 |---|---|
 | `panel` | one context: Phase 0 and the five reviewers (`panel.md`); the session is kept |
 | `check` | fresh: the Report Checker (`agents/report_checker_agent.md`); the unredacted paper and the integrity findings are denied |
-| `eic` | the `panel` session resumed (`eic_resume.md` + `eic.md`) |
+| `novelty` | the `panel` session resumed: Phase 1.7, Reviewer 2 may revise Novelty once (`novelty.md`); then `before` again |
+| `eic` | the same session resumed (`eic_resume.md` + `eic.md`) |
 
 The output files are the same as the split pipeline's, and `summary.json` records
 `"pipeline": "check"`. Compare with skill 2.10 single runs on the same papers.

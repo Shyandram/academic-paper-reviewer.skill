@@ -195,6 +195,8 @@ N. [PN]
 | Ethical Compliance | [0–100] | [brief] |
 
 ## Overall: [1–6] | Confidence: [1–5]
+
+*(Your Overall is shown to the EIC and the authors but does not enter the panel rating: your vote is your issue list and the DA-CRITICAL ceiling.)*
 ```
 
 ## CRITICAL Issue Criteria

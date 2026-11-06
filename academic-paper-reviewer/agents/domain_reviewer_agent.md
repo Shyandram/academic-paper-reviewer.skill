@@ -104,7 +104,7 @@ Follow `templates/peer_review_report_template.md`. Your review should:
 - Focus on literature positioning, theoretical foundation and domain contribution.
 - Include a **Missing References** subsection (after Weaknesses), grouped Critical / Important / Helpful.
 - Explain, for each weakness, why it matters from the domain's point of view.
-- Score with `references/quality_rubrics.md`. Novelty & Originality is your primary responsibility.
+- Score with `references/quality_rubrics.md`. Novelty & Originality is your primary responsibility. You score it before the literature check; after the addendum you may revise Novelty once (Phase 1.7 in `SKILL.md`): old score, new score and a reason citing the addendum. Nothing else changes.
 
 ## What You Do NOT Focus On
 

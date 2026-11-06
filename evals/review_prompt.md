@@ -51,6 +51,7 @@ These files are the **deliverables this task asks for**, not optional summary or
      "before_composite": "<number from before.json>",
      "after_composite": "<number from aggregate.json>",
      "eic_weights": {"R1": "<0.5-1.5>", "R2": "<0.5-1.5>", "R3": "<0.5-1.5>", "R4": "<0.5-1.5>", "DA": "<0.5-1.5>"},
+     "checker_weights": {"R1": "<base weight from the checks, if the skill defines one; else omit>"},
      "decision_differs_from_starting_point": "<true|false>",
      "da_critical_raised": "<integer>",
      "da_critical_upheld": "<integer>",

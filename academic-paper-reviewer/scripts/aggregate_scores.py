@@ -25,6 +25,13 @@ not have to do weighted averages by hand:
   * the decision starting point is the EIC-weighted mean of the reviewers'
     Overall ratings (rounded half up); the 0-100 composite band is a
     cross-check, flagged when it disagrees
+  * the Devil's Advocate does not vote: its Overall and pool position are
+    reported but left out of the ratings and the pool mean (its 0-100
+    dimension scores still enter the composite). "da_votes": true restores
+    the 2.10 behaviour
+  * the PRIMARY score is the continuous panel rating (plain mean of the
+    voting reviewers' Overall ratings) with the panel pool position as a
+    tie-breaker; the integer decision is reported with a lean ("3, leaning 4")
   * --final N renders venue labels from the EIC's actual decision
   * optional venue views (--venue / --all-venues): venue-emphasis weights,
     the venue's own score fields and scale, and a cross-venue outlook, using
@@ -124,6 +131,23 @@ def da_cap(da_critical):
                  if resolvable else
                  "at least one needs new data, experiments, or redesign"))
     return cap, reason
+
+
+def is_da(reviewer):
+    role = str(reviewer.get("role", "")).strip().lower()
+    return role == "da" or role.startswith("da ") or role.startswith("da(") or "devil" in role
+
+
+def lean(panel_rating, decision, margin=0.25):
+    """The integer decision with the side the continuous panel rating leans to."""
+    if panel_rating is None or decision is None:
+        return None
+    d = panel_rating - decision
+    if d >= margin and decision < 6:
+        return f"{decision}, leaning {decision + 1}"
+    if d <= -margin and decision > 1:
+        return f"{decision}, leaning {decision - 1}"
+    return f"{decision}"
 
 
 def composite(scores, weights):
@@ -241,10 +265,20 @@ def aggregate(data):
             f"{BORDERLINE[1]}: the panel may be compressed. The EIC should say which side "
             f"of the bar the deciding evidence points to.")
     composite_band = composite_to_overall(panel_composite)
-    overalls = [r.get("overall") for r in reviewers]
+    da_votes = bool(data.get("da_votes", False))
+    voting = [da_votes or not is_da(r) for r in reviewers]
+    if not any(voting):
+        voting = [True] * len(reviewers)
+    for entry, v in zip(per_reviewer, voting):
+        entry["votes"] = v
+    overalls = [r.get("overall") for r, v in zip(reviewers, voting) if v]
+    vw = [w for w, v in zip(combined, voting) if v]
+    pools = [r["pool_position"] for r, v in zip(reviewers, voting)
+             if v and r.get("pool_position") is not None]
+    panel_pool = round(sum(pools) / len(pools), 1) if pools else None
     if all(o is not None for o in overalls):
         official_rating = sum(overalls) / len(overalls)
-        eic_rating = sum(o * w for o, w in zip(overalls, combined)) / sum(combined)
+        eic_rating = sum(o * w for o, w in zip(overalls, vw)) / sum(vw)
         suggested = max(1, min(6, int(eic_rating + 0.5)))   # round half up
         basis = "rating"
     else:   # fall back to the composite if any Overall rating is missing
@@ -276,6 +310,11 @@ def aggregate(data):
         "suggested_overall": suggested,
         "suggestion_basis": basis,
         "official_rating": round(official_rating, 2) if official_rating is not None else None,
+        # PRIMARY score: continuous, unweighted, voting reviewers only (= official_rating).
+        "panel_rating": round(official_rating, 2) if official_rating is not None else None,
+        "panel_pool_position": panel_pool,
+        "da_votes": da_votes,
+        "decision_with_lean": lean(official_rating, suggested) if official_rating is not None else None,
         "eic_rating": round(eic_rating, 2) if eic_rating is not None else None,
         "composite_band": composite_band,
         "cross_check": cross_check,
@@ -402,7 +441,14 @@ def to_markdown(res):
     if any("pool_position" in p for p in res["per_reviewer"]):
         pools = " | ".join(str(p.get("pool_position", "–")) for p in res["per_reviewer"])
         lines.append(f"| Pool position (P%) | {pools} | | | |")
-    overalls = [(p["role"], p["overall"]) for p in res["per_reviewer"] if p["overall"] is not None]
+    if res.get("panel_rating") is not None:
+        pool = (f", panel pool position **{res['panel_pool_position']}**"
+                if res.get("panel_pool_position") is not None else "")
+        lines += ["", f"**Primary score: panel rating {res['panel_rating']:.2f}**{pool} "
+                  "(plain mean of the voting reviewers; the Devil's Advocate does not vote)"
+                  + (f" · decision **{res['decision_with_lean']}**" if res.get("decision_with_lean") else "")]
+    overalls = [(p["role"], p["overall"]) for p in res["per_reviewer"]
+                if p["overall"] is not None and p.get("votes", True)]
     if overalls:
         lines += ["", "#### Ratings (the decision's starting point)", "",
                   "**Official reviewer ratings (Overall 1-6)**: "
@@ -470,6 +516,8 @@ def main():
         if args.final > res["final_overall_ceiling"]:
             fail(f"--final {args.final} exceeds the DA ceiling {res['final_overall_ceiling']}")
         res["final_overall"] = args.final
+    res["decision_with_lean"] = lean(res["panel_rating"], res.get("final_overall",
+                                                                  res["suggested_overall"]))
     ordered = list(dict.fromkeys(keys))
     target = ordered[0] if args.venue or data.get("venues") else None   # first --venue = target
     views = [venue_view(res, k, venues[k], args.final, is_target=(k == target)) for k in ordered]

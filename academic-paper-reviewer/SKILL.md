@@ -14,7 +14,9 @@ Simulates a complete conference or journal peer review. The skill identifies the
 
 This skill works in Codex and Claude. Resolve all bundled paths relative to the directory containing this `SKILL.md`, regardless of the shell working directory. For Codex installation, PDF handling, tool fallbacks, and artifact paths, read `references/codex_runtime.md`. Follow the host's instructions and available permissions. Agent files define reviewer roles; they do not require a particular agent tool.
 
-Load only the files for the selected mode from the File Map, then the references needed for that paper type. Read shared rubrics once per review context. Keep a compact evidence ledger (claim ID, manuscript location, observation, uncertainty) across phases; never substitute the ledger for access to relevant manuscript sections.
+Load only the files for the selected mode from the File Map, then the references needed for that paper type. Read shared rubrics once per review context.
+
+**Work in few turns.** Every turn re-reads the whole context, so turns, not file sizes, drive the cost. Read each file once and don't re-read what is already in context. Write each report in a single write, not section by section. Batch independent reads and script runs. Run the aggregation script only at the points the workflow names. Keep a compact evidence ledger (claim ID, manuscript location, observation, uncertainty) across phases; never substitute the ledger for access to relevant manuscript sections.
 
 ## Persona
 
@@ -146,7 +148,7 @@ Default mode is `on`. Use `strict` (drops everything after the cutoff) to simula
 
 ### Phase 1.6: Report Check (after Phase 1.5, before the EIC)
 
-**Order:** Phase 1 → Phase 1.5 → Phase 1.6 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
+**Order:** Phase 1 → Phase 1.5 → Phase 1.6 → Phase 1.7 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
 
 The Report Checker checks every weakness in the five reports before the Synthesizer builds the package. This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass five tests:
 1. **Specific.** It names a location, what is wrong, and why it matters. Rewrite a vague weakness, or drop it.
@@ -157,16 +159,21 @@ The Report Checker checks every weakness in the five reports before the Synthesi
 
 Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with the test and reason), plus the factual error list. Scores are not changed here. The EIC sees both and uses them when setting quality weights.
 
+### Phase 1.7: Novelty Update (after the check, when a literature check ran)
+
+The Domain Reviewer scored Novelty before the literature check. After reading the addendum and the report check, it may revise **its Novelty score only**, in either direction, once. It records the old and new score and a one-line reason that cites the addendum (e.g., "C2 is established by a prior peer-reviewed work, addendum row 2: 64 → 52"). It changes no other score, no Overall rating and no text of the report. The official score uses the revised Novelty. Without a literature check, skip this phase.
+
 ### Phase 2: EIC Meta-Review and Decision
 
-1. **Synthesizer, part A** (`agents/editorial_synthesizer_agent.md`): deduplicate issues, classify them (CONSENSUS-4/5, CONSENSUS-3, CONSENSUS-2, SPLIT, SOLO, DA-CRITICAL), mark the issues the outcome may hinge on, and compute the **official** score (plain mean of the reviewers' raw scores) with `scripts/aggregate_scores.py`.
+1. **Synthesizer, part A** (`agents/editorial_synthesizer_agent.md`): deduplicate issues, classify them (CONSENSUS-4/5, CONSENSUS-3, CONSENSUS-2, SPLIT, SOLO, DA-CRITICAL), mark the issues the outcome may hinge on, and compute the **official** score with `scripts/aggregate_scores.py`. The official rating is the plain mean of the **voting** reviewers' Overall ratings: R1–R4. The Devil's Advocate does not vote. Its Overall and pool position are reported but not averaged, because it argues against the paper by design (on the pilot, leaving it out ranked papers slightly better, 0.52 vs 0.48). Its issues, and the DA-CRITICAL ceiling, still apply in full.
 2. **EIC meta-review** (`agents/eic_agent.md`, full mode):
    1. Read all five reports and the package **first**.
    2. Read the paper briefly, checking every decisive point against the text.
    3. Give each reviewer a **quality weight** (0.5–1.5) for how much their comments and scores should count.
    4. Rule on each DA-CRITICAL issue with the AC test (uphold, or downgrade to MAJOR).
-   5. Rerun the script for the **EIC assessment**. The **EIC-weighted mean of the reviewers' Overall ratings** is the starting point, and the 0–100 composite is a cross-check.
+   5. Rerun the script for the **EIC assessment**. The **EIC-weighted mean of the voting reviewers' Overall ratings** is the starting point, and the 0–100 composite is a cross-check.
    6. **Make the final decision**, explaining any departure from the starting point and any disagreement with the cross-check. The decision can never exceed the DA ceiling. Rerun with `--final <N>` so the venue labels reflect the decision.
+   7. **Report the primary score.** Lead with the **panel rating**: the plain mean of the voting reviewers' Overall ratings, to two decimals, with the **panel pool position** (their mean pool position) beside it. Give the integer decision with its lean, e.g. "3, leaning 4" (`decision_with_lean` in the script output). On the ICLR 2026 pilot the continuous panel rating ranked papers better than the integer decision (Spearman 0.48 vs 0.26) and better than an EIC pool position of its own (0.30), so the EIC does not replace it with its own estimate.
 3. **Synthesizer, part B**: record the decision, then assemble the Editorial Decision Package and the Revision Roadmap using `templates/editorial_decision_template.md`.
 
 For a journal target, also report the journal-style recommendation (Accept / Minor Revision / Major Revision / Reject) using the mapping in `references/editorial_decision_standards.md`.

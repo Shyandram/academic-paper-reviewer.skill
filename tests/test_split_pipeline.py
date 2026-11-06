@@ -63,9 +63,14 @@ class SplitPipeline(unittest.TestCase):
         resumed = run(["prompt", "eic", "--resumed"] + self.base)
         fresh = run(["prompt", "eic"] + self.base)
         self.assertNotRegex(resumed, r"\{[A-Z_]+\}")
-        self.assertTrue(resumed.startswith("## Resumed"))  # no repeated rules
+        self.assertTrue(resumed.startswith("## Phase 2 (resumed context)"))  # no repeated rules
         self.assertIn("Evaluation rules", fresh)
         self.assertIn("eic.json", resumed)
+        self.assertIn("checker_weights", resumed)
+        novelty = run(["prompt", "novelty"] + self.base)
+        self.assertNotRegex(novelty, r"\{[A-Z_]+\}")
+        self.assertIn("novelty_update", novelty)
+        self.assertIn("Change nothing else", novelty)
 
     def test_shared_prefix_is_redacted_and_role_free(self):
         a = argparse.Namespace(
@@ -159,6 +164,8 @@ class SplitPipeline(unittest.TestCase):
         self.assertEqual(summary["pipeline"], "check")
         runlog = json.loads((self.p["res"] / "run.json").read_text())
         self.assertAlmostEqual(runlog["phases"]["panel"]["cost_usd"], 1.5)
+        self.assertIn("panel_rating", summary)
+        self.assertIn("decision_with_lean", summary)
         self.assertIn("check pipeline", (self.p["res"] / "review.md").read_text())
 
     def test_before_requires_all_five(self):

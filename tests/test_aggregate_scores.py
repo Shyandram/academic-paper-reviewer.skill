@@ -257,3 +257,35 @@ class AggregateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DevilsAdvocateDoesNotVote(unittest.TestCase):
+    def panel(self):
+        rs = [uniform(60, overall=o) for o in (4, 4, 3, 4, 1)]
+        for r, role, pool in zip(rs, ("R1 (Meth.)", "R2 (Domain)", "R3 (Persp.)", "R4 (Gen.)", "DA"),
+                                 (70, 66, 50, 64, 10)):
+            r["role"], r["pool_position"] = role, pool
+        return {"reviewers": rs}
+
+    def test_da_left_out_of_ratings_and_pool(self):
+        res = agg.aggregate(self.panel())
+        self.assertEqual(res["official_rating"], 3.75)
+        self.assertEqual(res["panel_rating"], 3.75)
+        self.assertEqual(res["panel_pool_position"], 62.5)
+        self.assertEqual(res["suggested_overall"], 4)
+        self.assertEqual([p["votes"] for p in res["per_reviewer"]], [True] * 4 + [False])
+        self.assertEqual(res["decision_with_lean"], "4, leaning 3")  # 3.75 vs 4
+
+    def test_da_votes_restores_old_mean(self):
+        data = self.panel()
+        data["da_votes"] = True
+        res = agg.aggregate(data)
+        self.assertEqual(res["official_rating"], 3.2)
+        self.assertEqual(res["panel_pool_position"], 52.0)
+
+    def test_lean(self):
+        self.assertEqual(agg.lean(3.4, 3), "3, leaning 4")
+        self.assertEqual(agg.lean(3.2, 3), "3")
+        self.assertEqual(agg.lean(2.7, 3), "3, leaning 2")
+        self.assertEqual(agg.lean(6.0, 6), "6")
+        self.assertIsNone(agg.lean(None, 3))

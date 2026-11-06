@@ -21,7 +21,8 @@ EIC: only the check is independent, as in the skill's Independent Check.
 
 Subcommands:
     prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, check,
-                   eic; `eic --resumed` for the resumed panel context)
+                   novelty, eic; `novelty` and `eic --resumed` are for the resumed
+                   panel context)
     shared         write the shared system-prompt suffix for the reviewers
     deny           print the Read() deny rules for one reviewer, one per line
     before         merge the five reviewer score files and run the BEFORE aggregation
@@ -54,7 +55,7 @@ SHARED_SKILL_FILES = [
     "templates/peer_review_report_template.md",
 ]
 PHASE0_FILES = ["card.md", "paper_memory.md"]
-PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "check", "eic"]
+PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "check", "novelty", "eic"]
 PIPELINES = {"split": "one fresh context per phase",
              "check": "one context for the panel, a fresh context for the check"}
 
@@ -113,6 +114,8 @@ def cmd_prompt(a):
                   "AGENT_TEXT": (p["skill"] / "agents" / agent).read_text(encoding="utf-8")})
         # The rules are already in the shared system prompt.
         out = fill(template("reviewer.md"), v)
+    elif a.phase == "novelty":
+        out = fill(template("novelty.md"), v)  # resumed panel context: rules already there
     elif a.phase == "eic" and a.resumed:
         # The rules are already in the resumed context.
         out = fill(template("eic_resume.md"), v) + fill(template("eic.md"), v)
@@ -294,6 +297,11 @@ def cmd_finish(a):
         "before_composite": pre.get("before_composite", pre.get("official_composite")),
         "after_composite": agg.get("eic_composite"),
         "eic_weights": {k: weights.get(k, 1.0) for k in ROLES},
+        "checker_weights": eic.get("checker_weights"),
+        "panel_rating": agg.get("panel_rating"),
+        "panel_pool_position": agg.get("panel_pool_position"),
+        "decision_with_lean": agg.get("decision_with_lean"),
+        "novelty_update": (load(p["reports"] / "R2" / "scores.json", {}) or {}).get("novelty_update"),
         "decision_differs_from_starting_point": final != agg.get("suggested_overall"),
         "da_critical_raised": len(before.get("da_critical", [])),
         "da_critical_upheld": sum(d["upheld"] for d in scores["da_critical"]),
@@ -324,7 +332,7 @@ def main(argv=None):
         return s
 
     s = common(sub.add_parser("prompt"))
-    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "check", "eic"])
+    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "check", "novelty", "eic"])
     s.add_argument("--role", default="")
     s.add_argument("--resumed", action="store_true",
                    help="eic only: the prompt for the resumed panel context")

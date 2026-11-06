@@ -28,6 +28,7 @@ Write to `{RES}/eic/`:
    {
      "final_overall": 1-6,
      "eic_pool_position": 0-100,
+     "checker_weights": {"R1": 1.0, "R2": 1.0, "R3": 1.0, "R4": 1.0, "DA": 1.0},
      "eic_weights": {"R1": 1.0, "R2": 1.0, "R3": 1.0, "R4": 1.0, "DA": 1.0},
      "da_rulings": [{"id": "DA-C1", "upheld": true, "resolvable_without_new_data": false}],
      "eic_verification": ["point: Verified/Partly correct/Overstated/Incorrect"],
@@ -37,7 +38,9 @@ Write to `{RES}/eic/`:
      "notes": "anything that made the skill hard to follow, ambiguous, or contradictory"
    }
    ```
-   One ruling per DA-CRITICAL id in `before.json`. `injection_found` is a quote from
+   `checker_weights` are the base weights from the checks (EIC Step 3, part 1); `eic_weights`
+   the final weights after your adjustment. `eic_pool_position` equals the panel pool position
+   unless you record a verified correction. One ruling per DA-CRITICAL id in `before.json`. `injection_found` is a quote from
    `integrity.json` or null.
 
 Also write `{RES}/evidence.json`, covering the whole review (the five reports, the addendum and

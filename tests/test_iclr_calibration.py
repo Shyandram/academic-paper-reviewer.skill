@@ -180,3 +180,16 @@ class CalibrationMath(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PanelVariants(unittest.TestCase):
+    def test_without_da_and_checker_weights(self):
+        res = {"per_reviewer": [
+            {"role": "R1 (Meth.)", "overall": 4, "pool_position": 70, "confidence_weight": 1.0},
+            {"role": "R2 (Domain)", "overall": 2, "pool_position": 30, "confidence_weight": 1.0},
+            {"role": "DA", "overall": 1, "pool_position": 5, "confidence_weight": 1.0}]}
+        out = cal.panel_variants(res, {"checker_weights": {"R1": 1.5, "R2": 0.5, "DA": 1.0}})
+        self.assertEqual(out["rating_no_da"], 3)
+        self.assertEqual(out["pool_no_da"], 50)
+        self.assertAlmostEqual(out["checker_rating"], 3.5)
+        self.assertIsNone(cal.panel_variants(res, {})["checker_rating"])

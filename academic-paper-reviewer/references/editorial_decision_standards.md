@@ -103,7 +103,7 @@ The **EIC** rules on every DA-CRITICAL issue after checking it against the paper
 
 ### Who Decides
 
-The EIC (meta-reviewer) makes the final decision. The **official** ratings and scores are the plain means of the reviewers' raw Overall ratings and dimension scores; they are what the authors see. The EIC's quality weights produce the **EIC assessment**, which can be higher or lower. Its **EIC-weighted rating** (the weighted mean of the reviewers' Overall ratings, rounded half up) is the starting point, and the 0–100 composite is a cross-check. The EIC may decide above or below the starting point with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
+The EIC (meta-reviewer) makes the final decision. The **official** rating is the plain mean of the voting reviewers' (R1–R4) raw Overall ratings, and the official scores are the plain means of the reviewers' dimension scores; they are what the authors see. The Devil's Advocate's Overall is shown but not averaged. The official rating is also the **primary score** (the panel rating), reported to two decimals with the panel pool position and the integer decision's lean. The EIC's quality weights produce the **EIC assessment**, which can be higher or lower. Its **EIC-weighted rating** (the weighted mean of the reviewers' Overall ratings, rounded half up) is the starting point, and the 0–100 composite is a cross-check. The EIC may decide above or below the starting point with a written reason, but never above the DA-CRITICAL ceiling. The decision matrix above describes typical patterns, not a vote count.
 
 ### Conference ↔ Journal Mapping
 
