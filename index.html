@@ -291,6 +291,23 @@ h1 em{font-style:italic;font-weight:500;padding:0 .12em 0 .02em;margin-right:-.0
 .btn-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
 .btn.sm{min-height:40px;padding:8px 14px;font-size:.9rem}
 .chart-card .hint{display:block;margin-top:10px;font-size:.82rem;color:var(--muted)}
+
+/* report figures */
+.figure{margin:28px 0 0;padding:16px;background:#fff;border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}
+.figure .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.figure img{display:block;width:100%;height:auto;min-width:760px}
+.figure.design img{max-width:760px;margin:0 auto;min-width:520px}
+.figure figcaption{margin-top:10px;font-size:.88rem;color:#4a5568}
+.figure figcaption b{color:#111827}
+.figure figcaption a{color:#1d4ed8}
+@media (max-width:700px){.figure figcaption .swipe{display:inline}}
+.figure figcaption .swipe{display:none;color:#6b7280}
+.cmp-grid{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:28px;align-items:start}
+@media (max-width:1000px){.cmp-grid{grid-template-columns:minmax(0,1fr)}}
+.cmp-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.cmp-list li{padding:12px 14px}
+.cmp-list b{display:block;color:var(--ink);font-size:.98rem}
+.cmp-list span{color:var(--muted);font-size:.9rem}
 .legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.84rem;color:var(--muted);margin-top:4px}
 .legend span{display:inline-flex;align-items:center;gap:7px}
 .sw{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
@@ -371,8 +388,9 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
     <li><a href="#different"><span class="lab"><small>03</small>What's different</span></a></li>
     <li><a href="#modes"><span class="lab"><small>04</small>Modes &amp; venues</span></a></li>
     <li><a href="#eval"><span class="lab"><small>05</small>Evaluation</span></a></li>
-    <li><a href="#install"><span class="lab"><small>06</small>Install</span></a></li>
-    <li><a href="#responsible"><span class="lab"><small>07</small>Responsible use</span></a></li>
+    <li><a href="#compare"><span class="lab"><small>06</small>How it compares</span></a></li>
+    <li><a href="#install"><span class="lab"><small>07</small>Install</span></a></li>
+    <li><a href="#responsible"><span class="lab"><small>08</small>Responsible use</span></a></li>
   </ol>
 </nav>
 
@@ -473,6 +491,10 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
         <p>Decision letter, consensus map, both score lists in the venue's own form, and a prioritized revision roadmap. Optional Socratic coaching.</p>
       </li>
     </ol>
+    <figure class="figure rv" style="--i:6">
+      <div class="scroll"><img src="img/workflow.svg" width="1302" height="323" loading="lazy" alt="Workflow diagram: manuscript, then field analysis and integrity scan (phase 0), five independent reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) sharing a paper memory (phase 1), literature check with a self-exclusion filter (phase 1.5), report check (phase 1.6), Editor-in-Chief with quality weights, pool position and area-chair test (phase 2), then aggregate_scores.py producing a decision letter, revision roadmap and 11 venue forms."></div>
+      <figcaption><b>Full workflow</b> (Figure 1 of the <a href="report/technical_report.pdf">technical report</a>). The literature check cannot retrieve the paper under review, and the report check drops ungrounded points before the editor reads anything. <span class="swipe">Swipe sideways to see the whole diagram.</span></figcaption>
+    </figure>
   </div>
 </section>
 
@@ -638,7 +660,29 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
   </div>
 </section>
 
-<!-- 06 · Install -->
+<!-- 06 · How it compares -->
+<section class="slide" id="compare" aria-labelledby="t-cmp" data-label="How it compares">
+  <div class="wrap">
+    <p class="kicker rv">Related work</p>
+    <h2 id="t-cmp" class="rv" style="--i:1">How it compares</h2>
+    <p class="sub rv" style="--i:2">Most AI reviewers fine-tune an open model on past conference reviews. This skill instead runs a strong general model through a structured panel, so it needs no training data.</p>
+    <div class="cmp-grid">
+      <figure class="figure design rv" style="--i:3;margin-top:0">
+        <div class="scroll"><img src="img/design.svg" width="764" height="433" loading="lazy" alt="Design space chart. Vertical axis: prompted general model versus fine-tuned model. Horizontal axis: single pass, staged or self-checked, panel of reviewers. Fine-tuned: OpenReviewer (single pass), SEA-E and DeepReviewer (staged or self-checked), CycleReviewer (panel). Prompted: AI Scientist (single pass) and Academic Paper Reviewer (panel of reviewers with an Editor-in-Chief)."></div>
+        <figcaption><b>Design space of AI reviewers</b> (Figure 2 of the <a href="report/technical_report.pdf">technical report</a>). Positions are qualitative. <span class="swipe">Swipe sideways to see the whole chart.</span></figcaption>
+      </figure>
+      <ul class="cmp-list">
+        <li class="glass rv" style="--i:3"><b><a href="https://arxiv.org/abs/2503.08569">DeepReviewer</a> · 7B / 14B</b><span>Multi-stage reasoning, trained on synthetic ICLR 2024–2025 reviews. Reports Spearman 0.41 on ICLR 2025.</span></li>
+        <li class="glass rv" style="--i:4"><b><a href="https://arxiv.org/abs/2411.00816">CycleReviewer</a> · 8B–123B</b><span>Simulates several reviewers and a senior reviewer, then averages. Spearman 0.27–0.28 on ICLR 2025.</span></li>
+        <li class="glass rv" style="--i:5"><b><a href="https://arxiv.org/abs/2412.11948">OpenReviewer</a> · 8B</b><span>Fine-tuned on about 79k expert reviews; less lenient than general models.</span></li>
+        <li class="glass rv" style="--i:6"><b><a href="https://arxiv.org/abs/2407.12857">SEA-E</a> · 7B</b><span>Fine-tuned on standardized reviews, with a check that the review matches the paper.</span></li>
+        <li class="glass rv" style="--i:7"><b>This skill</b><span>Spearman 0.48 on 20 ICLR 2026 papers (pilot). Different papers and sizes, so not directly comparable; a same-paper comparison is planned.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 07 · Install -->
 <section class="slide" id="install" aria-labelledby="t-install" data-label="Install">
   <span class="num" aria-hidden="true">06</span>
   <div class="wrap">
