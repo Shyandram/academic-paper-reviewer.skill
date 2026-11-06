@@ -167,6 +167,15 @@ class CalibrationMath(unittest.TestCase):
         self.assertEqual(vals["NMAE(panel rating, mean human)"], 0.0)
         self.assertIsNone(vals["spearman(ICLR-scale rating, mean human)"])
         self.assertEqual(vals["NMAE(one human, another human)"], 0.1)
+        # no EIC fields in these features: only the final rating is a stage
+        self.assertEqual([s["stage"] for s in out["stages"]], ["ICLR-scale rating"])
+        for i in range(12):
+            feats[f"p{i}"].update(eic_rating=feats[f"p{i}"]["official_rating"],
+                                  reviewer_pool=10 * i, eic_pool=50)
+        stages = {s["stage"]: s for s in cal.pilot(rows, feats, reps=50)["stages"]}
+        self.assertEqual(stages["EIC-weighted rating"]["panel_minus_stage"], 0.0)
+        self.assertEqual(stages["reviewers' pool position"]["spearman"], 1.0)
+        self.assertIsNone(stages["EIC pool position"]["spearman"])  # constant
 
 
 if __name__ == "__main__":

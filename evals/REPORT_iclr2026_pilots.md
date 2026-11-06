@@ -64,6 +64,36 @@ Computed with `python3 evals/iclr_calibration.py pilot sample.jsonl features.jso
 - Reference only (not comparable: unknown N and paper overlap): CSPaper reports NMAE 0.128,
   NME −0.015, SRC 0.658 for Claude Sonnet 5.5 on ICLR main.
 
+## Where the signal is lost (reviewers → EIC)
+
+Sonnet high, 20 papers. Spearman with the mean human rating at each stage, and the paired
+bootstrap difference from the reviewers' mean rating (> 0: the reviewers' mean ranks better).
+Computed by `iclr_calibration.py pilot` (`stages`).
+
+| Stage | Spearman | AUC | Reviewers' mean − stage [95% CI] |
+|---|---|---|---|
+| Reviewers' mean Overall (panel rating) | 0.48 | 0.67 | — |
+| Reviewers' mean pool position | 0.45 | 0.63 | +0.03 [−0.11, +0.18] |
+| EIC-weighted rating | 0.42 | 0.63 | +0.06 [−0.03, +0.17] |
+| EIC pool position | 0.30 | 0.55 | **+0.18 [+0.01, +0.40]** |
+| Final integer decision | 0.26 | 0.53 | +0.22 [−0.08, +0.51] |
+
+- The EIC never changed the starting decision (0/20), and the DA cap never pushed a decision
+  below the reviewers' rating. The loss is not from overrides.
+- **Integer decision**: 17/20 papers get 3, so the final rating barely separates papers.
+- **EIC pool position**: the EIC's own estimate is weaker than the mean of the five
+  reviewers' estimates. This is the only difference whose CI excludes 0.
+- **Quality weighting**: a small loss (the EIC-weighted rating moves 0.08 from the plain mean
+  on average). With Haiku the loss is larger (0.20 → 0.04, CI [+0.01, +0.34]).
+- Each reviewer's Overall uses only 2–3 values across the 20 papers. The continuous pool
+  positions carry comparable signal.
+
+**Decision**: no skill change yet; confirm on the full balanced evaluation first. Candidate
+changes:
+1. use the continuous panel rating as the primary score;
+2. use the reviewers' mean pool position instead of the EIC's;
+3. report a lean with the integer decision (e.g. "3, leaning 4").
+
 ## Reading
 
 - Haiku has no signal: all scores sit near the acceptance bar (EIC pool position 38–50) whatever the paper.
