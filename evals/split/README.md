@@ -2,7 +2,7 @@
 
 **Status: trial, not adopted.** A 3-paper trial gave no increase in reviewer spread at about
 2.2× the cost (see `../REPORT_iclr2026_pilots.md`, "Split pipeline trial"). Evaluation runs
-keep `pipeline: single`. The independent check is an optional extension from skill 2.10.1.
+keep `pipeline: single`. From skill 2.10.1 the Report Checker is a post-review analysis (see below).
 
 The single-agent evaluation (`evals/review_prompt.md`) plays all five reviewers in one
 context, so every reviewer after the first has already read the earlier reports. In the
