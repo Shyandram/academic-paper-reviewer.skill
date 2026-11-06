@@ -306,6 +306,93 @@
      "value": 0.58
     }
    }
+  },
+  "pipeline_stages": {
+   "note": "Spearman with the mean human rating at each stage; panel_minus_stage > 0 means the reviewers' mean rating ranks better (paired bootstrap 95% CI)",
+   "haiku": [
+    {
+     "stage": "EIC-weighted rating",
+     "spearman": 0.04,
+     "auc": 0.547,
+     "panel_minus_stage": 0.164,
+     "ci95": [
+      0.008,
+      0.337
+     ]
+    },
+    {
+     "stage": "reviewers' pool position",
+     "spearman": 0.08,
+     "auc": 0.44,
+     "panel_minus_stage": 0.125,
+     "ci95": [
+      -0.308,
+      0.555
+     ]
+    },
+    {
+     "stage": "EIC pool position",
+     "spearman": -0.058,
+     "auc": 0.42,
+     "panel_minus_stage": 0.263,
+     "ci95": [
+      -0.084,
+      0.609
+     ]
+    },
+    {
+     "stage": "ICLR-scale rating",
+     "spearman": null,
+     "auc": 0.5,
+     "panel_minus_stage": null,
+     "ci95": [
+      null,
+      null
+     ]
+    }
+   ],
+   "sonnet_high": [
+    {
+     "stage": "EIC-weighted rating",
+     "spearman": 0.419,
+     "auc": 0.627,
+     "panel_minus_stage": 0.06,
+     "ci95": [
+      -0.031,
+      0.169
+     ]
+    },
+    {
+     "stage": "reviewers' pool position",
+     "spearman": 0.454,
+     "auc": 0.633,
+     "panel_minus_stage": 0.025,
+     "ci95": [
+      -0.111,
+      0.184
+     ]
+    },
+    {
+     "stage": "EIC pool position",
+     "spearman": 0.301,
+     "auc": 0.553,
+     "panel_minus_stage": 0.178,
+     "ci95": [
+      0.01,
+      0.395
+     ]
+    },
+    {
+     "stage": "ICLR-scale rating",
+     "spearman": 0.256,
+     "auc": 0.533,
+     "panel_minus_stage": 0.223,
+     "ci95": [
+      -0.08,
+      0.513
+     ]
+    }
+   ]
   }
  },
  "papers": [

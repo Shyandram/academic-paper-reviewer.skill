@@ -784,9 +784,18 @@ def cmd_features(a):
                 continue
             dims = {d["key"]: d["weighted_avg"] for d in res.get("dimensions", [])}
             pid = agg.parent.name.split("-", 1)[-1]
+            try:
+                summ = json.loads((agg.parent / "summary.json").read_text())
+            except (OSError, ValueError):
+                summ = {}
+            pools = [r["pool_position"] for r in res.get("per_reviewer", [])
+                     if isinstance(r.get("pool_position"), (int, float))]
             out.write(json.dumps({"paper_id": pid, "dims": dims,
                                   "overall": res.get("final_overall"),
                                   "official_rating": res.get("official_rating"),
+                                  "eic_rating": res.get("eic_rating"),
+                                  "reviewer_pool": statistics.mean(pools) if pools else None,
+                                  "eic_pool": summ.get("eic_pool_position"),
                                   "rating": venue_rating(res)}) + "\n")
             n += 1
     print(f"{n} runs with aggregate.json", file=sys.stderr)
@@ -822,6 +831,15 @@ def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
                          for r in rows],
         "ICLR-scale rating": [num(feats[r["paper_id"]].get("rating")) for r in rows],
     }
+    # Stages of the pipeline, ranking only (pool positions are not on the rating scale).
+    # Used to see where signal is lost between the reviewers and the EIC's decision.
+    stages = {
+        "EIC-weighted rating": [None if num(feats[r["paper_id"]].get("eic_rating")) is None
+                                else to_iclr(feats[r["paper_id"]]["eic_rating"], year)
+                                for r in rows],
+        "reviewers' pool position": [num(feats[r["paper_id"]].get("reviewer_pool")) for r in rows],
+        "EIC pool position": [num(feats[r["paper_id"]].get("eic_pool")) for r in rows],
+    }
     for label, v in preds.items():
         idx = [i for i in allidx if v[i] is not None]
         if len(idx) < 3:
@@ -835,6 +853,25 @@ def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
              "value": r3(auc([v[i] for i in idx], [lab[i] for i in idx]))},
             error_metric(f"NMAE({label}, mean human)", nmae, v, mean, idx, scale, reps),
             error_metric(f"NME({label}, mean human)", nme, v, mean, idx, scale, reps)]
+    base = preds["panel rating"]
+    out["stages"] = []
+    for label, v in [("EIC-weighted rating", stages["EIC-weighted rating"]),
+                     ("reviewers' pool position", stages["reviewers' pool position"]),
+                     ("EIC pool position", stages["EIC pool position"]),
+                     ("ICLR-scale rating", preds["ICLR-scale rating"])]:
+        idx = [i for i in allidx if v[i] is not None and base[i] is not None]
+        if len(idx) < 3:
+            continue
+        def diff(I, v=v, idx=idx):
+            m = [mean[idx[i]] for i in I]
+            return (spearman([base[idx[i]] for i in I], m) - spearman([v[idx[i]] for i in I], m))
+        lo, hi = bootstrap(diff, len(idx), reps)
+        out["stages"].append({
+            "stage": label,
+            "spearman": r3(spearman([v[i] for i in idx], [mean[i] for i in idx])),
+            "auc": r3(auc([v[i] for i in idx], [lab[i] for i in idx])),
+            # > 0: the panel rating ranks papers better than this stage
+            "panel_minus_stage": r3(diff(range(len(idx)))), "ci95": [r3(lo), r3(hi)]})
     one = [r["one_human"] for r in rows]
     other = [r["other_human"] for r in rows]
     p = [i for i in allidx if other[i] is not None]
