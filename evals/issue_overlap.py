@@ -12,6 +12,9 @@ This script prepares those inputs and computes the metrics from the annotations.
     analyze   overlap within each panel, hit rate across panels, per-role contribution
               and the coverage curve; JSON (numbers and paper ids only) and Markdown
     agree     compare two annotations of the same papers (annotator stability)
+    misses    export each human main issue with its status (hit, minor_only, related,
+              missed) for labeling with `evals/issue_miss_prompt.md`
+    categories  hit rate per label (topic, evidence needed, reason missed); numbers only
 
 Annotate each prepared paper by giving an agent `evals/issue_overlap_prompt.md` with
 {DIR} = <out>/<id> and {OUT} = issues.json. The inputs hold review text: keep <out> under
@@ -323,6 +326,114 @@ def cmd_agree(a):
         print(f"| {v['label']} | {x} | {y} | {d} |")
 
 
+
+# ---------------------------------------------------------------- what the panel misses
+
+STATUS = ("hit", "minor_only", "related", "missed")
+
+
+def human_issue_status(d, fname="issues.json"):
+    """Each human main issue with its status: hit (matched by an AI main issue),
+    minor_only (matched only by AI minor points), related (only a partial AI overlap),
+    missed. Rows hold review text: write them under evals/work/ only."""
+    ann = json.loads((d / fname).read_text())
+    key = json.loads((d / "blind_key.json").read_text())
+    src = {rid[0]: v[0] for rid, v in key.items()}
+    pts = {p["id"]: p for p in ann["points"]}
+    match, related = {}, {}
+    for c in ann.get("cross", []):
+        for field, store in (("match", match), ("related", related)):
+            for q in c.get(field, []) or []:
+                store.setdefault(c["p_issue"], set()).add(q)
+                store.setdefault(q, set()).add(c["p_issue"])
+    ai_major, ai_text = set(), []
+    for letter, lst in ann["issues"].items():
+        if src[letter] != "A":
+            continue
+        for i in lst:
+            members = [pts[x] for x in i["points"] if x in pts]
+            if members and not all(m.get("minor") for m in members):
+                ai_major.add(i["id"])
+            ai_text.append({"id": i["id"], "summary": i.get("summary", ""),
+                            "minor": i["id"] not in ai_major})
+    rows = []
+    for letter, lst in ann["issues"].items():
+        if src[letter] != "H":
+            continue
+        for i in lst:
+            members = [pts[x] for x in i["points"] if x in pts]
+            if not members or all(m.get("minor") for m in members):
+                continue
+            m = match.get(i["id"], set())
+            status = ("hit" if m & ai_major else "minor_only" if m
+                      else "related" if related.get(i["id"]) else "missed")
+            rows.append({"paper_id": d.name, "issue_id": i["id"], "status": status,
+                         "n_humans": len({x["reviewer"] for x in members}),
+                         "summary": i.get("summary", ""),
+                         "points": [x["text"] for x in members]})
+    return rows, ai_text
+
+
+def cmd_misses(a):
+    base, out = Path(a.dir), Path(a.out)
+    out.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for d in sorted(x for x in base.iterdir() if (x / a.annotation).exists()):
+        r, ai = human_issue_status(d, a.annotation)
+        rows += r
+        (out / f"{d.name}_ai_issues.json").write_text(json.dumps(ai, indent=1))
+    with open(out / "human_issues.jsonl", "w") as f:
+        for r in rows:
+            f.write(json.dumps(r) + "\n")
+    n = {s: sum(r["status"] == s for r in rows) for s in STATUS}
+    print(f"{len(rows)} human main issues: " + ", ".join(f"{k} {v}" for k, v in n.items()))
+
+
+def by_label(rows, labels, field, reps=2000):
+    """Share of human issues hit, per label value, with a bootstrap CI over papers."""
+    lab = {(x["paper_id"], x["issue_id"]): x for x in labels}
+    out = {}
+    values = sorted({lab[k][field] for k in lab if field in lab[k]})
+    for v in values:
+        sel = [r for r in rows if lab.get((r["paper_id"], r["issue_id"]), {}).get(field) == v]
+        papers = sorted({r["paper_id"] for r in sel})
+        per = {p: [r["status"] == "hit" for r in sel if r["paper_id"] == p] for p in papers}
+        rnd = random.Random(0)
+        bs = []
+        for _ in range(reps):
+            draw = [x for p in rnd.choices(papers, k=len(papers)) for x in per[p]]
+            bs.append(mean(draw))
+        bs.sort()
+        out[v] = {"n": len(sel), "share": len(sel) / max(len(rows), 1),
+                  "hit": mean([r["status"] == "hit" for r in sel]),
+                  "ci": [bs[int(0.025 * reps)], bs[int(0.975 * reps) - 1]],
+                  "status": {s: sum(r["status"] == s for r in sel) for s in STATUS}}
+    return out
+
+
+def cmd_categories(a):
+    rows = [json.loads(x) for x in open(a.issues)]
+    labels = [json.loads(x) for x in open(a.labels)]
+    s = {"n": len(rows), "status": {k: sum(r["status"] == k for r in rows) for k in STATUS},
+         "consensus": by_label(rows, [dict(paper_id=r["paper_id"], issue_id=r["issue_id"],
+                                           humans="2+" if r["n_humans"] > 1 else "1")
+                                      for r in rows], "humans", a.reps)}
+    for field in a.fields.split(","):
+        s[field] = by_label(rows, labels, field, a.reps)
+    lines = []
+    for field, tab in s.items():
+        if not isinstance(tab, dict) or field == "status":
+            continue
+        lines.append(f"\n{field}: value, n, share, hit [CI], missed+related")
+        for v, x in sorted(tab.items(), key=lambda kv: -kv[1]["n"]):
+            lines.append(f"  {v:28s} {x['n']:4d} {x['share']:.2f} {x['hit']:.2f} "
+                         f"[{x['ci'][0]:.2f}, {x['ci'][1]:.2f}] "
+                         f"{x['status']['missed'] + x['status']['related']}")
+    print(f"{s['n']} human main issues; status {s['status']}" + "\n".join(lines))
+    if a.json:
+        Path(a.json).write_text(json.dumps(s, indent=1))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -345,6 +456,18 @@ def main(argv=None):
     s.add_argument("--first", default="issues.json")
     s.add_argument("--second", default="issues_b.json")
     s.set_defaults(fn=cmd_agree)
+    s = sub.add_parser("misses", help="export the human issues with their status")
+    s.add_argument("dir")
+    s.add_argument("--annotation", default="issues.json")
+    s.add_argument("--out", required=True, help="output dir (keep it under evals/work/)")
+    s.set_defaults(fn=cmd_misses)
+    s = sub.add_parser("categories", help="hit rate per category of human issue")
+    s.add_argument("--issues", required=True, help="human_issues.jsonl from `misses`")
+    s.add_argument("--labels", required=True, help="JSONL: paper_id, issue_id, <fields>")
+    s.add_argument("--fields", default="topic,evidence,reason")
+    s.add_argument("--json", help="write the numbers (no review text) to this file")
+    s.add_argument("--reps", type=int, default=2000)
+    s.set_defaults(fn=cmd_categories)
     a = ap.parse_args(argv)
     a.fn(a)
 

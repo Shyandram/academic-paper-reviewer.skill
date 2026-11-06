@@ -98,6 +98,29 @@ class Analysis(unittest.TestCase):
         all_issues, _ = io.analyze(self.tmp, reps=50, major_only=False)
         self.assertEqual(all_issues["metrics"]["human_issues"]["mean"], 3)
 
+    def test_misses_status_and_categories(self):
+        ann = json.loads((self.tmp / "paper1" / "issues.json").read_text())
+        ann["cross"][1]["related"] = ["QI2"]
+        (self.tmp / "paper1" / "issues.json").write_text(json.dumps(ann))
+        rows, ai = io.human_issue_status(self.tmp / "paper1")
+        self.assertEqual({r["issue_id"]: r["status"] for r in rows},
+                         {"PI1": "hit", "PI2": "related"})   # PI3 is minor only
+        self.assertEqual(len(ai), 2)
+        out = self.tmp / "m"
+        with contextlib.redirect_stdout(_io.StringIO()):
+            io.main(["misses", str(self.tmp), "--out", str(out)])
+            (out / "l.jsonl").write_text(
+                json.dumps({"paper_id": "paper1", "issue_id": "PI1", "topic": "baselines"}) + "\n"
+                + json.dumps({"paper_id": "paper1", "issue_id": "PI2", "topic": "theory"}) + "\n")
+            io.main(["categories", "--issues", str(out / "human_issues.jsonl"), "--labels",
+                     str(out / "l.jsonl"), "--fields", "topic", "--json", str(out / "c.json"),
+                     "--reps", "20"])
+        c = json.loads((out / "c.json").read_text())
+        self.assertEqual(c["topic"]["baselines"]["hit"], 1.0)
+        self.assertEqual(c["topic"]["theory"]["status"]["related"], 1)
+        self.assertEqual(c["consensus"]["2+"]["hit"], 1.0)
+        self.assertNotIn("points", (out / "c.json").read_text())
+
     def test_markdown_and_json_hold_no_text(self):
         s, rows = io.analyze(self.tmp, reps=50)
         self.assertIn("Hit rate", io.markdown(s))
