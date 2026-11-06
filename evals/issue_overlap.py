@@ -567,7 +567,7 @@ def run_items(res):
     each reviewer's main weaknesses (`W<n>` headings, Minor left out), the Devil's
     Advocate issues (DA-C/DA-M rows), and the Gap Scout list with the Report Checker's
     verdict (dropped or kept) from the `Anticipated Reviewer Concerns` section of
-    check/gaps_checked.md (2.12) or check/report_check.md (2.11). Returns
+    check/gaps_checked.md (2.10.1) or check/report_check.md (2.11). Returns
     [(source, item id, text, extra)]."""
     res = Path(res)
     reps = ai_reports(res, gaps=True) or {}
@@ -582,7 +582,7 @@ def run_items(res):
         cells = [c.strip() for c in m.group(2).split("|") if c.strip()]
         out.append(("DA", m.group(1), " | ".join(cells)[:600], {}))
     dropped = set()
-    # 2.12: check/gaps_checked.md; 2.11: a section of check/report_check.md.
+    # 2.10.1: check/gaps_checked.md; 2.11: a section of check/report_check.md.
     rc = next((f for f in (res / "check" / "gaps_checked.md", res / "check" / "report_check.md")
                if f.exists()), None)
     if rc:
@@ -605,7 +605,7 @@ def run_items(res):
 
 
 def cmd_run_prepare(a):
-    """Blind matching files for one run directory (skill 2.11/2.12 layout): the human main
+    """Blind matching files for one run directory (skill 2.11 and 2.10.1 layouts): the human main
     issues from `misses` against every item of the run, all sources mixed at random."""
     rows = {}
     for r in map(json.loads, open(a.issues)):

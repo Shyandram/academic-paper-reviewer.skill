@@ -311,7 +311,19 @@ Ranking and error, same papers (`iclr_calibration.py pilot`; numbers:
   ranking signal without adding hits. The fresh-context checker's own estimate was the best
   single rating signal. n = 20; all intervals are wide.
 
-**Decision (2.12):** the panel, its instructions, the scoring and the decision rule go back to
+**How good is the checker's own estimate?** Spearman with the human mean 0.51 [0.15, 0.77]
+(the only rating whose interval excludes 0 in pilot 4), AUC 0.67, NMAE 0.081 (constant 0.085),
+NME 0.00; on the 16 papers it did not recognize, 0.60 (panel 0.37). But its Overall takes three
+values (3 on 14 papers, 4 on 4, 2 on 2), so the correlation rests on the 4 papers it rated 4
+(3 accepted, 1 reject with human mean 4.0), and two accepted papers with human mean 4.4 and 6.0
+got 3. Its continuous pool position ranks worse (0.39). It agrees little with the panel
+(Spearman 0.38), which is why adding it as a fifth voice helps (0.43). Its advantage over the
+panel is not established: difference 0.19 [−0.32, 0.70]. As a filter of the Gap Scout list it
+dropped 17 of 592 items; 2 of them matched a human issue (12%, against 29% of the kept items),
+so its drops are mostly right but too few to change the list. Its factual-error findings were
+not verified against the papers in this pilot.
+
+**Decision (2.10.1):** the panel, its instructions, the scoring and the decision rule go back to
 2.10. The Gap Scout and the Report Checker (with its independent estimate) become optional
 extensions that never change a score or the decision; the Gap Scout list goes into the output
 as a checklist, not to the EIC. Whether the checker's estimate should vote is left to a larger

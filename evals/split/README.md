@@ -2,7 +2,7 @@
 
 **Status: trial, not adopted.** A 3-paper trial gave no increase in reviewer spread at about
 2.2× the cost (see `../REPORT_iclr2026_pilots.md`, "Split pipeline trial"). Evaluation runs
-keep `pipeline: single`. The independent check is an optional extension from skill 2.12.
+keep `pipeline: single`. The independent check is an optional extension from skill 2.10.1.
 
 The single-agent evaluation (`evals/review_prompt.md`) plays all five reviewers in one
 context, so every reviewer after the first has already read the earlier reports. In the
@@ -33,7 +33,7 @@ starts `WARMUP` seconds before the others so they read the prefix from the cache
 its wall time. `run.json` sums cost, turns and tokens (input, output, cache write, cache
 read) and keeps the per-phase breakdown.
 
-## Check pipeline (skill 2.12, optional extensions)
+## Check pipeline (skill 2.10.1, optional extensions)
 
 `PIPELINE=check` keeps the five reviewers in one context, as in the single pipeline, and runs
 the two optional extensions in fresh contexts:

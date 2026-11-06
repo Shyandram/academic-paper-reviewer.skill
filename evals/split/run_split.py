@@ -19,7 +19,7 @@ redacted paper, paper memory, panel card) so the second to fifth runs read it
 from the prompt cache; the role file and instructions come last, in the user
 prompt. Standard library only. `run_paper.sh` drives one paper.
 
-With `--pipeline check` (skill 2.12 with its optional extensions), Phase 0 and the
+With `--pipeline check` (skill 2.10.1 with its optional extensions), Phase 0 and the
 five reviewers run in one context (`panel`), as in the single pipeline; the Gap Scout
 and the Report Checker run fresh, and the panel context is resumed for the EIC.
 

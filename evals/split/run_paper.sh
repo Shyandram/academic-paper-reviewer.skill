@@ -4,7 +4,7 @@
 #   evals/split/run_paper.sh <paper id>
 #
 # PIPELINE=split (default): Phase 0, five parallel reviewers, check and EIC, each fresh.
-# PIPELINE=check (skill 2.12 with its optional extensions): Phase 0 and the five reviewers
+# PIPELINE=check (skill 2.10.1 with its optional extensions): Phase 0 and the five reviewers
 # in one context, the Gap Scout and the Report Checker each in a fresh context, then the
 # first context resumed for the EIC. GAPS=0 skips the Gap Scout.
 #
