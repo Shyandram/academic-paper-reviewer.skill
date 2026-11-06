@@ -72,6 +72,38 @@ class CheckerDevilsAdvocate(unittest.TestCase):
             shutil.rmtree(tmp)
 
 
+class RunItems(unittest.TestCase):
+    def test_items_by_source_with_checker_verdicts(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            rep = ("## Weaknesses\n### W1 (C1): no ablation of X\nTable 2 lacks it.\n"
+                   "### W2: unclear tau\nEq. 3.\n## Minor\n- typo\n## Questions\n- q\n")
+            for r in io.VOTING:
+                (tmp / "reports" / r).mkdir(parents=True)
+                (tmp / "reports" / r / "report.md").write_text(rep)
+            (tmp / "check").mkdir()
+            (tmp / "check" / "da.md").write_text(DA)
+            (tmp / "check" / "report_check.md").write_text(
+                "## Anticipated Reviewer Concerns\n- **G1** kept; covered: R1-W1\n"
+                "- **G2** **dropped (test 2):** answered in App. B\n## Key concerns\n- G1\n")
+            (tmp / "gaps").mkdir()
+            (tmp / "gaps" / "gaps.md").write_text(
+                "## Anticipated Reviewer Concerns\n- G1 [baselines] no X (Table 2)\n"
+                "- G2 [method] tau undefined (Eq. 3)\n")
+            items = io.run_items(tmp)
+            by = {}
+            for s, i, text, ex in items:
+                by.setdefault(s, []).append((i, text, ex))
+            self.assertEqual([i for i, _, _ in by["R1"]], ["R1-W1", "R1-W2"])
+            self.assertIn("Table 2 lacks it", by["R1"][0][1])
+            self.assertEqual([i for i, _, _ in by["DA"]], ["DA-M1"])
+            self.assertEqual([(i, ex["dropped"]) for i, _, ex in by[io.GAP]],
+                             [("G1", False), ("G2", True)])
+            self.assertFalse(by[io.GAP][0][1].startswith("["))   # category tag removed
+        finally:
+            shutil.rmtree(tmp)
+
+
 class GapScout(unittest.TestCase):
     def test_gap_list_is_an_optional_source(self):
         tmp = Path(tempfile.mkdtemp())

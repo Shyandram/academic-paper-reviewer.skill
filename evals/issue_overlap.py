@@ -560,6 +560,129 @@ def cmd_match_score(a):
         Path(a.json).write_text(json.dumps(s, indent=1))
 
 
+# ------------------------------------------------- per-source items from a run
+
+def run_items(res):
+    """The weakness items of one result directory, by source, for a matching pass:
+    each reviewer's main weaknesses (`W<n>` headings, Minor left out), the Devil's
+    Advocate issues (DA-C/DA-M rows), and the Gap Scout list with the Report Checker's
+    verdict (dropped or kept) from the `Anticipated Reviewer Concerns` section of
+    check/report_check.md. Returns [(source, item id, text, extra)]."""
+    res = Path(res)
+    reps = ai_reports(res, gaps=True) or {}
+    out = []
+    for r in VOTING:
+        w = weaknesses(reps.get(r, ""), r)
+        for m in re.finditer(r"^#{2,4} (W\d+)\b(.*?)(?=^#{2,4} |\Z)", w, re.M | re.S):
+            body = " ".join(m.group(2).split())
+            out.append((r, f"{r}-{m.group(1)}", body[:600], {}))
+    da = weaknesses(reps.get("DA", ""), "DA")
+    for m in re.finditer(r"^\| (DA-[CM]\d+) \|(.*)$", da, re.M):
+        cells = [c.strip() for c in m.group(2).split("|") if c.strip()]
+        out.append(("DA", m.group(1), " | ".join(cells)[:600], {}))
+    dropped = set()
+    rc = res / "check" / "report_check.md"
+    if rc.exists():
+        text = rc.read_text(encoding="utf-8")
+        m = re.search(r"^(#+)[^\n]*Anticipated Reviewer Concerns[^\n]*$", text, re.M | re.I)
+        if m:
+            rest = text[m.end():]
+            e = re.search(r"^#{1,%d} " % len(m.group(1)), rest, re.M)
+            for ln in rest[:e.start() if e else len(rest)].splitlines():
+                g = re.search(r"\bG(\d+)\b", ln)
+                if g and re.search(r"\bdrop", ln, re.I):
+                    dropped.add(int(g.group(1)))
+    g = reps.get(GAP, "")
+    for m in re.finditer(r"^- G(\d+)\b\s*(.*)$", g, re.M):
+        n = int(m.group(1))
+        # Drop the "[category]" tag, so the annotator cannot tell the Scout's items apart.
+        text = re.sub(r"^\[[^\]]*\]\s*", "", m.group(2))
+        out.append((GAP, f"G{n}", text[:600], {"dropped": n in dropped, "rank": n}))
+    return out
+
+
+def cmd_run_prepare(a):
+    """Blind matching files for one run directory (skill 2.11 layout): the human main
+    issues from `misses` against every item of the run, all sources mixed at random."""
+    rows = {}
+    for r in map(json.loads, open(a.issues)):
+        rows.setdefault(r["paper_id"], []).append(r)
+    out = Path(a.out)
+    for d in sorted(Path(a.results).iterdir()):
+        pid = d.name.split("-", 1)[-1]
+        if not d.is_dir() or pid not in rows:
+            continue
+        items = run_items(d)
+        if not items:
+            print(f"skip {pid}: no items", file=sys.stderr)
+            continue
+        random.Random(f"{a.seed}-{pid}").shuffle(items)
+        o = out / pid
+        o.mkdir(parents=True, exist_ok=True)
+        hum = rows[pid]
+        (o / "match.json").write_text(json.dumps({
+            "human": [{"id": f"H{n + 1}", "summary": r["summary"], "points": r["points"]}
+                      for n, r in enumerate(hum)],
+            "items": [{"id": f"X{n + 1}", "text": s} for n, (_, _, s, _) in enumerate(items)]},
+            indent=1, ensure_ascii=False))
+        (o / "match_key.json").write_text(json.dumps({
+            "items": {f"X{n + 1}": [src, i, ex] for n, (src, i, _, ex) in enumerate(items)},
+            "human": {f"H{n + 1}": r["issue_id"] for n, r in enumerate(hum)}}))
+    print(f"prepared {len(list(out.glob('*/match.json')))} papers in {out}", file=sys.stderr)
+
+
+RUN_SETS = {
+    "panel (R1-R4)": lambda s, x: s in VOTING,
+    "Devil's Advocate": lambda s, x: s == "DA",
+    "Gap Scout, all items": lambda s, x: s == GAP,
+    "Gap Scout, kept by the checker": lambda s, x: s == GAP and not x.get("dropped"),
+    "Gap Scout, first 20": lambda s, x: s == GAP and x.get("rank", 99) <= 20,
+    "panel + DA": lambda s, x: s in VOTING or s == "DA",
+    "panel + Gap Scout": lambda s, x: s in VOTING or s == GAP,
+    "everything": lambda s, x: True,
+}
+
+
+def cmd_run_score(a):
+    """Hit rate of the human main issues per source and per set of sources, unique hits
+    per source, and items per paper. Numbers only."""
+    out = Path(a.dir)
+    status = {(r["paper_id"], r["issue_id"]): r["status"] for r in map(json.loads, open(a.issues))}
+    per, n_items = {}, {}
+    for d in sorted(x for x in out.iterdir() if (x / a.annotation).exists()):
+        key = json.loads((d / "match_key.json").read_text())
+        src = {k: (v[0], v[2] if len(v) > 2 else {}) for k, v in key["items"].items()}
+        for s, x in src.values():
+            n_items[s] = n_items.get(s, 0) + 1
+            if s == GAP and x.get("dropped"):
+                n_items["GAP dropped"] = n_items.get("GAP dropped", 0) + 1
+        rows = []
+        for e in json.loads((d / a.annotation).read_text()):
+            hit = [src[x] for x in e.get("match", []) if x in src]
+            r = {name: any(f(s, x) for s, x in hit) for name, f in RUN_SETS.items()}
+            for ro in VOTING + ["DA", GAP]:
+                r[f"only {ro}"] = bool(hit) and all(s == ro for s, _ in hit)
+            r["pilot-3 panel hit"] = status.get((d.name, key["human"][e["human"]])) == "hit"
+            rows.append(r)
+        per[d.name] = rows
+    papers = sorted(per)
+    s = {"n_papers": len(papers), "n_human_issues": sum(len(v) for v in per.values()),
+         "items_per_paper": {k: r3(v / max(len(papers), 1)) for k, v in sorted(n_items.items())},
+         "hit": {}}
+    fields = list(RUN_SETS) + [f"only {ro}" for ro in VOTING + ["DA", GAP]] + ["pilot-3 panel hit"]
+    for f in fields:
+        pm = [mean([r[f] for r in per[p]]) for p in papers]
+        lo, hi = boot(pm, a.reps)
+        s["hit"][f] = {"count": sum(r[f] for p in papers for r in per[p]),
+                       "mean": r3(mean(pm)), "ci95": [r3(lo), r3(hi)]}
+    for f, v in s["hit"].items():
+        ci = "" if None in v["ci95"] else f" [{v['ci95'][0]:.2f}, {v['ci95'][1]:.2f}]"
+        print(f"{f:32s} {v['count']:4d}  {v['mean']:.2f}{ci}")
+    print("items per paper:", s["items_per_paper"])
+    if a.json:
+        Path(a.json).write_text(json.dumps(s, indent=1))
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -613,6 +736,19 @@ def main(argv=None):
     s.add_argument("--json", help="write the numbers (no review text) to this file")
     s.add_argument("--reps", type=int, default=2000)
     s.set_defaults(fn=cmd_match_score)
+    s = sub.add_parser("run-prepare", help="per-source items of a 2.11 run vs the human issues")
+    s.add_argument("--results", required=True, help="directory of <prefix>-<id> result dirs")
+    s.add_argument("--issues", required=True, help="human_issues.jsonl from `misses`")
+    s.add_argument("--out", required=True, help="output dir (keep it under evals/work/)")
+    s.add_argument("--seed", type=int, default=7)
+    s.set_defaults(fn=cmd_run_prepare)
+    s = sub.add_parser("run-score", help="hit rate per source of a 2.11 run")
+    s.add_argument("dir", help="the run-prepare output, annotated with gap_match_prompt.md")
+    s.add_argument("--issues", required=True)
+    s.add_argument("--annotation", default="matched.json")
+    s.add_argument("--json", help="write the numbers (no review text) to this file")
+    s.add_argument("--reps", type=int, default=2000)
+    s.set_defaults(fn=cmd_run_score)
     a = ap.parse_args(argv)
     a.fn(a)
 
