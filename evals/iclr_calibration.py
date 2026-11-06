@@ -772,6 +772,41 @@ def venue_rating(res, venue="iclr"):
     return None
 
 
+def role_key(role):
+    r = str(role).strip()
+    return "DA" if r.upper().startswith("DA") or "devil" in r.lower() else r[:2].upper()
+
+
+def panel_variants(res, summ):
+    """Score variants computed from the reviewers' own numbers, so 2.10 runs can be
+    re-scored the 2.11 way without new reviews: means without the Devil's Advocate,
+    and the rating weighted by the checker's base weights instead of the EIC's."""
+    per = [r for r in res.get("per_reviewer", []) if isinstance(r, dict)]
+    vote = [r for r in per if role_key(r.get("role")) != "DA"]
+    num = lambda x: isinstance(x, (int, float))  # noqa: E731
+    out = {}
+    ov = [r["overall"] for r in vote if num(r.get("overall"))]
+    out["rating_no_da"] = statistics.mean(ov) if ov and len(ov) == len(vote) else None
+    pp = [r["pool_position"] for r in vote if num(r.get("pool_position"))]
+    out["pool_no_da"] = statistics.mean(pp) if pp else None
+    cw = summ.get("checker_weights") if isinstance(summ.get("checker_weights"), dict) else None
+    out["checker_rating"] = None
+    if cw and out["rating_no_da"] is not None:
+        w = [r.get("confidence_weight", 1.0) * float(cw.get(role_key(r.get("role")), 1.0))
+             for r in vote]
+        if sum(w) > 0:
+            out["checker_rating"] = sum(r["overall"] * x for r, x in zip(vote, w)) / sum(w)
+    # The checker's independent estimate (diagnostic), alone and as a fifth voice.
+    cp, co = summ.get("checker_pool_position"), summ.get("checker_overall")
+    out["checker_pool"] = cp if num(cp) else None
+    out["checker_overall"] = co if num(co) else None
+    out["pool_with_checker"] = (statistics.mean(pp + [cp])
+                                if pp and len(pp) == len(vote) and num(cp) else None)
+    out["rating_with_checker"] = (statistics.mean(ov + [co])
+                                  if out["rating_no_da"] is not None and num(co) else None)
+    return out
+
+
 def cmd_features(a):
     """Collect the 7 EIC-weighted dimension scores from each run's aggregate.json, plus
     the final 1-6 Overall and the skill's own ICLR-scale rating."""
@@ -796,6 +831,7 @@ def cmd_features(a):
                                   "eic_rating": res.get("eic_rating"),
                                   "reviewer_pool": statistics.mean(pools) if pools else None,
                                   "eic_pool": summ.get("eic_pool_position"),
+                                  **panel_variants(res, summ),
                                   "rating": venue_rating(res)}) + "\n")
             n += 1
     print(f"{n} runs with aggregate.json", file=sys.stderr)
@@ -839,6 +875,25 @@ def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
                                 for r in rows],
         "reviewers' pool position": [num(feats[r["paper_id"]].get("reviewer_pool")) for r in rows],
         "EIC pool position": [num(feats[r["paper_id"]].get("eic_pool")) for r in rows],
+        # 2.11 variants: the Devil's Advocate does not vote; checker-based weights.
+        "panel rating without DA": [None if num(feats[r["paper_id"]].get("rating_no_da")) is None
+                                    else to_iclr(feats[r["paper_id"]]["rating_no_da"], year)
+                                    for r in rows],
+        "reviewers' pool position without DA": [num(feats[r["paper_id"]].get("pool_no_da"))
+                                                for r in rows],
+        "checker-weighted rating": [None if num(feats[r["paper_id"]].get("checker_rating")) is None
+                                    else to_iclr(feats[r["paper_id"]]["checker_rating"], year)
+                                    for r in rows],
+        # The checker's independent estimate (2.11 diagnostic): alone, and as a fifth voice.
+        "checker's pool position": [num(feats[r["paper_id"]].get("checker_pool")) for r in rows],
+        "checker's rating": [None if num(feats[r["paper_id"]].get("checker_overall")) is None
+                             else to_iclr(feats[r["paper_id"]]["checker_overall"], year)
+                             for r in rows],
+        "pool position, voters + checker": [num(feats[r["paper_id"]].get("pool_with_checker"))
+                                            for r in rows],
+        "panel rating, voters + checker": [
+            None if num(feats[r["paper_id"]].get("rating_with_checker")) is None
+            else to_iclr(feats[r["paper_id"]]["rating_with_checker"], year) for r in rows],
     }
     for label, v in preds.items():
         idx = [i for i in allidx if v[i] is not None]
@@ -858,6 +913,14 @@ def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
     for label, v in [("EIC-weighted rating", stages["EIC-weighted rating"]),
                      ("reviewers' pool position", stages["reviewers' pool position"]),
                      ("EIC pool position", stages["EIC pool position"]),
+                     ("panel rating without DA", stages["panel rating without DA"]),
+                     ("reviewers' pool position without DA",
+                      stages["reviewers' pool position without DA"]),
+                     ("checker-weighted rating", stages["checker-weighted rating"]),
+                     ("checker's pool position", stages["checker's pool position"]),
+                     ("checker's rating", stages["checker's rating"]),
+                     ("pool position, voters + checker", stages["pool position, voters + checker"]),
+                     ("panel rating, voters + checker", stages["panel rating, voters + checker"]),
                      ("ICLR-scale rating", preds["ICLR-scale rating"])]:
         idx = [i for i in allidx if v[i] is not None and base[i] is not None]
         if len(idx) < 3:

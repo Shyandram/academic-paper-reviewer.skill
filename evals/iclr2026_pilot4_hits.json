@@ -1,0 +1,135 @@
+{
+ "n_papers": 20,
+ "n_human_issues": 247,
+ "items_per_paper": {
+  "DA": 3.8,
+  "GAP": 29.6,
+  "GAP dropped": 0.85,
+  "R1": 6.3,
+  "R2": 5.05,
+  "R3": 4.45,
+  "R4": 3.75
+ },
+ "hit": {
+  "panel (R1-R4)": {
+   "count": 102,
+   "mean": 0.432,
+   "ci95": [
+    0.349,
+    0.526
+   ]
+  },
+  "Devil's Advocate": {
+   "count": 5,
+   "mean": 0.015,
+   "ci95": [
+    0.006,
+    0.028
+   ]
+  },
+  "Gap Scout, all items": {
+   "count": 155,
+   "mean": 0.652,
+   "ci95": [
+    0.584,
+    0.719
+   ]
+  },
+  "Gap Scout, kept by the checker": {
+   "count": 153,
+   "mean": 0.645,
+   "ci95": [
+    0.572,
+    0.715
+   ]
+  },
+  "Gap Scout, first 20": {
+   "count": 115,
+   "mean": 0.486,
+   "ci95": [
+    0.416,
+    0.556
+   ]
+  },
+  "panel + DA": {
+   "count": 105,
+   "mean": 0.441,
+   "ci95": [
+    0.356,
+    0.534
+   ]
+  },
+  "panel + Gap Scout": {
+   "count": 178,
+   "mean": 0.743,
+   "ci95": [
+    0.681,
+    0.802
+   ]
+  },
+  "everything": {
+   "count": 180,
+   "mean": 0.75,
+   "ci95": [
+    0.689,
+    0.808
+   ]
+  },
+  "only R1": {
+   "count": 2,
+   "mean": 0.007,
+   "ci95": [
+    0,
+    0.019
+   ]
+  },
+  "only R2": {
+   "count": 9,
+   "mean": 0.034,
+   "ci95": [
+    0.01,
+    0.06
+   ]
+  },
+  "only R3": {
+   "count": 4,
+   "mean": 0.014,
+   "ci95": [
+    0.003,
+    0.027
+   ]
+  },
+  "only R4": {
+   "count": 4,
+   "mean": 0.014,
+   "ci95": [
+    0,
+    0.038
+   ]
+  },
+  "only DA": {
+   "count": 2,
+   "mean": 0.006,
+   "ci95": [
+    0,
+    0.016
+   ]
+  },
+  "only GAP": {
+   "count": 75,
+   "mean": 0.308,
+   "ci95": [
+    0.238,
+    0.377
+   ]
+  },
+  "pilot-3 panel hit": {
+   "count": 106,
+   "mean": 0.454,
+   "ci95": [
+    0.37,
+    0.543
+   ]
+  }
+ }
+}

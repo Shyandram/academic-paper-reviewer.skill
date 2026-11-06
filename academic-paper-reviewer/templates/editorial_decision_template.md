@@ -177,6 +177,13 @@ Editor-in-Chief (meta-reviewer)
 - Priority 2: [X items, estimated Y hours/days]
 - Priority 3: [X items]
 - **Total estimated revision time**: [estimate]
+
+---
+
+## Post-Review Analysis (only if requested after the review; not part of the decision)
+
+### Anticipated Reviewer Concerns (Gap Scout)
+- [ ] G1 [category] [concrete gap] (location) — [covered: R1-W2 / new]
 ```
 
 ---

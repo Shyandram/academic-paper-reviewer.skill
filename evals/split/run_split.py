@@ -10,16 +10,25 @@ is its own process:
     check       literature check (Phase 1.5) and report check (Phase 1.6)
     eic         Synthesizer A, EIC meta-review and decision, Synthesizer B
 
+Post-review analysis (optional, after the review is finished; never changes it):
+    gaps        the Gap Scout list, from the redacted copy only
+
 The five reviewer runs get the same system-prompt suffix (`shared`: skill text,
 redacted paper, paper memory, panel card) so the second to fifth runs read it
 from the prompt cache; the role file and instructions come last, in the user
 prompt. Standard library only. `run_paper.sh` drives one paper.
 
+With `--pipeline check` (skill 2.10.1), the review runs as in the single pipeline:
+Phase 0 and the five reviewers in one context (`panel`), resumed for Phases 1.5, 1.6
+and 2; then the Gap Scout runs in a fresh context.
+
 Subcommands:
-    prompt PHASE   print the user prompt for a phase (phase0, reviewer, check, eic)
+    prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, check, eic,
+                   gaps; `eic --resumed` is for the resumed panel context)
     shared         write the shared system-prompt suffix for the reviewers
-    deny           print the Read() deny rules for one reviewer, one per line
-    before         merge the five reviewer score files and run the BEFORE aggregation
+    deny           print the Read() deny rules for one reviewer (or GAP), one per line
+    before         merge the five reviewer score files (the DA-CRITICAL list from the
+                   Devil's Advocate's) and run the BEFORE aggregation
     finish         build scores.json, run the AFTER aggregation, write summary.json,
                    review.md and run.json (per-phase cost, tokens and wall time)
 """
@@ -49,7 +58,12 @@ SHARED_SKILL_FILES = [
     "templates/peer_review_report_template.md",
 ]
 PHASE0_FILES = ["card.md", "paper_memory.md"]
-PHASES = ["phase0", "R1", "R2", "R3", "R4", "DA", "check", "eic"]
+# "novelty" (2.11) and "estimate", "post" (the withdrawn Report Checker) are kept so
+# older run logs are still summed.
+PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "check", "novelty", "eic",
+          "gaps", "estimate", "post"]
+PIPELINES = {"split": "one fresh context per phase",
+             "check": "one context for the panel, a fresh context for the check"}
 
 
 def paths(root, pid):
@@ -62,6 +76,7 @@ def paths(root, pid):
         "res": res,
         "p0": res / "phase0",
         "reports": res / "reports",
+        "gaps": res / "gaps",
         "check": res / "check",
         "eic": res / "eic",
         "runs": res / "runs",
@@ -106,6 +121,9 @@ def cmd_prompt(a):
                   "AGENT_TEXT": (p["skill"] / "agents" / agent).read_text(encoding="utf-8")})
         # The rules are already in the shared system prompt.
         out = fill(template("reviewer.md"), v)
+    elif a.phase == "eic" and a.resumed:
+        # The rules are already in the resumed context.
+        out = fill(template("eic_resume.md"), v) + fill(template("eic.md"), v)
     else:
         out = rules + "\n" + fill(template(a.phase + ".md"), v)
     sys.stdout.write(out)
@@ -145,6 +163,12 @@ def deny_rules(root, pid, role):
              f"Read({rel(p['p0'])}/integrity.json)",
              f"Read({rel(p['check'])}/**)", f"Read({rel(p['eic'])}/**)"]
     rules += [f"Read({rel(p['reports'] / k)}/**)" for k in ROLES if k != role]
+    if role == "GAP":  # post-review, from the reviewers' copy only
+        rules += [f"Read({rel(p['reports'])}/**)", f"Read({rel(p['res'])}/review.md)",
+                  f"Read({rel(p['res'])}/*.json)",
+                  f"Read({rel(p['p0'])}/paper_memory.md)", f"Read({rel(p['p0'])}/card.md)"]
+    else:
+        rules.append(f"Read({rel(p['gaps'])}/**)")
     return rules
 
 
@@ -180,7 +204,11 @@ def reviewer_entries(p):
 
 
 def da_issues(p):
-    r = load(p["reports"] / "DA" / "scores.json", {}) or {}
+    """DA-CRITICAL issues from the Devil's Advocate's score file (reports/DA/scores.json),
+    or, for a skill 2.11 run, from the check's Devil's Advocate challenge (check/da.json)."""
+    r = load(p["reports"] / "DA" / "scores.json")
+    if not isinstance(r, dict) or "da_critical" not in r:
+        r = load(p["check"] / "da.json", {}) or {}
     return [{"id": i.get("id"), "upheld": True,
              "resolvable_without_new_data": bool(i.get("resolvable_without_new_data"))}
             for i in r.get("da_critical", []) if isinstance(i, dict)]
@@ -222,19 +250,31 @@ def run_stats(p):
     return phases, total
 
 
-def assemble_review(p):
+def checker_estimate(p):
+    """The 2.11 Report Checker's independent estimate (check/), read from older runs only."""
+    r = load(p["check"] / "checker_estimate.json")
+    return r if isinstance(r, dict) else {}
+
+
+def assemble_review(p, pipeline="split"):
     def part(path, title):
         try:
             return f"\n\n## {title}\n\n" + Path(path).read_text(encoding="utf-8").strip() + "\n"
         except OSError:
             return f"\n\n## {title}\n\n(missing)\n"
-    out = "# Review (split pipeline: one fresh context per phase)\n"
+    out = f"# Review ({pipeline} pipeline: {PIPELINES[pipeline]})\n"
     out += part(p["p0"] / "card.md", "Phase 0: Reviewer Configuration Card")
     for key, (_, _, title) in ROLES.items():
         out += part(p["reports"] / key / "report.md", f"Phase 1: {title}")
     out += part(p["check"] / "R2_addendum.md", "Phase 1.5: Literature-check addendum (Reviewer 2)")
     out += part(p["check"] / "report_check.md", "Phase 1.6: Report check")
     out += part(p["eic"] / "decision.md", "Phase 2: EIC meta-review and Editorial Decision")
+    # Post-review analysis (optional; after the decision, never part of it).
+    # 2.11 runs have the list as checked by the withdrawn Report Checker (check/).
+    gaps = next((f for f in (p["check"] / "gaps_checked.md", p["gaps"] / "gaps.md")
+                 if f.exists()), None)
+    if gaps:
+        out += part(gaps, "Post-review analysis: Anticipated Reviewer Concerns (Gap Scout)")
     return out
 
 
@@ -242,12 +282,12 @@ def cmd_finish(a):
     p = paths(a.root, a.id)
     eic = load(p["eic"] / "eic.json")
     phases, total = run_stats(p)
-    run = {"pipeline": "split", "total_cost_usd": round(total["cost_usd"], 4),
+    run = {"pipeline": a.pipeline, "total_cost_usd": round(total["cost_usd"], 4),
            "num_turns": total["turns"], "duration_ms": total["duration_ms"],
            "tokens": {k: total[k] for k in ("input", "output", "cache_write", "cache_read")},
            "phases": phases}
     (p["res"] / "run.json").write_text(json.dumps(run, indent=2))
-    (p["res"] / "review.md").write_text(assemble_review(p), encoding="utf-8")
+    (p["res"] / "review.md").write_text(assemble_review(p, a.pipeline), encoding="utf-8")
     if not isinstance(eic, dict):
         sys.exit("eic/eic.json missing or invalid; run.json and review.md written")
     before = load(p["res"] / "scores_before.json")
@@ -274,7 +314,7 @@ def cmd_finish(a):
     flags.append(load(p["p0"] / "panel.json", {}) or {})
     flags.append(eic)
     summary = {
-        "id": a.id, "pipeline": "split",
+        "id": a.id, "pipeline": a.pipeline,
         "paper_type": scores.get("paper_type"),
         "final_overall": agg.get("final_overall", final),
         "venue_recommendation": views[0].get("label"),
@@ -284,6 +324,9 @@ def cmd_finish(a):
         "before_composite": pre.get("before_composite", pre.get("official_composite")),
         "after_composite": agg.get("eic_composite"),
         "eic_weights": {k: weights.get(k, 1.0) for k in ROLES},
+        # 2.11 runs only: the withdrawn Report Checker's own placement (diagnostic).
+        "checker_pool_position": checker_estimate(p).get("pool_position"),
+        "checker_overall": checker_estimate(p).get("overall"),
         "decision_differs_from_starting_point": final != agg.get("suggested_overall"),
         "da_critical_raised": len(before.get("da_critical", [])),
         "da_critical_upheld": sum(d["upheld"] for d in scores["da_critical"]),
@@ -310,17 +353,20 @@ def main(argv=None):
         s.add_argument("--venue-name", default="ICLR")
         s.add_argument("--lit", default="strict", choices=["on", "strict", "off"])
         s.add_argument("--cutoff", default="")
+        s.add_argument("--pipeline", default="split", choices=list(PIPELINES))
         return s
 
     s = common(sub.add_parser("prompt"))
-    s.add_argument("phase", choices=["phase0", "reviewer", "check", "eic"])
+    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "check", "eic", "gaps"])
     s.add_argument("--role", default="")
+    s.add_argument("--resumed", action="store_true",
+                   help="eic only: the prompt for the resumed panel context")
     s.set_defaults(fn=cmd_prompt)
     s = common(sub.add_parser("shared"))
     s.add_argument("--out", required=True)
     s.set_defaults(fn=cmd_shared)
     s = common(sub.add_parser("deny"))
-    s.add_argument("--role", required=True, choices=list(ROLES))
+    s.add_argument("--role", required=True, choices=list(ROLES) + ["GAP"])
     s.set_defaults(fn=cmd_deny)
     common(sub.add_parser("before")).set_defaults(fn=cmd_before)
     common(sub.add_parser("finish")).set_defaults(fn=cmd_finish)

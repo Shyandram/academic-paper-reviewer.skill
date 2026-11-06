@@ -11,7 +11,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
 
-**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.10 ([changelog](CHANGELOG.md))
+**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.10.1 ([changelog](CHANGELOG.md))
 
 ---
 
@@ -36,6 +36,7 @@ What sets it apart:
 - **Venue-aware scoring.** It covers 11 venues: **CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, IEEE TPAMI and IEEE TIP**. Scores are translated into each venue's own form, for example ICLR Soundness/Presentation/Contribution and rating, the ICML 1–5 recommendation, the TMLR Yes/No criteria, or IEEE journal recommendations. A **Cross-Venue Outlook** shows how the same paper would likely fare at each venue. Every scale is labeled *official*, *confirmed*, *secondary*, *assumed* or *unpublished*, so nothing unverified is presented as official.
 - **Literature check without self-leaks.** With network access, reviewers search arXiv for related work and verify every recommended reference. A fingerprint filter refuses queries that could find the reviewed paper, drops the paper's own arXiv versions, code pages, reviews and acceptance lists unread, and labels the rest prior (peer-reviewed or 6+ months old) / recent preprint / concurrent / newer; only prior work can be a required comparison. The check runs after the reviewers have read the full paper. Every decision is logged (`literature check: on | strict | off`). Searches are driven by the paper's contribution claims and its benchmarks: each claim gets a novelty verdict with supporting papers, a **baseline scout** lists prior methods reported on the same benchmarks (and baselines the paper under-reports), a coverage check drives a second round of searches, and a short field snapshot calibrates significance. A **similarity check** then ranks the closest prior works (novelty is argued against them, in a delta table) and flags verbatim text overlap as an integrity concern for the editor, never as an accusation.
 - **Error audit with precision rules.** The Methodology Reviewer hunts for concrete errors in nine categories (result inconsistencies, equation/proof errors, assumptions, protocol flaws, claim distortion, inconsistent definitions, citation errors, omissions, figure/table integrity). It works claim by claim from a shared factual *paper memory* and sweeps for omissions. Every error needs a location, a verbatim quote and a concrete check; suspicions become questions. Before the EIC reads anything, a **report check** removes vague weaknesses, points the paper already answers, and claims the paper contradicts, and groups cosmetic issues as Minor.
+- **Post-review analysis (on request, never by default).** One analysis you can ask for after a review (or on its own); it is not part of the review and never changes a score or the decision. The **Gap Scout** reads only the paper, in its own context, and lists the 20–30 concrete concerns reviewers are most likely to raise (the specific missing experiment, baseline, definition or setting) as a checklist. On 20 ICLR 2026 submissions it raised 65% of the human reviewers' main issues alone, and 73% together with the panel (47% for the panel alone).
 - **Prompt-injection safe.** The manuscript is data, never instructions. `scripts/integrity_scan.py` flags text addressed to reviewers or AI systems ("ignore previous instructions…") and hidden characters. Findings go to the editor as integrity concerns and never raise a score.
 - **Integrity guardrails.** No fabricated citations, fictional reviewer personas only, a confidentiality reminder for assigned reviewers, and every point tied to a location in the manuscript.
 
@@ -191,7 +192,7 @@ This is a pilot, not a result. With 20 papers the intervals are wide, and the fu
  "effort": "high", "max_parallel": 10, "budget": 6}
 ```
 
-Then push `evals/iclr_run.json` on a branch listed in the workflow's `push` trigger. You can also start the workflow manually (`workflow_dispatch`), but the manual form has no `effort` field, so use the JSON file when you need that setting. A run with `{"mode": "evaluate", "runs": [...]}` collects earlier review runs and computes the metrics. To work locally, `python3 evals/iclr_calibration.py --help` lists the steps: `sample`, `find`, `sources`, `fetch`, `features`, `evaluate`. Manuscripts and review text stay in the ignored `evals/work/`; only scores and paper IDs are committed.
+Then push `evals/iclr_run.json` on a branch listed in the workflow's `push` trigger. You can also start the workflow manually (`workflow_dispatch`), but the manual form has no `effort` field, so use the JSON file when you need that setting. A run with `{"mode": "evaluate", "runs": [...]}` collects earlier review runs and computes the metrics. To work locally, `python3 evals/iclr_calibration.py --help` lists the steps: `sample`, `find`, `sources`, `fetch`, `features`, `evaluate`. Manuscripts and review text stay in the ignored `evals/work/`; only scores and paper IDs are committed. To compare the panel's weaknesses with the human reviews (issue overlap and hit rate), run `python3 evals/issue_overlap.py prepare` on the fetched reviews and results, annotate each paper with `evals/issue_overlap_prompt.md`, then `python3 evals/issue_overlap.py analyze` (and `misses` / `categories` with `evals/issue_miss_prompt.md` for what the panel misses, `match-prepare` / `match-score` with `evals/gap_match_prompt.md` for the Gap Scout, `run-prepare` / `run-score` for every source of one run); results for the 20-paper pilots are in `evals/REPORT_iclr2026_pilots.md`.
 
 ## Repository Layout
 
@@ -207,6 +208,7 @@ academic-paper-reviewer/               ← skill source
 │   ├── domain_reviewer_agent.md       (R2)
 │   ├── perspective_reviewer_agent.md  (R3)
 │   ├── devils_advocate_reviewer_agent.md
+│   ├── gap_scout_agent.md             (post-review analysis: anticipated reviewer concerns)
 │   ├── editorial_synthesizer_agent.md (Phase 2)
 │   └── rebuttal_strategist_agent.md   (rebuttal mode)
 ├── references/                        ← rubrics, standards, checklists, venue profiles

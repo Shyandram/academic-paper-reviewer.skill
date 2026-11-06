@@ -2,8 +2,7 @@
 
 **Status: trial, not adopted.** A 3-paper trial gave no increase in reviewer spread at about
 2.2× the cost (see `../REPORT_iclr2026_pilots.md`, "Split pipeline trial"). Evaluation runs
-keep `pipeline: single` with skill 2.10. Only the independent check phase is carried into the
-next skill version.
+keep `pipeline: single`. From skill 2.10.1 the Gap Scout is a post-review analysis (see below).
 
 The single-agent evaluation (`evals/review_prompt.md`) plays all five reviewers in one
 context, so every reviewer after the first has already read the earlier reports. In the
@@ -15,10 +14,11 @@ context instead. The skill itself is unchanged.
 |---|---|---|
 | `phase0` | the unredacted paper, SKILL.md, field analyst, error audit §3 | `phase0/`: card, paper memory, `panel.json`, redacted copy, integrity findings, fingerprint |
 | `R1`–`R4`, `DA` (parallel) | the shared prefix plus its own role file; Read rules deny the other reports, the unredacted paper and the integrity findings; no Bash | `reports/<role>/report.md`, `scores.json` |
-| `before` (script) | the five score files | `scores_before.json`, `before.json` |
+| `before` (script, after the reviewers) | the five score files | `scores_before.json`, `before.json` |
 | `check` | the reports, the redacted copy, the fingerprint | `check/R2_addendum.md` (Phase 1.5), `check/report_check.md` (Phase 1.6) |
 | `eic` | the reports, the check, `before.json`, the integrity findings, then the paper | `eic/decision.md`, `eic/eic.json`, `evidence.json` |
 | `finish` (script) | `eic.json` | `scores.json`, `aggregate.json`, `summary.json`, `review.md`, `run.json` |
+| post-review (optional, below) | | `gaps/`; `finish` runs again |
 
 `summary.json` and `aggregate.json` keep the single-pipeline format, so
 `iclr_calibration.py features`, `evaluate` and `pilot` work on these results unchanged.
@@ -32,6 +32,32 @@ starts `WARMUP` seconds before the others so they read the prefix from the cache
 **Cost log.** `runs/<phase>.json` is each phase's CLI result and `runs/<phase>.wall.json`
 its wall time. `run.json` sums cost, turns and tokens (input, output, cache write, cache
 read) and keeps the per-phase breakdown.
+
+## Check pipeline (skill 2.10.1)
+
+`PIPELINE=check` runs the review as the single pipeline does, in one context:
+
+| Phase | Context |
+|---|---|
+| `panel` | one context: Phase 0 and the five reviewers (`panel.md`); the session is kept |
+| `eic` | the `panel` session resumed: Phases 1.5 and 1.6 (`eic_resume.md`), then Phase 2 (`eic.md`) |
+
+`summary.json` records `"pipeline": "check"`.
+
+## Post-review analysis (both pipelines)
+
+After `finish`, the optional Gap Scout runs in a fresh context that cannot read the review;
+`finish` then runs again to add its list to `review.md`:
+
+| Phase | Context | Writes |
+|---|---|---|
+| `gaps` (`GAPS=0` skips) | the redacted copy only; every result file denied | `gaps/gaps.md` |
+
+The Report Checker (an independent estimate and a fact check of the finished review) was
+withdrawn in 2.10.1 before it was evaluated as a post-review analysis. Skill 2.11 runs (four
+reviewers, the Devil's Advocate in `check/da.md`, the checker's estimate and checked Gap Scout
+list in `check/`) are still read by `run_split.py before`/`finish`, `issue_overlap.py` and
+`iclr_calibration.py`.
 
 ## Running
 
