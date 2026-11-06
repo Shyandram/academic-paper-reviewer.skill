@@ -510,7 +510,7 @@ Missing experiments, the largest topic (30\% of human issues), are among the lea
 (0.33). Issues that need outside knowledge are hit \emph{more} often than text-only ones (0.52 vs
 0.41), so the literature check is not the bottleneck; figure-dependent issues are hit least (0.20)
 but are rare (10). Version 2.11 therefore asks each weakness to name the concrete missing
-experiment, baseline or definition.
+experiment, baseline or definition, and adds a pass that does only that.
 
 \begin{table}[h]
 \centering
@@ -536,6 +536,37 @@ Text and tables & 175 & 0.41 & & & \\
 Outside knowledge & 46 & 0.52 & & & \\
 Derivation & 16 & 0.50 & & & \\
 Figures & 10 & 0.20 & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Raising the hit count: a Gap Scout.} Since most non-hits were raised only as a
+category, we tested one extra, unscored pass: a Sonnet agent that reads only the redacted paper
+and lists up to 30 concrete weaknesses reviewers would likely raise (claims and their missing
+evidence, named baselines, undefined elements, theory, scope, typical requests). One annotator
+per paper then matched each human main issue against the panel's issues and the Scout's items,
+mixed without sources, so both are judged on the same scale; the panel's re-judged hits agree
+with the original annotation on 88\% of human issues. Table~\ref{tab:gap} gives the results.
+Twenty concrete items hit as many human issues as the whole panel; thirty hit 1.4$\times$ as
+many, and together with the panel 73\%. The gain is largest for missing experiments (0.35
+$\to$ 0.76) and baselines (0.55 $\to$ 0.82). Part of it is volume (about 51 items per paper
+against 12 human issues), and the Scout's items were not checked against the paper in this
+test. Version 2.11 adds the Scout as an unscored sixth pass whose list, filtered by the Report
+Checker, appears in the final report as a checklist of anticipated reviewer concerns.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Human main issues hit (247 issues, 20 papers), judged by one annotator per paper.}\label{tab:gap}
+\begin{tabular}{lccc}
+\toprule
+Source & Items/paper & Issues hit & Hit rate [95\% CI]\\
+\midrule
+Five-reviewer panel & 20.9 & 110 & 0.47 [0.38, 0.55]\\
+Gap Scout, first 10 items & 10 & 70 & 0.30 [0.23, 0.39]\\
+Gap Scout, first 20 items & 20 & 108 & 0.46 [0.39, 0.54]\\
+Gap Scout, all & 30 & 153 & \textbf{0.65} [0.59, 0.71]\\
+Panel + Gap Scout & 50.9 & 175 & \textbf{0.73} [0.68, 0.79]\\
 \bottomrule
 \end{tabular}
 \end{table}
