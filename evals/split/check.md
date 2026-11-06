@@ -7,6 +7,11 @@ Section 5 (error log and precision rules) of `{SKILL}/references/error_audit.md`
 paper memory is `{RES}/phase0/paper_memory.md`; the reports are
 `{RES}/reports/<R1|R2|R3|R4|DA>/report.md`, with the claim IDs in Reviewer 1's `scores.json`.
 
+**First, the independent estimate.** Before opening any report or score file, read `{COPY}`
+and write `{RES}/check/checker_estimate.json`:
+`{"pool_position": 0-100, "overall": 1-6, "reasons": "<2-3 sentences>"}`, as
+`report_checker_agent.md` describes. Do not change it after reading the reports.
+
 **Phase 1.5** (skip it, and say so in the addendum, when the literature check is `off`). Act as
 Reviewer 2 (Domain). Run `scripts/related_search.py` as `literature_search.md` instructs, with
 `--fp {RES}/phase0/fingerprint.json`, `--mode {LIT}` (cutoff {CUTOFF}, set in the fingerprint), with

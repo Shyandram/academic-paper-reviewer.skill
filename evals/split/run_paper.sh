@@ -63,7 +63,8 @@ if [ "$PIPELINE" = check ]; then
   SID="${SID2:-$SID}"
   # Phase 2 in the same resumed context.
   $S prompt eic --resumed "${ARGS[@]}" > "$R/prompts/eic.md"
-  run eic "$R/prompts/eic.md" --resume "$SID" --allowedTools "${TOOLS[@]}"
+  run eic "$R/prompts/eic.md" --resume "$SID" --allowedTools "${TOOLS[@]}" \
+    --disallowedTools "Read(./$R/check/checker_estimate.json)"
   $S finish "${ARGS[@]}"
   exit
 fi
@@ -97,5 +98,6 @@ run gaps "$R/prompts/gaps.md" --allowedTools Read Write Glob Grep --disallowedTo
 $S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
 run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}"
 $S prompt eic "${ARGS[@]}" > "$R/prompts/eic.md"
-run eic "$R/prompts/eic.md" --allowedTools "${TOOLS[@]}"
+run eic "$R/prompts/eic.md" --allowedTools "${TOOLS[@]}" \
+  --disallowedTools "Read(./$R/check/checker_estimate.json)"
 $S finish "${ARGS[@]}"

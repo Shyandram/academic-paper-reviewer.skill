@@ -796,6 +796,14 @@ def panel_variants(res, summ):
              for r in vote]
         if sum(w) > 0:
             out["checker_rating"] = sum(r["overall"] * x for r, x in zip(vote, w)) / sum(w)
+    # The checker's independent estimate (diagnostic), alone and as a fifth voice.
+    cp, co = summ.get("checker_pool_position"), summ.get("checker_overall")
+    out["checker_pool"] = cp if num(cp) else None
+    out["checker_overall"] = co if num(co) else None
+    out["pool_with_checker"] = (statistics.mean(pp + [cp])
+                                if pp and len(pp) == len(vote) and num(cp) else None)
+    out["rating_with_checker"] = (statistics.mean(ov + [co])
+                                  if out["rating_no_da"] is not None and num(co) else None)
     return out
 
 
@@ -876,6 +884,16 @@ def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
         "checker-weighted rating": [None if num(feats[r["paper_id"]].get("checker_rating")) is None
                                     else to_iclr(feats[r["paper_id"]]["checker_rating"], year)
                                     for r in rows],
+        # The checker's independent estimate (2.11 diagnostic): alone, and as a fifth voice.
+        "checker's pool position": [num(feats[r["paper_id"]].get("checker_pool")) for r in rows],
+        "checker's rating": [None if num(feats[r["paper_id"]].get("checker_overall")) is None
+                             else to_iclr(feats[r["paper_id"]]["checker_overall"], year)
+                             for r in rows],
+        "pool position, voters + checker": [num(feats[r["paper_id"]].get("pool_with_checker"))
+                                            for r in rows],
+        "panel rating, voters + checker": [
+            None if num(feats[r["paper_id"]].get("rating_with_checker")) is None
+            else to_iclr(feats[r["paper_id"]]["rating_with_checker"], year) for r in rows],
     }
     for label, v in preds.items():
         idx = [i for i in allidx if v[i] is not None]
@@ -899,6 +917,10 @@ def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
                      ("reviewers' pool position without DA",
                       stages["reviewers' pool position without DA"]),
                      ("checker-weighted rating", stages["checker-weighted rating"]),
+                     ("checker's pool position", stages["checker's pool position"]),
+                     ("checker's rating", stages["checker's rating"]),
+                     ("pool position, voters + checker", stages["pool position, voters + checker"]),
+                     ("panel rating, voters + checker", stages["panel rating, voters + checker"]),
                      ("ICLR-scale rating", preds["ICLR-scale rating"])]:
         idx = [i for i in allidx if v[i] is not None and base[i] is not None]
         if len(idx) < 3:

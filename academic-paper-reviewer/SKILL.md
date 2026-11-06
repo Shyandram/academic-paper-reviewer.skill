@@ -135,7 +135,7 @@ The EIC is **not** in Phase 1. It sees the reports only in Phase 2.
 
 ### Independent Check (Phases 1.5 and 1.6)
 
-The **Report Checker** (`agents/report_checker_agent.md`) runs Phases 1.5 and 1.6. When the host permits delegation, run it as a separate agent in a fresh context that did not write the reports. It gets the five reports and score files, the reviewers' copy, the paper memory and the fingerprint, never the integrity findings or the unredacted paper. It cannot change scores or reports. Its two documents, the literature-check addendum and the report check, go to the EIC. Without delegation, run the checker role in the same context and disclose that the check was not independent. The reviewers themselves stay in one context in either case.
+The **Report Checker** (`agents/report_checker_agent.md`) runs Phases 1.5 and 1.6. Before opening any report it records its own **independent estimate** (pool position and Overall) from the paper alone; this is a diagnostic, never averaged, and kept from the EIC until the decision is made. When the host permits delegation, run it as a separate agent in a fresh context that did not write the reports. It gets the five reports and score files, the reviewers' copy, the paper memory and the fingerprint, never the integrity findings or the unredacted paper. It cannot change scores or reports. Its two documents, the literature-check addendum and the report check, go to the EIC. Without delegation, run the checker role in the same context and disclose that the check was not independent. The reviewers themselves stay in one context in either case.
 
 ### Phase 1.5: Literature Check (after the five reports are drafted; needs network access)
 

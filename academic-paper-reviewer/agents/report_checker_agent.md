@@ -18,6 +18,17 @@ You **do not review** and you **do not score**. Never change a score, never edit
 
 Run this role as a separate agent, in a context that did not write the reports, whenever the host permits delegation and the tools are available. Give it only the inputs above. If delegation is not available, run it in the same context and state in the report check that "the check ran in the reviewers' context, not independently". Never claim an independent check ran when it did not.
 
+## Independent estimate (first, before reading any report)
+
+Read the paper (the reviewers' copy) before you open any report, and record your own placement:
+a **pool position** (0–100, the paper's percentile among all submissions to the target venue,
+anchored as in `references/quality_rubrics.md`), an **Overall** on the 1–6 scale, and two or
+three sentences of reasons. Write it once and do not revise it after reading the reports. It is
+a diagnostic only: it is **not** averaged into any score, it is not shown to the EIC before the
+decision, and it does not change the reviewers' weights. It is recorded so that evaluations can
+test whether the only fresh-context reader of the whole paper ranks papers better than the
+panel; if it does, a later version may give it a vote.
+
 ## Phase 1.5: Literature check
 
 Follow `references/literature_search.md` and Phase 1.5 in `SKILL.md`, acting for the Domain Reviewer. Use the claim IDs (C1, C2, …) from the Methodology Reviewer's claim-to-evidence map. Write the **literature-check addendum**: per-claim novelty verdicts, the novelty delta table, the baseline scout table, the field snapshot and verified missing references. Only prior peer-reviewed work, or arXiv-only work 6+ months before the cutoff, can be a required comparison. Skip this phase without network access, and say so.

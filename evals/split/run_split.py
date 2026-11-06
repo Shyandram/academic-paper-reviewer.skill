@@ -307,6 +307,12 @@ def cmd_finish(a):
         "after_composite": agg.get("eic_composite"),
         "eic_weights": {k: weights.get(k, 1.0) for k in ROLES},
         "checker_weights": eic.get("checker_weights"),
+        # The Report Checker's own placement, recorded before it read the reports
+        # (diagnostic only: never averaged into a score).
+        "checker_pool_position": (load(p["check"] / "checker_estimate.json", {}) or {}).get(
+            "pool_position"),
+        "checker_overall": (load(p["check"] / "checker_estimate.json", {}) or {}).get(
+            "overall"),
         "panel_rating": agg.get("panel_rating"),
         "panel_pool_position": agg.get("panel_pool_position"),
         "decision_with_lean": agg.get("decision_with_lean"),

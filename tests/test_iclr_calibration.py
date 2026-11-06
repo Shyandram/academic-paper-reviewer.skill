@@ -193,3 +193,8 @@ class PanelVariants(unittest.TestCase):
         self.assertEqual(out["pool_no_da"], 50)
         self.assertAlmostEqual(out["checker_rating"], 3.5)
         self.assertIsNone(cal.panel_variants(res, {})["checker_rating"])
+        est = cal.panel_variants(res, {"checker_pool_position": 20, "checker_overall": 3})
+        self.assertEqual(est["checker_pool"], 20)
+        self.assertAlmostEqual(est["pool_with_checker"], 40)       # (70 + 30 + 20) / 3, no DA
+        self.assertAlmostEqual(est["rating_with_checker"], 3)      # (4 + 2 + 3) / 3
+        self.assertIsNone(cal.panel_variants(res, {})["pool_with_checker"])

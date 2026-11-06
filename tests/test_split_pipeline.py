@@ -60,6 +60,8 @@ class SplitPipeline(unittest.TestCase):
         check = run(["prompt", "check"] + self.base)
         self.assertIn("report_checker_agent.md", check)
         self.assertIn("factually accurate", check)
+        self.assertIn("checker_estimate.json", check)
+        self.assertLess(check.index("checker_estimate.json"), check.index("**Phase 1.5**"))
         resumed = run(["prompt", "eic", "--resumed"] + self.base)
         fresh = run(["prompt", "eic"] + self.base)
         self.assertNotRegex(resumed, r"\{[A-Z_]+\}")
@@ -172,6 +174,9 @@ class SplitPipeline(unittest.TestCase):
             "final_overall": 3, "eic_pool_position": 40, "eic_weights": {}, "da_rulings": []}))
         self.p["runs"].mkdir(parents=True)
         (self.p["runs"] / "panel.json").write_text(json.dumps({"total_cost_usd": 1.5}))
+        self.p["check"].mkdir(parents=True)
+        (self.p["check"] / "checker_estimate.json").write_text(json.dumps(
+            {"pool_position": 35, "overall": 3, "reasons": "x"}))
         run(["finish", "--pipeline", "check"] + self.base)
         summary = json.loads((self.p["res"] / "summary.json").read_text())
         self.assertEqual(summary["pipeline"], "check")
@@ -179,6 +184,9 @@ class SplitPipeline(unittest.TestCase):
         self.assertAlmostEqual(runlog["phases"]["panel"]["cost_usd"], 1.5)
         self.assertIn("panel_rating", summary)
         self.assertIn("decision_with_lean", summary)
+        self.assertEqual(summary["checker_pool_position"], 35)   # recorded, never averaged
+        self.assertEqual(summary["checker_overall"], 3)
+        self.assertEqual(summary["eic_pool_position"], 40)
         self.assertIn("check pipeline", (self.p["res"] / "review.md").read_text())
 
     def test_before_requires_all_five(self):
