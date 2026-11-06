@@ -1,5 +1,10 @@
 # Split evaluation pipeline
 
+**Status: trial, not adopted.** A 3-paper trial gave no increase in reviewer spread at about
+2.2× the cost (see `../REPORT_iclr2026_pilots.md`, "Split pipeline trial"). Evaluation runs
+keep `pipeline: single` with skill 2.10. Only the independent check phase is carried into the
+next skill version.
+
 The single-agent evaluation (`evals/review_prompt.md`) plays all five reviewers in one
 context, so every reviewer after the first has already read the earlier reports. In the
 Sonnet pilot the reviewers' composite scores agreed with each other at Spearman 0.88

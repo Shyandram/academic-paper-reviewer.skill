@@ -94,6 +94,36 @@ changes:
 2. use the reviewers' mean pool position instead of the EIC's;
 3. report a lean with the integer decision (e.g. "3, leaning 4").
 
+## Split pipeline trial (3 papers)
+
+Sonnet high, `evals/split/` (one fresh context per phase), run as in-session subagents
+(no API billing, no shared prompt cache). Same three papers as the single-context Sonnet pilot.
+
+| Paper | Human mean | Single: Overall / rating / final | Split: Overall / rating / final |
+|---|---|---|---|
+| iclr26-g4HpTtgsn2 | 3.0 (Withdrawn) | 2,3,3,3,2 / 2.6 / 3 | 2,2,2,2,2 / 2.0 / 2 |
+| iclr26-0xObmDmsKY | 4.0 (Reject) | 3,3,4,3,2 / 3.0 / 3 | 3,3,3,3,3 / 3.0 / 3 |
+| iclr26-tlYSbw5GXY | 5.2 (Accept) | 3,3,4,4,3 / 3.4 / 3 | 3,3,3,3,3 / 3.0 / 3 |
+
+- **No increase in spread.** The SD of the reviewers' Overall is 0 on every paper (single:
+  0.49–0.63), and the SD of pool position falls from 6.5–10.1 to 1.0–4.8. The one-point R3
+  (Perspective) optimism in the single context disappears.
+- **Ranking**: the single context orders the three papers as the humans do; the split ties
+  the Reject and the Accept paper. No DA-CRITICAL was raised; the EIC never left the start.
+- **Cost**: $3.5–4.7 per paper (API-equivalent estimate from token counts) vs $1.7–1.9 for
+  the single context. Cache writes are 0.73–0.87M tokens vs about 0.22M. Critical path
+  10–11 min vs 9–10 min.
+- **Independent check**: the Phase 1.5/1.6 check in a fresh context caught factual errors in
+  the reports (miscounts, a metric value misquoted by three reviewers, an unverified
+  attribution), and the EIC down-weighted R2 on all three papers.
+- **Caveats**: n = 3. The reviewers still shared the phase-0 card and paper memory, so this
+  tests separate reports, not separate readings of the paper. Read-deny rules were
+  instructions only in subagent mode.
+
+**Decision**: the split is not adopted. Evaluation runs continue with skill 2.10 (single
+context). The independent check (a fresh-context Phase 1.5/1.6 after the reviewers) is planned
+for the next skill version, to be evaluated against 2.10.
+
 ## Reading
 
 - Haiku has no signal: all scores sit near the acceptance bar (EIC pool position 38–50) whatever the paper.
