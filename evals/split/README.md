@@ -2,7 +2,7 @@
 
 **Status: trial, not adopted.** A 3-paper trial gave no increase in reviewer spread at about
 2.2× the cost (see `../REPORT_iclr2026_pilots.md`, "Split pipeline trial"). Evaluation runs
-keep `pipeline: single`. From skill 2.10.1 the Report Checker is a post-review analysis (see below).
+keep `pipeline: single`. From skill 2.10.1 the Gap Scout is a post-review analysis (see below).
 
 The single-agent evaluation (`evals/review_prompt.md`) plays all five reviewers in one
 context, so every reviewer after the first has already read the earlier reports. In the
@@ -18,7 +18,7 @@ context instead. The skill itself is unchanged.
 | `check` | the reports, the redacted copy, the fingerprint | `check/R2_addendum.md` (Phase 1.5), `check/report_check.md` (Phase 1.6) |
 | `eic` | the reports, the check, `before.json`, the integrity findings, then the paper | `eic/decision.md`, `eic/eic.json`, `evidence.json` |
 | `finish` (script) | `eic.json` | `scores.json`, `aggregate.json`, `summary.json`, `review.md`, `run.json` |
-| post-review (optional, below) | | `post/`, `gaps/`; `finish` runs again |
+| post-review (optional, below) | | `gaps/`; `finish` runs again |
 
 `summary.json` and `aggregate.json` keep the single-pipeline format, so
 `iclr_calibration.py features`, `evaluate` and `pilot` work on these results unchanged.
@@ -46,17 +46,18 @@ read) and keeps the per-phase breakdown.
 
 ## Post-review analysis (both pipelines)
 
-After `finish`, the optional analyses run, each in a fresh context that cannot change the
-review; `finish` then runs again to add them to `review.md` and `summary.json`:
+After `finish`, the optional Gap Scout runs in a fresh context that cannot read the review;
+`finish` then runs again to add its list to `review.md`:
 
 | Phase | Context | Writes |
 |---|---|---|
-| `estimate` (`EST=0` skips) | the redacted copy only; every result file denied | `post/checker_estimate.json` |
 | `gaps` (`GAPS=0` skips) | the redacted copy only; every result file denied | `gaps/gaps.md` |
-| `post` (`POST=0` skips) | the finished review and the redacted copy; edits to the review denied | `post/fact_check.md`, `post/gaps_checked.md` |
 
-Skill 2.11 runs (four reviewers, the Devil's Advocate in `check/da.md`, the estimate in
-`check/`) are still read by `run_split.py before`/`finish` and `issue_overlap.py`.
+The Report Checker (an independent estimate and a fact check of the finished review) was
+withdrawn in 2.10.1 before it was evaluated as a post-review analysis. Skill 2.11 runs (four
+reviewers, the Devil's Advocate in `check/da.md`, the checker's estimate and checked Gap Scout
+list in `check/`) are still read by `run_split.py before`/`finish`, `issue_overlap.py` and
+`iclr_calibration.py`.
 
 ## Running
 

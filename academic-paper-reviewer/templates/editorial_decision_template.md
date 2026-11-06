@@ -184,10 +184,6 @@ Editor-in-Chief (meta-reviewer)
 
 ### Anticipated Reviewer Concerns (Gap Scout)
 - [ ] G1 [category] [concrete gap] (location) — [covered: R1-W2 / new]
-
-### Independent Estimate and Fact Check (Report Checker)
-- Independent estimate (formed without the review): pool position [X], Overall [N]; panel rating [Y], decision [Z]
-- Factual errors: [N] ([report and item → what the paper says, location]; [bears on a decisive point: yes/no])
 ```
 
 ---

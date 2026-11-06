@@ -324,11 +324,11 @@ so its drops are mostly right but too few to change the list. Its factual-error 
 not verified against the papers in this pilot.
 
 **Decision (2.10.1):** the panel, its instructions, the scoring and the decision rule go back to
-2.10. The Gap Scout and the Report Checker are taken out of the review: they run only on
-request, after the review, each in a context that has not seen it, and never change it. The
-checker's estimate is now formed from the paper alone with the review files denied, so a later
-evaluation (on papers other than these 20) can test whether its signal is independent of the
-panel.
+2.10. The Gap Scout is taken out of the review: it runs only on request, after the review (or
+on its own), in a context that has not seen it, and never changes it. The Report Checker is
+removed. Its estimate (0.51) is no better than the 2.10 panel (0.48) within these error bars,
+and it used only three Overall values; a planned test of it as a post-review analysis on the
+pilot 3 reviews was cancelled, so its fact check was never measured.
 
 ## Split pipeline trial (3 papers)
 

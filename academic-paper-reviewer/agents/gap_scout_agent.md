@@ -53,5 +53,5 @@ method, theory, scope, efficiency, presentation, request. No preamble, no scores
 
 Your list is not part of the review: it never changes a score, a weight, the decision or the
 Roadmap. It is shown under *Post-Review Analysis* as the **Anticipated Reviewer Concerns**
-checklist. When the Report Checker also runs, it first drops the items the paper already
-answers and marks those a panel weakness covers.
+checklist. The context presenting it may mark each item `covered: <weakness ID>` or `new`
+against the panel's weaknesses; it does not drop, merge or rewrite items.

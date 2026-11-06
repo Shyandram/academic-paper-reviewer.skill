@@ -1,6 +1,6 @@
 ---
 name: academic-paper-reviewer
-description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides; optional post-review Gap Scout and Report Checker. Modes: full review with editorial decision and revision roadmap, quick and submission-readiness checks, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
+description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides; optional post-review Gap Scout checklist. Modes: full review with editorial decision and revision roadmap, quick and submission-readiness checks, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
   version: "2.10.1"
   last_updated: "2026-11-06"
@@ -8,7 +8,7 @@ metadata:
 
 # Academic Paper Reviewer v2.10.1
 
-Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions. After the review, two optional analyses, off by default, can be run on request: a list of concrete concerns reviewers are likely to raise (Gap Scout) and an independent fact check of the finished review with a second-opinion estimate (Report Checker). They are not part of the review and never change it.
+Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions. After the review, one optional analysis, off by default, can be run on request: a list of concrete concerns reviewers are likely to raise (Gap Scout). It is not part of the review and never changes it.
 
 ## Runtime and Resource Loading
 
@@ -58,9 +58,9 @@ Default output (`full` mode):
 2. Five independent review reports (Phase 1)
 3. EIC meta-review: verification of decisive points, reviewer weights, official scores and the EIC's internal weighted assessment and the final decision (Phase 2)
 4. Editorial Decision Letter, consensus map and Revision Roadmap (Phase 2)
-
-Not part of the default output: the post-review analyses (Gap Scout, Report Checker), run only when asked after the review. See *Post-Review Analysis*.
 5. Optional Socratic revision coaching (Phase 2.5)
+
+Not part of the default output: the post-review Gap Scout checklist, run only when asked. See *Post-Review Analysis*.
 
 Useful modifiers: `literature check: on | strict | off`, `target venue: CVPR`, `journal: TPAMI`, `compare venues` (or `venues: CVPR, ICLR, TMLR`), `venue format`, `skip confirmation`, `anonymous reviewers`, `in English`, `save to file`.
 
@@ -180,27 +180,15 @@ A Socratic dialogue led by the EIC (see `agents/eic_agent.md`): open with agreed
 
 ## Post-Review Analysis (optional, never called by default)
 
-The review ends with Phase 2 (or Phase 2.5). These two analyses are not part of it: no mode calls them unless the user asks, and they run only **after** the review is finished. They read the paper, and the Report Checker also reads the finished review, but they never change a report, a score, a weight, the DA ceiling, the decision or the Roadmap. Present their results under a separate heading, **Post-Review Analysis**, after the review. If a finding contradicts a decisive point (for example a factual error behind an upheld weakness), say so in the analysis; the user decides whether to revise or rerun the review.
-
-Each needs a context that has not seen the review. Run it as a separate agent when the host permits delegation, given only the inputs its file lists. In a context that already wrote the review, an "independent" result is not independent: say so, and skip the Report Checker's estimate.
+The review ends with Phase 2 (or Phase 2.5). The Gap Scout is not part of it: no mode calls it unless the user asks, and it runs only **after** the review is finished or on its own. It never changes a report, a score, a weight, the DA ceiling, the decision or the Roadmap. Present its result under a separate heading, **Post-Review Analysis**, after the review.
 
 ### Gap Scout: anticipated reviewer concerns
 
 **When:** the user asks, after a review or on its own, what reviewers are likely to raise, for a pre-submission checklist, or names the Gap Scout.
 
-Follow `agents/gap_scout_agent.md`. It reads only the reviewers' copy and lists 20–30 concrete concerns, each naming the missing experiment, baseline, definition or setting with its location. It gives no scores. The result is a checklist for the authors: **Anticipated Reviewer Concerns**.
+Follow `agents/gap_scout_agent.md`. It reads only the reviewers' copy and lists 20–30 concrete concerns, each naming the missing experiment, baseline, definition or setting with its location. It gives no scores. Run it as a separate agent when the host permits delegation, given only the reviewers' copy and the target venue; in a context that already wrote the review the list is not independent of it, so say so. The result is a checklist for the authors: **Anticipated Reviewer Concerns**. After it returns, the context presenting it may mark each item with the panel weakness that already covers it (`covered: R1-W2`) or `new`; it keeps the Scout's order, IDs and wording.
 
 Evidence: on 20 ICLR 2026 submissions, judged against the human reviewers' main issues, the five-reviewer panel raised 47% of them, the Gap Scout list alone 65%, and both together 73%. Changing the reviewers' own instructions to name items did not raise the panel's share (skill 2.11: 43%) and made its scores rank papers worse, so the list stays outside the review.
-
-### Report Checker: independent estimate and fact check
-
-**When:** the user asks, after a review, for a second opinion or a fact check of the review, or names the Report Checker.
-
-Follow `agents/report_checker_agent.md`, in two steps:
-1. **Independent estimate**, from the reviewers' copy alone, before it sees any part of the review: a pool position, an Overall and two or three sentences of reasons. A second opinion, shown next to the panel's rating; never averaged into any score.
-2. **Fact check** of the finished review: every number, count, quote and attribution the reports and the decision use as evidence, checked against the cited location, with a factual error list that says which errors bear on a decisive point. When the Gap Scout ran, it also drops the Scout's items the paper already answers and marks those a panel weakness covers.
-
-Evidence and limits: in a 3-paper trial a fresh-context check caught errors repeated across reports (a miscount, a metric value misquoted by three reviewers, an unverified attribution). On 20 ICLR 2026 submissions its estimate ranked papers by human score at Spearman 0.51 against 0.32 for the 2.11 panel, but it used only three Overall values and the difference was not significant; its fact-check accuracy has not been measured.
 
 ---
 
@@ -311,7 +299,6 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | `agents/editorial_synthesizer_agent.md` | Phase 2 |
 | `agents/rebuttal_strategist_agent.md` | Rebuttal mode |
 | `agents/gap_scout_agent.md` | Post-review analysis, on request: Gap Scout |
-| `agents/report_checker_agent.md` | Post-review analysis, on request: independent estimate and fact check |
 | `references/codex_runtime.md` | Codex runtime, input tools, permissions and output paths |
 | `references/review_criteria_framework.md` | Before any review: criteria by paper type |
 | `references/quality_rubrics.md` | Before scoring: 0–100 rubrics, weights, scale mappings |
