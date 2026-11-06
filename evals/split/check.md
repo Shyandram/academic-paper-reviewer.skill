@@ -23,4 +23,9 @@ in the format the role file gives: the change table, the factual error list, eac
 weaknesses in severity order after the check, and the per-reviewer test counts. Do not change
 any score and do not edit the reports themselves.
 
+**Gap Scout list.** Also check `{RES}/gaps/gaps.md` (if present) as `report_checker_agent.md`
+says: drop items the paper already answers or contradicts, mark each kept item with the panel
+weakness that covers it or `new`, and add the result to `report_check.md` under
+`## Anticipated Reviewer Concerns`, keeping the Scout's order and IDs.
+
 Reply with one line: queries run, weaknesses dropped, rewritten and moved, factual errors.

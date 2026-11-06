@@ -7,6 +7,8 @@ is its own process:
 
     phase0      field analysis, panel, paper memory, redacted copy, fingerprint
     R1..R4, DA  five reviewers in parallel; each sees the shared context only
+    gaps        Gap Scout: concrete weaknesses reviewers are likely to raise, from the
+                redacted copy only (fresh context, cannot read the reports)
     check       literature check (Phase 1.5) and report check (Phase 1.6)
     eic         Synthesizer A, EIC meta-review and decision, Synthesizer B
 
@@ -20,11 +22,11 @@ context (`panel`), the check runs fresh, and the panel context is resumed for th
 EIC: only the check is independent, as in the skill's Independent Check.
 
 Subcommands:
-    prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, check,
+    prompt PHASE   print the user prompt for a phase (phase0, reviewer, panel, gaps, check,
                    novelty, eic; `novelty` and `eic --resumed` are for the resumed
                    panel context)
     shared         write the shared system-prompt suffix for the reviewers
-    deny           print the Read() deny rules for one reviewer, one per line
+    deny           print the Read() deny rules for one reviewer (or GAP), one per line
     before         merge the five reviewer score files and run the BEFORE aggregation
     finish         build scores.json, run the AFTER aggregation, write summary.json,
                    review.md and run.json (per-phase cost, tokens and wall time)
@@ -55,7 +57,7 @@ SHARED_SKILL_FILES = [
     "templates/peer_review_report_template.md",
 ]
 PHASE0_FILES = ["card.md", "paper_memory.md"]
-PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "check", "novelty", "eic"]
+PHASES = ["phase0", "panel", "R1", "R2", "R3", "R4", "DA", "gaps", "check", "novelty", "eic"]
 PIPELINES = {"split": "one fresh context per phase",
              "check": "one context for the panel, a fresh context for the check"}
 
@@ -70,6 +72,7 @@ def paths(root, pid):
         "res": res,
         "p0": res / "phase0",
         "reports": res / "reports",
+        "gaps": res / "gaps",
         "check": res / "check",
         "eic": res / "eic",
         "runs": res / "runs",
@@ -158,6 +161,11 @@ def deny_rules(root, pid, role):
              f"Read({rel(p['p0'])}/integrity.json)",
              f"Read({rel(p['check'])}/**)", f"Read({rel(p['eic'])}/**)"]
     rules += [f"Read({rel(p['reports'] / k)}/**)" for k in ROLES if k != role]
+    if role == "GAP":  # the Gap Scout reads the reviewers' copy only
+        rules += [f"Read({rel(p['reports'])}/**)", f"Read({rel(p['res'])}/review.md)",
+                  f"Read({rel(p['res'])}/*.json)"]
+    else:
+        rules.append(f"Read({rel(p['gaps'])}/**)")
     return rules
 
 
@@ -245,6 +253,7 @@ def assemble_review(p, pipeline="split"):
     out += part(p["p0"] / "card.md", "Phase 0: Reviewer Configuration Card")
     for key, (_, _, title) in ROLES.items():
         out += part(p["reports"] / key / "report.md", f"Phase 1: {title}")
+    out += part(p["gaps"] / "gaps.md", "Phase 1: Gap Scout (unscored)")
     out += part(p["check"] / "R2_addendum.md", "Phase 1.5: Literature-check addendum (Reviewer 2)")
     out += part(p["check"] / "report_check.md", "Phase 1.6: Report check")
     out += part(p["eic"] / "decision.md", "Phase 2: EIC meta-review and Editorial Decision")
@@ -332,7 +341,7 @@ def main(argv=None):
         return s
 
     s = common(sub.add_parser("prompt"))
-    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "check", "novelty", "eic"])
+    s.add_argument("phase", choices=["phase0", "reviewer", "panel", "gaps", "check", "novelty", "eic"])
     s.add_argument("--role", default="")
     s.add_argument("--resumed", action="store_true",
                    help="eic only: the prompt for the resumed panel context")
@@ -341,7 +350,7 @@ def main(argv=None):
     s.add_argument("--out", required=True)
     s.set_defaults(fn=cmd_shared)
     s = common(sub.add_parser("deny"))
-    s.add_argument("--role", required=True, choices=list(ROLES))
+    s.add_argument("--role", required=True, choices=list(ROLES) + ["GAP"])
     s.set_defaults(fn=cmd_deny)
     common(sub.add_parser("before")).set_defaults(fn=cmd_before)
     common(sub.add_parser("finish")).set_defaults(fn=cmd_finish)

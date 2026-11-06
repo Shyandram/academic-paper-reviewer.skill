@@ -1,0 +1,59 @@
+{
+ "n_papers": 20,
+ "n_human_issues": 247,
+ "items_per_paper": {
+  "panel": 20.9,
+  "extra": 30.0
+ },
+ "hit": {
+  "orig_hit": {
+   "count": 106,
+   "mean": 0.454,
+   "ci95": [
+    0.37,
+    0.543
+   ]
+  },
+  "panel": {
+   "count": 110,
+   "mean": 0.467,
+   "ci95": [
+    0.383,
+    0.553
+   ]
+  },
+  "extra": {
+   "count": 153,
+   "mean": 0.648,
+   "ci95": [
+    0.588,
+    0.711
+   ]
+  },
+  "both": {
+   "count": 175,
+   "mean": 0.73,
+   "ci95": [
+    0.678,
+    0.785
+   ]
+  },
+  "extra_top10": {
+   "count": 70,
+   "mean": 0.302,
+   "ci95": [
+    0.229,
+    0.394
+   ]
+  },
+  "extra_top20": {
+   "count": 108,
+   "mean": 0.46,
+   "ci95": [
+    0.386,
+    0.537
+   ]
+  }
+ },
+ "agreement_orig_vs_rejudged_panel": 0.879
+}

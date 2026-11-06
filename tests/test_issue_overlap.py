@@ -55,6 +55,24 @@ class Extraction(unittest.TestCase):
         self.assertEqual(sorted(v[1] for v in key.values() if v[0] == "A"), sorted(io.ROLES))
 
 
+class GapScout(unittest.TestCase):
+    def test_gap_list_is_an_optional_source(self):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            for r in io.ROLES:
+                (tmp / "reports" / r).mkdir(parents=True)
+                (tmp / "reports" / r / "report.md").write_text(DA if r == "DA" else REPORT)
+            (tmp / "gaps").mkdir()
+            (tmp / "gaps" / "gaps.md").write_text(
+                "## Anticipated Reviewer Concerns\n- G1 [baselines] no comparison with X (Table 2)\n")
+            self.assertEqual(sorted(io.ai_reports(tmp)), sorted(io.ROLES))
+            reps = io.ai_reports(tmp, gaps=True)
+            self.assertIn(io.GAP, reps)
+            self.assertIn("comparison with X", io.weaknesses(reps[io.GAP], io.GAP))
+        finally:
+            shutil.rmtree(tmp)
+
+
 class Analysis(unittest.TestCase):
     """Two humans, five AI reviewers (here only R1, R2 and DA raise issues)."""
 
@@ -120,6 +138,29 @@ class Analysis(unittest.TestCase):
         self.assertEqual(c["topic"]["theory"]["status"]["related"], 1)
         self.assertEqual(c["consensus"]["2+"]["hit"], 1.0)
         self.assertNotIn("points", (out / "c.json").read_text())
+
+    def test_extra_list_match_round_trip(self):
+        m, ex, mo = self.tmp / "m", self.tmp / "ex", self.tmp / "mo"
+        (ex / "paper1").mkdir(parents=True)
+        (ex / "paper1" / "gaps.md").write_text("- G1 a\n- G2 b\n")
+        with contextlib.redirect_stdout(_io.StringIO()), \
+                contextlib.redirect_stderr(_io.StringIO()):
+            io.main(["misses", str(self.tmp), "--out", str(m)])
+            io.main(["match-prepare", str(self.tmp), "--issues", str(m / "human_issues.jsonl"),
+                     "--extra", str(ex), "--out", str(mo)])
+            key = json.loads((mo / "paper1" / "match_key.json").read_text())
+            self.assertEqual(sorted(v[0] for v in key["items"].values()),
+                             ["extra", "extra", "panel", "panel"])
+            first = next(k for k, v in key["items"].items() if v == ["extra", "g0"])
+            ann = [{"human": "H1", "match": [], "related": []},
+                   {"human": "H2", "match": [first], "related": []}]
+            (mo / "paper1" / "matched.json").write_text(json.dumps(ann))
+            io.main(["match-score", str(mo), "--issues", str(m / "human_issues.jsonl"),
+                     "--k", "1", "--json", str(mo / "s.json"), "--reps", "20"])
+        s = json.loads((mo / "s.json").read_text())["hit"]
+        self.assertEqual(s["extra"]["count"], 1)
+        self.assertEqual(s["extra_top1"]["count"], 1)
+        self.assertEqual(s["panel"]["count"], 0)
 
     def test_markdown_and_json_hold_no_text(self):
         s, rows = io.analyze(self.tmp, reps=50)

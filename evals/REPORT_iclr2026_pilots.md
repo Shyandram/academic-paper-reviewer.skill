@@ -203,11 +203,44 @@ papers. Numbers: `evals/iclr2026_issue_misses.json` (pooled over issues; CIs by 
 - **Consensus.** Of the 52 issues raised by two or more humans, 37 were hit; 9 of the 15 others
   were raised only as a broad category.
 
+### Raising the hit count: a Gap Scout pass
+
+Most non-hits are issues the panel raised only as a category, so we tested one extra pass that
+names items (`evals/gap_pass_prompt.md`, now `agents/gap_scout_agent.md`): one Sonnet agent per
+paper read only the redacted paper and listed up to 30 concrete weaknesses reviewers would
+likely raise (claims → missing evidence, named baselines, undefined elements, theory, scope,
+typical requests). It never saw the reviews, scores or decisions. Then one annotator per paper
+(`evals/gap_match_prompt.md`) matched each human main issue against the panel's main issues and
+the Scout's items, mixed at random without sources (`issue_overlap.py match-prepare`,
+`match-score`). Re-judged this way, the panel's hits agree with the original annotation on 88%
+of human issues (0.47 vs 0.45). Numbers: `evals/iclr2026_gap_scout.json`.
+
+| Source | Items per paper | Human main issues hit | Per-paper hit rate [95% CI] |
+|---|---|---|---|
+| Five-reviewer panel | 20.9 | 110 / 247 | 0.47 [0.38, 0.55] |
+| Gap Scout, first 10 items | 10 | 70 | 0.30 [0.23, 0.39] |
+| Gap Scout, first 20 items | 20 | 108 | 0.46 [0.39, 0.54] |
+| Gap Scout, all items | 30 | 153 | **0.65** [0.59, 0.71] |
+| Panel + Gap Scout | 50.9 | 175 | **0.73** [0.68, 0.79] |
+
+- One concrete list of 20 items hits as many human issues as the whole five-reviewer panel
+  with its 21 main issues; with 30 items it hits 1.4× as many. The hit count was still rising
+  at 30 items.
+- Of the 115 human issues the panel had only touched ("related"), the Scout matched 57; of
+  the 26 the panel missed entirely, 14.
+- By topic (panel → panel + Scout): missing experiments 0.35 → 0.76, baselines 0.55 → 0.82,
+  scope 0.36 → 0.70, claims 0.37 → 0.63, method clarity 0.43 → 0.57; theory (0.63) and
+  presentation (0.25) did not change.
+- Caveats: the extra hits come partly from volume (51 items against about 12 human issues per
+  paper); the Scout's items were not checked against the paper here (in 2.11 the Report
+  Checker drops those the paper answers); same 20 papers and an LLM annotator.
+
 **2.11 changes from this study**: the Devil's Advocate lists only issues that attack a step of
 the core argument chain (no MINOR list); R4 keeps its vote (the ratings rank worse without it)
 but lists weaknesses only from contribution clarity, venue fit and presentation; the Report
 Checker adds the 3–5 key concerns; the report template asks each weakness to name the concrete
-missing experiment, baseline or definition. To be measured with the same tool on the 2.11 runs.
+missing experiment, baseline or definition. A new unscored Gap Scout pass lists the concrete concerns reviewers are likely to raise
+(Anticipated Reviewer Concerns checklist in the final report). To be measured with the same tool on the 2.11 runs.
 
 ## Split pipeline trial (3 papers)
 

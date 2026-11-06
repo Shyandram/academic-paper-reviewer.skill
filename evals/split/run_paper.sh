@@ -4,8 +4,9 @@
 #   evals/split/run_paper.sh <paper id>
 #
 # PIPELINE=split (default): Phase 0, five parallel reviewers, check and EIC, each fresh.
-# PIPELINE=check (skill 2.11): Phase 0 and the five reviewers in one context, the check
-# in a fresh context, then the first context resumed for the Novelty update and the EIC.
+# PIPELINE=check (skill 2.11): Phase 0 and the five reviewers in one context, the Gap Scout
+# and the check each in a fresh context, then the first context resumed for the Novelty
+# update and the EIC.
 #
 # Run from the repository root. Needs evals/work/papers/<id>/blinded.txt and an
 # authenticated `claude` CLI: ANTHROPIC_API_KEY (API, billed per token) or
@@ -22,7 +23,7 @@ PIPELINE="${PIPELINE:-split}"
 R="evals/work/results/$ID"; S="python3 -I evals/split/run_split.py"
 ARGS=(--id "$ID" --lit "$LIT" --cutoff "$CUTOFF" --pipeline "$PIPELINE")
 TOOLS=(Read Write Edit Glob Grep "Bash(python3:*)")
-mkdir -p "$R"/{phase0,reports/{R1,R2,R3,R4,DA},check,eic,runs,prompts}
+mkdir -p "$R"/{phase0,reports/{R1,R2,R3,R4,DA},gaps,check,eic,runs,prompts}
 
 # run <name> <prompt file> [extra claude args...]: one context, its own run log.
 # PERSIST=1 keeps the session so it can be resumed (`--resume <session id>` in the args).
@@ -45,6 +46,10 @@ if [ "$PIPELINE" = check ]; then
   SID=$(python3 -c "import json,sys;print(json.load(open(sys.argv[1])).get('session_id',''))" "$R/runs/panel.json" 2>/dev/null)
   [ -n "$SID" ] || { echo "panel: no session id"; exit 1; }
   $S before "${ARGS[@]}" || exit 1
+  # The Gap Scout: a fresh context that reads the redacted copy only.
+  $S prompt gaps "${ARGS[@]}" > "$R/prompts/gaps.md"
+  mapfile -t GDENY < <($S deny --id "$ID" --role GAP)
+  run gaps "$R/prompts/gaps.md" --allowedTools Read Write Glob Grep --disallowedTools Bash "${GDENY[@]}"
   # The independent check: a fresh context that did not write the reports.
   $S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
   run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}" \
@@ -85,6 +90,10 @@ wait
 $S before "${ARGS[@]}" || exit 1
 
 # Phase 1.5 + 1.6, then Phase 2, each fresh.
+# The Gap Scout: a fresh context that reads the redacted copy only.
+$S prompt gaps "${ARGS[@]}" > "$R/prompts/gaps.md"
+mapfile -t GDENY < <($S deny --id "$ID" --role GAP)
+run gaps "$R/prompts/gaps.md" --allowedTools Read Write Glob Grep --disallowedTools Bash "${GDENY[@]}"
 $S prompt check "${ARGS[@]}" > "$R/prompts/check.md"
 run check "$R/prompts/check.md" --allowedTools "${TOOLS[@]}"
 $S prompt eic "${ARGS[@]}" > "$R/prompts/eic.md"

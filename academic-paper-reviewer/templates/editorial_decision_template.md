@@ -171,6 +171,13 @@ Editor-in-Chief (meta-reviewer)
 |---|-------|--------|-----------|
 | N1 | [issue] | [reviewer] | [suggestion] |
 
+### Anticipated Reviewer Concerns (checklist)
+*From the Gap Scout, after the Report Checker. Concrete items real reviewers are likely to raise; not scored. Items marked `new` are not covered by the roadmap above: fix them or prepare a rebuttal answer.*
+
+| # | Concern | Category | Location | Covered by |
+|---|---------|----------|----------|------------|
+| G1 | [concrete item] | [category] | [location] | [R1-W2 / new] |
+
 ---
 
 ## Estimated Revision Effort

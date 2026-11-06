@@ -125,6 +125,8 @@ When network access is available, Phase 0 also writes the **fingerprint** for th
 
 **Distinct roles, not five copies.** On 20 ICLR 2026 submissions, Reviewers 1–4 overlapped with each other about as much as human reviewers do (pairwise Jaccard of their main issues 0.10, the same as the humans'). Reviewers 2 and 3 added the most issues no one else raised. The Devil's Advocate and Reviewer 4 mostly repeated the others, so both now stay inside their own focus: the Devil's Advocate lists only attacks on the core argument chain, and Reviewer 4 lists only clarity, venue-fit and presentation weaknesses. A point outside a reviewer's focus is left to the reviewer who owns it.
 
+**Gap Scout (sixth, unscored pass).** The Gap Scout (`agents/gap_scout_agent.md`) reads only the reviewers' copy and writes the 20–30 concrete weaknesses reviewers at the venue are most likely to raise, naming the missing experiment, baseline, definition or setting. It runs in a fresh context when delegation is allowed (otherwise before the reports are read, disclosed), gives no scores and has no vote. On the ICLR 2026 pilot it raised 65% of the human reviewers' main issues alone and lifted the panel's 47% to 73%. Its list goes through the Report Checker and into the final report as a checklist.
+
 Each report uses `templates/peer_review_report_template.md`, except the Devil's Advocate, whose format is defined in its agent file. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
 
 **Error audit** (`references/error_audit.md`). The Methodology Reviewer runs the claim-grounded audit and the omission sweep, and keeps an Error Log (categories E1–E9, each entry with location, verbatim quote, how it was verified, confidence and severity). The Domain Reviewer checks citations (E7). The Devil's Advocate checks claim distortion (E5), which LLM reviewers detect least reliably, and re-checks the errors behind its CRITICAL issues.
@@ -150,7 +152,7 @@ Default mode is `on`. Use `strict` (drops everything after the cutoff) to simula
 
 ### Phase 1.6: Report Check (after Phase 1.5, before the EIC)
 
-**Order:** Phase 1 → Phase 1.5 → Phase 1.6 → Phase 1.7 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
+**Order:** Phase 1 (five reports and the Gap Scout list) → Phase 1.5 → Phase 1.6 → Phase 1.7 → Phase 2. The check runs after the literature-check addendum is written, so it covers the addendum too. When Phase 1.5 is skipped, it runs right after Phase 1.
 
 The Report Checker checks every weakness in the five reports before the Synthesizer builds the package. This is the same kind of check that the ICLR 2025 feedback agent ran on human reviews. Each weakness must pass five tests:
 1. **Specific.** It names a location, what is wrong, and why it matters. Rewrite a vague weakness, or drop it.
@@ -158,6 +160,8 @@ The Report Checker checks every weakness in the five reports before the Synthesi
 3. **Consistent with the paper.** It makes no claim the paper contradicts. Novelty statements about prior work must match that work's abstract.
 4. **Actionable and professional.** It gives a concrete fix and critiques the work, never the authors.
 5. **Factually accurate.** Every number, count, quote and attribution matches the cited location. The checker opens the location and recounts; it does not trust the report. This test also covers the evidence behind strengths and scores. Errors go to a factual error list, once per error, with every report that repeated it.
+
+The checker also reads the Gap Scout list: it drops items the paper already answers or contradicts (tests 2 and 3), and marks each remaining item with the panel weakness that already covers it, if any. Items no report covers stay in the list as they are.
 
 Then order each report's weaknesses by severity and move cosmetic issues into one *Minor* line. Reviews that overweight minor issues were the most common complaint about AI reviews at AAAI-26. Record what changed in a short table (dropped / rewritten / moved, with the test and reason), plus the factual error list. Scores are not changed here. The EIC sees both and uses them when setting quality weights.
 
@@ -294,6 +298,7 @@ Every non-DA reviewer gives two complementary sets of scores, and the DA gives t
 | `agents/domain_reviewer_agent.md` | Full |
 | `agents/perspective_reviewer_agent.md` | Full |
 | `agents/devils_advocate_reviewer_agent.md` | Full, guided |
+| `agents/gap_scout_agent.md` | Full (unscored sixth pass in Phase 1) |
 | `agents/report_checker_agent.md` | Phases 1.5 and 1.6 (independent check), full mode |
 | `agents/editorial_synthesizer_agent.md` | Phase 2 |
 | `agents/rebuttal_strategist_agent.md` | Rebuttal mode |

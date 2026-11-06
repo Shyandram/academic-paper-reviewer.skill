@@ -94,6 +94,19 @@ class SplitPipeline(unittest.TestCase):
         self.assertIn(f"papers/{PID}/**", joined)
         self.assertTrue(all(r.startswith("Read(./") for r in rules))
 
+    def test_gap_scout_sees_the_copy_only(self):
+        joined = "\n".join(rs.deny_rules(self.tmp, PID, "GAP"))
+        for k in rs.ROLES:
+            self.assertIn(f"reports/{k}/**", joined)
+        self.assertIn("check/**", joined)
+        self.assertIn("integrity.json", joined)
+        self.assertNotIn("phase0/**", joined)          # the redacted copy stays readable
+        self.assertIn("gaps/**", "\n".join(rs.deny_rules(self.tmp, PID, "R1")))
+        text = run(["prompt", "gaps"] + self.base)
+        self.assertIn("gap_scout_agent.md", text)
+        self.assertIn("reviewer_copy.txt", text)
+        self.assertNotRegex(text, r"\{(RES|SKILL|COPY|VENUE_NAME)\}")
+
     def write_reviewers(self, missing=()):
         for i, key in enumerate(rs.ROLES):
             if key in missing:
