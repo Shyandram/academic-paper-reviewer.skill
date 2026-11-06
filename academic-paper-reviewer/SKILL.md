@@ -118,10 +118,12 @@ When network access is available, Phase 0 also writes the **fingerprint** for th
 | Reviewer 1 (Methodology) | `agents/methodology_reviewer_agent.md` | Design, statistics, fairness of comparison, reproducibility | Technical Rigor, Experimental Validation, Reproducibility |
 | Reviewer 2 (Domain) | `agents/domain_reviewer_agent.md` | Literature positioning, theory, domain contribution | Novelty & Originality |
 | Reviewer 3 (Perspective) | `agents/perspective_reviewer_agent.md` | Cross-disciplinary links, deployment, assumptions, broader impact | Significance & Impact, Ethical Compliance |
-| Reviewer 4 (Generalist) | `agents/generalist_reviewer_agent.md` | Contribution clarity, venue fit, presentation, balanced overall judgment | Clarity & Presentation |
-| Devil's Advocate | `agents/devils_advocate_reviewer_agent.md` | Strongest counter-argument, logic, overclaiming | CRITICAL/MAJOR/MINOR issue list |
+| Reviewer 4 (Generalist) | `agents/generalist_reviewer_agent.md` | Contribution clarity, venue fit, presentation, balanced overall judgment; weaknesses from this focus only | Clarity & Presentation |
+| Devil's Advocate | `agents/devils_advocate_reviewer_agent.md` | Strongest counter-argument, logic, overclaiming: only issues that attack the core argument chain | CRITICAL/MAJOR issue list (no MINOR); does not vote on ratings |
 
 **Execution and independence.** Use parallel reviewers only when the host permits delegation and the tools are available. Give each reviewer the manuscript, its own role file, the template, and the relevant references, without other reviewers' reports. Otherwise perform five separate role-based passes and disclose that they share one model context; do not claim independent agents ran. Each pass examines the manuscript from its own angle. Preserve genuine agreement; merge overlap in Phase 2. Missing delegation never blocks a full review.
+
+**Distinct roles, not five copies.** On 20 ICLR 2026 submissions, Reviewers 1–4 overlapped with each other about as much as human reviewers do (pairwise Jaccard of their main issues 0.10, the same as the humans'). Reviewers 2 and 3 added the most issues no one else raised. The Devil's Advocate and Reviewer 4 mostly repeated the others, so both now stay inside their own focus: the Devil's Advocate lists only attacks on the core argument chain, and Reviewer 4 lists only clarity, venue-fit and presentation weaknesses. A point outside a reviewer's focus is left to the reviewer who owns it.
 
 Each report uses `templates/peer_review_report_template.md`, except the Devil's Advocate, whose format is defined in its agent file. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
 

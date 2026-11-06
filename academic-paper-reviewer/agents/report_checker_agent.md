@@ -50,3 +50,4 @@ Then order each report's weaknesses by severity and group cosmetic items into on
    - The **factual error list** (test 5): report and item, what it says, what the paper says (location), and whether the error affects the point it supports (none / weakens it / removes it).
    - Each report's weaknesses in severity order after the check.
    - One line per reviewer: how many items failed each test. The EIC uses this to set quality weights; you do not set them.
+   - **Key concerns**: the 3–5 checked weaknesses most likely to decide the outcome, each with its source IDs. An AI panel raises far more issues than a human one (on the ICLR 2026 pilot, about 21 main issues per paper against 12, and only about a quarter of the AI issues were also raised by human reviewers), so the EIC and the authors need the short list. Choose by impact on the main claims, not by how many reviewers raised a point.

@@ -94,6 +94,67 @@ changes:
 2. use the reviewers' mean pool position instead of the EIC's;
 3. report a lean with the integer decision (e.g. "3, leaning 4").
 
+## Issue overlap and hit rate (reviewers vs human reviews)
+
+Same 20 papers, pilot 3 (Sonnet high, skill 2.10, single context), compared with the ICLR 2026
+human reviews of each paper (JerMa88/ICLR_Peer_Reviews_2026; 3–5 reviews, mean 4.05).
+`evals/issue_overlap.py` takes the **weakness** sections of both panels (the Devil's
+Advocate's issue list), and one Sonnet annotator per paper (`evals/issue_overlap_prompt.md`)
+splits them into atomic points, groups the points into issues within each panel and matches
+issues across panels. The annotator sees the panels under random names in random order,
+without roles, and does not judge correctness. Main issues only (minor and cosmetic points
+excluded). Numbers: `evals/iclr2026_issue_overlap.json`; 95% bootstrap CIs over papers.
+
+| | Human | AI, 5 reviewers | AI, R1–R4 |
+|---|---|---|---|
+| Main issues per paper | 12.4 [10.8, 13.9] | 20.9 [19.0, 22.9] | |
+| Share raised by one reviewer only | 0.77 [0.69, 0.83] | 0.49 [0.46, 0.53] | 0.73 [0.69, 0.77] |
+| Pairwise Jaccard between reviewers | 0.10 [0.07, 0.14] | 0.16 [0.14, 0.18] | 0.10 [0.08, 0.12] |
+
+| Hit rate | Value |
+|---|---|
+| Human issues raised by the AI panel | **0.45** [0.37, 0.54] |
+| … raised by 2+ humans (consensus) | **0.78** [0.64, 0.90] |
+| … raised by one human | 0.38 [0.28, 0.48] |
+| … by the AI panel without the DA | 0.44 [0.37, 0.51] |
+| AI issues also raised by a human | 0.26 [0.22, 0.29] |
+| One human's issues raised by the *other* humans | 0.39 [0.31, 0.48] |
+| One human's issues raised by 1 / 3 / 5 AI reviewers | 0.20 / 0.40 / 0.50 |
+
+Coverage of the human issues by k AI reviewers (mean over subsets): 0.17, 0.29, 0.36, 0.41,
+0.45 for k = 1–5.
+
+| Role | Issues | Raised by no other role | Human issues hit | Hit by no other role |
+|---|---|---|---|---|
+| R1 Methodology | 10.1 | 0.23 | 0.19 | 0.01 |
+| R2 Domain | 5.5 | 0.53 | 0.19 | 0.10 |
+| R3 Perspective | 5.0 | 0.62 | 0.16 | 0.07 |
+| R4 Generalist | 5.3 | 0.20 | 0.14 | 0.01 |
+| Devil's Advocate | 9.2 | 0.09 | 0.20 | 0.02 |
+
+Spearman of the mean Overall with the mean human rating, by reviewer subset (same pilot):
+R1–R4 0.52, R1–R3 0.48, R2–R4 0.55, all five 0.48.
+
+- **Overlap.** The five-reviewer panel looks more repetitive than a human panel, but at equal
+  size (R1–R4, about the human panel size) the overlap is the same as the humans'. The
+  repetition comes from the Devil's Advocate (91% of its issues raised by another role) and, to
+  a lesser extent, R4 (80%) and R1 (77%, mostly shared with the DA).
+- **Hit rate.** The panel raises 45% of the humans' main issues and 78% of those two or more
+  humans agree on. Three AI reviewers anticipate a given human's issues as well as the other
+  human reviewers do (0.40 vs 0.39); five do better (0.50).
+- **Volume.** The AI panel raises about 1.7× as many main issues, and only a quarter of them
+  were raised by a human. Unmatched issues are not necessarily wrong (humans miss things), but
+  the EIC and authors need a short list.
+- **Stability.** Four papers annotated twice by independent annotators: every metric above
+  differs by at most 0.04.
+- **Caveats.** n = 20; one LLM annotator per paper; humans saw the figures, the AI read the
+  extracted text; agreement with humans is not correctness.
+
+**2.11 changes from this study**: the Devil's Advocate lists only issues that attack a step of
+the core argument chain (no MINOR list); R4 keeps its vote (the ratings rank worse without it)
+but lists weaknesses only from contribution clarity, venue fit and presentation; the Report
+Checker adds the 3–5 key concerns. To be measured with the same tool on the 2.11 runs.
+
 ## Split pipeline trial (3 papers)
 
 Sonnet high, `evals/split/` (one fresh context per phase), run as in-session subagents

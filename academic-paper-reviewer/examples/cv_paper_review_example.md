@@ -55,8 +55,7 @@
 **Steelman**: if content-adaptive pruning preserves accuracy at half the cost, it is a practical win for every ViT segmenter.
 **Strongest counter-argument**: the headline claim (C3) rests on Table 2, where the proposed model uses a higher input resolution *and* a longer schedule (160k vs. 80k iterations, Appendix B) than the copied baseline numbers. "Comparable accuracy" may come from these advantages, with pruning actually costing accuracy that they hide.
 - **DA-C1 (CRITICAL; resolvable by: new experiments)**: confounded main comparison (Table 2 + Appendix B).
-- **DA-M1 (MAJOR)**: small-object accuracy is not reported (per-class IoU missing).
-- **DA-m1 (MINOR)**: Fig. 6 qualitative examples are not stated as random.
+- **DA-M1 (MAJOR; attacks P2, "pruning keeps the tokens that matter")**: small-object accuracy is not reported (per-class IoU missing).
 
 ---
 
@@ -140,4 +139,4 @@ The authors see the **official** scores (63.2, ratings 3/4/4/4/3). The EIC's int
 | R2 | Latency conditions unstated | R1-W2 | Table 4, §4.1 | Same precision/framework/batch for all rows | Low | Yes |
 
 **Priority 2**: token-merging comparison (R2-W1); per-class IoU / small objects (DA-M1); 3-seed ablation (R1-W3); edge-device deployment (R3); decoder novelty (R2-W2); abstract wording (R4).
-**Priority 3**: random qualitative samples (DA-m1).
+**Priority 3**: random qualitative samples (R4, Minor).

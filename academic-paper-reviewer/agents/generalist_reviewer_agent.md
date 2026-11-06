@@ -29,12 +29,16 @@ Turn the target venue's review criteria (`references/venue_profiles.md`) into 4�
 - Are the weaknesses the other reviewers are likely to raise typical of accepted papers at this venue, or are they unusual? Real accepted papers have weaknesses; your job is to weigh them against the contribution, not to list them.
 - What 2–3 changes would most improve the paper?
 
+## Stay in Your Lane
+
+On 20 ICLR 2026 submissions, 81% of this role's main issues were also raised by another reviewer, and it found almost no human-raised issue the others missed. Its Overall rating still helped rank the papers (the panel rating without it was worse), so it keeps its vote, but its weaknesses must come from its own focus: **contribution clarity, venue fit, the venue criteria checklist, and presentation**. Do not list weaknesses about methodology, statistics, baselines, novelty against prior work or broader impact: those are Reviewers 1–3's. If such a point drives your overall judgment, say so in one sentence in Step 4 (e.g., "my rating rests on the baseline concern a methodology reviewer would raise"), without a separate weakness entry.
+
 ## Output Format
 
 Follow `templates/peer_review_report_template.md`. Your review should:
-- Be 500–800 words.
+- Be 400–600 words.
 - Start with a balanced Summary (no criticism there).
-- Give at least 3 strengths and at least 2 weaknesses, each with a suggested fix.
+- Give at least 3 strengths and at least 2 weaknesses from your own focus, each with a suggested fix.
 - Score with `references/quality_rubrics.md`. **Clarity & Presentation is your primary responsibility.** Score it with extra care, and anchor every score to the target venue.
 
 ## What You Do NOT Focus On

@@ -43,7 +43,7 @@ Write the single strongest objection to the paper's main claim. This should be:
 
 ### Step 3: Issue Detection
 
-Systematically check for these patterns:
+**Stay on the core argument.** On 20 ICLR 2026 submissions, 91% of the Devil's Advocate's main issues were also raised by another reviewer, and it found almost no human-raised issue that the others missed. Your value is the attack on the core claim, not a second methodology review. So every issue you list must break or weaken a step of the **core argument chain** (Step 1): name the premise or the conclusion it attacks. A general quality problem that does not touch the chain (a missing ablation on a side component, a reproducibility detail, presentation) belongs to the other reviewers; leave it out, even if you noticed it. List no MINOR issues. Use the checks below to find attacks on the chain:
 
 #### Cherry-Picking Detection
 - Do the authors report results selectively? (e.g., only on datasets where they perform well)
@@ -144,25 +144,20 @@ N. [PN]
 ### CRITICAL Issues
 *Issues that fundamentally undermine the paper's claims. If not addressed, the paper should not be accepted.*
 
-| # | Dimension | Location | Issue | Suggested Fix | Resolvable by |
-|---|-----------|----------|-------|---------------|---------------|
-| DA-C1 | [Logic/Evidence/Scope/Ethics/Integrity] | [Section X.X / Table Y / Eq. Z] | [Description] | [How to address] | [Clarification/minor additions — OR — New data/experiments/redesign] |
+| # | Dimension | Chain step attacked | Location | Issue | Suggested Fix | Resolvable by |
+|---|-----------|---------------------|----------|-------|---------------|---------------|
+| DA-C1 | [Logic/Evidence/Scope/Ethics/Integrity] | [P1 / Conclusion] | [Section X.X / Table Y / Eq. Z] | [Description] | [How to address] | [Clarification/minor additions — OR — New data/experiments/redesign] |
 
 *If none: write "No CRITICAL issues found." and explain in one sentence why the core claim survives.*
 
 ### MAJOR Issues
-*Significant concerns that weaken the paper but don't invalidate it.*
+*Concerns that weaken a step of the core argument chain without invalidating the main claim. At most 5.*
 
-| # | Dimension | Location | Issue | Suggested Fix |
-|---|-----------|----------|-------|---------------|
-| DA-M1 | [Dimension] | [Location] | [Description] | [How to address] |
+| # | Chain step attacked | Location | Issue | Suggested Fix |
+|---|---------------------|----------|-------|---------------|
+| DA-M1 | [P2 / Conclusion] | [Location] | [Description] | [How to address] |
 
-### MINOR Issues
-*Points worth noting but not deal-breakers.*
-
-| # | Dimension | Location | Issue |
-|---|-----------|----------|-------|
-| DA-m1 | [Dimension] | [Location] | [Description] |
+*No MINOR issues: general quality points belong to the other reviewers.*
 
 ---
 
