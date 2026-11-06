@@ -1,0 +1,424 @@
+{
+ "n": 247,
+ "status": {
+  "hit": 106,
+  "minor_only": 0,
+  "related": 115,
+  "missed": 26
+ },
+ "consensus": {
+  "1": {
+   "n": 195,
+   "share": 0.7894736842105263,
+   "hit": 0.35384615384615387,
+   "ci": [
+    0.28,
+    0.43646408839779005
+   ],
+   "status": {
+    "hit": 69,
+    "minor_only": 0,
+    "related": 104,
+    "missed": 22
+   }
+  },
+  "2+": {
+   "n": 52,
+   "share": 0.21052631578947367,
+   "hit": 0.7115384615384616,
+   "ci": [
+    0.576271186440678,
+    0.8636363636363636
+   ],
+   "status": {
+    "hit": 37,
+    "minor_only": 0,
+    "related": 11,
+    "missed": 4
+   }
+  }
+ },
+ "topic": {
+  "baselines": {
+   "n": 33,
+   "share": 0.13360323886639677,
+   "hit": 0.5757575757575758,
+   "ci": [
+    0.42105263157894735,
+    0.75
+   ],
+   "status": {
+    "hit": 19,
+    "minor_only": 0,
+    "related": 14,
+    "missed": 0
+   }
+  },
+  "claims": {
+   "n": 19,
+   "share": 0.07692307692307693,
+   "hit": 0.3684210526315789,
+   "ci": [
+    0.1,
+    0.6666666666666666
+   ],
+   "status": {
+    "hit": 7,
+    "minor_only": 0,
+    "related": 12,
+    "missed": 0
+   }
+  },
+  "efficiency": {
+   "n": 10,
+   "share": 0.04048582995951417,
+   "hit": 0.9,
+   "ci": [
+    0.7,
+    1
+   ],
+   "status": {
+    "hit": 9,
+    "minor_only": 0,
+    "related": 1,
+    "missed": 0
+   }
+  },
+  "experiments": {
+   "n": 75,
+   "share": 0.30364372469635625,
+   "hit": 0.3333333333333333,
+   "ci": [
+    0.22857142857142856,
+    0.4482758620689655
+   ],
+   "status": {
+    "hit": 25,
+    "minor_only": 0,
+    "related": 37,
+    "missed": 13
+   }
+  },
+  "method_clarity": {
+   "n": 23,
+   "share": 0.0931174089068826,
+   "hit": 0.30434782608695654,
+   "ci": [
+    0.13636363636363635,
+    0.5
+   ],
+   "status": {
+    "hit": 7,
+    "minor_only": 0,
+    "related": 12,
+    "missed": 4
+   }
+  },
+  "novelty": {
+   "n": 25,
+   "share": 0.10121457489878542,
+   "hit": 0.56,
+   "ci": [
+    0.391304347826087,
+    0.7619047619047619
+   ],
+   "status": {
+    "hit": 14,
+    "minor_only": 0,
+    "related": 11,
+    "missed": 0
+   }
+  },
+  "other": {
+   "n": 1,
+   "share": 0.004048582995951417,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 1,
+    "missed": 0
+   }
+  },
+  "presentation": {
+   "n": 8,
+   "share": 0.032388663967611336,
+   "hit": 0.125,
+   "ci": [
+    0,
+    0.2727272727272727
+   ],
+   "status": {
+    "hit": 1,
+    "minor_only": 0,
+    "related": 5,
+    "missed": 2
+   }
+  },
+  "reproducibility": {
+   "n": 1,
+   "share": 0.004048582995951417,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 1,
+    "missed": 0
+   }
+  },
+  "scope": {
+   "n": 33,
+   "share": 0.13360323886639677,
+   "hit": 0.3939393939393939,
+   "ci": [
+    0.2682926829268293,
+    0.5357142857142857
+   ],
+   "status": {
+    "hit": 13,
+    "minor_only": 0,
+    "related": 14,
+    "missed": 6
+   }
+  },
+  "theory": {
+   "n": 19,
+   "share": 0.07692307692307693,
+   "hit": 0.5789473684210527,
+   "ci": [
+    0.4230769230769231,
+    0.75
+   ],
+   "status": {
+    "hit": 11,
+    "minor_only": 0,
+    "related": 7,
+    "missed": 1
+   }
+  }
+ },
+ "evidence": {
+  "derivation": {
+   "n": 16,
+   "share": 0.06477732793522267,
+   "hit": 0.5,
+   "ci": [
+    0.2777777777777778,
+    0.7333333333333333
+   ],
+   "status": {
+    "hit": 8,
+    "minor_only": 0,
+    "related": 7,
+    "missed": 1
+   }
+  },
+  "outside": {
+   "n": 46,
+   "share": 0.1862348178137652,
+   "hit": 0.5217391304347826,
+   "ci": [
+    0.37142857142857144,
+    0.6976744186046512
+   ],
+   "status": {
+    "hit": 24,
+    "minor_only": 0,
+    "related": 20,
+    "missed": 2
+   }
+  },
+  "text": {
+   "n": 175,
+   "share": 0.708502024291498,
+   "hit": 0.4114285714285714,
+   "ci": [
+    0.3392857142857143,
+    0.4858757062146893
+   ],
+   "status": {
+    "hit": 72,
+    "minor_only": 0,
+    "related": 83,
+    "missed": 20
+   }
+  },
+  "visual": {
+   "n": 10,
+   "share": 0.04048582995951417,
+   "hit": 0.2,
+   "ci": [
+    0,
+    0.5
+   ],
+   "status": {
+    "hit": 2,
+    "minor_only": 0,
+    "related": 5,
+    "missed": 3
+   }
+  }
+ },
+ "specificity": {
+  "generic": {
+   "n": 27,
+   "share": 0.10931174089068826,
+   "hit": 0.25925925925925924,
+   "ci": [
+    0.10714285714285714,
+    0.38235294117647056
+   ],
+   "status": {
+    "hit": 7,
+    "minor_only": 0,
+    "related": 16,
+    "missed": 4
+   }
+  },
+  "specific": {
+   "n": 220,
+   "share": 0.8906882591093117,
+   "hit": 0.45,
+   "ci": [
+    0.3835616438356164,
+    0.5240174672489083
+   ],
+   "status": {
+    "hit": 99,
+    "minor_only": 0,
+    "related": 99,
+    "missed": 22
+   }
+  }
+ },
+ "reason": {
+  "-": {
+   "n": 105,
+   "share": 0.4251012145748988,
+   "hit": 0.9904761904761905,
+   "ci": [
+    0.968421052631579,
+    1
+   ],
+   "status": {
+    "hit": 104,
+    "minor_only": 0,
+    "related": 1,
+    "missed": 0
+   }
+  },
+  "deep_detail": {
+   "n": 10,
+   "share": 0.04048582995951417,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 3,
+    "missed": 7
+   }
+  },
+  "different_framing": {
+   "n": 29,
+   "share": 0.11740890688259109,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 29,
+    "missed": 0
+   }
+  },
+  "narrower": {
+   "n": 71,
+   "share": 0.2874493927125506,
+   "hit": 0.028169014084507043,
+   "ci": [
+    0,
+    0.07142857142857142
+   ],
+   "status": {
+    "hit": 2,
+    "minor_only": 0,
+    "related": 69,
+    "missed": 0
+   }
+  },
+  "needs_outside": {
+   "n": 4,
+   "share": 0.016194331983805668,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 3,
+    "missed": 1
+   }
+  },
+  "needs_visual": {
+   "n": 5,
+   "share": 0.020242914979757085,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 2,
+    "missed": 3
+   }
+  },
+  "preference": {
+   "n": 19,
+   "share": 0.07692307692307693,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 6,
+    "missed": 13
+   }
+  },
+  "unclear": {
+   "n": 4,
+   "share": 0.016194331983805668,
+   "hit": 0,
+   "ci": [
+    0,
+    0
+   ],
+   "status": {
+    "hit": 0,
+    "minor_only": 0,
+    "related": 2,
+    "missed": 2
+   }
+  }
+ }
+}

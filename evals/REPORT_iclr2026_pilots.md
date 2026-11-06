@@ -150,10 +150,64 @@ R1–R4 0.52, R1–R3 0.48, R2–R4 0.55, all five 0.48.
 - **Caveats.** n = 20; one LLM annotator per paper; humans saw the figures, the AI read the
   extracted text; agreement with humans is not correctness.
 
+### What the panel misses, and why
+
+`issue_overlap.py misses` lists each of the 247 human main issues with its status: **hit**
+(matched by an AI main issue, 106), **related** (only a partial overlap with an AI issue, 115)
+or **missed** (nothing close, 26). One Sonnet labeler per five papers (`evals/issue_miss_prompt.md`)
+then gave each issue a topic, the evidence a reviewer needs to raise it, and, for the 141
+non-hits, the likely reason, comparing it with that paper's AI issue summaries. Topic and
+evidence were labeled before the labeler saw which issues were hit. The labeler did not see the
+papers. Numbers: `evals/iclr2026_issue_misses.json` (pooled over issues; CIs by paper bootstrap).
+
+| Topic | Issues | Hit rate [95% CI] |
+|---|---|---|
+| Missing experiments, ablations, datasets | 75 | 0.33 [0.23, 0.45] |
+| Baselines | 33 | 0.58 [0.42, 0.75] |
+| Scope, limitations, generalization | 33 | 0.39 [0.27, 0.54] |
+| Novelty, related work | 25 | 0.56 [0.39, 0.76] |
+| Method clarity | 23 | 0.30 [0.14, 0.50] |
+| Unsupported claims | 19 | 0.37 [0.10, 0.67] |
+| Theory | 19 | 0.58 [0.42, 0.75] |
+| Efficiency | 10 | 0.90 [0.70, 1.00] |
+| Presentation | 8 | 0.12 [0.00, 0.27] |
+
+| Evidence needed | Issues | Hit rate |
+|---|---|---|
+| Paper text and tables | 175 | 0.41 |
+| Outside knowledge (specific prior work, field norms) | 46 | 0.52 |
+| Step-by-step derivation | 16 | 0.50 |
+| Figures or qualitative results | 10 | 0.20 |
+
+| Likely reason (141 non-hits) | Related | Missed |
+|---|---|---|
+| AI raised the same area only as a broad category | 69 | 0 |
+| AI raised a related concern with a different diagnosis | 29 | 0 |
+| Subjective request (more scope, another setting) | 6 | 13 |
+| Fine technical or derivation detail | 3 | 7 |
+| Needs figures or qualitative results | 2 | 3 |
+| Needs a specific prior work | 3 | 1 |
+| Unclear | 3 | 2 |
+
+- **Mostly not blind spots but granularity.** 82% of the non-hits have a related AI issue. Half
+  of all non-hits are cases where the panel said "more baselines" or "more ablations" and the
+  human named which one; most of these human issues are specific (62 of 69).
+- **Missing experiments** are the largest topic (30% of human issues) and among the least often
+  hit (0.33): every reviewer can ask for a different experiment, and only a named one matches.
+- **Not the expected causes.** Issues that need outside knowledge are hit *more* often (0.52)
+  than text-only ones, so the literature check works; figures matter but are rare in weakness
+  sections (10 issues, hit 0.20).
+- **What is truly missed** (26) is mostly subjective scope requests (13) and fine technical
+  detail (7). The labeler marked no human issue as likely wrong, but it could not check the
+  paper.
+- **Consensus.** Of the 52 issues raised by two or more humans, 37 were hit; 9 of the 15 others
+  were raised only as a broad category.
+
 **2.11 changes from this study**: the Devil's Advocate lists only issues that attack a step of
 the core argument chain (no MINOR list); R4 keeps its vote (the ratings rank worse without it)
 but lists weaknesses only from contribution clarity, venue fit and presentation; the Report
-Checker adds the 3–5 key concerns. To be measured with the same tool on the 2.11 runs.
+Checker adds the 3–5 key concerns; the report template asks each weakness to name the concrete
+missing experiment, baseline or definition. To be measured with the same tool on the 2.11 runs.
 
 ## Split pipeline trial (3 papers)
 
