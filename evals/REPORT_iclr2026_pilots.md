@@ -193,16 +193,20 @@ R4 0.14 (0.02), DA 0.21 (0.01).
 how many humans raised the issue, the rating of the reviewers who raised it (ICLR 2026 scale;
 ≤ 4 is a reject vote), and whether it was one of the first two main points of a review.
 
-| Human main issues (1017) | Issues | Hit rate [95% CI] |
+| Human main issues (1018) | Issues | Hit rate [95% CI] |
 |---|---|---|
-| Raised by 2+ humans | 218 | **0.74** [0.67, 0.80] |
+| Raised by 2+ humans | 219 | **0.74** [0.67, 0.80] |
 | Raised by one human | 799 | 0.37 [0.34, 0.40] |
-| Raised by a reviewer who voted reject (≤ 4) | 789 | 0.48 [0.45, 0.52] |
+| Raised by a reviewer who voted reject (≤ 4) | 790 | 0.48 [0.45, 0.52] |
 | Raised only by reviewers who voted accept (≥ 6) | 228 | 0.34 [0.28, 0.40] |
-| Raised by the paper's lowest-rating reviewer | 554 | 0.50 [0.46, 0.54] |
+| Raised by the paper's lowest-rating reviewer | 555 | 0.50 [0.46, 0.54] |
 | One of a reviewer's first two main points | 535 | 0.51 [0.47, 0.56] |
-| Not among any reviewer's first two points | 482 | 0.38 [0.34, 0.42] |
+| Not among any reviewer's first two points | 483 | 0.38 [0.34, 0.42] |
 | One human, accept votes only, not a lead point | 91 | 0.29 [0.20, 0.38] |
+
+The one issue the AI raised only as a minor point counts as not hit, as in the hit rate above.
+"Raised by 2+ humans" counts reviewers who listed the issue as a main point (219); the miss table
+below counts any mention, minor points included (221).
 
 Of the hit issues, 63% of the consensus ones and 56% of the single-human ones match an AI issue
 that two or more AI reviewers raised: the panel's own agreement tracks importance only weakly.
@@ -242,7 +246,7 @@ the original annotation on 85% of human issues (0.47 vs 0.46).
   found more often than single-reviewer ones (0.45 vs 0.30). The prioritization is aligned with
   the humans', but weakly.
 - **Most human priorities are not in the top 5.** The five concerns match 34% of the consensus
-  issues (0.74 for the whole panel) and 17% of all human issues; with "related" counted, 56% and
+  issues (0.74 for the whole panel) and 17% of all human issues; with "related" counted, 55% and
   38%. Each concern bundles several points into one line, which the strict "same specific
   point" criterion often rejects.
 - **No order within the five.** Concern #1 matches a human issue 0.37 of the time, #5 0.29, with

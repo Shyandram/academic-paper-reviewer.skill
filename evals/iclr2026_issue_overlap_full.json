@@ -3853,19 +3853,19 @@
  },
  "importance": {
   "all": {
-   "n": 1017,
+   "n": 1018,
    "hit": 0.448,
    "ci": [
-    0.417,
+    0.416,
     0.481
    ]
   },
   "raised by 2+ humans": {
-   "n": 218,
-   "hit": 0.739,
+   "n": 219,
+   "hit": 0.735,
    "ci": [
-    0.674,
-    0.801
+    0.671,
+    0.798
    ]
   },
   "raised by 1 human": {
@@ -3877,7 +3877,7 @@
    ]
   },
   "raised by a negative reviewer (rating <= 4)": {
-   "n": 789,
+   "n": 790,
    "hit": 0.48,
    "ci": [
     0.447,
@@ -3893,11 +3893,11 @@
    ]
   },
   "raised by the paper's lowest-rating reviewer": {
-   "n": 554,
-   "hit": 0.496,
+   "n": 555,
+   "hit": 0.495,
    "ci": [
-    0.458,
-    0.538
+    0.456,
+    0.537
    ]
   },
   "a reviewer's first or second main point": {
@@ -3909,27 +3909,27 @@
    ]
   },
   "not among any reviewer's first two points": {
-   "n": 482,
-   "hit": 0.38,
+   "n": 483,
+   "hit": 0.379,
    "ci": [
-    0.337,
-    0.423
+    0.336,
+    0.422
    ]
   },
   "raised by a confident reviewer (confidence >= 4)": {
-   "n": 731,
-   "hit": 0.464,
+   "n": 732,
+   "hit": 0.463,
    "ci": [
     0.423,
-    0.504
+    0.503
    ]
   },
   "2+ humans and a negative reviewer": {
-   "n": 206,
-   "hit": 0.743,
+   "n": 207,
+   "hit": 0.739,
    "ci": [
-    0.677,
-    0.806
+    0.673,
+    0.802
    ]
   },
   "1 human, positive reviewers only, not a lead point": {
@@ -3946,7 +3946,7 @@
   "recall": {
    "all": {
     "panel": {
-     "n": 1017,
+     "n": 1018,
      "k": 466,
      "rate": 0.458,
      "ci": [
@@ -3955,7 +3955,7 @@
      ]
     },
     "top5": {
-     "n": 1017,
+     "n": 1018,
      "k": 174,
      "rate": 0.171,
      "ci": [
@@ -3964,7 +3964,7 @@
      ]
     },
     "top3": {
-     "n": 1017,
+     "n": 1018,
      "k": 108,
      "rate": 0.106,
      "ci": [
@@ -3973,7 +3973,7 @@
      ]
     },
     "top1": {
-     "n": 1017,
+     "n": 1018,
      "k": 37,
      "rate": 0.036,
      "ci": [
@@ -3982,59 +3982,59 @@
      ]
     },
     "top5rel": {
-     "n": 1017,
+     "n": 1018,
      "k": 391,
      "rate": 0.384,
      "ci": [
       0.352,
-      0.417
+      0.416
      ]
     }
    },
    "2+ humans": {
     "panel": {
-     "n": 218,
+     "n": 219,
      "k": 161,
-     "rate": 0.739,
+     "rate": 0.735,
      "ci": [
-      0.681,
-      0.793
+      0.676,
+      0.79
      ]
     },
     "top5": {
-     "n": 218,
+     "n": 219,
      "k": 74,
-     "rate": 0.339,
+     "rate": 0.338,
      "ci": [
-      0.28,
-      0.397
+      0.279,
+      0.396
      ]
     },
     "top3": {
-     "n": 218,
+     "n": 219,
      "k": 48,
-     "rate": 0.22,
+     "rate": 0.219,
      "ci": [
-      0.168,
-      0.276
+      0.167,
+      0.275
      ]
     },
     "top1": {
-     "n": 218,
+     "n": 219,
      "k": 17,
      "rate": 0.078,
      "ci": [
       0.042,
-      0.12
+      0.119
      ]
     },
     "top5rel": {
-     "n": 218,
+     "n": 219,
      "k": 121,
-     "rate": 0.555,
+     "rate": 0.553,
      "ci": [
-      0.5,
-      0.611
+      0.496,
+      0.606
      ]
     }
    },
@@ -4087,16 +4087,16 @@
    },
    "reject vote": {
     "panel": {
-     "n": 789,
+     "n": 790,
      "k": 384,
-     "rate": 0.487,
+     "rate": 0.486,
      "ci": [
-      0.45,
+      0.449,
       0.526
      ]
     },
     "top5": {
-     "n": 789,
+     "n": 790,
      "k": 145,
      "rate": 0.184,
      "ci": [
@@ -4105,7 +4105,7 @@
      ]
     },
     "top3": {
-     "n": 789,
+     "n": 790,
      "k": 95,
      "rate": 0.12,
      "ci": [
@@ -4114,7 +4114,7 @@
      ]
     },
     "top1": {
-     "n": 789,
+     "n": 790,
      "k": 30,
      "rate": 0.038,
      "ci": [
@@ -4123,12 +4123,12 @@
      ]
     },
     "top5rel": {
-     "n": 789,
+     "n": 790,
      "k": 317,
-     "rate": 0.402,
+     "rate": 0.401,
      "ci": [
-      0.367,
-      0.439
+      0.366,
+      0.438
      ]
     }
    },
@@ -4228,16 +4228,16 @@
    },
    "not a lead point": {
     "panel": {
-     "n": 482,
+     "n": 483,
      "k": 182,
-     "rate": 0.378,
+     "rate": 0.377,
      "ci": [
-      0.335,
+      0.334,
       0.423
      ]
     },
     "top5": {
-     "n": 482,
+     "n": 483,
      "k": 59,
      "rate": 0.122,
      "ci": [
@@ -4246,7 +4246,7 @@
      ]
     },
     "top3": {
-     "n": 482,
+     "n": 483,
      "k": 42,
      "rate": 0.087,
      "ci": [
@@ -4255,7 +4255,7 @@
      ]
     },
     "top1": {
-     "n": 482,
+     "n": 483,
      "k": 15,
      "rate": 0.031,
      "ci": [
@@ -4264,36 +4264,36 @@
      ]
     },
     "top5rel": {
-     "n": 482,
+     "n": 483,
      "k": 153,
      "rate": 0.317,
      "ci": [
       0.275,
-      0.363
+      0.362
      ]
     }
    },
    "important (2+ humans, reject vote or lead)": {
     "panel": {
-     "n": 926,
+     "n": 927,
      "k": 437,
-     "rate": 0.472,
+     "rate": 0.471,
      "ci": [
-      0.437,
-      0.509
+      0.436,
+      0.508
      ]
     },
     "top5": {
-     "n": 926,
+     "n": 927,
      "k": 169,
-     "rate": 0.183,
+     "rate": 0.182,
      "ci": [
       0.156,
       0.21
      ]
     },
     "top3": {
-     "n": 926,
+     "n": 927,
      "k": 106,
      "rate": 0.114,
      "ci": [
@@ -4302,7 +4302,7 @@
      ]
     },
     "top1": {
-     "n": 926,
+     "n": 927,
      "k": 35,
      "rate": 0.038,
      "ci": [
@@ -4311,7 +4311,7 @@
      ]
     },
     "top5rel": {
-     "n": 926,
+     "n": 927,
      "k": 365,
      "rate": 0.394,
      "ci": [
@@ -4538,10 +4538,10 @@
     },
     "rel": {
      "n": 1751,
-     "k": 961,
+     "k": 962,
      "rate": 0.549,
      "ci": [
-      0.523,
+      0.524,
       0.574
      ]
     }
@@ -4649,5 +4649,6 @@
   },
   "rejudged_panel_agreement_with_original": 0.851,
   "note": "EIC top 5 concerns (summary.json) mixed blind with the panel's main issues; one Sonnet annotator per paper (evals/gap_match_prompt.md) matched each human main issue. recall = share of human issues matched; precision = share of AI items matching >=1 human issue."
- }
+ },
+ "importance_note": "Human main issues with status minor_only (raised by the AI only as a minor point) count as not hit, as in the overlap hit rate; there is 1 such issue, so n = 1018. Consensus here means 2+ humans raised the issue as a main point (219); the misses table counts any human mention, including minor points (221)."
 }
