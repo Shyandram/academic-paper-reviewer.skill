@@ -499,7 +499,14 @@ def cmd_fetch(a):
     if a.pick == "balanced":
         rows = [r for r in rows if r["paper_id"] not in reviewed]  # already have results
         rows = rows[a.offset:a.offset + a.limit] if a.limit else rows[a.offset:]
-    if a.pick == "stratified":  # pilot: drawn from the balanced set, so its runs count later
+    if a.only:  # named papers (a small validation run): no pick, offset or limit
+        want = [p.strip() for p in a.only.split(",") if p.strip()]
+        have = {r["paper_id"]: r for r in rows}
+        missing = [p for p in want if p not in have]
+        if missing:
+            sys.exit(f"error: --only names papers without text or outside the split: {missing}")
+        rows = [have[p] for p in want]
+    elif a.pick == "stratified":  # pilot: drawn from the balanced set, so its runs count later
         rows = stratified(everyone, rows, a.limit or len(rows), prefer=prefer)
         for r in rows:
             print(f"  pick {r['paper_id']}: {group(r)}, {r['split']}, mean {r['mean_human']}, "
@@ -1035,6 +1042,8 @@ def main():
     h.add_argument("--ids-out")
     h.add_argument("--splits-out", help="with --pick balanced/stratified: write the balanced split")
     h.add_argument("--dry-run", action="store_true", help="select only; no downloads")
+    h.add_argument("--only", help="comma-separated paper ids to fetch instead of a pick "
+                                  "(a small validation run); offset and limit are ignored")
     h.add_argument("--prefer", help="JSON list of paper ids to prefer in the pick "
                                     "(e.g. an earlier pilot, for a like-for-like rerun)")
     h.add_argument("--reviewed", help="JSON list of paper ids already reviewed: kept in the "

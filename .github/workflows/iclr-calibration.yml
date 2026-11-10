@@ -72,6 +72,7 @@ jobs:
       budget: ${{ steps.c.outputs.budget }}
       effort: ${{ steps.c.outputs.effort }}
       pick: ${{ steps.c.outputs.pick }}
+      only: ${{ steps.c.outputs.only }}
       pipeline: ${{ steps.c.outputs.pipeline }}
       auth: ${{ steps.c.outputs.auth }}
       runner: ${{ steps.c.outputs.runner }}
@@ -88,7 +89,7 @@ jobs:
           import json, os, re
           cfg = {"split": "all", "offset": "0", "limit": "2", "model": "claude-haiku-5-5",
                  "max_parallel": "2", "mode": "review", "runs": "",
-                 "budget": "3", "pick": "order", "effort": "",
+                 "budget": "3", "pick": "order", "only": "", "effort": "",
                  "pipeline": "single", "auth": "api", "runner": "claude",
                  "price_in": "0", "price_cached": "0", "price_out": "0"}
           given = json.loads(os.environ.get("INPUTS") or "null") or {}
@@ -99,6 +100,9 @@ jobs:
           cfg.update({k: str(v) for k, v in given.items() if k in cfg})
           assert cfg["mode"] in ("review", "evaluate")
           assert cfg["pick"] in ("order", "stratified", "balanced")
+          if isinstance(given.get("only"), list):
+              cfg["only"] = ",".join(given["only"])
+          assert re.fullmatch(r"[A-Za-z0-9_-]*(,[A-Za-z0-9_-]+)*", cfg["only"])  # paper ids (validation run)
           assert re.fullmatch(r"[0-9]+(\.[0-9]+)?", cfg["budget"])  # USD cap per paper
           assert re.fullmatch(r"[0-9,]*", cfg["runs"])
           assert cfg["split"] in ("all", "train", "test")
@@ -139,6 +143,7 @@ jobs:
           python3 -I evals/iclr_calibration.py fetch $W/sample.jsonl evals/iclr2026_sources.json \
             --split "${{ needs.config.outputs.split }}" --offset "${{ needs.config.outputs.offset }}" --limit "${{ needs.config.outputs.limit }}" \
             --pick "${{ needs.config.outputs.pick }}" --ids-out ids.json \
+            $( [ -n "${{ needs.config.outputs.only }}" ] && echo --only "${{ needs.config.outputs.only }}" ) \
             $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json ) \
             $( [ -f evals/iclr2026_prefer.json ] && echo --prefer evals/iclr2026_prefer.json )
           echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
