@@ -1,7 +1,8 @@
 # ICLR 2026 calibration pilots
 
 Pilots for the paperreview.ai-style evaluation (`evals/iclr_calibration.py`,
-`.github/workflows/iclr-calibration.yml`). Per-paper numbers: `evals/iclr2026_pilot_scores.json`.
+`.github/workflows/iclr-calibration.yml`). Per-paper numbers: `evals/iclr2026_pilot_scores.json` (pilots),
+`evals/iclr2026_full_scores.json` (full evaluation, AI outputs only).
 Review text and manuscripts are not committed.
 
 ## Setup
@@ -18,6 +19,72 @@ Review text and manuscripts are not committed.
 | 3 | 2.10 | Sonnet / high | normalized arXiv | see below |
 
 Pilots 2 and 3 review the same 20 papers; 12 of them are also in pilot 1.
+
+## Full evaluation: skill 2.10.1, 86 papers (Sonnet, high effort)
+
+The balanced set of the protocol: 86 papers (45 train / 41 test; 23 accepted, 43 rejected,
+17 withdrawn, 3 desk-rejected), single context, API. 66 papers were reviewed in run
+42825160181; pilot 3's 20 runs are reused (2.10.1 has the 2.10 panel, scoring and decision;
+only optional post-review parts changed). 86/86 runs finished. Cost $166.61 in total,
+$1.94 per paper (median $1.91, range $1.29–2.88; $127.16 for the 66 new runs). Metrics: run 42840835940.
+
+Spearman of the panel rating (reviewers' mean 1–6 Overall on the ICLR map, not fitted) with
+the mean human rating [bootstrap 95% CI] / AUC for acceptance:
+
+| Papers | n | Spearman | AUC |
+|---|---|---|---|
+| All | 86 | **+0.47** [+0.27, +0.64] | 0.64 |
+| Pilot 3's 20 | 20 | +0.48 [+0.10, +0.74] | 0.67 |
+| The 66 new papers | 66 | +0.48 [+0.25, +0.66] | 0.64 |
+| Test split | 41 | +0.50 [+0.21, +0.72] | 0.67 |
+| Test split, against one human (protocol) | 41 | +0.45 [+0.14, +0.69] | 0.67 |
+| Without withdrawn papers | 69 | +0.40 [+0.17, +0.59] | 0.61 |
+| Without the 11 papers the reviewer recognized | 75 | +0.48 [+0.28, +0.65] | 0.66 |
+
+References on the same 86 papers: one human vs another Spearman +0.14, one human's AUC 0.64
+(on the 41 test papers: −0.02 and 0.63). paperreview.ai (ICLR 2025): AI 0.42 / 0.75,
+human 0.41 / 0.84.
+
+| Predictor (86 papers) | NMAE ± std [CI] | NME ± std | Spearman | AUC |
+|---|---|---|---|---|
+| Panel rating | **0.084** ± 0.063 [0.071, 0.098] | **−0.003** ± 0.105 | +0.47 | 0.64 |
+| Final rating (integer, ICLR scale) | 0.087 ± 0.064 [0.074, 0.102] | −0.018 ± 0.107 | +0.47 | 0.64 |
+| Constant (median of these papers' mean ratings) | 0.089 ± 0.074 | — | — | — |
+| One human vs mean human | 0.118 ± 0.087 | — | — | 0.64 |
+| One human vs another human | 0.188 ± 0.157 | — | +0.14 | — |
+
+Pipeline stages (Spearman, 86 papers; panel − stage [95% CI]): EIC-weighted rating 0.45
+(+0.02 [−0.01, +0.06]), reviewers' pool position 0.48 (−0.01 [−0.06, +0.05]), EIC pool
+position 0.45 (+0.02 [−0.03, +0.08]), panel without the DA 0.48 (−0.01 [−0.04, +0.02]).
+No stage is better or worse than the panel rating.
+
+The protocol's regression (7 EIC-weighted dimensions fitted on the 45 train papers, scored on
+the 41 test papers against one human): Spearman +0.19 [−0.13, +0.48], AUC 0.67 [0.44, 0.87],
+NMAE 0.084; without withdrawn papers +0.05. Three of the seven fitted weights are negative
+(clarity, experimental validation, reproducibility): 45 papers do not fit seven correlated
+dimensions, and the unfitted panel rating ranks the same test papers better (+0.45).
+
+Rating spread: the final Overall is 3 (ICLR 4) for 67 of 86 papers, 2 for 10 and 4 for 9.
+Mean panel rating (ICLR scale) by decision, AI / human: accepted 4.45 / 5.28, rejected
+4.10 / 3.89, withdrawn 3.79 / 3.22, desk-rejected 3.87 / 4.56. The order is right, but the
+accepted − rejected gap is 0.35 points against the humans' 1.39.
+
+- **The pilot 3 signal holds.** The 66 new papers give the same Spearman as pilot 3's 20
+  (0.48 and 0.48); it was not a lucky sample.
+- **Ranking is above one-human agreement on the same papers** (0.47 vs 0.14) and at
+  paperreview.ai's AI level (0.42, other year and papers). Acceptance AUC (0.64) equals one
+  human's here but is below paperreview.ai's 0.75.
+- **Not driven by recognized papers**: the reviewer said it knew 11 of the 86 (13%); without
+  them Spearman is unchanged (0.48). Unlike pilot 3, they are not all rated high (EIC pool
+  position 47–70).
+- **Withdrawn papers carry part of the signal**: without them Spearman falls to 0.40.
+- **Use the continuous panel rating**, not the regression over dimensions. The final integer
+  rating ranks as well here (0.47) but puts 78% of papers on one value.
+- **Compression is the main weakness**: good papers are under-rated (accepted papers
+  0.8 points below the humans) and weak ones over-rated.
+- **No score leak**: the reviewers' workspace held no human scores for the 66 new papers
+  (`evals/iclr2026_pilot_scores.json` covers only the pilot papers); from commit cc5fffd the
+  workflow also removes all evaluation data from the reviewer's workspace.
 
 ## Results (pilots 2 and 3, same 20 papers)
 
@@ -365,10 +432,11 @@ for the next skill version, to be evaluated against 2.10.
 - Haiku has no signal: all scores sit near the acceptance bar (EIC pool position 38–50) whatever the paper.
 - Sonnet at high effort gives the first signal that is distinguishable from zero (final rating CI excludes 0),
   at about human-human agreement; AUC is still below paperreview.ai's 0.75.
-- The final rating carries more signal than the plain mean of dimensions; the protocol's linear
-  regression over the 7 dimensions needs the full balanced set (86 papers, 45 train / 41 test).
+- The final rating carries more signal than the plain mean of dimensions. On the full balanced
+  set (86 papers) the protocol's regression over the 7 dimensions does worse than the unfitted
+  panel rating (test split 0.19 vs 0.45); see "Full evaluation".
 - Recognized papers all scored high (EIC 65–70) regardless of outcome; report them separately.
-- 20 papers give wide intervals; these are pilot numbers, not the evaluation result.
+- 20 papers give wide intervals; the full 86-paper evaluation above is the result to cite.
 
 ## Per paper (sorted by mean human rating)
 

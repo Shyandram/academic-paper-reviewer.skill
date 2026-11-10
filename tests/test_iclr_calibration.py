@@ -1,3 +1,4 @@
+import json
 import random
 import sys
 import unittest
@@ -176,6 +177,15 @@ class CalibrationMath(unittest.TestCase):
         self.assertEqual(stages["EIC-weighted rating"]["panel_minus_stage"], 0.0)
         self.assertEqual(stages["reviewers' pool position"]["spearman"], 1.0)
         self.assertIsNone(stages["EIC pool position"]["spearman"])  # constant
+        self.assertEqual(cal.pilot(rows, feats, reps=50)["n_recognized"], 0)
+        feats["p11"]["recognized"] = True
+        feats["p0"]["official_rating"] = 6  # a recognized paper rated high would hurt
+        feats["p0"]["recognized"] = True
+        out = cal.pilot(rows, feats, reps=50)
+        vals = {m["metric"]: m for m in out["results"]}
+        self.assertEqual(out["n_recognized"], 2)
+        self.assertEqual(vals["spearman(panel rating, mean human), not recognized"]["value"], 1.0)
+        self.assertEqual(vals["spearman(panel rating, mean human), not recognized"]["n"], 10)
 
 
 if __name__ == "__main__":
@@ -198,3 +208,23 @@ class PanelVariants(unittest.TestCase):
         self.assertAlmostEqual(est["pool_with_checker"], 40)       # (70 + 30 + 20) / 3, no DA
         self.assertAlmostEqual(est["rating_with_checker"], 3)      # (4 + 2 + 3) / 3
         self.assertIsNone(cal.panel_variants(res, {})["pool_with_checker"])
+
+
+class Features(unittest.TestCase):
+    def test_features_record_recognition_and_cost(self):
+        import tempfile, types
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "results" / "iclr26-abc"
+            p.mkdir(parents=True)
+            (p / "aggregate.json").write_text(json.dumps({
+                "dimensions": [{"key": "novelty", "weighted_avg": 50}], "final_overall": 3,
+                "official_rating": 3.2, "per_reviewer": [{"role": "R1", "overall": 3,
+                                                          "pool_position": 40}]}))
+            (p / "summary.json").write_text(json.dumps({"recognized": True}))
+            (p / "run.json").write_text(json.dumps({"total_cost_usd": 1.5, "model": "m"}))
+            out = Path(d) / "f.jsonl"
+            cal.cmd_features(types.SimpleNamespace(results=str(Path(d) / "results"), out=str(out)))
+            f = json.loads(out.read_text())
+            self.assertEqual(f["paper_id"], "abc")
+            self.assertTrue(f["recognized"])
+            self.assertEqual((f["cost_usd"], f["model"]), (1.5, "m"))

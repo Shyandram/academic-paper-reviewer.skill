@@ -13,6 +13,11 @@ name: ICLR calibration (paperreview.ai protocol)
 # Both then run the optional post-review Gap Scout in a fresh context that cannot read or
 # change the review.
 # budget is then the cap per phase. auth "subscription" uses CLAUDE_CODE_OAUTH_TOKEN.
+#
+# runner "codex" (single pipeline only) runs the same prompt with the OpenAI Codex CLI
+# (`codex exec`, OPENAI_API_KEY secret), model e.g. "gpt-6.1-terra", effort as Codex's
+# model_reasoning_effort. Codex has no budget cap: the job timeout bounds it, and run.json
+# records the token usage with a cost estimated from the price_* keys (USD per 1M tokens).
 on:
   workflow_dispatch:
     inputs:
@@ -69,6 +74,10 @@ jobs:
       pick: ${{ steps.c.outputs.pick }}
       pipeline: ${{ steps.c.outputs.pipeline }}
       auth: ${{ steps.c.outputs.auth }}
+      runner: ${{ steps.c.outputs.runner }}
+      price_in: ${{ steps.c.outputs.price_in }}
+      price_cached: ${{ steps.c.outputs.price_cached }}
+      price_out: ${{ steps.c.outputs.price_out }}
     steps:
       - uses: actions/checkout@v4
       - id: c
@@ -80,7 +89,8 @@ jobs:
           cfg = {"split": "all", "offset": "0", "limit": "2", "model": "claude-haiku-5-5",
                  "max_parallel": "2", "mode": "review", "runs": "",
                  "budget": "3", "pick": "order", "effort": "",
-                 "pipeline": "single", "auth": "api"}
+                 "pipeline": "single", "auth": "api", "runner": "claude",
+                 "price_in": "0", "price_cached": "0", "price_out": "0"}
           given = json.loads(os.environ.get("INPUTS") or "null") or {}
           if not given and os.path.exists("evals/iclr_run.json"):
               given = json.load(open("evals/iclr_run.json"))
@@ -93,10 +103,15 @@ jobs:
           assert re.fullmatch(r"[0-9,]*", cfg["runs"])
           assert cfg["split"] in ("all", "train", "test")
           assert all(cfg[k].isdigit() for k in ("offset", "limit", "max_parallel"))
-          assert re.fullmatch(r"claude-[a-z0-9.-]+", cfg["model"])
+          assert cfg["runner"] in ("claude", "codex")
+          assert re.fullmatch(r"claude-[a-z0-9.-]+" if cfg["runner"] == "claude"
+                              else r"gpt-[a-z0-9.-]+", cfg["model"])
+          assert cfg["runner"] == "claude" or cfg["pipeline"] == "single"
+          assert all(re.fullmatch(r"[0-9]+(\.[0-9]+)?", cfg[k])
+                     for k in ("price_in", "price_cached", "price_out"))
           assert cfg["pipeline"] in ("single", "split", "check")
           assert cfg["auth"] in ("api", "subscription")
-          assert cfg["effort"] in ("", "low", "medium", "high", "xhigh", "max")
+          assert cfg["effort"] in ("", "minimal", "low", "medium", "high", "xhigh", "max")
           for k, v in cfg.items():
               print(f"{k}={v}")
           PY
@@ -141,7 +156,7 @@ jobs:
     needs: [config, prepare]
     if: needs.prepare.outputs.ids != '[]'
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ needs.config.outputs.pipeline == 'single' && 90 || 180 }}
+    timeout-minutes: ${{ needs.config.outputs.pipeline == 'single' && needs.config.outputs.runner == 'claude' && 90 || 180 }}
     strategy:
       fail-fast: false
       max-parallel: ${{ fromJSON(needs.config.outputs.max_parallel) }}
@@ -151,7 +166,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: {name: papers, path: evals/work/papers}
+      - name: Remove evaluation data from the workspace
+        # Committed pilot files hold human scores and decisions; the reviewer needs only
+        # the skill, the prompt and its own paper.
+        run: |
+          find evals -mindepth 1 -maxdepth 1 ! -name split ! -name work ! -name review_prompt.md -exec rm -rf {} +
+          ls evals
       - run: npm install -g @anthropic-ai/claude-code
+        if: needs.config.outputs.runner == 'claude'
+      - run: npm install -g @openai/codex
+        if: needs.config.outputs.runner == 'codex'
       - name: Review (single context)
         if: needs.config.outputs.pipeline == 'single'
         env:
@@ -175,12 +199,90 @@ jobs:
                         "scripts/related_search.py for the literature check.")
           print(t)
           PY
+          [ "${{ needs.config.outputs.runner }}" = claude ] || exit 0
           claude -p "$(cat prompt.md)" --model "${{ needs.config.outputs.model }}" \
             ${{ needs.config.outputs.effort && format('--effort {0}', needs.config.outputs.effort) || '' }} \
             --allowedTools "Read" "Write" "Edit" "Glob" "Grep" "Bash(python3:*)" \
             --max-budget-usd "${{ needs.config.outputs.budget }}" --output-format json > "evals/work/results/$ID/run.json" || true
           python3 -c "import json;r=json.load(open('evals/work/results/$ID/run.json'));print('cost_usd',r.get('total_cost_usd'),'turns',r.get('num_turns'))" || true
           ls -la "evals/work/results/$ID"
+      - name: Review (single context, Codex)
+        if: needs.config.outputs.runner == 'codex'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ID: ${{ matrix.id }}
+          MODEL: ${{ needs.config.outputs.model }}
+          EFFORT: ${{ needs.config.outputs.effort }}
+          PRICE_IN: ${{ needs.config.outputs.price_in }}
+          PRICE_CACHED: ${{ needs.config.outputs.price_cached }}
+          PRICE_OUT: ${{ needs.config.outputs.price_out }}
+        run: |
+          [ -n "$OPENAI_API_KEY" ] || { echo "OPENAI_API_KEY secret is not set"; exit 1; }
+          printenv OPENAI_API_KEY | codex login --with-api-key > /dev/null
+          unset OPENAI_API_KEY
+          R="evals/work/results/$ID"
+          # The same prompt as the Claude run; the skill is model-neutral Markdown.
+          sed -i 's/You are evaluating a Claude skill/You are evaluating a skill/' prompt.md
+          CFG=(-c sandbox_mode="workspace-write" -c sandbox_workspace_write.network_access=true)
+          [ -z "$EFFORT" ] || CFG+=(-c model_reasoning_effort="$EFFORT")
+          start=$(date +%s); deadline=$((start + 165 * 60))
+          timeout $((deadline - $(date +%s)))s codex exec --model "$MODEL" "${CFG[@]}" \
+            --skip-git-repo-check --json -o "$R/last_message.txt" - < prompt.md > "$R/codex_events.jsonl" || true
+          # An organization rate limit (tokens per minute) can stop a turn; resume the same
+          # session, which keeps everything done so far.
+          for i in 1 2 3 4 5 6 7 8; do
+            tail -n 1 "$R/codex_events.jsonl" | grep -q '"turn.failed".*rate limit' || break
+            [ $((deadline - $(date +%s))) -gt 300 ] || break
+            echo "rate limited; resume $i"; sleep 90
+            timeout $((deadline - $(date +%s)))s codex exec resume --last --model "$MODEL" "${CFG[@]}" \
+              --skip-git-repo-check --json -o "$R/last_message.txt" \
+              "Continue the task from where you stopped (the previous turn ended on an API rate limit). Do not redo finished steps." >> "$R/codex_events.jsonl" || true
+          done
+          python3 - "$R" "$start" "$HOME/.codex/sessions" <<'PY'
+          import glob, json, os, sys, time
+          res, start, sess = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+          keys = ("input_tokens", "cached_input_tokens", "output_tokens", "reasoning_output_tokens")
+          use, turns, failed, err = dict.fromkeys(keys, 0), 0, 0, None
+          for line in open(os.path.join(res, "codex_events.jsonl"), errors="replace"):
+              try:
+                  e = json.loads(line)
+              except ValueError:
+                  continue
+              if e.get("type") == "turn.completed":
+                  turns += 1
+                  for k in keys:
+                      use[k] += (e.get("usage") or {}).get(k, 0) or 0
+                  err = None
+              elif e.get("type") == "turn.failed":
+                  turns += 1; failed += 1
+                  err = str((e.get("error") or {}).get("message"))[:300]
+          # Failed turns report no usage in the event stream; the session log has the total.
+          total = None
+          for f in sorted(glob.glob(os.path.join(sess, "**", "*.jsonl"), recursive=True)):
+              for line in open(f, errors="replace"):
+                  if '"total_token_usage"' in line:
+                      try:
+                          t = json.loads(line)["payload"]["info"]["total_token_usage"]
+                          total = {k: t.get(k, 0) or 0 for k in keys}
+                      except (ValueError, KeyError, TypeError):
+                          pass
+          if total and total["input_tokens"] >= use["input_tokens"]:
+              use = total
+          p = {k: float(os.environ[k]) for k in ("PRICE_IN", "PRICE_CACHED", "PRICE_OUT")}
+          fresh = use["input_tokens"] - use["cached_input_tokens"]
+          cost = (fresh * p["PRICE_IN"] + use["cached_input_tokens"] * p["PRICE_CACHED"]
+                  + use["output_tokens"] * p["PRICE_OUT"]) / 1e6
+          done = os.path.exists(os.path.join(res, "summary.json"))
+          run = {"runner": "codex", "model": os.environ["MODEL"], "effort": os.environ["EFFORT"],
+                 "usage": use, "usage_source": "session log" if use is total else "events",
+                 "num_turns": turns, "failed_turns": failed,
+                 "duration_ms": (int(time.time()) - start) * 1000,
+                 "total_cost_usd": round(cost, 4), "cost_is_estimate": True,
+                 "prices_per_mtok": p, "is_error": err is not None or not done, "error": err}
+          json.dump(run, open(os.path.join(res, "run.json"), "w"), indent=1)
+          print(json.dumps(run))
+          PY
+          ls -la "$R"
       - name: Review (split or check, evals/split/)
         if: needs.config.outputs.pipeline != 'single'
         env:
