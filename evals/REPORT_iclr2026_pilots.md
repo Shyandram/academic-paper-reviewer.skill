@@ -72,8 +72,9 @@ accepted − rejected gap is 0.35 points against the humans' 1.39.
 
 - **The pilot 3 signal holds.** The 66 new papers give the same Spearman as pilot 3's 20
   (0.48 and 0.48); it was not a lucky sample.
-- **Ranking is above one-human agreement on the same papers** (0.47 vs 0.14). Acceptance AUC (0.64) equals one
-  human's here.
+- **Ranking is above one-human agreement on the same papers** (0.47 vs 0.14), roughly the level
+  paperreview.ai reports for its AI reviewer (0.42, other year and papers). Acceptance AUC (0.64)
+  equals one human's here.
 - **Not driven by recognized papers**: the reviewer said it knew 11 of the 86 (13%); without
   them Spearman is unchanged (0.48). Unlike pilot 3, they are not all rated high (EIC pool
   position 47–70).
