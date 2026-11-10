@@ -536,7 +536,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
     <h2 id="t-eval" class="rv" style="--i:1;margin-top:14px">Does it agree with human reviewers?</h2>
     <p class="sub rv" style="--i:2">We reviewed 86 ICLR 2026 submissions (23 accepted, 43 rejected, 20 withdrawn or desk-rejected) from anonymized arXiv versions, then compared the skill's scores with the real human scores it never saw.</p>
     <ul class="take rv" style="--i:3">
-      <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.47 for Sonnet at high effort, versus 0.14 between two human reviewers.</span></li>
+      <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.47 for Sonnet at high effort, versus 0.14 between two human reviewers. That is roughly the level paperreview.ai reports for its AI reviewer (0.42, on other papers from another year).</span></li>
       <li><span class="tk ok">✓</span><span><b>Scores are not biased</b>: on average neither too harsh nor too lenient (NME −0.003).</span></li>
       <li><span class="tk no">!</span><span><b>Scores bunch in the middle</b>: 78% of papers end at ICLR 4, so accepted papers are rated 0.8 points below the humans and weak ones a little above.</span></li>
       <li><span class="tk no">!</span><span><b>Model matters</b>: Haiku and two GPT-6.1 models showed little or no agreement with the humans on 20 papers. <a href="#models">See the model comparison</a>.</span></li>
