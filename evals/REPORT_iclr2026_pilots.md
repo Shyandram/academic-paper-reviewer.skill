@@ -385,6 +385,27 @@ moves only for a verified reason; a median above the primary claim's band moves 
 the profile missed is verified, and gaps the reviewers already deducted are not deducted again. Applied by hand to
 the round 3 reports, this gives 54, 50 and 47, in the human order; round 4 tests whether the EIC does it.
 
+**Round 4** (EIC from the panel median; `evals/iclr2026_terra213_validation_r4.json`, compared with round 3):
+
+| Paper | Human mean | Reviewer pools (r4) | Reviewer pool mean, r3 → r4 | EIC pool, r3 → r4 | Primary (r4) | Cost |
+|-------|-----------:|---------------------|-----------------------------|-------------------|--------------|-----:|
+| euMVC1DO4k | 6.0 | 47, 49, 51, 49, 45 | 55.8 → 48.2 | 45 → 49 | C1, incremental | $0.55 |
+| Lvkbe0CgmZ | 5.0 | 51, 52, 59, 53, 47 | 49.6 → 52.4 | 45 → 52 | C1, medium | $0.58 |
+| KtocialdxS | 2.67 | 49, 47, 50, 48, 45 | 46.8 → 47.8 | 45 → 48 | C1, incremental | $0.43 |
+
+- The EIC now follows the panel: each EIC pool is within one point of the reviewers' median, inside the
+  primary claim's band, with no gap deducted twice.
+- The reviewer instructions did not change between rounds 3 and 4, yet euMVC1DO4k's reviewer pool mean moved
+  from 55.8 to 48.2. This is the first, rough measure of run-to-run variation: up to about 8 points per paper,
+  as large as the differences between the three papers in rounds 3–4.
+
+**Across the four rounds.** What held in every round from 2 on: the lenient case (KtocialdxS) sits at 46–48
+instead of 57 (2.10.1), and the theory paper (Lvkbe0CgmZ) at 43–52 instead of 33. What did not: the control
+(euMVC1DO4k, human 6.0) fell from 61 to 48–56, because from round 2 on Terra judged its primary claim
+incremental and the band caps it at 54. The three papers now sit within about 46–56, so their order is within
+run-to-run variation. The three papers were also used to tune the changes; the next check needs papers the
+changes were not tuned on. Total cost of the four rounds at Terra's listed prices: about $5.70.
+
 ## Error on the ICLR scale (NMAE / NME)
 
 CSPaper-style errors against the mean human rating on the ICLR 2026 scale (0–10):
