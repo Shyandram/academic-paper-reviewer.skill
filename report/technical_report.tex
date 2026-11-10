@@ -10,6 +10,7 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage[numbers,sort&compress]{natbib}
+\usepackage{graphicx}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,fit,backgrounds,calc,shapes.geometric}
 \usepackage[hidelinks]{hyperref}
@@ -112,62 +113,15 @@ including what did not work.
 
 \begin{figure}[t]
 \centering
-\resizebox{\linewidth}{!}{%
-\begin{tikzpicture}[
-  font=\sffamily\small, >={Stealth[length=2.2mm]},
-  box/.style={draw=cLine, rounded corners=3pt, fill=white, align=center, inner sep=4pt, minimum height=9mm},
-  phase/.style={font=\sffamily\scriptsize\bfseries, text=cE},
-  rev/.style={draw=#1, fill=#1!10, rounded corners=3pt, minimum width=27mm, minimum height=6.2mm, font=\sffamily\scriptsize, align=center},
-  arr/.style={->, thick, draw=cE!80},
-  note/.style={font=\sffamily\scriptsize, text=black!65, align=center}]
-% input
-\node[box, minimum width=20mm] (in) {Manuscript\\(PDF / text)\\[1pt]\scriptsize + target venue};
-% phase 0
-\node[box, right=7mm of in, minimum width=27mm] (p0) {\textbf{Field analysis}\\\scriptsize sub-field, technique,\\\scriptsize paper type, venue\\\scriptsize configures 5 reviewers};
-\node[box, below=3mm of p0, minimum width=27mm, fill=cBg, font=\sffamily\scriptsize] (scan) {integrity scan\\(prompt injection)};
-\node[phase, above=1mm of p0] {PHASE 0};
-% phase 1: reviewers
-\node[rev=cM, right=10mm of p0, yshift=13mm] (r1) {R1 Methodology\\error audit};
-\node[rev=cD, below=1.4mm of r1] (r2) {R2 Domain};
-\node[rev=cP, below=1.4mm of r2] (r3) {R3 Perspective};
-\node[rev=cG, below=1.4mm of r3] (r4) {R4 Generalist};
-\node[rev=cA, below=1.4mm of r4] (r5) {Devil's Advocate\\strongest case against};
-\begin{scope}[on background layer]
-\node[draw=cLine, dashed, rounded corners=4pt, fill=cBg, fit=(r1)(r5), inner sep=3pt] (panel) {};
-\end{scope}
-\node[phase, above=0.5mm of panel] {PHASE 1 $\cdot$ INDEPENDENT};
-\node[note, below=0.6mm of panel] {shared paper memory};
-% phase 1.5 / 1.6
-\node[box, right=9mm of panel, yshift=10mm, minimum width=30mm] (lit) {\textbf{Literature check}\\\scriptsize claim novelty, baseline scout,\\\scriptsize similarity ranking};
-\node[box, below=1.5mm of lit, minimum width=30mm, fill=cBg, font=\sffamily\scriptsize] (filt) {self-exclusion filter:\\no own versions, reviews,\\acceptance lists};
-\node[phase, above=1mm of lit] {PHASE 1.5};
-\node[box, below=6mm of filt, minimum width=30mm] (chk) {\textbf{Report check}\\\scriptsize drop ungrounded points};
-\node[phase, above=0.3mm of chk] {PHASE 1.6};
-% phase 2
-\node[box, right=9mm of lit, yshift=-11mm, minimum width=31mm, minimum height=26mm, draw=cE, very thick] (eic) {\textbf{Editor-in-Chief}\\[2pt]\scriptsize checks decisive points\\\scriptsize quality weight $q_i\in[0.5,1.5]$\\\scriptsize pool position $P$\\\scriptsize area-chair test on\\\scriptsize DA-CRITICAL issues};
-\node[phase, above=1mm of eic] {PHASE 2};
-% aggregation and outputs
-\node[box, right=8mm of eic, minimum width=27mm, fill=cBg] (agg) {\code{aggregate\_scores.py}\\\scriptsize $w_i = c(\mathrm{conf}_i)\,q_i$\\\scriptsize DA cap, pool bands};
-\node[box, above=6mm of agg, minimum width=27mm] (out1) {Decision letter\\\scriptsize + revision roadmap};
-\node[box, below=6mm of agg, minimum width=27mm] (out2) {11 venue forms\\\scriptsize e.g.\ ICLR $\{0,2,\dots,10\}$};
-% arrows
-\draw[arr] (in) -- (p0);
-\draw[arr] (p0.east) -- ++(4mm,0) |- (r1.west);
-\foreach \r in {r2,r3,r4} \draw[arr] (p0.east) -- ++(4mm,0) |- (\r.west);
-\draw[arr] (p0.east) -- ++(4mm,0) |- (r5.west);
-\draw[arr] (panel.east) -- ++(3mm,0) |- (lit.west);
-\draw[arr] (panel.east) -- ++(3mm,0) |- (chk.west);
-\draw[arr] (lit.east) -- ++(3mm,0) |- (eic.west);
-\draw[arr] (chk.east) -- ++(3mm,0) |- (eic.west);
-\draw[arr] (eic) -- (agg);
-\draw[arr] (agg) -- (out1);
-\draw[arr] (agg) -- (out2);
-\end{tikzpicture}}
-\caption{Full-mode workflow. Five reviewers write independently from a shared factual
-paper memory. A literature check, which cannot retrieve the paper under review, and a report check
-run before the Editor-in-Chief. The EIC weights each review by quality and checks decisive points
-against the manuscript. A deterministic script aggregates scores and translates them into each
-venue's form.}
+\includegraphics[width=\linewidth]{fig/workflow.pdf}
+\caption{Full-mode workflow. Phase~0 analyses the field and configures the panel, and an
+integrity scan redacts text addressed to AI reviewers; each reviewer gets the configuration, a
+factual paper memory and the redacted copy, never another reviewer's report. The literature check
+(Phase~1.5, skipped without network access) cannot retrieve the paper under review; the report check
+(Phase~1.6) follows it. The Editor-in-Chief (Phase~2) alone sees the integrity findings (thin
+arrow), weights each review by quality and decides; a deterministic script translates the scores
+into the forms of 11 venues. The Gap Scout is optional, runs after the review and changes none of
+it. Drawn with the paper-figure skill (Draw.io, editable source in \code{report/fig/}).}
 \label{fig:workflow}
 \end{figure}
 A full review runs the phases in Figure~\ref{fig:workflow}. The phases are Markdown instructions in
