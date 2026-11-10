@@ -362,6 +362,29 @@ the abstract leads with) and used by everyone; a missing experiment weakens a cl
 no other evidence for it. Round 3 reruns the same papers; with the primary claim fixed, it also shows how much
 the profile itself varies between runs.
 
+**Round 3** (primary claim fixed in Phase 0; `evals/iclr2026_terra213_validation_r3.json`, compared with round 2;
+the first attempt failed installing the Codex CLI before any API call, and the CLI is now pinned):
+
+| Paper | Human mean | Reviewer pools (r3) | Reviewer pool mean, 2.10.1 / r1 / r2 / r3 | EIC pool, 2.10.1 / r1 / r2 / r3 | Primary (r3) | EIC C, E | Cost |
+|-------|-----------:|---------------------|--------------------------------------------|----------------------------------|--------------|----------|-----:|
+| euMVC1DO4k | 6.0 | 57, 45, 65, 58, 54 | 60.6 / 56.4 / 52.6 / **55.8** | 59 / 55 / 45 / 45 | C1, incremental | 52, −7 | $0.51 |
+| Lvkbe0CgmZ | 5.0 | 45, 51, 59, 50, 43 | 32.6 / 40.6 / 42.6 / **49.6** | 25 / 36 / 39 / 45 | C1, medium | 60, −15 | $0.40 |
+| KtocialdxS | 2.67 | 47, 44, 51, 47, 45 | 57.4 / 56.2 / 46.0 / **46.8** | 55 / 55 / 44 / 45 | C1, incremental | 48, −3 | $0.41 |
+
+- The reviewer pools are in the human order for the first time (55.8 > 49.6 > 46.8); in 2.10.1 and rounds 1–2
+  the theory paper came last.
+- The EIC pools are not: all three are 45. Setting its position afresh, the EIC deducted gaps the reviewers had
+  already counted (−7 including "ordinary reporting gaps" on euMVC1DO4k; −15 on Lvkbe0CgmZ).
+- With C1 fixed as primary, euMVC1DO4k's primary claim was judged incremental again (a prior robot-learning
+  distillation work shares its problem and mechanism), as in round 2; in round 1 it was high. The humans rated
+  the paper 6.0; the band caps it at 54.
+- No run reached the soft budget limit; the highest was $0.51.
+
+**Change after round 3:** the EIC starts its pool position from the median of the reviewers' pool positions and
+moves only for a verified reason; a median above the primary claim's band moves to the band's top unless a delta
+the profile missed is verified, and gaps the reviewers already deducted are not deducted again. Applied by hand to
+the round 3 reports, this gives 54, 50 and 47, in the human order; round 4 tests whether the EIC does it.
+
 ## Error on the ICLR scale (NMAE / NME)
 
 CSPaper-style errors against the mean human rating on the ICLR 2026 scale (0–10):
