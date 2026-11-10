@@ -377,6 +377,41 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
 .btn,.btn:hover{transition:none;transform:none}
 .btn.primary{box-shadow:none}
 .chart-card .foot{margin-top:12px;font-size:.84rem;color:var(--muted)}
+
+/* One screen per topic: each topic fits a laptop screen; extra charts sit behind tabs. */
+.slide{min-height:calc(100vh - var(--nav-h));padding:26px 0}
+#top.slide{padding:20px 0 24px}
+h2{font-size:clamp(1.7rem,3vw,2.3rem);margin-bottom:8px;max-width:26ch}
+.sub{margin-bottom:18px;font-size:1rem}
+.kicker{margin-bottom:8px}
+.take{margin-top:14px;gap:9px}.take li{font-size:.93rem;line-height:1.5}
+.callout.small{margin-top:14px;padding:10px 14px}
+.btn-row{margin-top:14px}
+.eval-grid{align-items:center}
+.seg-bar{display:none;gap:4px;flex-wrap:wrap;margin:0 0 10px;padding:4px;background:var(--surface-2);border-radius:11px;width:fit-content;max-width:100%}
+.js .seg-bar{display:flex}
+.seg-btn{border:0;background:transparent;color:var(--muted);min-height:36px;padding:6px 13px;border-radius:8px;cursor:pointer;font:700 .86rem var(--sans)}
+.seg-btn:hover{color:var(--ink)}
+.seg-btn[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(15,23,42,.14)}
+.js [data-seg]>[data-seg-label]:not(.on){display:none}
+.js .charts[data-seg]{display:block}
+.figure.fit{margin-top:0;padding:12px}
+.figure.fit img{min-width:0;width:auto;max-width:100%;max-height:calc(100vh - 390px);min-height:240px;margin:0 auto}
+.figure.fit figcaption{font-size:.84rem;margin-top:6px}
+table.mini{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
+table.mini th,table.mini td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.mini tbody th,table.mini thead th:first-child{text-align:left;font-weight:400;color:var(--ink-2);white-space:normal}
+table.mini thead th{font-weight:700;color:var(--ink);font-size:.84rem}
+table.mini b{color:var(--accent)}
+.chart-card .scroll{overflow-x:auto}
+@media (min-width:1101px) and (min-height:700px){html{scroll-snap-type:y proximity}.slide{scroll-snap-align:start}}
+
+details.more{margin-top:12px}
+details.more>summary{cursor:pointer;font-weight:700;font-size:.9rem;color:var(--accent);width:fit-content;padding:4px 0}
+details.more .take{margin-top:8px}
+@media (min-width:1101px) and (max-height:840px){html{font-size:88%}.slide{padding:16px 0}.card,.chart-card{padding:14px 18px}.stats{margin-top:18px}h1{margin:10px 0 10px}.cta{margin-top:18px}.note{margin-top:14px}}
+@media (min-width:1101px) and (max-height:720px){html{font-size:86%}}
+@media (min-width:1101px){.figure.design{padding:10px}.figure.design img{min-width:0;width:auto;max-width:100%;max-height:calc(100vh - 360px)}.cmp-list li{padding:9px 12px}}
 </style>
 </head>
 <body>
@@ -488,6 +523,8 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
     <p class="kicker rv">How it works</p>
     <h2 id="t-how" class="rv" style="--i:1">How a review runs</h2>
     <p class="sub rv" style="--i:2">The same structure a program committee uses: configure a panel for the paper's real sub-field, collect independent reports, then let an area chair weigh them against the evidence.</p>
+    <div data-seg>
+    <div data-seg-label="The four steps">
     <ol class="pipe" style="list-style:none;margin:0;padding:0">
       <li class="stage glass prep rv" style="--i:2">
         <div class="ph"><b>0</b>Phase 0</div>
@@ -519,10 +556,12 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
         <p>Decision letter, consensus map, both score lists in the venue's own form, and a prioritized revision roadmap. Optional Socratic coaching, and on request a Gap Scout checklist of concrete concerns reviewers are likely to raise.</p>
       </li>
     </ol>
-    <figure class="figure rv" style="--i:6">
+    </div>
+    <figure class="figure fit" data-seg-label="Full workflow diagram">
       <div class="scroll"><img src="img/workflow.svg" width="1364" height="671" loading="lazy" alt="Workflow diagram. The manuscript goes to field analysis and the integrity scan (Phase 0), which build one reviewer packet. The packet goes to five independent reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate). Their reports pass in sequence through the literature check (Phase 1.5) and the report check (Phase 1.6) to the Editor-in-Chief (Phase 2); integrity findings go to the Editor-in-Chief alone. The Editor-in-Chief writes the decision letter, and aggregate_scores.py turns the scores into venue forms. An optional Gap Scout reads the manuscript after the review and writes a gap checklist."></div>
       <figcaption><b>Full workflow</b> (Figure 1 of the <a href="report/technical_report.pdf">technical report</a>). Colour marks the role: preparation in blue, reviewers in green, checks in orange, the editor in vermilion, outputs in pink. The two checks run one after the other, the literature check cannot retrieve the paper under review, and the report check drops ungrounded points before the editor reads anything. Drawn with the paper-clean figure pipeline and exported natively from draw.io. <span class="swipe">Swipe sideways to see the whole diagram.</span></figcaption>
     </figure>
+    </div>
   </div>
 </section>
 
@@ -539,6 +578,9 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
       <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.47 for Sonnet at high effort, versus 0.14 between two human reviewers. That is roughly the level paperreview.ai reports for its AI reviewer (0.42, on other papers from another year).</span></li>
       <li><span class="tk ok">✓</span><span><b>Scores are not biased</b>: on average neither too harsh nor too lenient (NME −0.003).</span></li>
       <li><span class="tk no">!</span><span><b>Scores bunch in the middle</b>: 78% of papers end at ICLR 4, so accepted papers are rated 0.8 points below the humans and weak ones a little above.</span></li>
+    </ul>
+    <details class="more"><summary>More findings</summary>
+    <ul class="take">
       <li><span class="tk no">!</span><span><b>Model matters</b>: Haiku and two GPT-6.1 models showed little or no agreement with the humans on 20 papers. <a href="#models">See the model comparison</a>.</span></li>
       <li><span class="tk no">!</span><span><b>Picks accepted papers only as well as one human</b>: AUC 0.64 for both on the same papers, where 0.5 is a coin flip.</span></li>
     </ul>
@@ -546,6 +588,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
       <div><b>Holds beyond the pilot.</b> The 66 papers added after the 20-paper pilot give the same 0.48, and so do the 75 papers the reviewer did not recognize. The 95% range is 0.27 to 0.64. Cost: $1.94 per paper. Haiku was tested on the 20-paper pilot only.</div>
     </div>
+    </details>
     <div class="btn-row rv" style="--i:5">
       <a class="btn sm primary" href="report/technical_report.pdf">Technical report (PDF)</a>
       <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#full-evaluation-skill-2101-86-papers-sonnet-high-effort">Evaluation data</a>
@@ -553,8 +596,8 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
     </div>
       </div>
       <div>
-    <div class="charts">
-      <div class="chart-card glass rv" style="--i:2">
+    <div class="charts" data-seg>
+      <div class="chart-card glass" data-seg-label="Ranking">
         <h3>Does it rank papers like humans?</h3>
         <p>Spearman correlation with the mean human score. 0 = no relation, 1 = same order. Higher is better; the line shows the 95% range.</p>
         <!-- values from evals/REPORT_iclr2026_pilots.md (full evaluation, n = 86; Haiku: pilot, n = 20); scale 0 to 1 -->
@@ -565,7 +608,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
       </div>
-      <div class="chart-card glass rv" style="--i:3">
+      <div class="chart-card glass" data-seg-label="Accept vs reject">
         <h3>Does it score accepted papers higher?</h3>
         <p>AUC: the chance an accepted paper outscores a rejected one. 0.5 = coin flip, 1 = always.</p>
         <!-- scale 0.5 to 1 -->
@@ -576,7 +619,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="axis" aria-hidden="true"><div></div><div><span>0.5</span><span>0.75</span><span>1</span></div><div></div></div>
         </div>
       </div>
-      <div class="chart-card glass rv" style="--i:4">
+      <div class="chart-card glass" data-seg-label="Score error">
         <h3>How far off is the score?</h3>
         <p>NMAE: average gap to the human score on ICLR's 0–10 scale, as a share of the scale. Lower is better.</p>
         <!-- scale 0 to 0.2 -->
@@ -614,8 +657,12 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
       <li><span class="tk ok">✓</span><span><b>Finds what humans agree on</b>: 74% of the issues raised by two or more human reviewers, 46% of all. The 20-paper pilot gave 78% and 45%.</span></li>
       <li><span class="tk ok">✓</span><span><b>The more important, the more often</b>: half of the reviewers' lead points and of the issues behind a reject vote, against a third of the issues raised only by reviewers who voted accept.</span></li>
       <li><span class="tk ok">✓</span><span><b>As good as another human</b>: three AI reviewers anticipate a reviewer's issues as often as the other humans do (0.42 vs 0.41).</span></li>
+    </ul>
+    <details class="more"><summary>More findings</summary>
+    <ul class="take">
       <li><span class="tk no">!</span><span><b>Its top five are only partly the humans' top</b>: a top concern matches a human issue more often than an average panel issue (34% vs 26%), but the five hold only a third of the consensus issues the whole panel finds.</span></li>
     </ul>
+    </details>
     <p class="rv" style="--i:4;font-size:.82rem;color:var(--muted);margin:12px 0 0">Caveats: LLM annotators; importance is inferred from the human reviews (how many raised it, their vote, its place in the review); humans saw the figures, the AI read the text; agreeing with humans is not the same as being right.</p>
     <div class="btn-row rv" style="--i:5">
       <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#full-evaluation-86-papers-skill-2101">Issue study</a>
@@ -623,8 +670,8 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
     </div>
       </div>
       <div>
-    <div class="charts">
-      <div class="chart-card glass rv" style="--i:2">
+    <div class="charts" data-seg>
+      <div class="chart-card glass" data-seg-label="Coverage">
         <h3>How many human concerns does it raise?</h3>
         <p>Share of the human reviewers' main issues that the AI panel also raised, 86 papers. Higher is better.</p>
         <!-- values from evals/iclr2026_issue_overlap_full.json (n = 86); scale 0 to 1 -->
@@ -636,7 +683,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
       </div>
-      <div class="chart-card glass rv" style="--i:3">
+      <div class="chart-card glass" data-seg-label="Important ones">
         <h3>Does it catch the important ones?</h3>
         <p>Hit rate by how much the issue mattered to the human reviewers, 86 papers.</p>
         <!-- values from evals/iclr2026_issue_overlap_full.json, importance (n = 86); scale 0 to 1 -->
@@ -649,7 +696,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
       </div>
-      <div class="chart-card glass rv" style="--i:4">
+      <div class="chart-card glass" data-seg-label="Top five">
         <h3>Are its top five concerns the humans' priorities?</h3>
         <p>Share of AI items that match a human main issue, 86 papers. The EIC's five top concerns against an average panel issue.</p>
         <!-- values from evals/iclr2026_issue_overlap_full.json, top_concerns (n = 86); scale 0 to 0.5 -->
@@ -681,12 +728,16 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
       <li><span class="tk no">!</span><span><b>Too broad, not blind</b>: most misses are in an area the panel did discuss, but only as a category (&ldquo;more ablations&rdquo;) while a human named the item. Only 101 of 1018 had nothing close.</span></li>
       <li><span class="tk no">!</span><span><b>Weakest on clarity and scope</b>: it catches baselines and novelty concerns about 60% of the time, but method-clarity and presentation issues about 20%.</span></li>
       <li><span class="tk no">!</span><span><b>Too many and repetitive</b>: 20 main issues per paper vs 12 for humans; the Devil's Advocate repeats others 93% of the time.</span></li>
+    </ul>
+    <details class="more"><summary>More findings</summary>
+    <ul class="take">
       <li><span class="tk ok">✓</span><span><b>Not a knowledge gap</b>: issues that need prior work are caught more often (0.51) than text-only ones (0.44); few misses need figures (17) or a specific paper (22).</span></li>
     </ul>
     <div class="callout small rv" style="--i:4" role="note">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
       <div><b>Naming the item helps; building it into the panel did not.</b> On the 20-paper pilot, an optional Gap Scout that lists concrete concerns lifted the share of human issues raised from 47% to 73%. Version 2.11 built the same ideas into the panel; it raised no more human issues (43% vs 47%), ranked papers worse (Spearman 0.32 vs 0.48) and cost $6.93 instead of $1.97 per paper. 2.10.1 keeps the 2.10 panel and offers the Gap Scout only as an optional checklist after the review.</div>
     </div>
+    </details>
     <p class="rv" style="--i:5;font-size:.82rem;color:var(--muted);margin:12px 0 0">Caveats: reasons are one LLM labeler's judgement. Gap Scout and 2.11: 20 pilot papers only.</p>
     <div class="btn-row rv" style="--i:6">
       <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#full-evaluation-86-papers-skill-2101">Issue study</a>
@@ -694,8 +745,8 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
     </div>
       </div>
       <div>
-    <div class="charts">
-      <div class="chart-card glass rv" style="--i:2">
+    <div class="charts" data-seg>
+      <div class="chart-card glass" data-seg-label="By topic">
         <h3>Which concerns does it catch?</h3>
         <p>Hit rate of the human issues, by topic, 86 papers.</p>
         <!-- values from evals/iclr2026_issue_overlap_full.json, misses.topic; scale 0 to 1 -->
@@ -711,7 +762,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
       </div>
-      <div class="chart-card glass rv" style="--i:3">
+      <div class="chart-card glass" data-seg-label="Why missed">
         <h3>Why does it miss the rest?</h3>
         <p>Likely reason for the 561 human issues it did not raise (number of issues), 86 papers.</p>
         <!-- counts from evals/iclr2026_issue_overlap_full.json, misses.reason; bar = share of the 561 -->
@@ -725,7 +776,7 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
         </div>
         <span class="hint">Issues that need knowledge of prior work are caught more often (0.51) than text-only ones (0.44).</span>
       </div>
-      <div class="chart-card glass rv" style="--i:4">
+      <div class="chart-card glass" data-seg-label="Fix tested">
         <h3>Naming the item raises the hit count</h3>
         <p>20-paper pilot. Share of the human reviewers' main issues raised, judged by one annotator. The Gap Scout reads only the paper and names concrete concerns.</p>
         <!-- values from evals/iclr2026_gap_scout.json (pilot, n = 20); scale 0 to 1 -->
@@ -751,17 +802,17 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
       <div>
     <div class="eval-head"><p class="kicker" style="margin:0">Models</p><span class="pill">same 20 papers</span></div>
     <h2 id="t-models" style="margin-top:14px">Does the model matter?</h2>
-    <p class="sub">Yes. We ran the same skill, prompt and 20 ICLR 2026 papers through four models. Only Sonnet at high effort ranked the papers in anything like the human order.</p>
+    <p class="sub">Yes. We ran the same skill, prompt and 20 ICLR 2026 papers through four models. Each has strengths; only Sonnet at high effort ranked the papers like the humans did. Twenty papers is a small sample.</p>
     <ul class="take">
-      <li><span class="tk ok">✓</span><span><b>Sonnet, high effort: +0.48.</b> The same value as on all 86 papers (+0.47).</span></li>
-      <li><span class="tk no">!</span><span><b>GPT-6.1 Sol and Terra, high effort: +0.02 and −0.01.</b> No relation to the human scores. Sol gives the three papers the humans rated highest 3.4, 2.8 and 2.8 out of 6, and the two they rated lowest 3.2 each.</span></li>
-      <li><span class="tk no">!</span><span><b>The models agree with each other more than with the humans</b>: Sol and Terra 0.71, Sol and Sonnet 0.60.</span></li>
-      <li><span class="tk no">!</span><span><b>Twenty papers is a small sample.</b> The 95% ranges overlap, so this shows a tendency, not a settled result.</span></li>
+      <li><span class="tk ok">✓</span><span><b>Sonnet tracks the humans best</b>: ranking agreement +0.48, and it raises 45% of the humans' main concerns.</span></li>
+      <li><span class="tk ok">✓</span><span><b>The GPT models are as precise at half the length</b>: about 11 main concerns per review against 21, and a similar share of them match a human concern (Terra 28%, Sol 23%, Sonnet 26%).</span></li>
+      <li><span class="tk ok">✓</span><span><b>Sol is the cheapest and not biased</b>: about $1.39 per paper, average score error near zero. Both GPT models use more of the rating scale and recognized fewer papers.</span></li>
+      <li><span class="tk no">!</span><span><b>But GPT scores do not follow the humans</b> (+0.02 and −0.01), and they raise fewer of the humans' concerns (21% and 27%).</span></li>
     </ul>
       </div>
       <div>
-    <div class="charts">
-      <div class="chart-card glass">
+    <div class="charts" data-seg>
+      <div class="chart-card glass" data-seg-label="Ranking">
         <h3>Ranking agreement with humans, by model</h3>
         <p>Spearman correlation of the panel rating with the mean human score, same 20 papers. 0 = no relation. The line shows the 95% range.</p>
         <!-- values from evals/REPORT_iclr2026_pilots.md (pilot 3 and the Codex runs, n = 20); scale 0 to 1, negative ends clipped at 0 -->
@@ -773,6 +824,37 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
         <p class="foot">The GPT costs are estimates from token counts at list prices. Full table in the <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#another-model-gpt-61-terra-high-via-codex-pilot-3s-20-papers">evaluation data</a>.</p>
+      </div>
+      <div class="chart-card glass" data-seg-label="Concerns found">
+        <h3>How many human concerns does each model raise?</h3>
+        <p>Share of the human reviewers' main concerns that the five AI reports also raise, same 20 papers. Higher is better.</p>
+        <!-- values from evals/iclr2026_issue_overlap_gpt.json and the pilot-3 overlap study; scale 0 to 1 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>21 main concerns per review</small></div><div class="track"><i class="fill ai" style="--w:45%"></i><i class="ci" style="left:37%;width:17%"></i><span class="sr-only">95% CI 0.37 to 0.54</span></div><div class="val">0.45</div></div>
+          <div class="row"><div class="lab">GPT-6.1 Terra, high effort<small>11 main concerns per review</small></div><div class="track"><i class="fill weak" style="--w:27%"></i><i class="ci" style="left:21%;width:13%"></i><span class="sr-only">95% CI 0.21 to 0.34</span></div><div class="val">0.27</div></div>
+          <div class="row"><div class="lab">GPT-6.1 Sol, high effort<small>11 main concerns per review</small></div><div class="track"><i class="fill weak" style="--w:21%"></i><i class="ci" style="left:17%;width:8%"></i><span class="sr-only">95% CI 0.17 to 0.25</span></div><div class="val">0.21</div></div>
+          <div class="row"><div class="lab">The other human reviewers<small>of one human's concerns</small></div><div class="track"><i class="fill human" style="--w:39%"></i></div><div class="val">0.39</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
+        </div>
+        <p class="foot">Counted from each report's Weaknesses section only. The GPT reports put more of their findings in separate audit sections, which this count leaves out.</p>
+      </div>
+      <div class="chart-card glass" data-seg-label="Side by side">
+        <h3>The three models side by side</h3>
+        <p>Same 20 papers, same skill and prompt. Bold marks the best value in each row.</p>
+        <div class="scroll"><table class="mini">
+          <thead><tr><th></th><th>Sonnet</th><th>GPT-6.1 Sol</th><th>GPT-6.1 Terra</th></tr></thead>
+          <tbody>
+          <tr><th>Ranking agreement with humans</th><td><b>+0.48</b></td><td>+0.02</td><td>−0.01</td></tr>
+          <tr><th>Human concerns raised</th><td><b>45%</b></td><td>21%</td><td>27%</td></tr>
+          <tr><th>Its concerns that a human also raised</th><td>26%</td><td>23%</td><td><b>28%</b></td></tr>
+          <tr><th>Main concerns per review</th><td>21</td><td><b>11</b></td><td><b>11</b></td></tr>
+          <tr><th>Average score bias (0 is none)</th><td><b>+0.01</b></td><td>−0.02</td><td>−0.07</td></tr>
+          <tr><th>ICLR ratings given: 2 / 4 / 6</th><td>0 / 17 / 3</td><td>3 / 14 / 3</td><td>6 / 13 / 1</td></tr>
+          <tr><th>Papers it recognized</th><td>3</td><td>1</td><td><b>0</b></td></tr>
+          <tr><th>Cost per paper</th><td>$1.97</td><td><b>≈ $1.39</b></td><td>≈ $4.55*</td></tr>
+          <tr><th>Minutes per paper</th><td>–</td><td>14</td><td><b>9</b></td></tr>
+          </tbody></table></div>
+        <p class="foot">* Terra's estimate priced cached input as fresh input, so it is too high.</p>
       </div>
     </div>
       </div>
@@ -1108,6 +1190,21 @@ Compare this paper across CVPR, ICLR and TMLR — which venue fits best?</code><
     sync();
   });
 })();
+</script>
+<script>
+// Tabs inside a topic: [data-seg] holds panels marked data-seg-label; one shows at a time.
+(function(){var n=0;[].forEach.call(document.querySelectorAll("[data-seg]"),function(box){
+  var panels=[].filter.call(box.children,function(c){return c.hasAttribute("data-seg-label");});
+  if(panels.length<2){panels.forEach(function(p){p.classList.add("on");});return;}
+  var bar=document.createElement("div");bar.className="seg-bar";bar.setAttribute("role","tablist");
+  var btns=panels.map(function(p,i){var b=document.createElement("button");b.type="button";b.className="seg-btn";
+    b.textContent=p.getAttribute("data-seg-label");b.setAttribute("role","tab");
+    p.id=p.id||("seg-"+(n++));p.setAttribute("role","tabpanel");b.setAttribute("aria-controls",p.id);bar.appendChild(b);return b;});
+  function pick(k,focus){btns.forEach(function(b,i){var on=i===k;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;panels[i].classList.toggle("on",on);});if(focus)btns[k].focus();}
+  btns.forEach(function(b,i){b.addEventListener("click",function(){pick(i);});
+    b.addEventListener("keydown",function(e){var j=null;if(e.key==="ArrowRight")j=(i+1)%btns.length;else if(e.key==="ArrowLeft")j=(i-1+btns.length)%btns.length;if(j!==null){e.preventDefault();pick(j,true);}});});
+  box.insertBefore(bar,panels[0]);pick(0);
+});})();
 </script>
 </body>
 </html>

@@ -499,6 +499,35 @@ than with the humans: the panel ratings correlate at 0.71 (Sol--Terra), 0.60 (So
 0.65 (Terra--Sonnet). With 20 papers the intervals overlap, so this is evidence that the result
 depends on the model, not a ranking of the three.
 
+Ranking is not the only measure. We repeated the issue-overlap study of
+Section~\ref{sec:overlap} on the GPT reviews of the same 20 papers
+(Table~\ref{tab:gptoverlap}). The GPT models raise about half as many main issues per paper as
+Sonnet, and a similar share of what they raise is something a human also raised, so their
+reviews are shorter at the same precision. Sol is also the cheapest of the three and unbiased on
+average, both GPT models use more of the rating scale (ICLR 2 / 4 / 6: Sol 3 / 14 / 3, Terra
+6 / 13 / 1, Sonnet 0 / 17 / 3), and they recognized fewer papers (1 and 0 against 3). They fall
+short on coverage: they raise half as many of the humans' issues, and the gap is largest on the
+issues that two or more humans agree on. The count uses each report's weaknesses section only;
+Sol's reviews are as long as Sonnet's but put more findings in separate audit sections, which
+the study leaves out for every model.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Issue overlap with the human reviewers, three models, same 20 papers, main issues only
+[bootstrap 95\% CI].}\label{tab:gptoverlap}
+\begin{tabular}{lccc}
+\toprule
+ & Sonnet & GPT-6.1 Sol & GPT-6.1 Terra\\
+\midrule
+Human issues raised by the panel & $\mathbf{0.45}$ [0.37, 0.54] & 0.21 [0.17, 0.25] & 0.27 [0.21, 0.34]\\
+\quad raised by 2+ humans & $\mathbf{0.78}$ & 0.27 & 0.50\\
+AI issues also raised by a human & 0.26 [0.22, 0.29] & 0.23 [0.19, 0.28] & $\mathbf{0.28}$ [0.23, 0.34]\\
+AI main issues per paper & 20.9 & 10.8 & 10.9\\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Evaluation III: weaknesses compared with the human reviews}\label{sec:overlap}
 Scores say nothing about \emph{which} weaknesses a review raises. On the 86 papers of the full
 evaluation (Sonnet, high effort, skill 2.10.1) we compared the weakness sections of the AI panel
