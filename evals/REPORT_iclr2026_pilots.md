@@ -2,7 +2,8 @@
 
 Pilots for the paperreview.ai-style evaluation (`evals/iclr_calibration.py`,
 `.github/workflows/iclr-calibration.yml`). Per-paper numbers: `evals/iclr2026_pilot_scores.json` (pilots),
-`evals/iclr2026_full_scores.json` (full evaluation, AI outputs only).
+`evals/iclr2026_full_scores.json` (full evaluation, AI outputs only), `evals/iclr2026_issue_overlap_full.json`
+(issue overlap on the 86 papers).
 Review text and manuscripts are not committed.
 
 ## Setup
@@ -163,6 +164,106 @@ changes:
 
 ## Issue overlap and hit rate (reviewers vs human reviews)
 
+### Full evaluation: 86 papers (skill 2.10.1)
+
+The 86 papers of the full evaluation above (pilot 3's 20 and 66 new), annotated with the same
+tool and prompt as the pilot described below: one Sonnet annotator per paper, blind panels,
+main issues only. The 66 new papers were annotated after their reviews were finished and the
+annotator never saw scores or decisions. Numbers: `evals/iclr2026_issue_overlap_full.json`;
+95% bootstrap CIs over papers. The Gap Scout and 2.11 results further down are still from the
+20-paper pilot only.
+
+| Hit rate | 86 papers | 66 new papers | Pilot 3 (20) |
+|---|---|---|---|
+| Human main issues raised by the AI panel | **0.46** [0.42, 0.49] | 0.46 [0.42, 0.50] | 0.45 [0.37, 0.54] |
+| … raised by 2+ humans (consensus) | **0.74** [0.67, 0.80] | 0.72 [0.64, 0.80] | 0.78 [0.64, 0.90] |
+| … raised by one human | 0.38 [0.34, 0.42] | 0.38 [0.34, 0.42] | 0.38 [0.28, 0.48] |
+| … by the panel without the DA | 0.45 [0.42, 0.49] | 0.46 [0.42, 0.49] | 0.44 [0.37, 0.51] |
+| AI issues also raised by a human | 0.26 [0.24, 0.28] | 0.26 [0.24, 0.29] | 0.26 [0.22, 0.29] |
+| One human's issues raised by the *other* humans | 0.41 [0.36, 0.45] | 0.41 [0.36, 0.45] | 0.39 [0.31, 0.48] |
+| One human's issues raised by 1 / 3 / 5 AI reviewers | 0.21 / 0.42 / 0.52 | 0.21 / 0.43 / 0.52 | 0.20 / 0.40 / 0.50 |
+| Main issues per paper, human / AI | 11.8 / 20.4 | 11.7 / 20.2 | 12.4 / 20.9 |
+| Share raised by one reviewer only, human / AI R1–R4 | 0.77 / 0.73 | 0.77 / 0.73 | 0.77 / 0.73 |
+
+Coverage by k AI reviewers (k = 1–5): 0.18, 0.30, 0.37, 0.42, 0.46. Per role (86 papers):
+R1 hits 0.22 of the human issues (0.02 hit by no other role), R2 0.18 (0.08), R3 0.15 (0.06),
+R4 0.14 (0.02), DA 0.21 (0.01).
+
+**Importance.** The study has no severity labels, so we use proxies from the human reviews:
+how many humans raised the issue, the rating of the reviewers who raised it (ICLR 2026 scale;
+≤ 4 is a reject vote), and whether it was one of the first two main points of a review.
+
+| Human main issues (1017) | Issues | Hit rate [95% CI] |
+|---|---|---|
+| Raised by 2+ humans | 218 | **0.74** [0.67, 0.80] |
+| Raised by one human | 799 | 0.37 [0.34, 0.40] |
+| Raised by a reviewer who voted reject (≤ 4) | 789 | 0.48 [0.45, 0.52] |
+| Raised only by reviewers who voted accept (≥ 6) | 228 | 0.34 [0.28, 0.40] |
+| Raised by the paper's lowest-rating reviewer | 554 | 0.50 [0.46, 0.54] |
+| One of a reviewer's first two main points | 535 | 0.51 [0.47, 0.56] |
+| Not among any reviewer's first two points | 482 | 0.38 [0.34, 0.42] |
+| One human, accept votes only, not a lead point | 91 | 0.29 [0.20, 0.38] |
+
+Of the hit issues, 63% of the consensus ones and 56% of the single-human ones match an AI issue
+that two or more AI reviewers raised: the panel's own agreement tracks importance only weakly.
+
+**By decision** (hit rate; consensus hit rate): accepted (23 papers) 0.39 [0.32, 0.45]; 0.65 —
+rejected (43) 0.49 [0.45, 0.54]; 0.80 — withdrawn (17) 0.48 [0.39, 0.58]; 0.76 — desk rejected
+(3) 0.42. On accepted papers the humans raise fewer issues (11.0 per paper) and fewer of the
+AI's issues match theirs (0.19 vs 0.29 on rejected papers).
+
+**What the panel misses (1018 human main issues, 86 papers).** Status: hit 456, related 460,
+missed 101, minor only 1. Labels for the 66 new papers by one Sonnet labeler per five papers
+(`evals/issue_miss_prompt.md`, as in the pilot); the pilot's labels are reused for its 20.
+
+| Topic | Issues | Hit rate [95% CI] |
+|---|---|---|
+| Missing experiments, ablations, datasets | 287 | 0.47 [0.41, 0.54] |
+| Scope, limitations, generalization | 148 | 0.33 [0.26, 0.41] |
+| Method clarity | 107 | 0.22 [0.15, 0.30] |
+| Novelty, related work | 100 | 0.60 [0.51, 0.70] |
+| Baselines | 99 | 0.63 [0.54, 0.71] |
+| Unsupported claims | 91 | 0.37 [0.27, 0.48] |
+| Theory | 81 | 0.51 [0.38, 0.63] |
+| Efficiency | 50 | 0.64 [0.52, 0.77] |
+| Reproducibility | 28 | 0.43 [0.19, 0.67] |
+| Presentation | 20 | 0.20 [0.05, 0.39] |
+
+| Evidence needed | Issues | Hit rate |
+|---|---|---|
+| Paper text and tables | 721 | 0.44 [0.41, 0.48] |
+| Outside knowledge (specific prior work, field norms) | 200 | 0.51 [0.44, 0.58] |
+| Step-by-step derivation | 52 | 0.40 [0.26, 0.56] |
+| Figures or qualitative results | 45 | 0.29 [0.17, 0.42] |
+
+| Likely reason (561 non-hits) | Related | Missed |
+|---|---|---|
+| AI raised the same area only as a broad category | 242 | 2 |
+| AI raised a related concern with a different diagnosis | 107 | 3 |
+| Subjective request (more scope, another setting) | 59 | 58 |
+| Fine technical or derivation detail | 19 | 21 |
+| Needs a specific prior work | 14 | 8 |
+| Needs figures or qualitative results | 11 | 6 |
+| Unclear | 8 | 3 |
+
+- **The pilot holds.** Every hit-rate number of the pilot is reproduced within 0.06 on the 66
+  new papers; the CIs are now about half as wide.
+- **Important issues are hit more often.** Consensus issues 0.74 vs 0.37; issues from reject
+  votes 0.48 vs 0.34 from accept votes only; a reviewer's lead points 0.51 vs 0.38. The panel
+  misses mostly the peripheral issues, not the decisive ones.
+- **Granularity, not blind spots.** 82% of the non-hits have a related AI issue; 44% are cases
+  where the panel named the area ("more baselines") and the human named the item (91% of those
+  human issues are specific). Of the 59 consensus issues not hit, 27 were raised by the panel
+  only as a category and 16 with a different diagnosis.
+- **Weakest topics**: method clarity (0.22), presentation (0.20) and scope (0.33). Missing
+  experiments, the largest topic (28%), is hit 0.47, higher than in the pilot (0.33).
+- **Truly missed** (101): mostly subjective scope requests (58) and fine technical detail (21).
+- **Caveats**: one LLM annotator and one labeler per paper; importance is inferred from the
+  human reviews, not judged; humans saw the figures, the AI read the extracted text; agreement
+  with humans is not correctness.
+
+### Pilot 3 details (20 papers)
+
 Same 20 papers, pilot 3 (Sonnet high, skill 2.10, single context), compared with the ICLR 2026
 human reviews of each paper (JerMa88/ICLR_Peer_Reviews_2026; 3–5 reviews, mean 4.05).
 `evals/issue_overlap.py` takes the **weakness** sections of both panels (the Devil's
@@ -217,7 +318,7 @@ R1–R4 0.52, R1–R3 0.48, R2–R4 0.55, all five 0.48.
 - **Caveats.** n = 20; one LLM annotator per paper; humans saw the figures, the AI read the
   extracted text; agreement with humans is not correctness.
 
-### What the panel misses, and why
+### What the panel misses, and why (pilot, 20 papers)
 
 `issue_overlap.py misses` lists each of the 247 human main issues with its status: **hit**
 (matched by an AI main issue, 106), **related** (only a partial overlap with an AI issue, 115)
@@ -437,6 +538,9 @@ for the next skill version, to be evaluated against 2.10.
   panel rating (test split 0.19 vs 0.45); see "Full evaluation".
 - Recognized papers all scored high (EIC 65–70) regardless of outcome; report them separately.
 - 20 papers give wide intervals; the full 86-paper evaluation above is the result to cite.
+- Issues: on 86 papers the panel raises 46% of the humans' main issues and 74% of those two or
+  more humans raised; the more important the issue (consensus, reject vote, lead point), the
+  more often it is hit.
 
 ## Per paper (sorted by mean human rating)
 
