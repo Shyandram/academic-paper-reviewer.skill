@@ -3,7 +3,7 @@
 Pilots for the paperreview.ai-style evaluation (`evals/iclr_calibration.py`,
 `.github/workflows/iclr-calibration.yml`). Per-paper numbers: `evals/iclr2026_pilot_scores.json` (pilots),
 `evals/iclr2026_full_scores.json` (full evaluation, AI outputs only), `evals/iclr2026_issue_overlap_full.json`
-(issue overlap on the 86 papers).
+(issue overlap on the 86 papers), `evals/iclr2026_codex_pilot3.json` (GPT-6.1 Terra vs Sonnet, 20 papers).
 Review text and manuscripts are not committed.
 
 ## Setup
@@ -105,6 +105,43 @@ Without the 3 papers Sonnet recognized (n = 17):
 |---|---|---|---|---|
 | Haiku, default effort | +0.07 [-0.39, +0.49] / 0.50 | -0.25 [-0.71, +0.27] / 0.33 | -0.10 [-0.62, +0.44] / 0.44 | $14.22 |
 | Sonnet, high effort | +0.46 [+0.09, +0.74] / 0.69 | +0.22 [-0.24, +0.66] / 0.53 | +0.10 [-0.41, +0.60] / 0.54 | $33.51 |
+
+## Another model: GPT-6.1 Terra (high) via Codex, pilot 3's 20 papers
+
+Run 42834172940, collected by run 42851251502 (metrics only; numbers in `evals/iclr2026_codex_pilot3.json`). Codex `exec` with
+`model_reasoning_effort=high`, 2 papers in parallel, the same prompt and blinded text as the
+Claude runs; skill 2.10.1 (the 2.10 panel without the Report Checker; Sonnet's pilot 3 ran
+2.10). All 20 reviews finished; none failed. Spearman with the mean human rating [bootstrap
+95% CI] / acceptance AUC; NMAE / NME on the ICLR scale.
+
+| | Sonnet, high (pilot 3) | GPT-6.1 Terra, high |
+|---|---|---|
+| Panel rating (1–6) | **+0.48** [+0.12, +0.73] / 0.67 | -0.01 [-0.43, +0.43] / 0.40 |
+| Reviewers' pool position | +0.45 [+0.03, +0.77] / 0.63 | +0.05 [-0.35, +0.51] / 0.45 |
+| EIC pool position | +0.30 [-0.12, +0.68] / 0.55 | +0.10 [-0.34, +0.57] / 0.49 |
+| ICLR rating | +0.26 [-0.10, +0.59] / 0.53 | +0.01 [-0.39, +0.44] / 0.41 |
+| NMAE / NME, ICLR rating | 0.090 / +0.010 | 0.133 / -0.070 |
+| ICLR ratings given (2 / 4 / 6) | 0 / 17 / 3 | 6 / 13 / 1 |
+| SD of panel rating; of EIC pool | 0.38; 9.6 | 0.45; 11.3 |
+| Papers recognized | 3 | 0 |
+| Cost per paper | $1.97 (billed) | $4.55 (estimate from session-log tokens) |
+| Wall time per paper | – | 9.2 min (6.2–14.4) |
+
+Constant median: NMAE 0.085. Human references on the same papers as above.
+
+- **No ranking signal.** GPT-6.1 Terra's panel rating does not track the human mean (Spearman
+  -0.01, AUC 0.40); no stage helps (reviewers' pool +0.05, EIC pool +0.10).
+- **It agrees with Sonnet more than with the humans.** Spearman between the two models: panel
+  rating 0.65, EIC pool 0.67; same ICLR rating on 12 of 20 papers; mean absolute gap in the
+  panel rating 0.36. The disagreement sits on the papers the humans liked: it rates all five
+  accepted papers lower than Sonnet (by 0.2–0.8 on the 1–6 scale), and the accepted paper with
+  the highest human mean (6.0) shares its lowest rating, 2.2.
+- **Harsher and more spread out.** Six papers get ICLR 2 (Sonnet: none), so the scores are less
+  compressed than Sonnet's (78% at ICLR 4 on 86 papers) but land on the wrong papers; NME -0.07.
+- **Cost.** About 2.3× Sonnet's per-paper cost at list prices; the first attempt at 10 papers in
+  parallel hit the organization's token-per-minute limit, so this run used 2.
+- With 20 papers the interval is wide; the result says this model, prompted this way, gives no
+  usable ranking here, not that it cannot.
 
 ## Error on the ICLR scale (NMAE / NME)
 

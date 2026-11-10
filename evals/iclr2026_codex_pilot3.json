@@ -1,0 +1,267 @@
+{
+ "note": "GPT-6.1 Terra (high) via Codex, run 42834172940 (collected by 42851251502), vs Sonnet high, pilot 3 run 42087346815, same 20 papers. Spearman/AUC vs mean human; numbers and paper IDs only. s/c = Sonnet/Codex panel rating (1-6), *_pool = EIC pool position.",
+ "codex_cost_per_paper_estimate": 4.55,
+ "codex_wall_minutes_per_paper": {
+  "mean": 9.2,
+  "min": 6.2,
+  "max": 14.4
+ },
+ "codex_failed_reviews": 0,
+ "n": 20,
+ "sonnet/official_rating": {
+  "spearman": 0.48,
+  "ci": [
+   0.12,
+   0.73
+  ],
+  "auc": 0.67
+ },
+ "sonnet/rating": {
+  "spearman": 0.26,
+  "ci": [
+   -0.1,
+   0.59
+  ],
+  "auc": 0.53
+ },
+ "sonnet/reviewer_pool": {
+  "spearman": 0.45,
+  "ci": [
+   0.03,
+   0.77
+  ],
+  "auc": 0.63
+ },
+ "sonnet/eic_pool": {
+  "spearman": 0.3,
+  "ci": [
+   -0.12,
+   0.68
+  ],
+  "auc": 0.55
+ },
+ "sonnet/iclr": {
+  "nmae": 0.09,
+  "nme": 0.01,
+  "dist": {
+   "4.0": 17,
+   "6.0": 3
+  },
+  "official_sd": 0.38,
+  "pool_sd": 9.6,
+  "recognized": 3,
+  "cost": 1.97
+ },
+ "codex/official_rating": {
+  "spearman": -0.01,
+  "ci": [
+   -0.43,
+   0.43
+  ],
+  "auc": 0.4
+ },
+ "codex/rating": {
+  "spearman": 0.01,
+  "ci": [
+   -0.39,
+   0.44
+  ],
+  "auc": 0.41
+ },
+ "codex/reviewer_pool": {
+  "spearman": 0.05,
+  "ci": [
+   -0.35,
+   0.51
+  ],
+  "auc": 0.45
+ },
+ "codex/eic_pool": {
+  "spearman": 0.1,
+  "ci": [
+   -0.34,
+   0.57
+  ],
+  "auc": 0.49
+ },
+ "codex/iclr": {
+  "nmae": 0.133,
+  "nme": -0.07,
+  "dist": {
+   "2.0": 6,
+   "4.0": 13,
+   "6.0": 1
+  },
+  "official_sd": 0.45,
+  "pool_sd": 11.3,
+  "recognized": 0,
+  "cost": 4.55
+ },
+ "agree/official_rating": 0.65,
+ "agree/eic_pool": 0.67,
+ "agree/rating": 0.42,
+ "agree/same_iclr": 12,
+ "agree/mean_abs_official": 0.36,
+ "per_paper": {
+  "0xObmDmsKY": {
+   "human": 4.0,
+   "acc": false,
+   "s": 3.0,
+   "c": 3.2,
+   "s_pool": 45,
+   "c_pool": 50
+  },
+  "8xcmfwomnI": {
+   "human": 3.0,
+   "acc": false,
+   "s": 3.0,
+   "c": 2.6,
+   "s_pool": 42,
+   "c_pool": 30
+  },
+  "9R2iUHhVfr": {
+   "human": 4.5,
+   "acc": false,
+   "s": 3.6,
+   "c": 3.4,
+   "s_pool": 65,
+   "c_pool": 53
+  },
+  "9jcB40wjk3": {
+   "human": 4.4,
+   "acc": true,
+   "s": 2.8,
+   "c": 2.4,
+   "s_pool": 38,
+   "c_pool": 35
+  },
+  "AIKURJjxXT": {
+   "human": 2.5,
+   "acc": false,
+   "s": 2.8,
+   "c": 3.2,
+   "s_pool": 40,
+   "c_pool": 49
+  },
+  "BxeJLOrKDF": {
+   "human": 4.0,
+   "acc": false,
+   "s": 3.2,
+   "c": 3.2,
+   "s_pool": 45,
+   "c_pool": 51
+  },
+  "E5mL07Fbq8": {
+   "human": 3.33,
+   "acc": false,
+   "s": 2.6,
+   "c": 2.2,
+   "s_pool": 42,
+   "c_pool": 39
+  },
+  "Jw7khYzYzl": {
+   "human": 4.0,
+   "acc": false,
+   "s": 4.0,
+   "c": 3.6,
+   "s_pool": 70,
+   "c_pool": 72
+  },
+  "KtocialdxS": {
+   "human": 2.67,
+   "acc": false,
+   "s": 3.0,
+   "c": 3.2,
+   "s_pool": 45,
+   "c_pool": 55
+  },
+  "Lvkbe0CgmZ": {
+   "human": 5.0,
+   "acc": false,
+   "s": 3.2,
+   "c": 2.4,
+   "s_pool": 45,
+   "c_pool": 25
+  },
+  "PJdMrK79Mo": {
+   "human": 4.5,
+   "acc": true,
+   "s": 3.4,
+   "c": 2.8,
+   "s_pool": 50,
+   "c_pool": 53
+  },
+  "Z6z4AnXGhw": {
+   "human": 3.5,
+   "acc": false,
+   "s": 3.2,
+   "c": 3.4,
+   "s_pool": 50,
+   "c_pool": 60
+  },
+  "be4ey66fhk": {
+   "human": 4.4,
+   "acc": false,
+   "s": 3.4,
+   "c": 3.2,
+   "s_pool": 52,
+   "c_pool": 56
+  },
+  "euMVC1DO4k": {
+   "human": 6.0,
+   "acc": true,
+   "s": 3.8,
+   "c": 3.4,
+   "s_pool": 68,
+   "c_pool": 59
+  },
+  "g4HpTtgsn2": {
+   "human": 3.0,
+   "acc": false,
+   "s": 2.6,
+   "c": 3.2,
+   "s_pool": 38,
+   "c_pool": 52
+  },
+  "gUw8n109ki": {
+   "human": 3.5,
+   "acc": false,
+   "s": 2.6,
+   "c": 2.2,
+   "s_pool": 40,
+   "c_pool": 40
+  },
+  "kwro5432AI": {
+   "human": 6.0,
+   "acc": false,
+   "s": 3.0,
+   "c": 3.2,
+   "s_pool": 42,
+   "c_pool": 54
+  },
+  "qfW4IrUuig": {
+   "human": 4.5,
+   "acc": false,
+   "s": 2.8,
+   "c": 2.6,
+   "s_pool": 40,
+   "c_pool": 51
+  },
+  "rubeJmT1XM": {
+   "human": 6.0,
+   "acc": true,
+   "s": 3.0,
+   "c": 2.2,
+   "s_pool": 40,
+   "c_pool": 32
+  },
+  "tlYSbw5GXY": {
+   "human": 5.2,
+   "acc": true,
+   "s": 3.4,
+   "c": 3.2,
+   "s_pool": 55,
+   "c_pool": 54
+  }
+ }
+}
