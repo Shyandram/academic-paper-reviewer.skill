@@ -214,8 +214,26 @@ h1 em{font-weight:500}
 .figures dd{margin:0;font:500 clamp(2.2rem,3.6vw,3rem)/1 var(--serif);color:var(--ink);order:-1}
 .figures dt{margin-top:6px;font:700 .6rem/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);max-width:28ch}
 .band-note{font-size:.8rem;color:var(--muted);text-align:center;margin:-6px 0 14px}
-@media (max-width:960px){.hero-grid{grid-template-columns:1fr}.hero-art{min-height:380px;margin:0 -16px}.hero-art .plate{inset:0;clip-path:none}.figures{grid-template-columns:repeat(2,1fr);row-gap:22px}.figures>div:nth-child(3)::before{display:none}}
-@media (max-width:520px){.hero-art{display:none}}
+@media (max-width:960px){.hero-grid{grid-template-columns:minmax(0,1fr)}.figures{grid-template-columns:repeat(2,1fr);row-gap:22px}.figures>div:nth-child(3)::before{display:none}}
+
+/* Stacked hero art for tablets and phones (portrait and landscape): no page sheet; the reviewer notes
+   form a list and the cycle card sits under them (phones) or beside them (tablets). */
+@media (max-width:960px),(max-height:500px) and (orientation:landscape){
+  .hero-art{min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"a" "b" "c" "card";gap:8px;padding:16px;align-content:start}
+  .hero-art .plate{inset:0;clip-path:none}
+  .hero-art .sheet{display:none}
+  .hero-art .note-tag{position:relative;right:auto!important;top:auto!important;max-width:none;width:fit-content;font-size:.74rem}
+  .hero-art .t1{grid-area:a}.hero-art .t2{grid-area:b}.hero-art .t3{grid-area:c}
+  .hero-art .t4{grid-row:1/4;grid-column:1;align-self:center}
+  .cycle{grid-area:card;position:relative;left:auto;bottom:auto;width:auto;margin-top:6px}
+}
+@media (min-width:601px) and (max-width:960px) and (orientation:portrait){
+  .hero-art{grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);grid-template-areas:"a card" "b card" "c card";align-items:center;padding:22px}
+  .cycle{margin-top:0}
+}
+@media (max-width:600px){.hero-art{margin:0 -16px}.steps button{font-size:.5rem;letter-spacing:.06em}}
+
+
 
 /* how it works: horizontal timeline */
 .timeline{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:1fr 1.5fr 1fr 1fr;gap:0}
@@ -380,7 +398,7 @@ table.mini b{color:var(--olive-ink)}
 .try ul{list-style:none;margin:0;padding:0}
 .try li{font:italic 500 1.12rem/1.3 var(--serif);color:var(--ink);padding:9px 0;border-bottom:1px solid var(--line-2)}
 .try li:last-child{border-bottom:0}
-@media (max-width:1100px){.install-grid{grid-template-columns:1fr}.install-grid>div+div{border-left:0;border-top:1px solid var(--line)}}
+@media (max-width:1100px){.install-grid{grid-template-columns:minmax(0,1fr)}.install-grid>div+div{border-left:0;border-top:1px solid var(--line)}}
 
 /* responsible use + footer */
 .resp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;margin-top:26px}
@@ -402,6 +420,66 @@ table.mini b{color:var(--olive-ink)}
 @media (min-width:1181px) and (min-height:700px){html{scroll-snap-type:y proximity}.slide{scroll-snap-align:start}}
 @media (min-width:1101px) and (max-height:840px){html{font-size:90%}.slide{padding:22px 0}.chart-card{padding:16px 20px}.hero-grid{padding:18px 0}.hero-art{min-height:400px}.cta{margin-top:18px}.figures{padding:12px 0}.tile{min-height:128px;padding:16px 18px}}
 @media (min-width:1101px) and (max-height:720px){html{font-size:86%}}
+
+/* Phones (and narrow chart columns on sideways phones): the label sits above the bar. */
+@media (max-width:640px),(max-height:500px) and (orientation:landscape){
+  .row{grid-template-columns:minmax(0,1fr) 50px;grid-template-areas:"lab lab" "track val";row-gap:4px;column-gap:12px}
+  .row .lab{grid-area:lab;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px}
+  .row .lab small{display:inline}
+  .row .track{grid-area:track}.row .val{grid-area:val}
+  .axis{grid-template-columns:minmax(0,1fr) 50px;column-gap:12px}.axis div:first-child{display:none}
+  .chart{gap:14px}
+}
+
+/* Phones held sideways: short screen, so use the width (two columns) and trim the chrome. */
+@media (max-height:500px) and (orientation:landscape){
+  :root{--nav-h:50px}
+  html{font-size:87.5%}
+  .brand small{display:none}
+  .slide{min-height:0;padding:22px 0}
+  #top>.wrap{display:block}
+  .hero-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;padding:18px 0;align-items:center}
+  h1{font-size:2.2rem;margin-bottom:10px}
+  .lede{font-size:.92rem}
+  .cta{margin-top:14px}.note{margin-top:10px}
+  .hero-art{margin:0}
+  .figures{grid-template-columns:repeat(4,1fr);padding:10px 0}.figures>div:nth-child(3)::before{display:block}
+  .figures dd{font-size:1.9rem}
+  h2{font-size:1.9rem}
+  .sub{margin-bottom:14px}
+  .eval-grid{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:26px;align-items:start}
+  .timeline{grid-template-columns:1fr 1fr;row-gap:22px}
+  .timeline>li{border-left:0;border-top:1px solid var(--ink-2);padding:22px 18px 0 0}
+  .timeline>li::before{top:-6px;left:0}
+  .timeline h3{font-size:1.5rem}
+  .tile{min-height:0}
+  .figure.fit img{min-width:0;width:100%}
+  .foot-bar{margin-top:24px}
+  .cmp-grid{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px}
+  .figure.design img{min-width:0;width:100%}
+  .bento{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .tile.w2{grid-column:auto}.tile h3,.tile.w2 h3{font-size:1.25rem;margin-top:24px}.tile{padding:16px 18px}
+  .svc{grid-template-columns:repeat(3,minmax(0,1fr));column-gap:24px}
+  .install-grid{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+  .install-grid .lead{grid-column:1/-1}
+  .install-grid>div{padding:20px 22px}
+  .install-grid>div:nth-child(3){border-left:1px solid var(--line)}
+}
+@media (max-width:560px){.tile{min-height:0;padding:18px}.tile h3{margin-top:24px}}
+
+/* Narrow phones: tab rows scroll sideways instead of stacking; smaller headline. */
+@media (max-width:640px){
+  .seg-bar,.js .tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;gap:18px}
+  .seg-bar::-webkit-scrollbar,.tabs::-webkit-scrollbar{display:none}
+  .seg-btn,.tab{white-space:nowrap;flex:none}
+}
+@media (max-width:380px){
+  h1{font-size:2.35rem}
+  h2{font-size:1.85rem}
+  .kicker{flex-wrap:wrap;row-gap:6px}
+  #top .kicker::after{display:none}
+  .figures dt{font-size:.56rem}
+}
 
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
