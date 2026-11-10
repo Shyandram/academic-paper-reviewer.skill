@@ -825,6 +825,10 @@ def cmd_features(a):
                 summ = {}
             pools = [r["pool_position"] for r in res.get("per_reviewer", [])
                      if isinstance(r.get("pool_position"), (int, float))]
+            try:
+                run = json.loads((agg.parent / "run.json").read_text())
+            except (OSError, ValueError):
+                run = {}
             out.write(json.dumps({"paper_id": pid, "dims": dims,
                                   "overall": res.get("final_overall"),
                                   "official_rating": res.get("official_rating"),
@@ -832,7 +836,11 @@ def cmd_features(a):
                                   "reviewer_pool": statistics.mean(pools) if pools else None,
                                   "eic_pool": summ.get("eic_pool_position"),
                                   **panel_variants(res, summ),
-                                  "rating": venue_rating(res)}) + "\n")
+                                  "rating": venue_rating(res),
+                                  # the reviewer said it knew the paper (summary.json)
+                                  "recognized": summ.get("recognized") is True,
+                                  "cost_usd": run.get("total_cost_usd"),
+                                  "model": run.get("model")}) + "\n")
             n += 1
     print(f"{n} runs with aggregate.json", file=sys.stderr)
 
@@ -908,6 +916,20 @@ def pilot(rows, feats, reps=2000, scale=(0, 10), year=2026):
              "value": r3(auc([v[i] for i in idx], [lab[i] for i in idx]))},
             error_metric(f"NMAE({label}, mean human)", nmae, v, mean, idx, scale, reps),
             error_metric(f"NME({label}, mean human)", nme, v, mean, idx, scale, reps)]
+    # Recognized papers (the reviewer knew the paper) are reported without, as in the pilots.
+    known = [i for i in allidx if feats[rows[i]["paper_id"]].get("recognized") is True]
+    out["n_recognized"] = len(known)
+    v = preds["panel rating"]
+    idx = [i for i in allidx if i not in known and v[i] is not None]
+    if known and len(idx) >= 3:
+        lo, hi = bootstrap(lambda I: spearman([v[idx[i]] for i in I],
+                                              [mean[idx[i]] for i in I]), len(idx), reps)
+        out["results"] += [
+            {"metric": "spearman(panel rating, mean human), not recognized",
+             "value": r3(spearman([v[i] for i in idx], [mean[i] for i in idx])),
+             "ci95": [r3(lo), r3(hi)], "n": len(idx)},
+            {"metric": "AUC(panel rating -> accept), not recognized",
+             "value": r3(auc([v[i] for i in idx], [lab[i] for i in idx]))}]
     base = preds["panel rating"]
     out["stages"] = []
     for label, v in [("EIC-weighted rating", stages["EIC-weighted rating"]),
