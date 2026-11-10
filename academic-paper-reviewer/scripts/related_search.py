@@ -623,7 +623,7 @@ def cmd_scout(args):
 # Entailment levels: 1 unrelated, 2 shared topic only, 3 partial coverage with
 # important details differing, 4 strong coverage with minor details missing,
 # 5 full coverage of the claim's substantive content.
-# Facets (2.10.2, after the Idea Novelty Checker, arXiv 2506.22026): instead of one
+# Facets (2.13, after the Idea Novelty Checker, arXiv 2506.22026): instead of one
 # holistic level, mark which facets the prior work shares with the claim; the level is
 # 1 + the number shared. Sharing both problem and mechanism makes the claim at least
 # incremental, whatever the count.

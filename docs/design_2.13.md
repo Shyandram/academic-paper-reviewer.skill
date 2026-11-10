@@ -1,6 +1,6 @@
-# Design: skill 2.10.2, novelty and severity calibration
+# Design: skill 2.13, novelty and severity calibration
 
-Status: implemented, not yet evaluated. Target: GPT-6.1 Sol and Terra (via Codex) without
+Status: implemented, not yet evaluated. First committed as 2.10.2; renumbered 2.13 because "2.12" was the working name of what shipped as 2.10.1. Target: GPT-6.1 Sol and Terra (via Codex) without
 hurting Sonnet.
 
 ## 1. Problem
@@ -67,9 +67,9 @@ Read literally, the 2.10.1 text holds novelty and errors to different standards:
 Sonnet resolved these conflicts the way human reviewers do; Sol resolved them toward caution.
 The OpenAI guidance says to remove such conflicts rather than add more instructions.
 
-## 4. Changes in 2.10.2
+## 4. Changes in 2.13
 
-Lessons from 2.11 (withdrawn): new roles and phases cost more and ranked worse. 2.10.2 adds no
+Lessons from 2.11 (withdrawn): new roles and phases cost more and ranked worse. 2.13 adds no
 role, phase or agent call. It edits wording and adds one optional field to one script.
 
 1. **Errors and judgments (SKILL.md, Hard Rule 10; `references/error_audit.md`).** Hard Rule 10
@@ -126,9 +126,9 @@ Same 20 pilot-3 papers, Codex `exec`, 2 in parallel:
 | Run | Skill | Effort | Separates |
 |---|---|---|---|
 | Sol (done) | 2.10.1 | high | baseline |
-| Sol A | 2.10.2 | high | the skill change |
+| Sol A | 2.13 | high | the skill change |
 | Sol B | 2.10.1 | xhigh | reasoning effort alone |
-| Sonnet | 2.10.2 | high | no regression on the model that works |
+| Sonnet | 2.13 | high | no regression on the model that works |
 
 Rough cost: Sol about $1.4–3 per paper (A and B ≈ $60–120 together), Sonnet about $2 per paper
 (≈ $40).
@@ -142,7 +142,7 @@ Predictions if the diagnosis is right (Sol A against Sol 2.10.1):
 - panel-rating Spearman with humans up from +0.02 (with 20 papers, only a large change is
   readable; the paired bootstrap against Sol 2.10.1 is the test).
 
-Sonnet 2.10.2 should stay within the noise of 2.10.1 (+0.48 [0.12, 0.73]); a paired difference
+Sonnet 2.13 should stay within the noise of 2.10.1 (+0.48 [0.12, 0.73]); a paired difference
 below −0.2 would mean the changes hurt the model that works and should be split by model.
 
 ## 6. Risks

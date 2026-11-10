@@ -11,7 +11,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
 
-**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.10.2 ([changelog](CHANGELOG.md))
+**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.13 ([changelog](CHANGELOG.md))
 
 ---
 
