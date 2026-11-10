@@ -181,7 +181,6 @@ Pilot on 20 stratified ICLR 2026 submissions, all using the final rating:
 | Haiku, default effort | +0.20 [−0.21, +0.58] | 0.56 |
 | **Sonnet, high effort** | **+0.48 [+0.09, +0.74]** | **0.67** |
 | Human vs human (2026 test split) | 0.25 | 0.75 |
-| paperreview.ai (ICLR 2025, AI vs human) | 0.42 | 0.75 |
 
 This is a pilot, not a result. With 20 papers the intervals are wide, and the full balanced evaluation is still pending. Model capability matters: Haiku's scores did not separate papers. Use a strong model at high effort for scoring.
 

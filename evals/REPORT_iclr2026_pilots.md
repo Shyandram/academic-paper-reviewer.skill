@@ -44,8 +44,7 @@ the mean human rating [bootstrap 95% CI] / AUC for acceptance:
 | Without the 11 papers the reviewer recognized | 75 | +0.48 [+0.28, +0.65] | 0.66 |
 
 References on the same 86 papers: one human vs another Spearman +0.14, one human's AUC 0.64
-(on the 41 test papers: −0.02 and 0.63). paperreview.ai (ICLR 2025): AI 0.42 / 0.75,
-human 0.41 / 0.84.
+(on the 41 test papers: −0.02 and 0.63).
 
 | Predictor (86 papers) | NMAE ± std [CI] | NME ± std | Spearman | AUC |
 |---|---|---|---|---|
@@ -73,9 +72,8 @@ accepted − rejected gap is 0.35 points against the humans' 1.39.
 
 - **The pilot 3 signal holds.** The 66 new papers give the same Spearman as pilot 3's 20
   (0.48 and 0.48); it was not a lucky sample.
-- **Ranking is above one-human agreement on the same papers** (0.47 vs 0.14) and at
-  paperreview.ai's AI level (0.42, other year and papers). Acceptance AUC (0.64) equals one
-  human's here but is below paperreview.ai's 0.75.
+- **Ranking is above one-human agreement on the same papers** (0.47 vs 0.14). Acceptance AUC (0.64) equals one
+  human's here.
 - **Not driven by recognized papers**: the reviewer said it knew 11 of the 86 (13%); without
   them Spearman is unchanged (0.48). Unlike pilot 3, they are not all rated high (EIC pool
   position 47–70).
@@ -98,7 +96,7 @@ Each cell: Spearman with the mean human rating [bootstrap 95% CI] / AUC for acce
 | Sonnet, high effort | +0.48 [+0.09, +0.74] / 0.67 | +0.30 [-0.14, +0.69] / 0.55 | +0.22 [-0.27, +0.64] / 0.57 | $39.46 |
 
 Human reference on the same papers: one reviewer vs another Spearman +0.12, one-reviewer AUC 0.58.
-Larger references: our 2026 test split 0.25 / 0.75; paperreview.ai (ICLR 2025) AI 0.42 / 0.75, human 0.41 / 0.84.
+Larger reference: human vs human on our 2026 test split 0.25 / 0.75.
 
 Without the 3 papers Sonnet recognized (n = 17):
 
@@ -645,7 +643,7 @@ for the next skill version, to be evaluated against 2.10.
 
 - Haiku has no signal: all scores sit near the acceptance bar (EIC pool position 38–50) whatever the paper.
 - Sonnet at high effort gives the first signal that is distinguishable from zero (final rating CI excludes 0),
-  at about human-human agreement; AUC is still below paperreview.ai's 0.75.
+  at about human-human agreement.
 - The final rating carries more signal than the plain mean of dimensions. On the full balanced
   set (86 papers) the protocol's regression over the 7 dimensions does worse than the unfitted
   panel rating (test split 0.19 vs 0.45); see "Full evaluation".
