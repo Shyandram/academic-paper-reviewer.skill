@@ -5,7 +5,8 @@ Pilots for the paperreview.ai-style evaluation (`evals/iclr_calibration.py`,
 `evals/iclr2026_full_scores.json` (full evaluation, AI outputs only), `evals/iclr2026_issue_overlap_full.json`
 (issue overlap on the 86 papers), `evals/iclr2026_codex_pilot3.json` (GPT-6.1 Terra vs Sonnet, 20 papers),
 `evals/iclr2026_codex_sol_pilot3.json` (GPT-6.1 Sol vs Sonnet and Terra, same 20 papers),
-`evals/iclr2026_issue_overlap_gpt.json` (issue overlap of the three models, same 20 papers).
+`evals/iclr2026_issue_overlap_gpt.json` (issue overlap of the three models, same 20 papers),
+`evals/iclr2026_sol_diagnosis.json` (why Sol does not rank them; `evals/sol_diagnosis.py`).
 Review text and manuscripts are not committed.
 
 ## Setup
@@ -172,7 +173,8 @@ parallel, skill 2.10.1). All 20 reviews finished; none failed. Numbers in
 - **Same failure pattern as Terra.** The three papers with the highest human mean (6.0) get 3.4,
   2.8 and 2.8 from Sol, while the three with the lowest (2.5–3.0) each get 3.2. Sonnet's edge
   comes from a few papers at each end, so with 20 papers the gap is suggestive, not established:
-  the intervals overlap.
+  the intervals overlap. A paired bootstrap of the difference is tighter; see
+  [Why Sol does not rank the papers](#why-sol-does-not-rank-the-papers).
 - **Cost is not comparable between the two GPT rows.** The Sol estimate prices cached input at
   the list rate ($0.10 per 1M); the Terra estimate priced cached input the same as fresh input,
   so it overstates Terra's cost. Sol's list prices are $2 / $10 per 1M input / output.
@@ -213,6 +215,95 @@ Caveat: the count uses each report's Weaknesses section (and the DA's issue list
 reviews are as long as Sonnet's overall (median 12.0k against 10.9k words) but its Weaknesses
 sections are about half as long, because it puts more findings in separate audit sections
 (claim-to-evidence, protocol sweep, error log), which this study leaves out for every model.
+
+### Why Sol does not rank the papers
+
+Sol was expected to land near Sonnet: it reads the whole paper, searches more, and writes
+reviews of the same length. It does not. Numbers in `evals/iclr2026_sol_diagnosis.json`
+(`evals/sol_diagnosis.py`, from the per-paper results; numbers and paper IDs only).
+
+**The gap is real but its size is uncertain.** Paired bootstrap (5000 resamples of the 20
+papers) of Sonnet's minus Sol's panel-rating Spearman: 0.46 [0.08, 0.81], P(difference ≤ 0) =
+0.01. Sol is not noisy either: its reviewers' pool correlates 0.81 with Terra's and 0.61 with
+Sonnet's, so it ranks by a consistent standard, just not the humans'.
+
+**It does not separate the papers the humans liked from the rest.** Mean reviewers' pool
+position on the humans' top 10 against bottom 10:
+
+| | Sonnet | Sol | Terra |
+|---|---|---|---|
+| Reviewers' pool, top 10 / bottom 10 | 51.4 / 46.6 (+4.8) | 55.1 / 55.3 (−0.2) | 50.2 / 52.3 (−2.1) |
+| Panel rating, top 10 / bottom 10 | 3.24 / 3.00 | 3.08 / 3.12 | 2.88 / 3.00 |
+
+**1. Its scores follow rigor; the humans' follow novelty and significance.** Spearman of each
+dimension with the model's own reviewers' pool, and with the human mean:
+
+| Dimension | Sonnet: own pool / human | Sol: own pool / human | Terra: own pool / human |
+|---|---|---|---|
+| Technical rigor | 0.84 / +0.23 | **0.94** / +0.04 | 0.91 / −0.11 |
+| Novelty | **0.92** / **+0.56** | 0.76 / +0.19 | 0.61 / +0.32 |
+| Significance | 0.82 / +0.47 | 0.78 / +0.31 | 0.91 / +0.14 |
+| Experimental validation | 0.67 / +0.24 | 0.88 / −0.02 | 0.94 / +0.05 |
+| Clarity | 0.48 / +0.04 | 0.81 / −0.13 | 0.74 / −0.01 |
+
+Sonnet's pool is driven most by novelty, the dimension that tracks the humans best. Sol's is
+driven by rigor, experimental validation and clarity, which do not track the humans at all here.
+
+**2. Lenient on weak papers whose problem is novelty.** On the humans' bottom papers Sol's
+pool sits 12–16 points above Sonnet's (reviewers' pool, Sonnet / Sol): AIKURJjxXT 38.0 / 53.0,
+g4HpTtgsn2 36.6 / 52.2, gUw8n109ki 40.4 / 53.2, KtocialdxS 44.8 / 56.4. The human reviews of
+these papers lead with lack of novelty and name the prior work. Sol raises novelty only as a
+question to clarify, without a named paper: none of its top concerns on any of the 20 papers
+cites a prior work (author–year or bracket pattern), against 6 of 20 papers for Sonnet (Terra:
+0 of 20). Its search effort is not the cause: median search-ledger entries per paper 190.5 for
+Sol and 181 for Terra against 129 for Sonnet, kept results 86.5 and 92.5 against 51.5. The
+searches return many keyword hits but, judging by the reviews, not the specific overlapping
+paper, so the evidence rules leave the doubt unproven and lightly weighted.
+
+**3. Harsh on theory papers with verifiable proof defects.** Lvkbe0CgmZ (human mean 5.0,
+human rank 5): Sonnet ranks it 7th (pool 52.2, rigor 52.4, ICLR 4), Sol 19th (pool 44.2, rigor
+38.5, ICLR 2) after logging a series of proof errors as verified. Sonnet flagged the same main
+theorem defect and still gave ICLR 4; the human reviewers focused on the synthesis and the
+gap to the exact dynamics, not on fatal errors. rubeJmT1XM (accepted, human mean 6.0, also
+theoretical) is Sol's last of 20 (Sonnet 14th). Sol also gives ICLR 2 to 9jcB40wjk3 (accepted,
+human mean 4.4; Sol rigor 42.9, Sonnet ICLR 4). A verified error weighs fully in
+Sol's score; an unproven novelty doubt hardly at all.
+
+**Hit rate by kind of human issue** (keyword categories on the issue summaries; crude). The
+annotator extracts the human issues afresh for each model's study, so the counts differ by
+column:
+
+| Human main issues about… | Sonnet | Sol | Terra |
+|---|---|---|---|
+| Novelty / prior work | **0.70** (14/20) | 0.38 (10/26) | 0.44 (11/25) |
+| Theory / proofs | 0.42 (5/12) | 0.19 (3/16) | 0.20 (4/20) |
+| Experiments / baselines | **0.49** (34/70) | 0.18 (15/84) | 0.23 (17/73) |
+| Clarity | 0.30 (11/37) | 0.12 (5/41) | 0.14 (5/35) |
+
+**4. Less reasoning per paper.** Medians per paper:
+
+| | Sonnet | Sol | Terra |
+|---|---|---|---|
+| Output tokens | 80.5k | 43.6k | 25.3k |
+| Reasoning tokens | 30.2k | 9.3k | 4.6k |
+| Wall time | 9.6 min | 14.0 min | 8.5 min |
+
+Sol runs longer than Sonnet but reasons about a third as much; the time goes to tool calls and
+searches. Deciding which prior paper a submission overlaps with, and whether a proof defect is
+fatal, are the judgements that need it.
+
+**Ruled out.** Reading (Sol reads the whole paper); review length (median 12.0k words against
+Sonnet's 10.9k); search volume (above); reviewer independence (Sonnet's pilot also ran its
+reviewers in sequence without subagents, and the within-paper spread of pool positions is
+similar, SD 9.3 against 8.7).
+
+**Caveats.** 20 papers. The issue categories and the citation pattern are keyword matches.
+Agreeing with the human reviewers is not the same as being right: Sol's proof findings may be
+correct and missed by the humans. The result says Sol, prompted this way at `high` effort,
+weighs evidence differently from ICLR reviewers. Candidate fixes, not yet tested: require a
+named closest prior work (or an explicit "none found") behind every novelty concern; grade a
+verified error as fatal or repairable before it moves the score; rerun Sol at a higher reasoning
+effort.
 
 ## Error on the ICLR scale (NMAE / NME)
 

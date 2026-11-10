@@ -1,0 +1,555 @@
+{
+ "note": "Diagnostic for GPT-6.1 Sol (high) vs Sonnet high (pilot 3) and GPT-6.1 Terra high on pilot 3's 20 ICLR 2026 papers. Spearman vs mean human rating; numbers and paper IDs only. Produced by evals/sol_diagnosis.py.",
+ "n": 20,
+ "spearman_vs_human": {
+  "sonnet": {
+   "official_rating": 0.48,
+   "reviewer_pool": 0.45,
+   "eic_pool": 0.3,
+   "rating": 0.26
+  },
+  "sol": {
+   "official_rating": 0.02,
+   "reviewer_pool": -0.07,
+   "eic_pool": -0.0,
+   "rating": 0.06
+  },
+  "terra": {
+   "official_rating": -0.01,
+   "reviewer_pool": 0.05,
+   "eic_pool": 0.1,
+   "rating": 0.01
+  }
+ },
+ "paired_bootstrap_sonnet_minus_sol_panel_rating": {
+  "diff": 0.46,
+  "ci95": [
+   0.08,
+   0.81
+  ],
+  "p_diff_le_0": 0.01,
+  "resamples": 5000
+ },
+ "reviewer_pool_spearman_between_models": {
+  "sol~sonnet": 0.61,
+  "sol~terra": 0.81,
+  "terra~sonnet": 0.6
+ },
+ "dimension_spearman_vs_human": {
+  "sonnet": {
+   "technical_rigor": 0.23,
+   "novelty": 0.56,
+   "significance": 0.47,
+   "experimental_validation": 0.24,
+   "clarity": 0.04,
+   "reproducibility": -0.05
+  },
+  "sol": {
+   "technical_rigor": 0.04,
+   "novelty": 0.19,
+   "significance": 0.31,
+   "experimental_validation": -0.02,
+   "clarity": -0.13,
+   "reproducibility": -0.16
+  },
+  "terra": {
+   "technical_rigor": -0.11,
+   "novelty": 0.32,
+   "significance": 0.14,
+   "experimental_validation": 0.05,
+   "clarity": -0.01,
+   "reproducibility": 0.01
+  }
+ },
+ "dimension_spearman_vs_own_reviewer_pool": {
+  "sonnet": {
+   "technical_rigor": 0.84,
+   "novelty": 0.92,
+   "significance": 0.82,
+   "experimental_validation": 0.67,
+   "clarity": 0.48,
+   "reproducibility": 0.37
+  },
+  "sol": {
+   "technical_rigor": 0.94,
+   "novelty": 0.76,
+   "significance": 0.78,
+   "experimental_validation": 0.88,
+   "clarity": 0.81,
+   "reproducibility": 0.53
+  },
+  "terra": {
+   "technical_rigor": 0.91,
+   "novelty": 0.61,
+   "significance": 0.91,
+   "experimental_validation": 0.94,
+   "clarity": 0.74,
+   "reproducibility": 0.53
+  }
+ },
+ "human_top10_vs_bottom10": {
+  "sonnet": {
+   "reviewer_pool": [
+    51.4,
+    46.6
+   ],
+   "panel_rating": [
+    3.24,
+    3.0
+   ]
+  },
+  "sol": {
+   "reviewer_pool": [
+    55.1,
+    55.3
+   ],
+   "panel_rating": [
+    3.08,
+    3.12
+   ]
+  },
+  "terra": {
+   "reviewer_pool": [
+    50.2,
+    52.3
+   ],
+   "panel_rating": [
+    2.88,
+    3.0
+   ]
+  }
+ },
+ "per_paper": [
+  {
+   "paper_id": "euMVC1DO4k",
+   "mean_human": 6.0,
+   "human_rank": 2.0,
+   "sonnet_pool": 65.2,
+   "sol_pool": 59.4,
+   "terra_pool": 60.6,
+   "sonnet_pool_rank": 2.0,
+   "sol_pool_rank": 6.0,
+   "terra_pool_rank": 3.0,
+   "sonnet_rigor": 62.0,
+   "sol_rigor": 58.9,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 6.0
+  },
+  {
+   "paper_id": "kwro5432AI",
+   "mean_human": 6.0,
+   "human_rank": 2.0,
+   "sonnet_pool": 46.2,
+   "sol_pool": 49.6,
+   "terra_pool": 55.6,
+   "sonnet_pool_rank": 12.0,
+   "sol_pool_rank": 17.0,
+   "terra_pool_rank": 7.0,
+   "sonnet_rigor": 50.5,
+   "sol_rigor": 47.2,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "rubeJmT1XM",
+   "mean_human": 6.0,
+   "human_rank": 2.0,
+   "sonnet_pool": 44.6,
+   "sol_pool": 43.8,
+   "terra_pool": 40.2,
+   "sonnet_pool_rank": 14.0,
+   "sol_pool_rank": 20.0,
+   "terra_pool_rank": 17.0,
+   "sonnet_rigor": 48.2,
+   "sol_rigor": 43.6,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "tlYSbw5GXY",
+   "mean_human": 5.2,
+   "human_rank": 4.0,
+   "sonnet_pool": 55.4,
+   "sol_pool": 58.6,
+   "terra_pool": 55,
+   "sonnet_pool_rank": 4.0,
+   "sol_pool_rank": 7.0,
+   "terra_pool_rank": 8.0,
+   "sonnet_rigor": 55.3,
+   "sol_rigor": 56.7,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "Lvkbe0CgmZ",
+   "mean_human": 5.0,
+   "human_rank": 5.0,
+   "sonnet_pool": 52.2,
+   "sol_pool": 44.2,
+   "terra_pool": 32.6,
+   "sonnet_pool_rank": 7.0,
+   "sol_pool_rank": 19.0,
+   "terra_pool_rank": 20.0,
+   "sonnet_rigor": 52.4,
+   "sol_rigor": 38.5,
+   "sol_iclr_rating": 2.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "9R2iUHhVfr",
+   "mean_human": 4.5,
+   "human_rank": 7.0,
+   "sonnet_pool": 60.4,
+   "sol_pool": 68.2,
+   "terra_pool": 58.2,
+   "sonnet_pool_rank": 3.0,
+   "sol_pool_rank": 1.0,
+   "terra_pool_rank": 4.0,
+   "sonnet_rigor": 54.7,
+   "sol_rigor": 62.0,
+   "sol_iclr_rating": 6.0,
+   "sonnet_iclr_rating": 6.0
+  },
+  {
+   "paper_id": "PJdMrK79Mo",
+   "mean_human": 4.5,
+   "human_rank": 7.0,
+   "sonnet_pool": 52.4,
+   "sol_pool": 63.4,
+   "terra_pool": 54.6,
+   "sonnet_pool_rank": 6.0,
+   "sol_pool_rank": 5.0,
+   "terra_pool_rank": 9.0,
+   "sonnet_rigor": 56.3,
+   "sol_rigor": 59.8,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "qfW4IrUuig",
+   "mean_human": 4.5,
+   "human_rank": 7.0,
+   "sonnet_pool": 41.2,
+   "sol_pool": 52.8,
+   "terra_pool": 50,
+   "sonnet_pool_rank": 16.5,
+   "sol_pool_rank": 12.0,
+   "terra_pool_rank": 14.0,
+   "sonnet_rigor": 49.4,
+   "sol_rigor": 55.6,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "9jcB40wjk3",
+   "mean_human": 4.4,
+   "human_rank": 9.5,
+   "sonnet_pool": 41.2,
+   "sol_pool": 46.6,
+   "terra_pool": 39,
+   "sonnet_pool_rank": 16.5,
+   "sol_pool_rank": 18.0,
+   "terra_pool_rank": 19.0,
+   "sonnet_rigor": 46.7,
+   "sol_rigor": 42.9,
+   "sol_iclr_rating": 2.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "be4ey66fhk",
+   "mean_human": 4.4,
+   "human_rank": 9.5,
+   "sonnet_pool": 55,
+   "sol_pool": 64.8,
+   "terra_pool": 56.4,
+   "sonnet_pool_rank": 5.0,
+   "sol_pool_rank": 3.0,
+   "terra_pool_rank": 6.0,
+   "sonnet_rigor": 55.1,
+   "sol_rigor": 61.0,
+   "sol_iclr_rating": 6.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "0xObmDmsKY",
+   "mean_human": 4.0,
+   "human_rank": 12.0,
+   "sonnet_pool": 48.2,
+   "sol_pool": 52.6,
+   "terra_pool": 53.2,
+   "sonnet_pool_rank": 10.0,
+   "sol_pool_rank": 13.0,
+   "terra_pool_rank": 12.0,
+   "sonnet_rigor": 50.4,
+   "sol_rigor": 45.2,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "BxeJLOrKDF",
+   "mean_human": 4.0,
+   "human_rank": 12.0,
+   "sonnet_pool": 46.4,
+   "sol_pool": 55,
+   "terra_pool": 53.6,
+   "sonnet_pool_rank": 11.0,
+   "sol_pool_rank": 9.0,
+   "terra_pool_rank": 11.0,
+   "sonnet_rigor": 49.8,
+   "sol_rigor": 55.1,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "Jw7khYzYzl",
+   "mean_human": 4.0,
+   "human_rank": 12.0,
+   "sonnet_pool": 68.8,
+   "sol_pool": 67.2,
+   "terra_pool": 69.6,
+   "sonnet_pool_rank": 1.0,
+   "sol_pool_rank": 2.0,
+   "terra_pool_rank": 1.0,
+   "sonnet_rigor": 61.8,
+   "sol_rigor": 61.2,
+   "sol_iclr_rating": 6.0,
+   "sonnet_iclr_rating": 6.0
+  },
+  {
+   "paper_id": "Z6z4AnXGhw",
+   "mean_human": 3.5,
+   "human_rank": 14.5,
+   "sonnet_pool": 51.8,
+   "sol_pool": 63.6,
+   "terra_pool": 61,
+   "sonnet_pool_rank": 8.0,
+   "sol_pool_rank": 4.0,
+   "terra_pool_rank": 2.0,
+   "sonnet_rigor": 54.5,
+   "sol_rigor": 61.7,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "gUw8n109ki",
+   "mean_human": 3.5,
+   "human_rank": 14.5,
+   "sonnet_pool": 40.4,
+   "sol_pool": 53.2,
+   "terra_pool": 40.2,
+   "sonnet_pool_rank": 18.0,
+   "sol_pool_rank": 10.0,
+   "terra_pool_rank": 17.0,
+   "sonnet_rigor": 45.9,
+   "sol_rigor": 52.2,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "E5mL07Fbq8",
+   "mean_human": 3.333,
+   "human_rank": 16.0,
+   "sonnet_pool": 42.2,
+   "sol_pool": 50,
+   "terra_pool": 40.2,
+   "sonnet_pool_rank": 15.0,
+   "sol_pool_rank": 15.5,
+   "terra_pool_rank": 17.0,
+   "sonnet_rigor": 48.0,
+   "sol_rigor": 47.8,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "8xcmfwomnI",
+   "mean_human": 3.0,
+   "human_rank": 17.5,
+   "sonnet_pool": 48.6,
+   "sol_pool": 50,
+   "terra_pool": 41,
+   "sonnet_pool_rank": 9.0,
+   "sol_pool_rank": 15.5,
+   "terra_pool_rank": 15.0,
+   "sonnet_rigor": 51.9,
+   "sol_rigor": 41.8,
+   "sol_iclr_rating": 2.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "g4HpTtgsn2",
+   "mean_human": 3.0,
+   "human_rank": 17.5,
+   "sonnet_pool": 36.6,
+   "sol_pool": 52.2,
+   "terra_pool": 54.4,
+   "sonnet_pool_rank": 20.0,
+   "sol_pool_rank": 14.0,
+   "terra_pool_rank": 10.0,
+   "sonnet_rigor": 46.1,
+   "sol_rigor": 54.3,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "KtocialdxS",
+   "mean_human": 2.667,
+   "human_rank": 19.0,
+   "sonnet_pool": 44.8,
+   "sol_pool": 56.4,
+   "terra_pool": 57.4,
+   "sonnet_pool_rank": 13.0,
+   "sol_pool_rank": 8.0,
+   "terra_pool_rank": 5.0,
+   "sonnet_rigor": 56.2,
+   "sol_rigor": 55.1,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  },
+  {
+   "paper_id": "AIKURJjxXT",
+   "mean_human": 2.5,
+   "human_rank": 20.0,
+   "sonnet_pool": 38,
+   "sol_pool": 53,
+   "terra_pool": 52.4,
+   "sonnet_pool_rank": 19.0,
+   "sol_pool_rank": 11.0,
+   "terra_pool_rank": 13.0,
+   "sonnet_rigor": 50.9,
+   "sol_rigor": 55.2,
+   "sol_iclr_rating": 4.0,
+   "sonnet_iclr_rating": 4.0
+  }
+ ],
+ "top_concerns_naming_prior_work": {
+  "sonnet": {
+   "papers": 6,
+   "of": 20,
+   "share_of_concerns": 0.06
+  },
+  "sol": {
+   "papers": 0,
+   "of": 20,
+   "share_of_concerns": 0.0
+  },
+  "terra": {
+   "papers": 0,
+   "of": 20,
+   "share_of_concerns": 0.0
+  }
+ },
+ "effort_median": {
+  "sonnet": {
+   "output_tokens": 80539,
+   "reasoning_tokens": 30161,
+   "minutes": 9.6
+  },
+  "sol": {
+   "output_tokens": 43604,
+   "reasoning_tokens": 9332,
+   "minutes": 14.0
+  },
+  "terra": {
+   "output_tokens": 25306,
+   "reasoning_tokens": 4606,
+   "minutes": 8.5
+  }
+ },
+ "search_median": {
+  "sonnet": {
+   "ledger_entries": 129.0,
+   "kept_results": 51.5
+  },
+  "sol": {
+   "ledger_entries": 190.5,
+   "kept_results": 86.5
+  },
+  "terra": {
+   "ledger_entries": 181.0,
+   "kept_results": 92.5
+  }
+ },
+ "human_issue_hit_rate_by_keyword_category": {
+  "sonnet": {
+   "novelty": {
+    "hit": 14,
+    "of": 20,
+    "rate": 0.7
+   },
+   "theory": {
+    "hit": 5,
+    "of": 12,
+    "rate": 0.42
+   },
+   "experiments": {
+    "hit": 34,
+    "of": 70,
+    "rate": 0.49
+   },
+   "clarity": {
+    "hit": 11,
+    "of": 37,
+    "rate": 0.3
+   },
+   "other": {
+    "hit": 48,
+    "of": 131,
+    "rate": 0.37
+   }
+  },
+  "sol": {
+   "novelty": {
+    "hit": 10,
+    "of": 26,
+    "rate": 0.38
+   },
+   "theory": {
+    "hit": 3,
+    "of": 16,
+    "rate": 0.19
+   },
+   "experiments": {
+    "hit": 15,
+    "of": 84,
+    "rate": 0.18
+   },
+   "clarity": {
+    "hit": 5,
+    "of": 41,
+    "rate": 0.12
+   },
+   "other": {
+    "hit": 22,
+    "of": 102,
+    "rate": 0.22
+   }
+  },
+  "terra": {
+   "novelty": {
+    "hit": 11,
+    "of": 25,
+    "rate": 0.44
+   },
+   "theory": {
+    "hit": 4,
+    "of": 20,
+    "rate": 0.2
+   },
+   "experiments": {
+    "hit": 17,
+    "of": 73,
+    "rate": 0.23
+   },
+   "clarity": {
+    "hit": 5,
+    "of": 35,
+    "rate": 0.14
+   },
+   "other": {
+    "hit": 25,
+    "of": 101,
+    "rate": 0.25
+   }
+  }
+ }
+}
