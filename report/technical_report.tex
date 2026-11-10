@@ -341,8 +341,7 @@ Without withdrawn papers & 69 & $+0.40$ [$0.17$, $0.59$] & 0.61\\
 Test split, against one human (protocol) & 41 & $+0.45$ [$0.14$, $0.69$] & 0.67\\
 Protocol regression on 7 dimensions, test split & 41 & $+0.19$ [$-0.13$, $0.48$] & 0.67\\
 \midrule
-\multicolumn{4}{l}{References on the same 86 papers: one human vs another $+0.14$, one-human AUC 0.64;}\\
-\multicolumn{4}{l}{paperreview.ai (ICLR 2025): AI $0.42$ / $0.75$, human $0.41$ / $0.84$.}\\
+\multicolumn{4}{l}{References on the same 86 papers: one human vs another $+0.14$, one-human AUC 0.64.}\\
 \midrule
 Error (86 papers) & & NMAE $\downarrow$ & NME\\
 \midrule
@@ -359,10 +358,9 @@ One human vs another human & & $0.188\pm0.157$ & --\\
 \item \textbf{The pilot signal holds.} The 66 new papers rank exactly as well as the 20 pilot
 papers ($0.48$), and recognized papers do not drive the result: the reviewer reported knowing 11
 of the 86, and without them Spearman is still $0.48$.
-\item \textbf{Above human--human agreement, at paperreview.ai's level.} The panel ranks papers
-far more like the human mean than one human ranks like another ($0.47$ vs $0.14$), and on the test
-split against one human ($0.45$) it is at paperreview.ai's AI level ($0.42$, a different year and
-sample). Acceptance AUC ($0.64$) equals one human's here but stays below paperreview.ai's $0.75$.
+\item \textbf{Above human--human agreement.} The panel ranks papers
+far more like the human mean than one human ranks like another ($0.47$ vs $0.14$); on the test
+split against one human it reaches $0.45$. Acceptance AUC ($0.64$) equals one human's here.
 \item \textbf{The fitted regression does worse than no fitting.} The protocol's least-squares map
 from seven dimensions, fitted on 45 papers, reaches only $0.19$ on the test split; three of its
 seven weights are negative. The unfitted panel rating is the better score.
@@ -418,7 +416,7 @@ Haiku, default & $+0.07$ / 0.50 & $-0.25$ / 0.33 & $-0.10$ / 0.44\\
 Sonnet, high   & $+0.46$ [$0.09$, $0.74$] / 0.69 & $+0.22$ / 0.53 & $+0.10$ / 0.54\\
 \midrule
 \multicolumn{4}{l}{References: one human vs another $+0.12$, one-human AUC 0.58 (same papers);}\\
-\multicolumn{4}{l}{our ICLR 2026 test split $0.25$ / $0.75$; paperreview.ai (ICLR 2025) AI $0.42$ / $0.75$, human $0.41$ / $0.84$.}\\
+\multicolumn{4}{l}{human vs human on our ICLR 2026 test split $0.25$ / $0.75$.}\\
 \bottomrule
 \end{tabular}
 \end{table}

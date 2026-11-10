@@ -363,7 +363,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
 }
 
 /* Plain document style, after surveying research project pages (Nerfies, mip-NeRF 360, Distill,
-   paperreview.ai, AgentReview, Sakana AI Scientist): flat background, no motion, no glass. */
+   AgentReview, Sakana AI Scientist): flat background, no motion, no glass. */
 .mesh{background:var(--bg)}.mesh::before,.mesh::after{display:none}
 .top{background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom-color:var(--line)}
 .glass{background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none;border-color:var(--line);box-shadow:none}
@@ -536,11 +536,11 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
     <h2 id="t-eval" class="rv" style="--i:1;margin-top:14px">Does it agree with human reviewers?</h2>
     <p class="sub rv" style="--i:2">We reviewed 86 ICLR 2026 submissions (23 accepted, 43 rejected, 20 withdrawn or desk-rejected) from anonymized arXiv versions, then compared the skill's scores with the real human scores it never saw.</p>
     <ul class="take rv" style="--i:3">
-      <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.47 for Sonnet at high effort, versus 0.14 between two human reviewers, and on par with paperreview.ai (0.42).</span></li>
+      <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.47 for Sonnet at high effort, versus 0.14 between two human reviewers.</span></li>
       <li><span class="tk ok">✓</span><span><b>Scores are not biased</b>: on average neither too harsh nor too lenient (NME −0.003).</span></li>
       <li><span class="tk no">!</span><span><b>Scores bunch in the middle</b>: 78% of papers end at ICLR 4, so accepted papers are rated 0.8 points below the humans and weak ones a little above.</span></li>
       <li><span class="tk no">!</span><span><b>Model matters</b>: Haiku and two GPT-6.1 models showed little or no agreement with the humans on 20 papers. <a href="#models">See the model comparison</a>.</span></li>
-      <li><span class="tk no">!</span><span><b>Not yet as good at picking accepted papers</b> as paperreview.ai (AUC 0.64 vs 0.75); one human reviewer scores 0.64 on the same papers.</span></li>
+      <li><span class="tk no">!</span><span><b>Picks accepted papers only as well as one human</b>: AUC 0.64 for both on the same papers, where 0.5 is a coin flip.</span></li>
     </ul>
     <div class="callout small rv" style="--i:4" role="note">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
@@ -562,7 +562,6 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating, 86 papers</small></div><div class="track"><i class="fill ai" style="--w:47%"></i><i class="ci" style="left:27%;width:37%"></i><span class="sr-only">95% CI +0.27 to +0.64</span></div><div class="val">+0.47</div></div>
           <div class="row"><div class="lab">Haiku<small>panel rating, 20-paper pilot</small></div><div class="track"><i class="fill weak" style="--w:20%"></i><i class="ci" style="left:0%;width:58%"></i><span class="sr-only">95% CI clipped at 0 to +0.58</span></div><div class="val">+0.20</div></div>
           <div class="row"><div class="lab">Human vs human<small>same 86 papers</small></div><div class="track"><i class="fill human" style="--w:14%"></i></div><div class="val">+0.14</div></div>
-          <div class="row"><div class="lab">paperreview.ai<small>AI vs human</small></div><div class="track"><i class="fill ref" style="--w:42%"></i></div><div class="val">+0.42</div></div>
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
       </div>
@@ -574,7 +573,6 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
           <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating, 86 papers</small></div><div class="track"><i class="fill ai" style="--w:28%"></i></div><div class="val">0.64</div></div>
           <div class="row"><div class="lab">Haiku<small>panel rating, 20-paper pilot</small></div><div class="track"><i class="fill weak" style="--w:12%"></i></div><div class="val">0.56</div></div>
           <div class="row"><div class="lab">One human reviewer<small>same 86 papers</small></div><div class="track"><i class="fill human" style="--w:28%"></i></div><div class="val">0.64</div></div>
-          <div class="row"><div class="lab">paperreview.ai<small>AI score</small></div><div class="track"><i class="fill ref" style="--w:50%"></i></div><div class="val">0.75</div></div>
           <div class="axis" aria-hidden="true"><div></div><div><span>0.5</span><span>0.75</span><span>1</span></div><div></div></div>
         </div>
       </div>
@@ -596,7 +594,6 @@ h1 em{background:none;-webkit-background-clip:border-box;background-clip:border-
       <span><i class="sw" style="background:var(--bar-ai)"></i>This skill, Sonnet, high effort</span>
       <span><i class="sw" style="background:var(--bar-weak)"></i>This skill, Haiku</span>
       <span><i class="sw" style="background:var(--bar-human)"></i>Human reference</span>
-      <span><i class="sw" style="border:1.5px dashed var(--muted)"></i>paperreview.ai, ICLR 2025 (147 papers)</span>
       <span><i class="sw" style="background:repeating-linear-gradient(135deg,var(--surface-2) 0 3px,var(--muted) 3px 4px)"></i>Constant baseline</span>
     </div>
       </div>
