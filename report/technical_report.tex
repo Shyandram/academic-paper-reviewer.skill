@@ -38,7 +38,7 @@ and an Editor-in-Chief (EIC) who weights each review by its quality and makes th
 Scores are aggregated by a deterministic, standard-library Python script and translated into the
 forms of 11 venues.
 
-We evaluate the skill in two ways.
+We evaluate the skill in three ways.
 \begin{itemize}
 \item \textbf{Accepted papers with planted flaws.} On 30 recently accepted CVPR/ECCV/ICLR papers,
 96\% of cited locations, 99\% of quoted phrases and all but two of 842 quoted numbers are found in the
@@ -48,11 +48,12 @@ paper, and the reviewers mention all six planted fatal flaws.
 [$0.27$, $0.64$] with the mean human rating (two human reviewers of the same papers: $0.14$) and
 an acceptance AUC of $0.64$. On the ICLR scale the normalized mean absolute error is $0.084$,
 with essentially no bias (NME $-0.003$). The 20-paper pilot gave the same ranking ($0.48$).
-\item \textbf{Issue coverage.} On the 86 papers the panel raises 46\% of the human reviewers'
-main issues and 74\% of those two or more reviewers share; the more important the issue
-(consensus, a reject vote, a reviewer's lead point), the more often it is raised. On a 20-paper
-pilot, an optional Gap Scout that names concrete missing items raises 65\% alone and 73\% with
-the panel.
+\item \textbf{Weaknesses compared with the human reviews.} On the same 86 papers the panel
+raises 46\% of the human reviewers' main issues and 74\% of those two or more reviewers share;
+the more important the issue (consensus, a reject vote, a reviewer's lead point), the more often
+it is raised. The EIC's five top concerns match human issues more often than an average panel
+issue (34\% vs 26\%) but hold only a third of the consensus issues. On a 20-paper pilot, an
+optional Gap Scout that names concrete missing items raises 65\% alone and 73\% with the panel.
 A redesign that moved these ideas into the panel (version 2.11) raised no more issues, ranked
 papers worse (Spearman $0.32$) and cost 3.5$\times$ as much, so it was withdrawn.
 \end{itemize}
@@ -99,8 +100,10 @@ deterministic score aggregation into venue-specific forms (Section~\ref{sec:syst
 \item A reproducible calibration harness following the paperreview.ai protocol~\citep{paperreview},
 extended with CSPaper-style error metrics~\citep{cspaper} and a no-split pilot mode
 (Section~\ref{sec:iclr}).
-\item Pilot and full-evaluation results, including what the skill did badly and the fixes that
-followed.
+\item An evaluation on 86 ICLR 2026 papers of both the ratings (Section~\ref{sec:iclr}) and the
+stated weaknesses against the human reviews, including whether the important issues and the
+EIC's priorities match the humans' (Section~\ref{sec:overlap}); and the pilots that led there,
+including what did not work.
 \end{enumerate}
 
 \section{System design}\label{sec:system}
@@ -316,7 +319,7 @@ The miss was an ICLR paper rated 4.
 received 3. This compression motivated the pool-position calibration of version 2.10. The DA raised
 CRITICAL issues on 11/30 papers, and the EIC upheld none on real papers.
 
-\section{Evaluation II: ICLR 2026 calibration}\label{sec:iclr}
+\section{Evaluation II: ICLR 2026 ratings}\label{sec:iclr}
 
 \subsection{Protocol}
 We follow the paperreview.ai protocol~\citep{paperreview}.
@@ -356,10 +359,73 @@ numbers, arXiv stamps, emails, affiliation footnotes, code links, acknowledgment
 marks are removed. The literature check runs in \code{strict} mode with the submission deadline as
 cutoff.
 
-The pilot set has 20 papers stratified by decision and human score: 5 accepted, 10 rejected,
-4 withdrawn and 1 desk rejected.
+The protocol's balanced set has 86 papers (23 accepted, 43 rejected, 17 withdrawn, 3 desk
+rejected; 45 train, 41 test). The pilots used 20 of them, stratified by decision and human score:
+5 accepted, 10 rejected, 4 withdrawn and 1 desk rejected.
 
-\subsection{Pilots}
+\subsection{Main result: 86 papers}\label{sec:full}
+On the balanced set we reviewed the 66 papers not in the pilot with skill 2.10.1,
+which keeps the 2.10 panel, scoring and decision, and reused the 20 pilot~3 runs. All 86 runs
+finished, at \$166.61 in total (\$1.94 per paper). Table~\ref{tab:full} gives the results.
+
+\begin{table}[t]
+\centering\small
+\caption{Full evaluation (Sonnet, high effort, 86 papers): the panel rating against the mean
+human rating, Spearman [bootstrap 95\% CI] / acceptance AUC, and errors on the ICLR scale.}
+\label{tab:full}
+\setlength{\tabcolsep}{4pt}\footnotesize
+\begin{tabular}{lccc}
+\toprule
+Papers & $n$ & Spearman & AUC\\
+\midrule
+All & 86 & $\mathbf{+0.47}$ [$0.27$, $0.64$] & 0.64\\
+Pilot 3's papers & 20 & $+0.48$ [$0.10$, $0.74$] & 0.67\\
+The 66 new papers & 66 & $+0.48$ [$0.25$, $0.66$] & 0.64\\
+Not recognized by the reviewer & 75 & $+0.48$ [$0.28$, $0.65$] & 0.66\\
+Without withdrawn papers & 69 & $+0.40$ [$0.17$, $0.59$] & 0.61\\
+Test split, against one human (protocol) & 41 & $+0.45$ [$0.14$, $0.69$] & 0.67\\
+Protocol regression on 7 dimensions, test split & 41 & $+0.19$ [$-0.13$, $0.48$] & 0.67\\
+\midrule
+\multicolumn{4}{l}{References on the same 86 papers: one human vs another $+0.14$, one-human AUC 0.64;}\\
+\multicolumn{4}{l}{paperreview.ai (ICLR 2025): AI $0.42$ / $0.75$, human $0.41$ / $0.84$.}\\
+\midrule
+Error (86 papers) & & NMAE $\downarrow$ & NME\\
+\midrule
+Panel rating & & $\mathbf{0.084}\pm0.063$ [0.071, 0.098] & $-0.003\pm0.105$\\
+Final rating (integer) & & $0.087\pm0.064$ [0.074, 0.102] & $-0.018\pm0.107$\\
+Constant at the median human mean & & $0.089\pm0.074$ & --\\
+One human vs mean human & & $0.118\pm0.087$ & --\\
+One human vs another human & & $0.188\pm0.157$ & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+\item \textbf{The pilot signal holds.} The 66 new papers rank exactly as well as the 20 pilot
+papers ($0.48$), and recognized papers do not drive the result: the reviewer reported knowing 11
+of the 86, and without them Spearman is still $0.48$.
+\item \textbf{Above human--human agreement, at paperreview.ai's level.} The panel ranks papers
+far more like the human mean than one human ranks like another ($0.47$ vs $0.14$), and on the test
+split against one human ($0.45$) it is at paperreview.ai's AI level ($0.42$, a different year and
+sample). Acceptance AUC ($0.64$) equals one human's here but stays below paperreview.ai's $0.75$.
+\item \textbf{The fitted regression does worse than no fitting.} The protocol's least-squares map
+from seven dimensions, fitted on 45 papers, reaches only $0.19$ on the test split; three of its
+seven weights are negative. The unfitted panel rating is the better score.
+\item \textbf{No stage loses signal.} The EIC-weighted rating ($0.45$), the reviewers' pool
+position ($0.48$) and the panel without the Devil's Advocate ($0.48$) are all within $\pm0.02$ of
+the panel rating, with intervals that include zero.
+\item \textbf{Compression.} The final Overall is 3 for 67 of 86 papers. The mean panel rating
+(ICLR scale) is $4.45$ for accepted papers against a human $5.28$, and $4.10$ for rejected papers
+against $3.89$: the order is right, but the gap is $0.35$ points instead of $1.39$.
+\item \textbf{Withdrawn papers help.} Without them Spearman drops to $0.40$; part of the signal is
+spotting clearly weak submissions.
+\end{itemize}
+The reviewer's workspace contained no human scores for the 66 new papers; the
+workflow now also removes all evaluation data from it before each review.
+
+\subsection{Pilots and model choice}\label{sec:pilots}
+Five runs led to the evaluated version; Tables~\ref{tab:rank} and~\ref{tab:err} give the
+20-paper pilots of Haiku and Sonnet.
 \begin{center}\small
 \begin{tabularx}{\linewidth}{cllX}
 \toprule
@@ -424,7 +490,7 @@ One human vs mean human           & $0.102\pm0.065$ & -- & -- & --\\
 \end{tabular}
 \end{table}
 
-\subsection{Findings}
+\paragraph{What the pilots showed.}
 \begin{itemize}
 \item \textbf{Model capability matters.} Haiku's scores did not separate papers. Its integer final
 rating was the same for all 20 papers, so Spearman is undefined. Sonnet at high effort gave the
@@ -447,68 +513,7 @@ For reference only: CSPaper reports NMAE 0.128, NME $-0.015$ and SRC 0.658 for C
 on ICLR main. That benchmark's sample size and paper overlap are unknown, so the numbers are not
 directly comparable with ours.
 
-\subsection{Full evaluation: 86 papers}\label{sec:full}
-The balanced set of the protocol has 86 papers (45 train, 41 test; 23 accepted, 43 rejected,
-17 withdrawn, 3 desk rejected). We reviewed the 66 papers not in the pilot with skill 2.10.1,
-which keeps the 2.10 panel, scoring and decision, and reused the 20 pilot~3 runs. All 86 runs
-finished, at \$166.61 in total (\$1.94 per paper). Table~\ref{tab:full} gives the results.
-
-\begin{table}[t]
-\centering\small
-\caption{Full evaluation (Sonnet, high effort, 86 papers): the panel rating against the mean
-human rating, Spearman [bootstrap 95\% CI] / acceptance AUC, and errors on the ICLR scale.}
-\label{tab:full}
-\setlength{\tabcolsep}{4pt}\footnotesize
-\begin{tabular}{lccc}
-\toprule
-Papers & $n$ & Spearman & AUC\\
-\midrule
-All & 86 & $\mathbf{+0.47}$ [$0.27$, $0.64$] & 0.64\\
-Pilot 3's papers & 20 & $+0.48$ [$0.10$, $0.74$] & 0.67\\
-The 66 new papers & 66 & $+0.48$ [$0.25$, $0.66$] & 0.64\\
-Not recognized by the reviewer & 75 & $+0.48$ [$0.28$, $0.65$] & 0.66\\
-Without withdrawn papers & 69 & $+0.40$ [$0.17$, $0.59$] & 0.61\\
-Test split, against one human (protocol) & 41 & $+0.45$ [$0.14$, $0.69$] & 0.67\\
-Protocol regression on 7 dimensions, test split & 41 & $+0.19$ [$-0.13$, $0.48$] & 0.67\\
-\midrule
-\multicolumn{4}{l}{References on the same 86 papers: one human vs another $+0.14$, one-human AUC 0.64;}\\
-\multicolumn{4}{l}{paperreview.ai (ICLR 2025): AI $0.42$ / $0.75$, human $0.41$ / $0.84$.}\\
-\midrule
-Error (86 papers) & & NMAE $\downarrow$ & NME\\
-\midrule
-Panel rating & & $\mathbf{0.084}\pm0.063$ [0.071, 0.098] & $-0.003\pm0.105$\\
-Final rating (integer) & & $0.087\pm0.064$ [0.074, 0.102] & $-0.018\pm0.107$\\
-Constant at the median human mean & & $0.089\pm0.074$ & --\\
-One human vs mean human & & $0.118\pm0.087$ & --\\
-One human vs another human & & $0.188\pm0.157$ & --\\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{itemize}
-\item \textbf{The pilot signal holds.} The 66 new papers rank exactly as well as the 20 pilot
-papers ($0.48$), and recognized papers do not drive the result: the reviewer reported knowing 11
-of the 86, and without them Spearman is still $0.48$.
-\item \textbf{Above human--human agreement, at paperreview.ai's level.} The panel ranks papers
-far more like the human mean than one human ranks like another ($0.47$ vs $0.14$), and on the test
-split against one human ($0.45$) it is at paperreview.ai's AI level ($0.42$, a different year and
-sample). Acceptance AUC ($0.64$) equals one human's here but stays below paperreview.ai's $0.75$.
-\item \textbf{The fitted regression does worse than no fitting.} The protocol's least-squares map
-from seven dimensions, fitted on 45 papers, reaches only $0.19$ on the test split; three of its
-seven weights are negative. The unfitted panel rating is the better score.
-\item \textbf{No stage loses signal.} The EIC-weighted rating ($0.45$), the reviewers' pool
-position ($0.48$) and the panel without the Devil's Advocate ($0.48$) are all within $\pm0.02$ of
-the panel rating, with intervals that include zero.
-\item \textbf{Compression.} The final Overall is 3 for 67 of 86 papers. The mean panel rating
-(ICLR scale) is $4.45$ for accepted papers against a human $5.28$, and $4.10$ for rejected papers
-against $3.89$: the order is right, but the gap is $0.35$ points instead of $1.39$.
-\item \textbf{Withdrawn papers help.} Without them Spearman drops to $0.40$; part of the signal is
-spotting clearly weak submissions.
-\end{itemize}
-The reviewer's workspace contained no human scores for the 66 new papers; the
-workflow now also removes all evaluation data from it before each review.
-
-\subsection{Issue overlap and hit rate}\label{sec:overlap}
+\section{Evaluation III: weaknesses compared with the human reviews}\label{sec:overlap}
 Scores say nothing about \emph{which} weaknesses a review raises. On the 86 papers of the full
 evaluation (Sonnet, high effort, skill 2.10.1) we compared the weakness sections of the AI panel
 with those of the ICLR 2026 human reviews (3--5 per paper). For each paper, one Sonnet annotator
@@ -520,6 +525,7 @@ pilot 3's 20 papers, where four papers annotated twice by independent annotators
 0.04 on every metric; every pilot hit rate is reproduced within 0.06 on the 66 new papers. The
 tool and the annotation prompts are in the repository (\texttt{evals/issue\_overlap.py}).
 
+\subsection{Coverage}
 \begin{table}[h]
 \centering
 \small
@@ -578,7 +584,8 @@ that keeps R4's vote but limits its weaknesses, moves the Devil's Advocate into 
 Report Checker and adds 3--5 key concerns (Section~\ref{sec:p4}).
 \end{itemize}
 
-\paragraph{Importance.} The human reviews carry no severity labels, so we use three proxies: how
+\subsection{Important issues}\label{sec:importance}
+The human reviews carry no severity labels, so we use three proxies: how
 many humans raised the issue, the rating of the reviewers who raised it (on the ICLR 2026 scale,
 4 or less is a reject vote) and whether it was among the first two main points of a review
 (Table~\ref{tab:importance}). Every proxy points the same way: the more important the issue, the
@@ -609,7 +616,45 @@ One human, accept votes only, not a lead point & 91 & 0.29 [0.20, 0.38]\\
 \end{tabular}
 \end{table}
 
-\paragraph{What the panel misses.} Of the 1018 human main issues, 456 were hit, 460 had only a
+\subsection{The EIC's priority list}\label{sec:priority}
+Each final report ends with the EIC's five top concerns, the first thing an author reads. To see
+whether they are the humans' priorities, one Sonnet annotator per paper saw the human main
+issues and, mixed at random without sources, the five top concerns and the panel's main issues,
+and matched each human issue to the items that raise the same specific point. The re-judged
+panel hits agree with the original annotation on 85\% of human issues.
+
+\begin{table}[h]
+\centering
+\small
+\caption{The EIC's five top concerns against the human main issues, 86 papers. Left: share of
+AI items that match a human issue. Right: of the human issues the panel raised, the share that
+also appear among the top five.}\label{tab:priority}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcc@{\qquad}lcc}
+\toprule
+AI item matches & Top concern & Panel issue & Human issue raised by the panel & $n$ & In top 5\\
+\midrule
+A human issue & \textbf{0.34} & 0.26 & 2+ humans & 161 & \textbf{0.45}\\
+A consensus issue & \textbf{0.16} & 0.10 & One human & 305 & 0.30\\
+A reject-vote issue & 0.29 & 0.22 & Behind a reject vote & 384 & 0.37\\
+Match or related & 0.65 & 0.55 & Accept votes only & 82 & 0.29\\
+Items & 430 & 1751 & A reviewer's lead point & 284 & 0.38\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The answer is \emph{partly} (Table~\ref{tab:priority}). A top concern is 1.3$\times$ as likely as
+an average panel issue to match a human issue and 1.6$\times$ as likely to match a consensus
+issue, and the EIC promotes the consensus issues the panel found more often than single-reviewer
+ones (0.45 vs 0.30). But most human priorities do not reach the list: the five concerns match
+34\% of the consensus issues, against 74\% for the whole panel (56\% when related items count),
+partly because each concern bundles several points into one line. Within the five there is no
+order: the first matches a human issue 0.37 of the time and the fifth 0.29, with no trend in
+between. Two-thirds of the top concerns match no human issue exactly; they need not be wrong, but
+a priority list that leads with the humans' consensus issues would serve authors better.
+
+\subsection{What the panel misses}\label{sec:misses}
+Of the 1018 human main issues, 456 were hit, 460 had only a
 related AI issue and 101 had nothing close. A Sonnet labeler (one per five papers) gave each
 issue a topic and the evidence needed to raise it (before seeing which were hit) and, for the 561
 non-hits, the likely reason, by comparing it with the AI issue summaries (Table~\ref{tab:misses}).
@@ -651,7 +696,10 @@ Figures & 45 & 0.29 & & & \\
 \end{tabular}
 \end{table}
 
-\paragraph{Raising the hit count: a Gap Scout (pilot, 20 papers).} Since most non-hits were raised only as a
+\subsection{Pilot experiments: a Gap Scout and version 2.11}\label{sec:p4}
+Both experiments ran on the 20 pilot papers only (247 human main issues).
+
+\paragraph{A Gap Scout.} Since most non-hits were raised only as a
 category, we tested one extra, unscored pass: a Sonnet agent that reads only the redacted paper
 and lists up to 30 concrete weaknesses reviewers would likely raise (claims and their missing
 evidence, named baselines, undefined elements, theory, scope, typical requests). One annotator
@@ -682,11 +730,7 @@ Panel + Gap Scout & 50.9 & 175 & \textbf{0.73} [0.68, 0.79]\\
 \end{tabular}
 \end{table}
 
-Caveats: one LLM annotator and one labeler per paper; the Gap Scout test covers only the 20 pilot
-papers; importance is inferred from the human reviews, not judged; human reviewers saw the
-figures, the AI read the extracted text; agreement with humans is not correctness.
-
-\subsection{Pilot 4: a redesign that did not help}\label{sec:p4}
+\paragraph{Pilot 4: building it into the panel (version 2.11).}
 Version 2.11 put the findings above into the review itself: four voting reviewers (R1 and R2
 asked to name concrete items, R4 limited to presentation and venue fit), the Gap Scout as a
 sixth, unscored pass, and a fresh-context Report Checker that ran the literature and report
@@ -732,6 +776,10 @@ error bars (difference to the 2.11 panel 0.19 [$-0.32$, 0.70]).
 Version 2.10.1 therefore returns the panel, its instructions, the scoring and the decision rule
 to 2.10, keeps the Gap Scout only as an optional post-review checklist, and removes the Report
 Checker.
+
+Caveats: one LLM annotator and one labeler per paper; the Gap Scout test covers only the 20 pilot
+papers; importance is inferred from the human reviews, not judged; human reviewers saw the
+figures, the AI read the extracted text; agreement with humans is not correctness.
 
 \section{Related work}\label{sec:related}
 
