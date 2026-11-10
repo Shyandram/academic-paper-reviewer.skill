@@ -191,7 +191,9 @@ jobs:
           ls evals
       - run: npm install -g @anthropic-ai/claude-code
         if: needs.config.outputs.runner == 'claude'
-      - run: npm install -g @openai/codex
+      # Pinned: the version rounds 1-2 of the 2.13 validation ran on. An unpinned install once
+      # ran between a release and its linux-x64 binary and left codex unusable.
+      - run: npm install -g @openai/codex@0.167.0 && codex --version
         if: needs.config.outputs.runner == 'codex'
       - name: Review (single context)
         if: needs.config.outputs.pipeline == 'single'
