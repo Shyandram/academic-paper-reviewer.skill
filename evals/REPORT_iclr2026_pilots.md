@@ -3,7 +3,8 @@
 Pilots for the paperreview.ai-style evaluation (`evals/iclr_calibration.py`,
 `.github/workflows/iclr-calibration.yml`). Per-paper numbers: `evals/iclr2026_pilot_scores.json` (pilots),
 `evals/iclr2026_full_scores.json` (full evaluation, AI outputs only), `evals/iclr2026_issue_overlap_full.json`
-(issue overlap on the 86 papers), `evals/iclr2026_codex_pilot3.json` (GPT-6.1 Terra vs Sonnet, 20 papers).
+(issue overlap on the 86 papers), `evals/iclr2026_codex_pilot3.json` (GPT-6.1 Terra vs Sonnet, 20 papers),
+`evals/iclr2026_codex_sol_pilot3.json` (GPT-6.1 Sol vs Sonnet and Terra, same 20 papers).
 Review text and manuscripts are not committed.
 
 ## Setup
@@ -142,6 +143,39 @@ Constant median: NMAE 0.085. Human references on the same papers as above.
   parallel hit the organization's token-per-minute limit, so this run used 2.
 - With 20 papers the interval is wide; the result says this model, prompted this way, gives no
   usable ranking here, not that it cannot.
+
+### GPT-6.1 Sol (high), same 20 papers
+
+Run 42857826982, same setup as the Terra run (Codex `exec`, `model_reasoning_effort=high`, 2 in
+parallel, skill 2.10.1). All 20 reviews finished; none failed. Numbers in
+`evals/iclr2026_codex_sol_pilot3.json`.
+
+| | Sonnet, high | GPT-6.1 Terra, high | GPT-6.1 Sol, high |
+|---|---|---|---|
+| Panel rating (1–6) | **+0.48** [+0.12, +0.73] / 0.67 | -0.01 [-0.43, +0.43] / 0.40 | +0.02 [-0.38, +0.45] / 0.47 |
+| Reviewers' pool position | +0.45 [+0.03, +0.77] / 0.63 | +0.05 [-0.35, +0.51] / 0.45 | -0.07 [-0.50, +0.44] / 0.45 |
+| EIC pool position | +0.30 [-0.12, +0.68] / 0.55 | +0.10 [-0.34, +0.57] / 0.49 | -0.00 [-0.43, +0.45] / 0.47 |
+| ICLR rating | +0.26 [-0.10, +0.59] / 0.53 | +0.01 [-0.39, +0.44] / 0.41 | +0.06 [-0.27, +0.42] / 0.39 |
+| NMAE / NME, ICLR rating | 0.090 / +0.010 | 0.133 / -0.070 | 0.126 / -0.020 |
+| ICLR ratings given (2 / 4 / 6) | 0 / 17 / 3 | 6 / 13 / 1 | 3 / 14 / 3 |
+| SD of panel rating; of EIC pool | 0.38; 9.6 | 0.45; 11.3 | 0.34; 8.8 |
+| Papers recognized | 3 | 0 | 1 |
+| Cost per paper | $1.97 (billed) | $4.55 (estimate) | $1.39 (estimate) |
+| Wall time per paper | – | 9.2 min (6.2–14.4) | 14.3 min (11.8–17.6) |
+
+- **No ranking signal from Sol either.** Panel rating Spearman +0.02, AUC 0.47; no stage helps.
+  Its ICLR ratings are not biased overall (NME -0.02) but land on the wrong papers: NMAE 0.126
+  against 0.085 for a constant guess.
+- **The two GPT models agree with each other, and with Sonnet, more than with the humans.**
+  Panel rating Spearman: Sol–Terra 0.71, Sol–Sonnet 0.60, Terra–Sonnet 0.65; EIC pool: Sol–Terra
+  0.82, Sol–Sonnet 0.74. Sol gives the same ICLR rating as Sonnet on 15 of 20 papers.
+- **Same failure pattern as Terra.** The three papers with the highest human mean (6.0) get 3.4,
+  2.8 and 2.8 from Sol, while the three with the lowest (2.5–3.0) each get 3.2. Sonnet's edge
+  comes from a few papers at each end, so with 20 papers the gap is suggestive, not established:
+  the intervals overlap.
+- **Cost is not comparable between the two GPT rows.** The Sol estimate prices cached input at
+  the list rate ($0.10 per 1M); the Terra estimate priced cached input the same as fresh input,
+  so it overstates Terra's cost. Sol's list prices are $2 / $10 per 1M input / output.
 
 ## Error on the ICLR scale (NMAE / NME)
 

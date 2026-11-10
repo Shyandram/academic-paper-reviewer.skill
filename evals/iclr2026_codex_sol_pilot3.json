@@ -1,0 +1,227 @@
+{
+ "note": "GPT-6.1 Sol (high) via Codex, run 42857826982, vs Sonnet high (pilot 3, run 42087346815) and GPT-6.1 Terra high (run 42834172940), same 20 papers. Spearman/AUC vs mean human; numbers and paper IDs only. Cost estimated from session-log tokens at list prices (2 / 0.10 cached / 10 USD per 1M).",
+ "sol_wall_minutes_per_paper": {
+  "mean": 14.3,
+  "min": 11.8,
+  "max": 17.6
+ },
+ "sol_failed_reviews": 0,
+ "n": 20,
+ "sol/official_rating": {
+  "spearman": 0.02,
+  "ci": [
+   -0.38,
+   0.45
+  ],
+  "auc": 0.47
+ },
+ "sol/rating": {
+  "spearman": 0.06,
+  "ci": [
+   -0.27,
+   0.42
+  ],
+  "auc": 0.39
+ },
+ "sol/reviewer_pool": {
+  "spearman": -0.07,
+  "ci": [
+   -0.5,
+   0.44
+  ],
+  "auc": 0.45
+ },
+ "sol/eic_pool": {
+  "spearman": -0.0,
+  "ci": [
+   -0.43,
+   0.45
+  ],
+  "auc": 0.47
+ },
+ "sol/iclr": {
+  "nmae": 0.126,
+  "nme": -0.02,
+  "dist": {
+   "2.0": 3,
+   "4.0": 14,
+   "6.0": 3
+  },
+  "official_sd": 0.34,
+  "pool_sd": 8.8,
+  "recognized": 1,
+  "cost": 1.39
+ },
+ "sol_vs_sonnet/official_rating": 0.6,
+ "sol_vs_sonnet/eic_pool": 0.74,
+ "sol_vs_sonnet/rating": 0.51,
+ "sol_vs_sonnet/same_iclr": 15,
+ "sol_vs_sonnet/mean_abs_official": 0.28,
+ "sol_vs_terra/official_rating": 0.71,
+ "sol_vs_terra/eic_pool": 0.82,
+ "sol_vs_terra/rating": 0.67,
+ "sol_vs_terra/same_iclr": 15,
+ "sol_vs_terra/mean_abs_official": 0.24,
+ "per_paper": {
+  "0xObmDmsKY": {
+   "human": 4.0,
+   "acc": false,
+   "sonnet": 3.0,
+   "terra": 3.2,
+   "sol": 2.8,
+   "sol_pool": 55
+  },
+  "8xcmfwomnI": {
+   "human": 3.0,
+   "acc": false,
+   "sonnet": 3.0,
+   "terra": 2.6,
+   "sol": 2.6,
+   "sol_pool": 42
+  },
+  "9R2iUHhVfr": {
+   "human": 4.5,
+   "acc": false,
+   "sonnet": 3.6,
+   "terra": 3.4,
+   "sol": 3.6,
+   "sol_pool": 68
+  },
+  "9jcB40wjk3": {
+   "human": 4.4,
+   "acc": true,
+   "sonnet": 2.8,
+   "terra": 2.4,
+   "sol": 2.4,
+   "sol_pool": 44
+  },
+  "AIKURJjxXT": {
+   "human": 2.5,
+   "acc": false,
+   "sonnet": 2.8,
+   "terra": 3.2,
+   "sol": 3.2,
+   "sol_pool": 52
+  },
+  "BxeJLOrKDF": {
+   "human": 4.0,
+   "acc": false,
+   "sonnet": 3.2,
+   "terra": 3.2,
+   "sol": 3.2,
+   "sol_pool": 52
+  },
+  "E5mL07Fbq8": {
+   "human": 3.33,
+   "acc": false,
+   "sonnet": 2.6,
+   "terra": 2.2,
+   "sol": 2.8,
+   "sol_pool": 48
+  },
+  "Jw7khYzYzl": {
+   "human": 4.0,
+   "acc": false,
+   "sonnet": 4.0,
+   "terra": 3.6,
+   "sol": 3.6,
+   "sol_pool": 70
+  },
+  "KtocialdxS": {
+   "human": 2.67,
+   "acc": false,
+   "sonnet": 3.0,
+   "terra": 3.2,
+   "sol": 3.2,
+   "sol_pool": 54
+  },
+  "Lvkbe0CgmZ": {
+   "human": 5.0,
+   "acc": false,
+   "sonnet": 3.2,
+   "terra": 2.4,
+   "sol": 2.6,
+   "sol_pool": 38
+  },
+  "PJdMrK79Mo": {
+   "human": 4.5,
+   "acc": true,
+   "sonnet": 3.4,
+   "terra": 2.8,
+   "sol": 3.4,
+   "sol_pool": 60
+  },
+  "Z6z4AnXGhw": {
+   "human": 3.5,
+   "acc": false,
+   "sonnet": 3.2,
+   "terra": 3.4,
+   "sol": 3.4,
+   "sol_pool": 62
+  },
+  "be4ey66fhk": {
+   "human": 4.4,
+   "acc": false,
+   "sonnet": 3.4,
+   "terra": 3.2,
+   "sol": 3.4,
+   "sol_pool": 70
+  },
+  "euMVC1DO4k": {
+   "human": 6.0,
+   "acc": true,
+   "sonnet": 3.8,
+   "terra": 3.4,
+   "sol": 3.4,
+   "sol_pool": 54
+  },
+  "g4HpTtgsn2": {
+   "human": 3.0,
+   "acc": false,
+   "sonnet": 2.6,
+   "terra": 3.2,
+   "sol": 3.2,
+   "sol_pool": 50
+  },
+  "gUw8n109ki": {
+   "human": 3.5,
+   "acc": false,
+   "sonnet": 2.6,
+   "terra": 2.2,
+   "sol": 3.2,
+   "sol_pool": 52
+  },
+  "kwro5432AI": {
+   "human": 6.0,
+   "acc": false,
+   "sonnet": 3.0,
+   "terra": 3.2,
+   "sol": 2.8,
+   "sol_pool": 50
+  },
+  "qfW4IrUuig": {
+   "human": 4.5,
+   "acc": false,
+   "sonnet": 2.8,
+   "terra": 2.6,
+   "sol": 3.2,
+   "sol_pool": 51
+  },
+  "rubeJmT1XM": {
+   "human": 6.0,
+   "acc": true,
+   "sonnet": 3.0,
+   "terra": 2.2,
+   "sol": 2.8,
+   "sol_pool": 43
+  },
+  "tlYSbw5GXY": {
+   "human": 5.2,
+   "acc": true,
+   "sonnet": 3.4,
+   "terra": 3.2,
+   "sol": 3.2,
+   "sol_pool": 58
+  }
+ }
+}
