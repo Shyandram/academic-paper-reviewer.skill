@@ -54,7 +54,13 @@ def section(text, title):
 def weaknesses(report, role):
     if role == GAP:
         return section(report, "Anticipated Reviewer Concerns") or report.strip()
-    return section(report, "Issue List" if role == "DA" else "Weaknesses")
+    if role == "DA":
+        # "### Issue List", or (some runs) separate "### CRITICAL/MAJOR/MINOR Issues" headings
+        # (the first one's section runs on through the later severity headings)
+        m = re.search(r"^#{2,4} (CRITICAL|MAJOR|MINOR) Issues.*$", report, re.M)
+        return section(report, "Issue List") or (
+            m.group(0).lstrip("# ") + "\n" + section(report, m.group(1) + " Issues") if m else "")
+    return section(report, "Weaknesses")
 
 
 def ai_reports(res, gaps=False):
@@ -78,7 +84,8 @@ def ai_reports(res, gaps=False):
         if not review.exists():
             return None
         text = review.read_text(encoding="utf-8")
-        parts = re.split(r"^## Reviewer: .*$", text, flags=re.M)[1:6]
+        # "## Reviewer: <name>" or "## Reviewer 1 (Methodology): <name>"
+        parts = re.split(r"^## Reviewer(?: \d+)?(?: \([^)\n]*\))?: .*$", text, flags=re.M)[1:6]
         if len(parts) == 5:
             out = dict(zip(ROLES, parts))
         elif len(parts) == 4:

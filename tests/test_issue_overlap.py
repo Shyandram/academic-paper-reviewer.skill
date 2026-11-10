@@ -224,3 +224,29 @@ class Analysis(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class NumberedHeadings(unittest.TestCase):
+    def test_reviewer_n_role_headings(self):
+        import tempfile
+        text = "# Phase 1\n" + "".join(
+            f"## Reviewer {i} ({r}): Dr. X\n### Weaknesses\n- W{i}\n" for i, r in
+            enumerate(["Methodology", "Domain", "Perspective", "Generalist"], 1)) + \
+            "## Devil's Advocate Report\n### Weaknesses\n- DA point\n"
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "review.md").write_text(text)
+            reps = io.ai_reports(d)
+            self.assertEqual(sorted(reps), sorted(io.ROLES))
+            self.assertIn("W4", reps["R4"])
+            self.assertNotIn("DA point", reps["R4"])
+            self.assertIn("DA point", reps["DA"])
+
+    def test_da_severity_headings(self):
+        da = "## Devil's Advocate Report\n### Steelman\nok\n### CRITICAL Issues\n- C1\n" \
+             "### MAJOR Issues\n- M1\n### MINOR Issues\n- m1\n### Numerical Sanity Check\nx\n"
+        w = io.weaknesses(da, "DA")
+        self.assertIn("C1", w)
+        self.assertIn("m1", w)
+        self.assertNotIn("Steelman", w)
+        self.assertNotIn("Sanity", w)
+        self.assertEqual(w.count("C1"), 1)
