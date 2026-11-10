@@ -448,7 +448,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
     <div class="glance" aria-label="At a glance">
       <div class="gl glass rv" style="--i:4"><span class="k">1 · You give</span><b>A PDF and, optionally, a target venue</b><p>“Review this paper for CVPR.” Works in Claude, Claude Code and Codex. No API key or server.</p></div>
       <div class="gl glass rv" style="--i:5"><span class="k">2 · You get</span><b>5 reviews, a decision and a ranked fix list</b><p>Scores in the venue's own form (e.g. ICLR rating, CVPR 6-point), plus a rebuttal draft or a revision check on request.</p></div>
-      <div class="gl glass rv" style="--i:6"><span class="k">3 · How good (pilot)</span><span class="big">0.48</span><p>Ranking agreement with human ICLR 2026 scores on 20 papers (Sonnet, high effort); two human reviewers agree at 0.25. <a href="#eval">See evaluation</a></p></div>
+      <div class="gl glass rv" style="--i:6"><span class="k">3 · How good</span><span class="big">0.47</span><p>Ranking agreement with human ICLR 2026 scores on 86 papers (Sonnet, high effort); two human reviewers of the same papers agree at 0.14. <a href="#eval">See evaluation</a></p></div>
     </div>
   </div>
 </section>
@@ -589,22 +589,23 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
   <div class="wrap">
     <div class="eval-grid">
       <div>
-    <div class="eval-head rv"><p class="kicker" style="margin:0">Evaluation</p><span class="pill">Pilot · 20 papers</span></div>
+    <div class="eval-head rv"><p class="kicker" style="margin:0">Evaluation</p><span class="pill">86 papers · ICLR 2026</span></div>
     <h2 id="t-eval" class="rv" style="--i:1;margin-top:14px">Does it agree with human reviewers?</h2>
-    <p class="sub rv" style="--i:2">We reviewed 20 ICLR 2026 submissions (accepted, rejected, withdrawn) from anonymized arXiv versions, then compared the skill's scores with the real human scores it never saw.</p>
+    <p class="sub rv" style="--i:2">We reviewed 86 ICLR 2026 submissions (23 accepted, 43 rejected, 20 withdrawn or desk-rejected) from anonymized arXiv versions, then compared the skill's scores with the real human scores it never saw.</p>
     <ul class="take rv" style="--i:3">
-      <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.48 for Sonnet at high effort, versus 0.25 between two human reviewers.</span></li>
-      <li><span class="tk ok">✓</span><span><b>Scores are not biased</b>: on average neither too harsh nor too lenient (NME +0.004).</span></li>
+      <li><span class="tk ok">✓</span><span><b>Ranks papers in roughly the human order</b>: 0.47 for Sonnet at high effort, versus 0.14 between two human reviewers, and on par with paperreview.ai (0.42).</span></li>
+      <li><span class="tk ok">✓</span><span><b>Scores are not biased</b>: on average neither too harsh nor too lenient (NME −0.003).</span></li>
+      <li><span class="tk no">!</span><span><b>Scores bunch in the middle</b>: 78% of papers end at ICLR 4, so accepted papers are rated 0.8 points below the humans and weak ones a little above.</span></li>
       <li><span class="tk no">!</span><span><b>Model matters</b>: a small model (Haiku) gave nearly the same score to every paper. Use a strong model at high effort.</span></li>
-      <li><span class="tk no">!</span><span><b>Not yet as good at picking accepted papers</b> as paperreview.ai (AUC 0.67 vs 0.75).</span></li>
+      <li><span class="tk no">!</span><span><b>Not yet as good at picking accepted papers</b> as paperreview.ai (AUC 0.64 vs 0.75); one human reviewer scores 0.64 on the same papers.</span></li>
     </ul>
     <div class="callout small rv" style="--i:4" role="note">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      <div><b>A pilot, not a final result.</b> 20 papers give wide error bars (0.48 could be anywhere from 0.09 to 0.74). An 86-paper evaluation is planned.</div>
+      <div><b>Holds beyond the pilot.</b> The 66 papers added after the 20-paper pilot give the same 0.48, and so do the 75 papers the reviewer did not recognize. The 95% range is 0.27 to 0.64. Cost: $1.94 per paper. Haiku was tested on the 20-paper pilot only.</div>
     </div>
     <div class="btn-row rv" style="--i:5">
       <a class="btn sm primary" href="report/technical_report.pdf">Technical report (PDF)</a>
-      <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/main/evals/REPORT_iclr2026_pilots.md">Pilot data</a>
+      <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#full-evaluation-skill-2101-86-papers-sonnet-high-effort">Evaluation data</a>
       <a class="btn sm" href="report/technical_report.tex">TeX source</a>
     </div>
       </div>
@@ -613,11 +614,11 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
       <div class="chart-card glass rv" style="--i:2">
         <h3>Does it rank papers like humans?</h3>
         <p>Spearman correlation with the mean human score. 0 = no relation, 1 = same order. Higher is better; the line shows the 95% range.</p>
-        <!-- values from evals/iclr2026_pilot_scores.json (pilot, n = 20); scale 0 to 1 -->
+        <!-- values from evals/REPORT_iclr2026_pilots.md (full evaluation, n = 86; Haiku: pilot, n = 20); scale 0 to 1 -->
         <div class="chart">
-          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating</small></div><div class="track"><i class="fill ai" style="--w:48%"></i><i class="ci" style="left:9%;width:65%"></i><span class="sr-only">95% CI +0.09 to +0.74</span></div><div class="val">+0.48</div></div>
-          <div class="row"><div class="lab">Haiku<small>panel rating</small></div><div class="track"><i class="fill weak" style="--w:20%"></i><i class="ci" style="left:0%;width:58%"></i><span class="sr-only">95% CI clipped at 0 to +0.58</span></div><div class="val">+0.20</div></div>
-          <div class="row"><div class="lab">Human vs human<small>ICLR 2026 test split</small></div><div class="track"><i class="fill human" style="--w:25%"></i></div><div class="val">+0.25</div></div>
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating, 86 papers</small></div><div class="track"><i class="fill ai" style="--w:47%"></i><i class="ci" style="left:27%;width:37%"></i><span class="sr-only">95% CI +0.27 to +0.64</span></div><div class="val">+0.47</div></div>
+          <div class="row"><div class="lab">Haiku<small>panel rating, 20-paper pilot</small></div><div class="track"><i class="fill weak" style="--w:20%"></i><i class="ci" style="left:0%;width:58%"></i><span class="sr-only">95% CI clipped at 0 to +0.58</span></div><div class="val">+0.20</div></div>
+          <div class="row"><div class="lab">Human vs human<small>same 86 papers</small></div><div class="track"><i class="fill human" style="--w:14%"></i></div><div class="val">+0.14</div></div>
           <div class="row"><div class="lab">paperreview.ai<small>AI vs human</small></div><div class="track"><i class="fill ref" style="--w:42%"></i></div><div class="val">+0.42</div></div>
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
         </div>
@@ -627,9 +628,9 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
         <p>AUC: the chance an accepted paper outscores a rejected one. 0.5 = coin flip, 1 = always.</p>
         <!-- scale 0.5 to 1 -->
         <div class="chart">
-          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating</small></div><div class="track"><i class="fill ai" style="--w:34%"></i></div><div class="val">0.67</div></div>
-          <div class="row"><div class="lab">Haiku<small>panel rating</small></div><div class="track"><i class="fill weak" style="--w:12%"></i></div><div class="val">0.56</div></div>
-          <div class="row"><div class="lab">One human reviewer<small>ICLR 2026 test split</small></div><div class="track"><i class="fill human" style="--w:50%"></i></div><div class="val">0.75</div></div>
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating, 86 papers</small></div><div class="track"><i class="fill ai" style="--w:28%"></i></div><div class="val">0.64</div></div>
+          <div class="row"><div class="lab">Haiku<small>panel rating, 20-paper pilot</small></div><div class="track"><i class="fill weak" style="--w:12%"></i></div><div class="val">0.56</div></div>
+          <div class="row"><div class="lab">One human reviewer<small>same 86 papers</small></div><div class="track"><i class="fill human" style="--w:28%"></i></div><div class="val">0.64</div></div>
           <div class="row"><div class="lab">paperreview.ai<small>AI score</small></div><div class="track"><i class="fill ref" style="--w:50%"></i></div><div class="val">0.75</div></div>
           <div class="axis" aria-hidden="true"><div></div><div><span>0.5</span><span>0.75</span><span>1</span></div><div></div></div>
         </div>
@@ -639,9 +640,9 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
         <p>NMAE: average gap to the human score on ICLR's 0–10 scale, as a share of the scale. Lower is better.</p>
         <!-- scale 0 to 0.2 -->
         <div class="chart">
-          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating</small></div><div class="track"><i class="fill ai" style="--w:39.5%"></i></div><div class="val">0.079</div></div>
-          <div class="row"><div class="lab">Always guess the middle<small>baseline</small></div><div class="track"><i class="fill base" style="--w:42.5%"></i></div><div class="val">0.085</div></div>
-          <div class="row"><div class="lab">Human vs human<small>same 20 papers</small></div><div class="track"><i class="fill human" style="--w:90%"></i></div><div class="val">0.180</div></div>
+          <div class="row hl"><div class="lab">Sonnet, high effort<small>panel rating, 86 papers</small></div><div class="track"><i class="fill ai" style="--w:42%"></i></div><div class="val">0.084</div></div>
+          <div class="row"><div class="lab">Always guess the middle<small>baseline</small></div><div class="track"><i class="fill base" style="--w:44.5%"></i></div><div class="val">0.089</div></div>
+          <div class="row"><div class="lab">Human vs human<small>same 86 papers</small></div><div class="track"><i class="fill human" style="--w:94%"></i></div><div class="val">0.188</div></div>
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.1</span><span>0.2</span></div><div></div></div>
         </div>
         <span class="hint">Guessing the middle already scores well here, so read this together with the ranking charts above.</span>
@@ -765,7 +766,7 @@ footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);color:v
         <li class="glass rv" style="--i:4"><b><a href="https://arxiv.org/abs/2411.00816">CycleReviewer</a> · 8B–123B</b><span>Simulates several reviewers and a senior reviewer, then averages. Spearman 0.27–0.28 on ICLR 2025.</span></li>
         <li class="glass rv" style="--i:5"><b><a href="https://arxiv.org/abs/2412.11948">OpenReviewer</a> · 8B</b><span>Fine-tuned on about 79k expert reviews; less lenient than general models.</span></li>
         <li class="glass rv" style="--i:6"><b><a href="https://arxiv.org/abs/2407.12857">SEA-E</a> · 7B</b><span>Fine-tuned on standardized reviews, with a check that the review matches the paper.</span></li>
-        <li class="glass rv" style="--i:7"><b>This skill</b><span>Spearman 0.48 on 20 ICLR 2026 papers (pilot). Different papers and sizes, so not directly comparable; a same-paper comparison is planned.</span></li>
+        <li class="glass rv" style="--i:7"><b>This skill</b><span>Spearman 0.47 on 86 ICLR 2026 papers. Different papers and sizes, so not directly comparable; a same-paper comparison is planned.</span></li>
       </ul>
     </div>
   </div>

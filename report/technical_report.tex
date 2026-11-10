@@ -43,18 +43,19 @@ We evaluate the skill in two ways.
 \item \textbf{Accepted papers with planted flaws.} On 30 recently accepted CVPR/ECCV/ICLR papers,
 96\% of cited locations, 99\% of quoted phrases and all but two of 842 quoted numbers are found in the
 paper, and the reviewers mention all six planted fatal flaws.
-\item \textbf{ICLR 2026 calibration.} This follows the paperreview.ai protocol. On a 20-paper
-stratified pilot with Sonnet at high effort, the reviewers' mean rating reaches Spearman $0.48$
-[$0.09$, $0.74$] with the mean human rating and an acceptance AUC of $0.67$. On the ICLR scale
-the normalized mean absolute error is $0.079$, with essentially no bias (NME $+0.004$).
+\item \textbf{ICLR 2026 calibration.} This follows the paperreview.ai protocol. On the balanced
+86-paper set with Sonnet at high effort, the reviewers' mean rating reaches Spearman $0.47$
+[$0.27$, $0.64$] with the mean human rating (two human reviewers of the same papers: $0.14$) and
+an acceptance AUC of $0.64$. On the ICLR scale the normalized mean absolute error is $0.084$,
+with essentially no bias (NME $-0.003$). The 20-paper pilot gave the same ranking ($0.48$).
 \item \textbf{Issue coverage.} The panel raises 47\% of the human reviewers' main issues. An
 optional Gap Scout that names concrete missing items raises 65\% alone and 73\% with the panel.
 A redesign that moved these ideas into the panel (version 2.11) raised no more issues, ranked
 papers worse (Spearman $0.32$) and cost 3.5$\times$ as much, so it was withdrawn.
 \end{itemize}
 A smaller model (Haiku) shows no reliable signal. We also report a negative result: NMAE alone
-does not measure skill on this pool, because a constant predictor scores $0.085$. All numbers here
-come from pilots. The full balanced evaluation is pending.
+does not measure skill on this pool, because a constant predictor scores $0.089$. The main
+remaining weakness is compression: 78\% of papers receive the same final rating.
 \end{abstract}
 
 \section{Introduction}
@@ -95,7 +96,8 @@ deterministic score aggregation into venue-specific forms (Section~\ref{sec:syst
 \item A reproducible calibration harness following the paperreview.ai protocol~\citep{paperreview},
 extended with CSPaper-style error metrics~\citep{cspaper} and a no-split pilot mode
 (Section~\ref{sec:iclr}).
-\item Pilot results, including what the skill did badly and the fixes that followed.
+\item Pilot and full-evaluation results, including what the skill did badly and the fixes that
+followed.
 \end{enumerate}
 
 \section{System design}\label{sec:system}
@@ -364,6 +366,7 @@ Pilot & Skill & Model / effort & Outcome\\
 2 & 2.10 & Haiku / default & normalized text; Spearman $-0.01$, AUC $0.49$ (mean of 6 dimensions)\\
 3 & 2.10 & Sonnet / high   & normalized text; Tables~\ref{tab:rank}--\ref{tab:err}\\
 4 & 2.11 & Sonnet / high   & redesigned panel; Spearman $0.32$, AUC $0.55$; withdrawn (Section~\ref{sec:p4})\\
+Full & 2.10.1 & Sonnet / high & balanced set, 86 papers; Section~\ref{sec:full}\\
 \bottomrule
 \end{tabularx}
 \end{center}
@@ -440,6 +443,67 @@ effort.
 For reference only: CSPaper reports NMAE 0.128, NME $-0.015$ and SRC 0.658 for Claude Sonnet 5.5
 on ICLR main. That benchmark's sample size and paper overlap are unknown, so the numbers are not
 directly comparable with ours.
+
+\subsection{Full evaluation: 86 papers}\label{sec:full}
+The balanced set of the protocol has 86 papers (45 train, 41 test; 23 accepted, 43 rejected,
+17 withdrawn, 3 desk rejected). We reviewed the 66 papers not in the pilot with skill 2.10.1,
+which keeps the 2.10 panel, scoring and decision, and reused the 20 pilot~3 runs. All 86 runs
+finished, at \$166.61 in total (\$1.94 per paper). Table~\ref{tab:full} gives the results.
+
+\begin{table}[t]
+\centering\small
+\caption{Full evaluation (Sonnet, high effort, 86 papers): the panel rating against the mean
+human rating, Spearman [bootstrap 95\% CI] / acceptance AUC, and errors on the ICLR scale.}
+\label{tab:full}
+\setlength{\tabcolsep}{4pt}\footnotesize
+\begin{tabular}{lccc}
+\toprule
+Papers & $n$ & Spearman & AUC\\
+\midrule
+All & 86 & $\mathbf{+0.47}$ [$0.27$, $0.64$] & 0.64\\
+Pilot 3's papers & 20 & $+0.48$ [$0.10$, $0.74$] & 0.67\\
+The 66 new papers & 66 & $+0.48$ [$0.25$, $0.66$] & 0.64\\
+Not recognized by the reviewer & 75 & $+0.48$ [$0.28$, $0.65$] & 0.66\\
+Without withdrawn papers & 69 & $+0.40$ [$0.17$, $0.59$] & 0.61\\
+Test split, against one human (protocol) & 41 & $+0.45$ [$0.14$, $0.69$] & 0.67\\
+Protocol regression on 7 dimensions, test split & 41 & $+0.19$ [$-0.13$, $0.48$] & 0.67\\
+\midrule
+\multicolumn{4}{l}{References on the same 86 papers: one human vs another $+0.14$, one-human AUC 0.64;}\\
+\multicolumn{4}{l}{paperreview.ai (ICLR 2025): AI $0.42$ / $0.75$, human $0.41$ / $0.84$.}\\
+\midrule
+Error (86 papers) & & NMAE $\downarrow$ & NME\\
+\midrule
+Panel rating & & $\mathbf{0.084}\pm0.063$ [0.071, 0.098] & $-0.003\pm0.105$\\
+Final rating (integer) & & $0.087\pm0.064$ [0.074, 0.102] & $-0.018\pm0.107$\\
+Constant at the median human mean & & $0.089\pm0.074$ & --\\
+One human vs mean human & & $0.118\pm0.087$ & --\\
+One human vs another human & & $0.188\pm0.157$ & --\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+\item \textbf{The pilot signal holds.} The 66 new papers rank exactly as well as the 20 pilot
+papers ($0.48$), and recognized papers do not drive the result: the reviewer reported knowing 11
+of the 86, and without them Spearman is still $0.48$.
+\item \textbf{Above human--human agreement, at paperreview.ai's level.} The panel ranks papers
+far more like the human mean than one human ranks like another ($0.47$ vs $0.14$), and on the test
+split against one human ($0.45$) it is at paperreview.ai's AI level ($0.42$, a different year and
+sample). Acceptance AUC ($0.64$) equals one human's here but stays below paperreview.ai's $0.75$.
+\item \textbf{The fitted regression does worse than no fitting.} The protocol's least-squares map
+from seven dimensions, fitted on 45 papers, reaches only $0.19$ on the test split; three of its
+seven weights are negative. The unfitted panel rating is the better score.
+\item \textbf{No stage loses signal.} The EIC-weighted rating ($0.45$), the reviewers' pool
+position ($0.48$) and the panel without the Devil's Advocate ($0.48$) are all within $\pm0.02$ of
+the panel rating, with intervals that include zero.
+\item \textbf{Compression.} The final Overall is 3 for 67 of 86 papers. The mean panel rating
+(ICLR scale) is $4.45$ for accepted papers against a human $5.28$, and $4.10$ for rejected papers
+against $3.89$: the order is right, but the gap is $0.35$ points instead of $1.39$.
+\item \textbf{Withdrawn papers help.} Without them Spearman drops to $0.40$; part of the signal is
+spotting clearly weak submissions.
+\end{itemize}
+The reviewer's workspace contained no human scores for the 66 new papers; the
+workflow now also removes all evaluation data from it before each review.
 
 \subsection{Issue overlap and hit rate}\label{sec:overlap}
 Scores say nothing about \emph{which} weaknesses a review raises. On the same 20 papers (Sonnet,
@@ -744,9 +808,9 @@ not use it.
 
 \section{Limitations and future work}
 \begin{itemize}
-\item \textbf{Small samples.} With 20 papers the intervals are wide, so these are pilot numbers.
-The planned balanced evaluation has 86 papers (45 train, 41 test) and fits the seven-dimension
-regression.
+\item \textbf{Sample size.} The full evaluation has 86 papers; its Spearman interval is still
+$0.27$--$0.64$, and the issue-overlap study and the 2.11 comparison use the 20-paper pilot only.
+Haiku was tested on the pilot only.
 \item \textbf{One venue and one year.} Calibration covers ICLR 2026 only. Other venues use
 assumed or secondary scales.
 \item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers
@@ -760,8 +824,11 @@ papers.
 \item \textbf{The Gap Scout's items are unchecked.} Its list is longer than a human panel's,
 and part of its hit rate is volume; how many of its items are wrong or already answered by the
 paper was not measured.
-\item \textbf{Human labels are noisy.} On our pilot papers, one human agrees with another at only
-Spearman 0.12. Mean human ratings are a weak target, and acceptance is a coarse one.
+\item \textbf{Compressed ratings.} On the 86 papers, 78\% receive final Overall 3 (ICLR 4);
+accepted papers are rated 0.8 points below the humans. Better ranking at the top and bottom of
+the pool is the main open problem.
+\item \textbf{Human labels are noisy.} On the 86 papers, one human agrees with another at only
+Spearman 0.14. Mean human ratings are a weak target, and acceptance is a coarse one.
 \end{itemize}
 
 \section*{Reproducibility}
