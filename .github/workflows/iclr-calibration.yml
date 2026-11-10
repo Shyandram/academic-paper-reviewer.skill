@@ -156,7 +156,7 @@ jobs:
     needs: [config, prepare]
     if: needs.prepare.outputs.ids != '[]'
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ needs.config.outputs.pipeline == 'single' && 90 || 180 }}
+    timeout-minutes: ${{ needs.config.outputs.pipeline == 'single' && needs.config.outputs.runner == 'claude' && 90 || 180 }}
     strategy:
       fail-fast: false
       max-parallel: ${{ fromJSON(needs.config.outputs.max_parallel) }}
@@ -223,15 +223,26 @@ jobs:
           R="evals/work/results/$ID"
           # The same prompt as the Claude run; the skill is model-neutral Markdown.
           sed -i 's/You are evaluating a Claude skill/You are evaluating a skill/' prompt.md
-          start=$(date +%s)
-          timeout 80m codex exec --model "$MODEL" ${EFFORT:+-c model_reasoning_effort="$EFFORT"} \
-            --sandbox workspace-write -c sandbox_workspace_write.network_access=true \
+          CFG=(-c sandbox_mode="workspace-write" -c sandbox_workspace_write.network_access=true)
+          [ -z "$EFFORT" ] || CFG+=(-c model_reasoning_effort="$EFFORT")
+          start=$(date +%s); deadline=$((start + 165 * 60))
+          timeout $((deadline - $(date +%s)))s codex exec --model "$MODEL" "${CFG[@]}" \
             --skip-git-repo-check --json -o "$R/last_message.txt" - < prompt.md > "$R/codex_events.jsonl" || true
-          python3 - "$R" "$start" <<'PY'
-          import json, os, sys, time
-          res, start = sys.argv[1], int(sys.argv[2])
-          use = {"input_tokens": 0, "cached_input_tokens": 0, "output_tokens": 0, "reasoning_output_tokens": 0}
-          turns, err = 0, None
+          # An organization rate limit (tokens per minute) can stop a turn; resume the same
+          # session, which keeps everything done so far.
+          for i in 1 2 3 4 5 6 7 8; do
+            tail -n 1 "$R/codex_events.jsonl" | grep -q '"turn.failed".*rate limit' || break
+            [ $((deadline - $(date +%s))) -gt 300 ] || break
+            echo "rate limited; resume $i"; sleep 90
+            timeout $((deadline - $(date +%s)))s codex exec resume --last --model "$MODEL" "${CFG[@]}" \
+              --skip-git-repo-check --json -o "$R/last_message.txt" \
+              "Continue the task from where you stopped (the previous turn ended on an API rate limit). Do not redo finished steps." >> "$R/codex_events.jsonl" || true
+          done
+          python3 - "$R" "$start" "$HOME/.codex/sessions" <<'PY'
+          import glob, json, os, sys, time
+          res, start, sess = sys.argv[1], int(sys.argv[2]), sys.argv[3]
+          keys = ("input_tokens", "cached_input_tokens", "output_tokens", "reasoning_output_tokens")
+          use, turns, failed, err = dict.fromkeys(keys, 0), 0, 0, None
           for line in open(os.path.join(res, "codex_events.jsonl"), errors="replace"):
               try:
                   e = json.loads(line)
@@ -239,18 +250,35 @@ jobs:
                   continue
               if e.get("type") == "turn.completed":
                   turns += 1
-                  for k in use:
+                  for k in keys:
                       use[k] += (e.get("usage") or {}).get(k, 0) or 0
-              elif e.get("type") in ("turn.failed", "error"):
-                  err = str(e.get("error") or e.get("message"))[:300]
+                  err = None
+              elif e.get("type") == "turn.failed":
+                  turns += 1; failed += 1
+                  err = str((e.get("error") or {}).get("message"))[:300]
+          # Failed turns report no usage in the event stream; the session log has the total.
+          total = None
+          for f in sorted(glob.glob(os.path.join(sess, "**", "*.jsonl"), recursive=True)):
+              for line in open(f, errors="replace"):
+                  if '"total_token_usage"' in line:
+                      try:
+                          t = json.loads(line)["payload"]["info"]["total_token_usage"]
+                          total = {k: t.get(k, 0) or 0 for k in keys}
+                      except (ValueError, KeyError, TypeError):
+                          pass
+          if total and total["input_tokens"] >= use["input_tokens"]:
+              use = total
           p = {k: float(os.environ[k]) for k in ("PRICE_IN", "PRICE_CACHED", "PRICE_OUT")}
           fresh = use["input_tokens"] - use["cached_input_tokens"]
           cost = (fresh * p["PRICE_IN"] + use["cached_input_tokens"] * p["PRICE_CACHED"]
                   + use["output_tokens"] * p["PRICE_OUT"]) / 1e6
+          done = os.path.exists(os.path.join(res, "summary.json"))
           run = {"runner": "codex", "model": os.environ["MODEL"], "effort": os.environ["EFFORT"],
-                 "usage": use, "num_turns": turns, "duration_ms": (int(time.time()) - start) * 1000,
+                 "usage": use, "usage_source": "session log" if use is total else "events",
+                 "num_turns": turns, "failed_turns": failed,
+                 "duration_ms": (int(time.time()) - start) * 1000,
                  "total_cost_usd": round(cost, 4), "cost_is_estimate": True,
-                 "prices_per_mtok": p, "is_error": err is not None, "error": err}
+                 "prices_per_mtok": p, "is_error": err is not None or not done, "error": err}
           json.dump(run, open(os.path.join(res, "run.json"), "w"), indent=1)
           print(json.dumps(run))
           PY
