@@ -1,0 +1,291 @@
+{
+ "label": "2.13 validation round 2 (contribution position) vs round 1; GPT-6.1 Terra high",
+ "n": 3,
+ "prices_per_mtok": [
+  1.0,
+  0.05,
+  5.0
+ ],
+ "order_by_human": [
+  "euMVC1DO4k",
+  "Lvkbe0CgmZ",
+  "KtocialdxS"
+ ],
+ "order_by_new_eic_pool": [
+  "euMVC1DO4k",
+  "KtocialdxS",
+  "Lvkbe0CgmZ"
+ ],
+ "order_by_old_eic_pool": [
+  "KtocialdxS",
+  "euMVC1DO4k",
+  "Lvkbe0CgmZ"
+ ],
+ "order_by_new_reviewer_pool": [
+  "euMVC1DO4k",
+  "KtocialdxS",
+  "Lvkbe0CgmZ"
+ ],
+ "order_by_old_reviewer_pool": [
+  "euMVC1DO4k",
+  "KtocialdxS",
+  "Lvkbe0CgmZ"
+ ],
+ "papers": [
+  {
+   "paper_id": "KtocialdxS",
+   "mean_human": 2.667,
+   "new": {
+    "reviewer_pools": [
+     46,
+     42,
+     50,
+     48,
+     44
+    ],
+    "reviewer_pool_mean": 46,
+    "official_rating": 2.8,
+    "eic_pool": 44,
+    "final_overall": 3,
+    "novelty": {
+     "verdicts": [
+      "incremental",
+      "incremental",
+      "none found"
+     ],
+     "paper_novelty": 0.619,
+     "primary": {
+      "id": "C1",
+      "verdict": "incremental",
+      "contribution_band": [
+       30,
+       54
+      ]
+     }
+    },
+    "markers": {
+     "contribution_position": 2,
+     "evidence_adjustment": 2,
+     "case_for_acceptance": 4,
+     "repair_test": 3
+    },
+    "tokens": {
+     "input_tokens": 4495072,
+     "cached_input_tokens": 4161546,
+     "output_tokens": 25947,
+     "reasoning_output_tokens": 4491
+    },
+    "cost_usd": 0.67,
+    "minutes": 10.2,
+    "budget_stop": null
+   },
+   "old": {
+    "reviewer_pools": [
+     56,
+     52,
+     66,
+     57,
+     50
+    ],
+    "reviewer_pool_mean": 56.2,
+    "official_rating": 3.2,
+    "eic_pool": 55,
+    "final_overall": 3,
+    "novelty": {
+     "verdicts": [
+      "incremental",
+      "incremental",
+      "medium"
+     ],
+     "paper_novelty": 0.381,
+     "primary": null
+    },
+    "markers": {
+     "contribution_position": 0,
+     "evidence_adjustment": 0,
+     "case_for_acceptance": 6,
+     "repair_test": 1
+    },
+    "tokens": {
+     "input_tokens": 4881119,
+     "cached_input_tokens": 4750993,
+     "output_tokens": 27555,
+     "reasoning_output_tokens": 4340
+    },
+    "cost_usd": 0.51,
+    "minutes": 12.1,
+    "budget_stop": null
+   }
+  },
+  {
+   "paper_id": "Lvkbe0CgmZ",
+   "mean_human": 5.0,
+   "new": {
+    "reviewer_pools": [
+     39,
+     45,
+     47,
+     43,
+     39
+    ],
+    "reviewer_pool_mean": 42.6,
+    "official_rating": 2.4,
+    "eic_pool": 39,
+    "final_overall": 2,
+    "novelty": {
+     "verdicts": [
+      "medium",
+      "medium",
+      "medium"
+     ],
+     "paper_novelty": 0.521,
+     "primary": {
+      "id": "C1",
+      "verdict": "medium",
+      "contribution_band": [
+       45,
+       69
+      ]
+     }
+    },
+    "markers": {
+     "contribution_position": 5,
+     "evidence_adjustment": 5,
+     "case_for_acceptance": 6,
+     "repair_test": 9
+    },
+    "tokens": {
+     "input_tokens": 3025563,
+     "cached_input_tokens": 2906413,
+     "output_tokens": 23567,
+     "reasoning_output_tokens": 4955
+    },
+    "cost_usd": 0.38,
+    "minutes": 8.8,
+    "budget_stop": null
+   },
+   "old": {
+    "reviewer_pools": [
+     33,
+     48,
+     49,
+     43,
+     30
+    ],
+    "reviewer_pool_mean": 40.6,
+    "official_rating": 2.6,
+    "eic_pool": 36,
+    "final_overall": 2,
+    "novelty": {
+     "verdicts": [
+      "medium",
+      "medium",
+      "medium"
+     ],
+     "paper_novelty": 0.5,
+     "primary": null
+    },
+    "markers": {
+     "contribution_position": 0,
+     "evidence_adjustment": 0,
+     "case_for_acceptance": 6,
+     "repair_test": 5
+    },
+    "tokens": {
+     "input_tokens": 3703410,
+     "cached_input_tokens": 3573386,
+     "output_tokens": 27609,
+     "reasoning_output_tokens": 6473
+    },
+    "cost_usd": 0.45,
+    "minutes": 10.2,
+    "budget_stop": null
+   }
+  },
+  {
+   "paper_id": "euMVC1DO4k",
+   "mean_human": 6.0,
+   "new": {
+    "reviewer_pools": [
+     51,
+     45,
+     65,
+     54,
+     48
+    ],
+    "reviewer_pool_mean": 52.6,
+    "official_rating": 3.2,
+    "eic_pool": 45,
+    "final_overall": 3,
+    "novelty": {
+     "verdicts": [
+      "medium",
+      "incremental",
+      "incremental"
+     ],
+     "paper_novelty": 0.415,
+     "primary": {
+      "id": "C2",
+      "verdict": "incremental",
+      "contribution_band": [
+       30,
+       54
+      ]
+     }
+    },
+    "markers": {
+     "contribution_position": 2,
+     "evidence_adjustment": 1,
+     "case_for_acceptance": 5,
+     "repair_test": 5
+    },
+    "tokens": {
+     "input_tokens": 3507720,
+     "cached_input_tokens": 3385530,
+     "output_tokens": 24816,
+     "reasoning_output_tokens": 2707
+    },
+    "cost_usd": 0.42,
+    "minutes": 10.5,
+    "budget_stop": null
+   },
+   "old": {
+    "reviewer_pools": [
+     53,
+     52,
+     70,
+     57,
+     50
+    ],
+    "reviewer_pool_mean": 56.4,
+    "official_rating": 3.2,
+    "eic_pool": 55,
+    "final_overall": 3,
+    "novelty": {
+     "verdicts": [
+      "high",
+      "incremental",
+      "medium"
+     ],
+     "paper_novelty": 0.594,
+     "primary": null
+    },
+    "markers": {
+     "contribution_position": 0,
+     "evidence_adjustment": 0,
+     "case_for_acceptance": 5,
+     "repair_test": 1
+    },
+    "tokens": {
+     "input_tokens": 3076912,
+     "cached_input_tokens": 2949765,
+     "output_tokens": 22128,
+     "reasoning_output_tokens": 2092
+    },
+    "cost_usd": 0.39,
+    "minutes": 10.8,
+    "budget_stop": null
+   }
+  }
+ ]
+}

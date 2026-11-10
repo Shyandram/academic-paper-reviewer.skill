@@ -340,6 +340,28 @@ primary claim (the one the paper leads with), plus an evidence adjustment in whi
 most −5 in total (`CHANGELOG.md`, 2.13). Had C1, the first listed claim, been marked primary in round 1, the bands would have been
 high, medium and incremental, in the human order; whether the panel follows the bands is what round 2 tests.
 
+**Round 2** (contribution position; `evals/iclr2026_terra213_validation_r2.json`, compared with round 1):
+
+| Paper | Human mean | Reviewer pool, r1 → r2 | EIC pool, r1 → r2 | Primary claim (r2) | EIC C, E | Cost |
+|-------|-----------:|------------------------|-------------------|--------------------|----------|-----:|
+| euMVC1DO4k | 6.0 | 56.4 → 52.6 | 55 → 45 | C2, incremental (30–54) | 53, −8 | $0.42 |
+| Lvkbe0CgmZ | 5.0 | 40.6 → 42.6 | 36 → 39 | C1, medium (45–69) | 49, −10 | $0.38 |
+| KtocialdxS | 2.67 | 56.2 → 46.0 | 55 → 44 | C1, incremental (30–54) | 50, −6 | $0.67 |
+
+- The lenient case moved as intended (EIC pool −11, all five reviewer pools 42–50).
+- The control fell by as much: the Domain Reviewer marked C2 as primary, and its profile changed between
+  rounds (C1 high in round 1, medium in round 2). The band amplifies the novelty verdict, including its
+  run-to-run variation and the choice of the primary claim.
+- On the two empirical papers the EIC took −6 and −8 for gaps the rubric counts as routine (at most −5); on the theory paper, −10 for proof gaps after dropping a claim judged lost.
+- The EICs always wrote the two numbers; in two of the three papers, the Phase 1 reports rarely did.
+- Order by EIC pool: euMVC1DO4k 45 > KtocialdxS 44 > Lvkbe0CgmZ 39 (human: euMVC1DO4k > Lvkbe0CgmZ >
+  KtocialdxS). The per-paper budget guard ran; no run reached its soft limit ($0.70), the highest $0.67.
+
+**Change after round 2:** the primary claim is marked once in the Phase 0 paper memory (the contribution
+the abstract leads with) and used by everyone; a missing experiment weakens a claim only when the paper has
+no other evidence for it. Round 3 reruns the same papers; with the primary claim fixed, it also shows how much
+the profile itself varies between runs.
+
 ## Error on the ICLR scale (NMAE / NME)
 
 CSPaper-style errors against the mean human rating on the ICLR 2026 scale (0–10):

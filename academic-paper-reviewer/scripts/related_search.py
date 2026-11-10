@@ -730,8 +730,8 @@ def novelty_profile(profile):
         v = r["verdict"] if r["verdict"] in CONTRIBUTION_BAND else "medium"  # "no close prior work": at most medium
         primary = {"id": r["id"], "verdict": r["verdict"], "contribution_band": CONTRIBUTION_BAND[v]}
     elif rows:
-        warnings.append("no primary claim marked: set \"primary\": true on the central claim the paper leads "
-                        "with (title, abstract, first listed contribution)")
+        warnings.append("no primary claim marked: set \"primary\": true on the claim the Phase 0 paper memory "
+                        "marks primary (the contribution the abstract leads with)")
     known = [r for r in central if r["verdict"] == "known"]
     same_uncited = (len(known) == len(central) and len({r["top_prior"]["title"] for r in known}) == 1
                     and not any(r["top_prior"].get("cited_by_paper") for r in known))

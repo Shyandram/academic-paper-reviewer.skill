@@ -38,7 +38,7 @@ Errors that matter break a **key claim** (this is how FLAWS defines them). For e
 
 A short factual record, built once in Phase 0. It is a description, not a judgment, so sharing it doesn't break reviewer independence. It follows the three-pass reading in Beyond Imitation (arXiv 2610.11087) and PaperAudit's global memory.
 
-- **Claims:** C1, C2, … quoted or closely paraphrased, with locations.
+- **Claims:** C1, C2, … quoted or closely paraphrased, with locations. Mark one as **primary**: the contribution the abstract leads with (when it lists several, the first). It is fixed here, before any search; every reviewer, the novelty profile and the EIC use this one.
 - **Setup facts:** datasets and splits (train / validation / test as named), backbone and pretraining, resolution, schedule, compute, seeds. Each with its location, or "not stated".
 - **Headline numbers:** each number in the abstract and introduction, with its source table or figure.
 - **Appendix and supplement summary:** what they add: extra experiments, implementation details, protocol statements. A reviewer must not raise a weakness that the appendix already answers.
