@@ -48,8 +48,11 @@ paper, and the reviewers mention all six planted fatal flaws.
 [$0.27$, $0.64$] with the mean human rating (two human reviewers of the same papers: $0.14$) and
 an acceptance AUC of $0.64$. On the ICLR scale the normalized mean absolute error is $0.084$,
 with essentially no bias (NME $-0.003$). The 20-paper pilot gave the same ranking ($0.48$).
-\item \textbf{Issue coverage.} The panel raises 47\% of the human reviewers' main issues. An
-optional Gap Scout that names concrete missing items raises 65\% alone and 73\% with the panel.
+\item \textbf{Issue coverage.} On the 86 papers the panel raises 46\% of the human reviewers'
+main issues and 74\% of those two or more reviewers share; the more important the issue
+(consensus, a reject vote, a reviewer's lead point), the more often it is raised. On a 20-paper
+pilot, an optional Gap Scout that names concrete missing items raises 65\% alone and 73\% with
+the panel.
 A redesign that moved these ideas into the panel (version 2.11) raised no more issues, ranked
 papers worse (Spearman $0.32$) and cost 3.5$\times$ as much, so it was withdrawn.
 \end{itemize}
@@ -506,36 +509,37 @@ The reviewer's workspace contained no human scores for the 66 new papers; the
 workflow now also removes all evaluation data from it before each review.
 
 \subsection{Issue overlap and hit rate}\label{sec:overlap}
-Scores say nothing about \emph{which} weaknesses a review raises. On the same 20 papers (Sonnet,
-high effort, skill 2.10) we compared the weakness sections of the AI panel with those of the ICLR
-2026 human reviews (3--5 per paper). For each paper, one Sonnet annotator saw both panels under
-random names, in random order and without roles. It split them into atomic points, grouped the
-points into issues within each panel and matched issues across panels; it did not judge
-correctness. We count main issues only (minor and cosmetic points excluded) and give 95\%
-bootstrap intervals over papers. Four papers annotated twice by independent annotators differ by
-at most 0.04 on every metric. The tool and the annotation prompt are in the repository
-(\texttt{evals/issue\_overlap.py}).
+Scores say nothing about \emph{which} weaknesses a review raises. On the 86 papers of the full
+evaluation (Sonnet, high effort, skill 2.10.1) we compared the weakness sections of the AI panel
+with those of the ICLR 2026 human reviews (3--5 per paper). For each paper, one Sonnet annotator
+saw both panels under random names, in random order and without roles. It split them into atomic
+points, grouped the points into issues within each panel and matched issues across panels; it did
+not judge correctness and never saw scores or decisions. We count main issues only (minor and
+cosmetic points excluded) and give 95\% bootstrap intervals over papers. The method was set on
+pilot 3's 20 papers, where four papers annotated twice by independent annotators differ by at most
+0.04 on every metric; every pilot hit rate is reproduced within 0.06 on the 66 new papers. The
+tool and the annotation prompts are in the repository (\texttt{evals/issue\_overlap.py}).
 
 \begin{table}[h]
 \centering
 \small
-\caption{Issue overlap and hit rate, 20 ICLR 2026 papers, main issues.}\label{tab:overlap}
+\caption{Issue overlap and hit rate, 86 ICLR 2026 papers, main issues (pilot 3's 20 papers in the last column).}\label{tab:overlap}
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lccc}
 \toprule
  & Human & AI, 5 reviewers & AI, R1--R4\\
 \midrule
-Main issues per paper & 12.4 [10.8, 13.9] & 20.9 [19.0, 22.9] & --\\
-One reviewer only & 0.77 [0.69, 0.83] & 0.49 [0.46, 0.53] & 0.73 [0.69, 0.77]\\
-Pairwise Jaccard & 0.10 [0.07, 0.14] & 0.16 [0.14, 0.18] & 0.10 [0.08, 0.12]\\
+Main issues per paper & 11.8 [11.1, 12.6] & 20.4 [19.5, 21.2] & --\\
+One reviewer only & 0.77 [0.74, 0.80] & 0.48 [0.46, 0.50] & 0.73 [0.71, 0.76]\\
+Pairwise Jaccard & 0.11 [0.09, 0.13] & 0.15 [0.14, 0.16] & 0.09 [0.08, 0.10]\\
 \midrule
-\multicolumn{4}{l}{\emph{Hit rate}}\\
-Human issues hit by the AI panel & \multicolumn{3}{l}{\textbf{0.45} [0.37, 0.54]}\\
-\quad raised by 2+ humans & \multicolumn{3}{l}{\textbf{0.78} [0.64, 0.90]}\\
-\quad raised by one human & \multicolumn{3}{l}{0.38 [0.28, 0.48]}\\
-AI issues also raised by humans & \multicolumn{3}{l}{0.26 [0.22, 0.29]}\\
-One human's issues, by other humans & \multicolumn{3}{l}{0.39 [0.31, 0.48]}\\
-One human's issues, raised by 1 / 3 / 5 AI reviewers & \multicolumn{3}{l}{0.20 / 0.40 / 0.50}\\
+\emph{Hit rate} & 86 papers & & Pilot (20)\\
+Human issues hit by the AI panel & \textbf{0.46} [0.42, 0.49] & & 0.45\\
+\quad raised by 2+ humans & \textbf{0.74} [0.67, 0.80] & & 0.78\\
+\quad raised by one human & 0.38 [0.34, 0.42] & & 0.38\\
+AI issues also raised by humans & 0.26 [0.24, 0.28] & & 0.26\\
+One human's issues, by other humans & 0.41 [0.36, 0.45] & & 0.39\\
+One human's issues, by 1 / 3 / 5 AI reviewers & 0.21 / 0.42 / 0.52 & & 0.20 / 0.40 / 0.50\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -543,79 +547,111 @@ One human's issues, raised by 1 / 3 / 5 AI reviewers & \multicolumn{3}{l}{0.20 /
 \begin{table}[h]
 \centering
 \small
-\caption{Per-role contribution (means per paper).}\label{tab:roles}
+\caption{Per-role contribution, 86 papers (means per paper).}\label{tab:roles}
 \begin{tabular}{lcccc}
 \toprule
 Role & Issues & Raised by no other role & Human issues hit & Hit by no other role\\
 \midrule
-R1 Methodology & 10.1 & 0.23 & 0.19 & 0.01\\
-R2 Domain & 5.5 & 0.53 & 0.19 & 0.10\\
-R3 Perspective & 5.0 & 0.62 & 0.16 & 0.07\\
-R4 Generalist & 5.3 & 0.20 & 0.14 & 0.01\\
-Devil's Advocate & 9.2 & 0.09 & 0.20 & 0.02\\
+R1 Methodology & 9.9 & 0.25 & 0.22 & 0.02\\
+R2 Domain & 5.4 & 0.51 & 0.18 & 0.08\\
+R3 Perspective & 5.2 & 0.58 & 0.15 & 0.06\\
+R4 Generalist & 4.8 & 0.21 & 0.14 & 0.02\\
+Devil's Advocate & 8.9 & 0.07 & 0.21 & 0.01\\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \begin{itemize}
 \item \textbf{Redundancy comes from two roles.} The five-reviewer panel repeats itself more than
-a human panel, but at equal size (R1--R4) its overlap matches the humans' (Jaccard 0.10). The
-Devil's Advocate raises 91\% of its issues together with another role, and R4 80\%.
-\item \textbf{The panel finds what humans agree on.} It raises 45\% of the humans' main issues and
-78\% of those two or more humans share. Three AI reviewers anticipate a given human's issues as
-well as the other humans do (0.40 vs 0.39). Coverage grows with panel size (0.17, 0.29, 0.36,
-0.41, 0.45 for 1--5 reviewers).
+a human panel, but at equal size (R1--R4) its overlap matches the humans' (Jaccard 0.09 vs 0.11).
+The Devil's Advocate raises 93\% of its issues together with another role, and R4 79\%.
+\item \textbf{The panel finds what humans agree on.} It raises 46\% of the humans' main issues and
+74\% of those two or more humans share. Three AI reviewers anticipate a given human's issues as
+well as the other humans do (0.42 vs 0.41). Coverage grows with panel size (0.18, 0.30, 0.37,
+0.42, 0.46 for 1--5 reviewers).
 \item \textbf{Too many issues.} The panel raises 1.7$\times$ as many main issues, and a quarter
 are also raised by a human. Unmatched issues are not necessarily wrong, but the reader needs a
 short list.
-\item \textbf{Votes and issues differ.} R4 adds few issues, yet the Spearman of the mean Overall
-drops without it (R1--R4 0.52, R1--R3 0.48). Version 2.11 tested a panel that keeps R4's vote
-but limits its weaknesses to clarity, venue fit and presentation, moves the Devil's Advocate
-into an independent Report Checker without a vote, and adds 3--5 key concerns
-(Section~\ref{sec:p4}).
+\item \textbf{Votes and issues differ.} On the pilot, R4 added few issues, yet the Spearman of
+the mean Overall dropped without it (R1--R4 0.52, R1--R3 0.48). Version 2.11 tested a panel
+that keeps R4's vote but limits its weaknesses, moves the Devil's Advocate into an independent
+Report Checker and adds 3--5 key concerns (Section~\ref{sec:p4}).
 \end{itemize}
-\paragraph{What the panel misses.} Of the 247 human main issues, 106 were hit, 115 had only a
-related AI issue and 26 had nothing close. A Sonnet labeler gave each issue a topic and the
-evidence needed to raise it (before seeing which were hit) and, for the 141 non-hits, the likely
-reason, by comparing it with the AI issue summaries (Table~\ref{tab:misses}). Half of the non-hits
-(69) are issues the panel raised only as a broad category (``more baselines'') while the human
-named the item (a specific method or dataset); 29 more are related concerns with a different
-diagnosis. True misses are mostly subjective scope requests (13) and fine technical detail (7).
-Missing experiments, the largest topic (30\% of human issues), are among the least often hit
-(0.33). Issues that need outside knowledge are hit \emph{more} often than text-only ones (0.52 vs
-0.41), so the literature check is not the bottleneck; figure-dependent issues are hit least (0.20)
-but are rare (10). Version 2.11 therefore asked each weakness to name the concrete missing
-experiment, baseline or definition, and added a pass that does only that.
+
+\paragraph{Importance.} The human reviews carry no severity labels, so we use three proxies: how
+many humans raised the issue, the rating of the reviewers who raised it (on the ICLR 2026 scale,
+4 or less is a reject vote) and whether it was among the first two main points of a review
+(Table~\ref{tab:importance}). Every proxy points the same way: the more important the issue, the
+more often the panel raises it, from 0.29 for a single accept-voter's later point to 0.74 for
+consensus issues. Of the hit issues, 63\% of the consensus ones and 56\% of the others match an
+AI issue raised by two or more AI reviewers, so the panel's own agreement tracks importance only
+weakly. By decision, the hit rate is lower on accepted papers (0.39 [0.32, 0.45], 23 papers) than
+on rejected ones (0.49 [0.45, 0.54], 43 papers): their reviewers raise fewer issues (11.0 per
+paper), and fewer of the AI's issues match theirs (0.19 vs 0.29).
 
 \begin{table}[h]
 \centering
 \small
-\caption{Hit rate of the human main issues by topic and evidence needed, and the likely reason for
-the 141 non-hits (related: a partial AI overlap; missed: nothing close).}\label{tab:misses}
-\begin{tabular}{lcc@{\qquad}lcc}
+\caption{Hit rate of the 1017 human main issues by importance proxy, 86 papers.}\label{tab:importance}
+\begin{tabular}{lcc}
 \toprule
-Topic & $n$ & Hit & Reason (non-hits) & Related & Missed\\
+Human main issues & $n$ & Hit rate [95\% CI]\\
 \midrule
-Missing experiments & 75 & 0.33 & Raised only as a broad category & 69 & 0\\
-Baselines & 33 & 0.58 & Different diagnosis & 29 & 0\\
-Scope, limitations & 33 & 0.39 & Subjective request & 6 & 13\\
-Novelty, related work & 25 & 0.56 & Fine technical detail & 3 & 7\\
-Method clarity & 23 & 0.30 & Needs figures & 2 & 3\\
-Unsupported claims & 19 & 0.37 & Needs a specific prior work & 3 & 1\\
-Theory & 19 & 0.58 & Unclear & 3 & 2\\
-Efficiency & 10 & 0.90 & & & \\
-Presentation & 8 & 0.12 & & & \\
-\midrule
-\multicolumn{3}{l}{\emph{Evidence needed}} & & & \\
-Text and tables & 175 & 0.41 & & & \\
-Outside knowledge & 46 & 0.52 & & & \\
-Derivation & 16 & 0.50 & & & \\
-Figures & 10 & 0.20 & & & \\
+Raised by 2+ humans & 218 & \textbf{0.74} [0.67, 0.80]\\
+Raised by one human & 799 & 0.37 [0.34, 0.40]\\
+Raised by a reviewer who voted reject ($\le 4$) & 789 & 0.48 [0.45, 0.52]\\
+Raised only by reviewers who voted accept ($\ge 6$) & 228 & 0.34 [0.28, 0.40]\\
+Raised by the paper's lowest-rating reviewer & 554 & 0.50 [0.46, 0.54]\\
+Among a reviewer's first two main points & 535 & 0.51 [0.47, 0.56]\\
+Not among any reviewer's first two & 482 & 0.38 [0.34, 0.42]\\
+One human, accept votes only, not a lead point & 91 & 0.29 [0.20, 0.38]\\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Raising the hit count: a Gap Scout.} Since most non-hits were raised only as a
+\paragraph{What the panel misses.} Of the 1018 human main issues, 456 were hit, 460 had only a
+related AI issue and 101 had nothing close. A Sonnet labeler (one per five papers) gave each
+issue a topic and the evidence needed to raise it (before seeing which were hit) and, for the 561
+non-hits, the likely reason, by comparing it with the AI issue summaries (Table~\ref{tab:misses}).
+82\% of the non-hits have a related AI issue: 244 are issues the panel raised only as a broad
+category (``more baselines'') while the human named the item (a specific method or dataset), and
+110 more are related concerns with a different diagnosis. True misses are mostly subjective scope
+requests (58) and fine technical detail (21). Method clarity (0.22), presentation (0.20) and
+scope (0.33) are hit least; missing experiments, the largest topic (28\% of human issues), are hit
+0.47. Issues that need outside knowledge are hit \emph{more} often than text-only ones (0.51 vs
+0.44), so the literature check is not the bottleneck; figure-dependent issues are hit least
+(0.29) but are rare (45).
+
+\begin{table}[h]
+\centering
+\small
+\caption{Hit rate of the 1018 human main issues by topic and evidence needed, and the likely reason for
+the 561 non-hits (related: a partial AI overlap; missed: nothing close), 86 papers.}\label{tab:misses}
+\begin{tabular}{lcc@{\qquad}lcc}
+\toprule
+Topic & $n$ & Hit & Reason (non-hits) & Related & Missed\\
+\midrule
+Missing experiments & 287 & 0.47 & Raised only as a broad category & 242 & 2\\
+Scope, limitations & 148 & 0.33 & Different diagnosis & 107 & 3\\
+Method clarity & 107 & 0.22 & Subjective request & 59 & 58\\
+Novelty, related work & 100 & 0.60 & Fine technical detail & 19 & 21\\
+Baselines & 99 & 0.63 & Needs a specific prior work & 14 & 8\\
+Unsupported claims & 91 & 0.37 & Needs figures & 11 & 6\\
+Theory & 81 & 0.51 & Unclear & 8 & 3\\
+Efficiency & 50 & 0.64 & & & \\
+Reproducibility & 28 & 0.43 & & & \\
+Presentation & 20 & 0.20 & & & \\
+\midrule
+\multicolumn{3}{l}{\emph{Evidence needed}} & & & \\
+Text and tables & 721 & 0.44 & & & \\
+Outside knowledge & 200 & 0.51 & & & \\
+Derivation & 52 & 0.40 & & & \\
+Figures & 45 & 0.29 & & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Raising the hit count: a Gap Scout (pilot, 20 papers).} Since most non-hits were raised only as a
 category, we tested one extra, unscored pass: a Sonnet agent that reads only the redacted paper
 and lists up to 30 concrete weaknesses reviewers would likely raise (claims and their missing
 evidence, named baselines, undefined elements, theory, scope, typical requests). One annotator
@@ -646,8 +682,9 @@ Panel + Gap Scout & 50.9 & 175 & \textbf{0.73} [0.68, 0.79]\\
 \end{tabular}
 \end{table}
 
-Caveats: $n=20$; one LLM annotator per paper; human reviewers saw the figures, the AI read the
-extracted text; agreement with humans is not correctness.
+Caveats: one LLM annotator and one labeler per paper; the Gap Scout test covers only the 20 pilot
+papers; importance is inferred from the human reviews, not judged; human reviewers saw the
+figures, the AI read the extracted text; agreement with humans is not correctness.
 
 \subsection{Pilot 4: a redesign that did not help}\label{sec:p4}
 Version 2.11 put the findings above into the review itself: four voting reviewers (R1 and R2
