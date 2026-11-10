@@ -877,7 +877,7 @@ table.mini b{color:var(--olive-ink)}
       <li><span class="tk ok">✓</span><span><b>Sonnet tracks the humans best</b>: ranking agreement +0.48, and it raises 45% of the humans' main concerns.</span></li>
       <li><span class="tk ok">✓</span><span><b>The GPT models are as precise at half the length</b>: about 11 main concerns per review against 21, and a similar share of them match a human concern (Terra 28%, Sol 23%, Sonnet 26%).</span></li>
       <li><span class="tk ok">✓</span><span><b>Sol is the cheapest and not biased</b>: about $1.39 per paper, average score error near zero. Both GPT models use more of the rating scale and recognized fewer papers.</span></li>
-      <li><span class="tk no">!</span><span><b>But GPT scores do not follow the humans</b> (+0.02 and −0.01), and they raise fewer of the humans' concerns (21% and 27%).</span></li>
+      <li><span class="tk no">!</span><span><b>But GPT scores do not follow the humans</b> (+0.02 and −0.01), and they raise fewer of the humans' concerns (21% and 27%). Sol weighs checkable proof flaws heavily and unproven novelty doubts lightly; see “Why not Sol?”.</span></li>
     </ul>
       </div>
       <div>
@@ -925,6 +925,16 @@ table.mini b{color:var(--olive-ink)}
           <tr><th>Minutes per paper</th><td>–</td><td>14</td><td><b>9</b></td></tr>
           </tbody></table></div>
         <p class="foot">* Terra's estimate priced cached input as fresh input, so it is too high.</p>
+      </div>
+      <div class="chart-card glass" data-seg-label="Why not Sol?">
+        <h3>Why Sol does not follow the humans</h3>
+        <p>Sol reads the whole paper and searches more than Sonnet, yet ranks its top and bottom ten papers the same (pool 55.1 against 55.3; Sonnet 51.4 against 46.6). The gap to Sonnet holds up in a paired test: 0.46, 95% range 0.08 to 0.81.</p>
+        <ul class="take">
+          <li><span class="tk no">1</span><span><b>Its scores follow rigor, not novelty.</b> Rigor drives Sol's score (0.94) but does not track the humans (+0.04); novelty drives Sonnet's (0.92) and does (+0.56).</span></li>
+          <li><span class="tk no">2</span><span><b>Lenient when the problem is novelty.</b> On four of the weakest papers Sol scores 12 to 16 points above Sonnet. It never names the prior work in its top concerns (0 of 20 papers; Sonnet 6), so the doubt stays mild.</span></li>
+          <li><span class="tk no">3</span><span><b>Harsh when a proof flaw is checkable.</b> A theory paper the humans rated 5.0 drops to Sol's 19th of 20 after it logs proof errors as verified; Sonnet saw the same flaw and kept it 7th.</span></li>
+        </ul>
+        <p class="foot">Sol also reasons about a third as much per paper (9.3k against 30.2k tokens). Twenty papers, keyword categories: a diagnosis, not proof, and Sol's proof findings may be right. <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#why-sol-does-not-rank-the-papers">Full analysis</a>.</p>
       </div>
     </div>
       </div>
@@ -1219,9 +1229,10 @@ python3 tools/install_codex_skill.py --skills-dir ~/.agents/skills   # personal<
   var btns=panels.map(function(p,i){var b=document.createElement("button");b.type="button";b.className="seg-btn";
     b.textContent=p.getAttribute("data-seg-label");b.setAttribute("role","tab");
     p.id=p.id||("seg-"+(n++));p.setAttribute("role","tabpanel");b.setAttribute("aria-controls",p.id);bar.appendChild(b);return b;});
-  function pick(k,focus){btns.forEach(function(b,i){var on=i===k;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;panels[i].classList.toggle("on",on);});if(focus)btns[k].focus();}
-  btns.forEach(function(b,i){b.addEventListener("click",function(){pick(i);});
-    b.addEventListener("keydown",function(e){var j=null;if(e.key==="ArrowRight")j=(i+1)%btns.length;else if(e.key==="ArrowLeft")j=(i-1+btns.length)%btns.length;if(j!==null){e.preventDefault();pick(j,true);}});});
+  function pick(k,focus,shown){btns.forEach(function(b,i){var on=i===k;b.setAttribute("aria-selected",on?"true":"false");b.tabIndex=on?0:-1;panels[i].classList.toggle("on",on);});if(focus)btns[k].focus();
+    if(shown){var br=bar.getBoundingClientRect(),xr=btns[k].getBoundingClientRect();if(xr.right>br.right||xr.left<br.left)bar.scrollLeft+=xr.left-br.left-(br.width-xr.width)/2;}}
+  btns.forEach(function(b,i){b.addEventListener("click",function(){pick(i,false,true);});
+    b.addEventListener("keydown",function(e){var j=null;if(e.key==="ArrowRight")j=(i+1)%btns.length;else if(e.key==="ArrowLeft")j=(i-1+btns.length)%btns.length;if(j!==null){e.preventDefault();pick(j,true,true);}});});
   box.insertBefore(bar,panels[0]);pick(0);
 });})();
 </script>

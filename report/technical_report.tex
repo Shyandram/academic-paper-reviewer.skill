@@ -496,8 +496,8 @@ NMAE (0.085). The failure is the same for both: Sol gives the three papers with 
 mean (6.0) 3.4, 2.8 and 2.8 on the 1--6 scale, and the two with the lowest 3.2 each. Terra is also
 harsher, with six papers at ICLR~2 where Sonnet has none. The models agree with each other more
 than with the humans: the panel ratings correlate at 0.71 (Sol--Terra), 0.60 (Sol--Sonnet) and
-0.65 (Terra--Sonnet). With 20 papers the intervals overlap, so this is evidence that the result
-depends on the model, not a ranking of the three.
+0.65 (Terra--Sonnet). With 20 papers the marginal intervals overlap, so this is evidence that the
+result depends on the model, not a ranking of the three; the paired test below is tighter.
 
 Ranking is not the only measure. We repeated the issue-overlap study of
 Section~\ref{sec:overlap} on the GPT reviews of the same 20 papers
@@ -524,6 +524,59 @@ Human issues raised by the panel & $\mathbf{0.45}$ [0.37, 0.54] & 0.21 [0.17, 0.
 \quad raised by 2+ humans & $\mathbf{0.78}$ & 0.27 & 0.50\\
 AI issues also raised by a human & 0.26 [0.22, 0.29] & 0.23 [0.19, 0.28] & $\mathbf{0.28}$ [0.23, 0.34]\\
 AI main issues per paper & 20.9 & 10.8 & 10.9\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Why Sol does not rank the papers.} Sol reads the whole paper, searches more than
+Sonnet and writes reviews of the same length, so its flat ranking was unexpected. A paired
+bootstrap (5000 resamples) of Sonnet's minus Sol's panel-rating Spearman gives $0.46$ [$0.08$,
+$0.81$], $P(\le 0)=0.01$: the gap is real, its size uncertain. Sol is not noisy either (its
+reviewers' pool correlates 0.81 with Terra's and 0.61 with Sonnet's); it ranks by another
+standard. On the humans' top ten papers its mean pool position is 55.1, on the bottom ten 55.3
+(Sonnet: 51.4 against 46.6). Three mechanisms show in the data (Table~\ref{tab:soldiag}):
+\begin{itemize}
+\item \textbf{Its scores follow rigor, the humans' follow novelty.} Sol's pool is driven most by
+technical rigor (Spearman 0.94 with its own pool), a dimension that does not track the humans
+($+0.04$); Sonnet's is driven most by novelty (0.92), which does ($+0.56$).
+\item \textbf{Lenient where the problem is novelty.} On four of the humans' weakest papers Sol's
+pool sits 12--16 points above Sonnet's. The human reviews of these papers lead with lack of
+novelty and name the prior work; none of Sol's top concerns on any of the 20 papers cites a prior
+work, against 6 of 20 papers for Sonnet. Search volume is not the cause (median 190 search-ledger
+entries per paper against Sonnet's 129): the searches do not surface the overlapping paper, so the
+evidence rules leave the doubt unproven and lightly weighted.
+\item \textbf{Harsh where a proof defect is verifiable.} A theory paper with human mean 5.0 is
+Sonnet's 7th of 20 (ICLR~4) and Sol's 19th (rigor 38.5, ICLR~2) after Sol logged a series of
+proof errors as verified; Sonnet found the same main defect and still gave ICLR~4. An accepted
+theory paper with human mean 6.0 is Sol's last.
+\end{itemize}
+Sol also reasons less: median 9.3k reasoning tokens per paper against Sonnet's 30.2k (Terra
+4.6k), although it runs longer (14.0 against 9.6 minutes); the time goes to tool calls. Reading,
+review length, search volume and reviewer independence are ruled out. With 20 papers and keyword
+categories this is a diagnosis, not a proof, and agreeing with the humans is not the same as being
+right: Sol's proof findings may be correct. Untested fixes: require a named closest prior work
+(or an explicit ``none found'') behind every novelty concern, grade verified errors as fatal or
+repairable before they move the score, and rerun Sol at a higher reasoning effort.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Why Sol does not rank pilot 3's 20 papers. Spearman of a dimension with the model's own
+reviewers' pool / with the human mean; human issues hit, by keyword category (crude); medians per
+paper.}\label{tab:soldiag}
+\begin{tabular}{lccc}
+\toprule
+ & Sonnet & GPT-6.1 Sol & GPT-6.1 Terra\\
+\midrule
+Technical rigor: own pool / human & 0.84 / $+0.23$ & $\mathbf{0.94}$ / $+0.04$ & 0.91 / $-0.11$\\
+Novelty: own pool / human & $\mathbf{0.92}$ / $\mathbf{+0.56}$ & 0.76 / $+0.19$ & 0.61 / $+0.32$\\
+Significance: own pool / human & 0.82 / $+0.47$ & 0.78 / $+0.31$ & 0.91 / $+0.14$\\
+Pool, human top 10 / bottom 10 & 51.4 / 46.6 & 55.1 / 55.3 & 50.2 / 52.3\\
+Human novelty issues hit & $\mathbf{0.70}$ & 0.38 & 0.44\\
+Human experiment issues hit & $\mathbf{0.49}$ & 0.18 & 0.23\\
+Top concerns naming a prior work (papers) & 6 / 20 & 0 / 20 & 0 / 20\\
+Reasoning tokens & 30.2k & 9.3k & 4.6k\\
+Wall time (min) & 9.6 & 14.0 & 8.5\\
 \bottomrule
 \end{tabular}
 \end{table}
