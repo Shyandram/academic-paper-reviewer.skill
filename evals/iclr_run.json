@@ -1,1 +1,1 @@
-{"mode": "evaluate", "runs": [42825160181, 42087346815], "note": "metrics only (no reviews, no API calls): the full balanced 86-paper evaluation of skill 2.10.1 (66 papers in run 42825160181 + pilot 3's 20), now with recognized papers and per-paper cost in the features"}
+{"mode": "evaluate", "runs": [42834172940], "note": "metrics only (no reviews, no API calls): GPT-6.1 Terra (high) via Codex on pilot 3's 20 papers, with recognized papers and per-paper cost in the features"}
