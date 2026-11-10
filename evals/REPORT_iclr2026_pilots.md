@@ -4,7 +4,8 @@ Pilots for the paperreview.ai-style evaluation (`evals/iclr_calibration.py`,
 `.github/workflows/iclr-calibration.yml`). Per-paper numbers: `evals/iclr2026_pilot_scores.json` (pilots),
 `evals/iclr2026_full_scores.json` (full evaluation, AI outputs only), `evals/iclr2026_issue_overlap_full.json`
 (issue overlap on the 86 papers), `evals/iclr2026_codex_pilot3.json` (GPT-6.1 Terra vs Sonnet, 20 papers),
-`evals/iclr2026_codex_sol_pilot3.json` (GPT-6.1 Sol vs Sonnet and Terra, same 20 papers).
+`evals/iclr2026_codex_sol_pilot3.json` (GPT-6.1 Sol vs Sonnet and Terra, same 20 papers),
+`evals/iclr2026_issue_overlap_gpt.json` (issue overlap of the three models, same 20 papers).
 Review text and manuscripts are not committed.
 
 ## Setup
@@ -175,6 +176,43 @@ parallel, skill 2.10.1). All 20 reviews finished; none failed. Numbers in
 - **Cost is not comparable between the two GPT rows.** The Sol estimate prices cached input at
   the list rate ($0.10 per 1M); the Terra estimate priced cached input the same as fresh input,
   so it overstates Terra's cost. Sol's list prices are $2 / $10 per 1M input / output.
+
+### Beyond ranking: concerns raised by the three models
+
+The same issue-overlap study as for Sonnet (`evals/issue_overlap.py`, one Sonnet annotator per
+paper, main issues only), run on the GPT reviews of the same 20 papers. Numbers in
+`evals/iclr2026_issue_overlap_gpt.json`; mean per paper [bootstrap 95% CI].
+
+| | Sonnet, high | GPT-6.1 Sol, high | GPT-6.1 Terra, high |
+|---|---|---|---|
+| Human main issues raised by the panel (hit rate) | **0.45** [0.37, 0.54] | 0.21 [0.17, 0.25] | 0.27 [0.21, 0.34] |
+| of those raised by 2+ humans | **0.78** [0.64, 0.90] | 0.27 [0.16, 0.38] | 0.50 [0.35, 0.66] |
+| of those raised by one human | **0.38** | 0.18 | 0.20 |
+| AI issues also raised by a human (precision) | 0.26 [0.22, 0.29] | 0.23 [0.19, 0.28] | **0.28** [0.23, 0.34] |
+| AI main issues per paper | 20.9 | 10.8 | 10.9 |
+| Pairwise Jaccard between the five AI reports | 0.16 | 0.16 | 0.19 |
+| One human's issues raised by the other humans | 0.39 | 0.40 | 0.41 |
+
+What the GPT models do well:
+
+- **Same precision at half the length.** They raise about 11 main issues per paper against
+  Sonnet's 21, and a similar share of them is something a human also raised (Terra 0.28, Sol
+  0.23, Sonnet 0.26). An author reads half as much for the same density of human-matched points.
+- **Sol is cheap and unbiased.** About $1.39 per paper against $1.97, NME -0.02.
+- **More of the rating scale.** Sol gives 3 / 14 / 3 papers ICLR 2 / 4 / 6 and Terra 6 / 13 / 1,
+  against Sonnet's 0 / 17 / 3.
+- **Fewer recognized papers** (Terra 0, Sol 1, Sonnet 3), and Terra is the fastest (9 min per
+  paper against Sol's 14).
+
+Where they fall short: they raise half as many of the humans' issues (0.21 and 0.27 against
+0.45), and the gap is largest on the issues two or more humans agree on (0.27 and 0.50 against
+0.78). Together with the flat ranking, the extra spread in their scores does not land on the
+right papers.
+
+Caveat: the count uses each report's Weaknesses section (and the DA's issue list) only. Sol's
+reviews are as long as Sonnet's overall (median 12.0k against 10.9k words) but its Weaknesses
+sections are about half as long, because it puts more findings in separate audit sections
+(claim-to-evidence, protocol sweep, error log), which this study leaves out for every model.
 
 ## Error on the ICLR scale (NMAE / NME)
 
