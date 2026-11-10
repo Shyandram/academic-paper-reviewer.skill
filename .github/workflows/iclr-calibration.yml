@@ -16,8 +16,11 @@ name: ICLR calibration (paperreview.ai protocol)
 #
 # runner "codex" (single pipeline only) runs the same prompt with the OpenAI Codex CLI
 # (`codex exec`, OPENAI_API_KEY secret), model e.g. "gpt-6.1-terra", effort as Codex's
-# model_reasoning_effort. Codex has no budget cap: the job timeout bounds it, and run.json
-# records the token usage with a cost estimated from the price_* keys (USD per 1M tokens).
+# model_reasoning_effort. Codex has no budget cap of its own: evals/codex_budget_guard.py
+# prices the session's token counts with the price_* keys (USD per 1M tokens) and stops the
+# run at `budget` USD per paper, after one wrap-up resume at 70% of it; run.json records
+# the usage, the estimated cost and any budget stop.
+# Current stage: a review run takes at most 3 papers and at most 3 USD per paper.
 on:
   workflow_dispatch:
     inputs:
@@ -116,6 +119,13 @@ jobs:
           assert cfg["pipeline"] in ("single", "split", "check")
           assert cfg["auth"] in ("api", "subscription")
           assert cfg["effort"] in ("", "minimal", "low", "medium", "high", "xhigh", "max")
+          # Current stage: at most 3 papers per experiment, and a capped spend per paper.
+          MAX_PAPERS = 3
+          n = len(cfg["only"].split(",")) if cfg["only"] else int(cfg["limit"])
+          assert cfg["mode"] != "review" or 1 <= n <= MAX_PAPERS, f"{n} papers; this stage allows {MAX_PAPERS}"
+          assert 0 < float(cfg["budget"]) <= 3, "per-paper budget must be in (0, 3] USD"
+          assert cfg["runner"] != "codex" or (float(cfg["price_in"]) > 0 and float(cfg["price_out"]) > 0), \
+              "a Codex run needs prices for its budget guard"
           for k, v in cfg.items():
               print(f"{k}={v}")
           PY
@@ -146,6 +156,7 @@ jobs:
             $( [ -n "${{ needs.config.outputs.only }}" ] && echo --only "${{ needs.config.outputs.only }}" ) \
             $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json ) \
             $( [ -f evals/iclr2026_prefer.json ] && echo --prefer evals/iclr2026_prefer.json )
+          python3 -c "import json,sys;n=len(json.load(open('ids.json')));sys.exit(f'{n} papers; this stage allows 3' if n>3 else 0)"
           echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
           mkdir -p ship
@@ -175,6 +186,7 @@ jobs:
         # Committed pilot files hold human scores and decisions; the reviewer needs only
         # the skill, the prompt and its own paper.
         run: |
+          cp evals/codex_budget_guard.py "$RUNNER_TEMP/"  # runs outside the reviewer's workspace
           find evals -mindepth 1 -maxdepth 1 ! -name split ! -name work ! -name review_prompt.md -exec rm -rf {} +
           ls evals
       - run: npm install -g @anthropic-ai/claude-code
@@ -221,6 +233,7 @@ jobs:
           PRICE_IN: ${{ needs.config.outputs.price_in }}
           PRICE_CACHED: ${{ needs.config.outputs.price_cached }}
           PRICE_OUT: ${{ needs.config.outputs.price_out }}
+          BUDGET: ${{ needs.config.outputs.budget }}
         run: |
           [ -n "$OPENAI_API_KEY" ] || { echo "OPENAI_API_KEY secret is not set"; exit 1; }
           printenv OPENAI_API_KEY | codex login --with-api-key > /dev/null
@@ -231,18 +244,42 @@ jobs:
           CFG=(-c sandbox_mode="workspace-write" -c sandbox_workspace_write.network_access=true)
           [ -z "$EFFORT" ] || CFG+=(-c model_reasoning_effort="$EFFORT")
           start=$(date +%s); deadline=$((start + 165 * 60))
-          timeout $((deadline - $(date +%s)))s codex exec --model "$MODEL" "${CFG[@]}" \
-            --skip-git-repo-check --json -o "$R/last_message.txt" - < prompt.md > "$R/codex_events.jsonl" || true
+          # Per-paper API cap: the guard prices the session's token counts and stops codex at
+          # the soft limit (70% of the budget; one wrap-up resume follows) and at the budget.
+          PIDF="$RUNNER_TEMP/codex.pid"; STOP="$R/budget_stop.txt"
+          python3 "$RUNNER_TEMP/codex_budget_guard.py" --sessions "$HOME/.codex/sessions" \
+            --budget "$BUDGET" --pidfile "$PIDF" --flag "$STOP" &
+          guard=$!
+          sleep 3; kill -0 "$guard" || { echo "budget guard did not start; not running uncapped"; exit 1; }
+          run_codex() {  # stdin file, then codex arguments; events append to codex_events.jsonl
+            local in="$1"; shift
+            setsid timeout $((deadline - $(date +%s)))s codex "$@" < "$in" >> "$R/codex_events.jsonl" &
+            echo $! > "$PIDF"; wait $! || true
+          }
+          stopped() { grep -q "^$1" "$STOP" 2>/dev/null; }
+          : > "$R/codex_events.jsonl"
+          run_codex prompt.md exec --model "$MODEL" "${CFG[@]}" \
+            --skip-git-repo-check --json -o "$R/last_message.txt" -
           # An organization rate limit (tokens per minute) can stop a turn; resume the same
-          # session, which keeps everything done so far.
-          for i in 1 2 3 4 5 6 7 8; do
-            tail -n 1 "$R/codex_events.jsonl" | grep -q '"turn.failed".*rate limit' || break
+          # session, which keeps everything done so far. The budget's wrap-up uses the same path.
+          wrapped=""
+          for i in 1 2 3 4 5 6 7 8 9; do
+            stopped hard && break
             [ $((deadline - $(date +%s))) -gt 300 ] || break
-            echo "rate limited; resume $i"; sleep 90
-            timeout $((deadline - $(date +%s)))s codex exec resume --last --model "$MODEL" "${CFG[@]}" \
-              --skip-git-repo-check --json -o "$R/last_message.txt" \
-              "Continue the task from where you stopped (the previous turn ended on an API rate limit). Do not redo finished steps." >> "$R/codex_events.jsonl" || true
+            if stopped soft && [ -z "$wrapped" ]; then
+              wrapped=1; echo "budget soft limit; wrap-up resume"
+              msg="Stop working on the review now: the per-paper API budget is nearly used. Do no more searching and do not reread the skill files. Using what you have already done, write every deliverable now (review.md, scores_before.json, before.json, scores.json, aggregate.json, evidence.json, summary.json), marking unfinished parts as not done, and say in summary.json notes that the budget cut the run short and which phases are incomplete."
+            elif tail -n 1 "$R/codex_events.jsonl" | grep -q '"turn.failed".*rate limit'; then
+              echo "rate limited; resume $i"; sleep 90
+              msg="Continue the task from where you stopped (the previous turn ended on an API rate limit). Do not redo finished steps."
+            else
+              break
+            fi
+            run_codex /dev/null exec resume --last --model "$MODEL" "${CFG[@]}" \
+              --skip-git-repo-check --json -o "$R/last_message.txt" "$msg"
           done
+          kill "$guard" 2>/dev/null || true
+          cat "$STOP" 2>/dev/null || echo "budget guard: under the soft limit"
           python3 - "$R" "$start" "$HOME/.codex/sessions" <<'PY'
           import glob, json, os, sys, time
           res, start, sess = sys.argv[1], int(sys.argv[2]), sys.argv[3]
@@ -283,7 +320,10 @@ jobs:
                  "num_turns": turns, "failed_turns": failed,
                  "duration_ms": (int(time.time()) - start) * 1000,
                  "total_cost_usd": round(cost, 4), "cost_is_estimate": True,
-                 "prices_per_mtok": p, "is_error": err is not None or not done, "error": err}
+                 "prices_per_mtok": p, "budget_usd": float(os.environ["BUDGET"]),
+                 "budget_stop": (open(os.path.join(res, "budget_stop.txt")).read().split() or [None])[0]
+                 if os.path.exists(os.path.join(res, "budget_stop.txt")) else None,
+                 "is_error": err is not None or not done, "error": err}
           json.dump(run, open(os.path.join(res, "run.json"), "w"), indent=1)
           print(json.dumps(run))
           PY
