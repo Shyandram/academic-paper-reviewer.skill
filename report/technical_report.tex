@@ -58,7 +58,8 @@ optional Gap Scout that names concrete missing items raises 65\% alone and 73\% 
 A redesign that moved these ideas into the panel (version 2.11) raised no more issues, ranked
 papers worse (Spearman $0.32$) and cost 3.5$\times$ as much, so it was withdrawn.
 \end{itemize}
-A smaller model (Haiku) shows no reliable signal. We also report a negative result: NMAE alone
+A smaller model (Haiku) shows no reliable signal, and neither do two GPT-6.1 models run on the
+same 20 papers. We also report a negative result: NMAE alone
 does not measure skill on this pool, because a constant predictor scores $0.089$. The main
 remaining weakness is compression: 78\% of papers receive the same final rating.
 \end{abstract}
@@ -467,6 +468,38 @@ For reference only: CSPaper reports NMAE 0.128, NME $-0.015$ and SRC 0.658 for C
 on ICLR main. That benchmark's sample size and paper overlap are unknown, so the numbers are not
 directly comparable with ours.
 
+\subsection{Other model families}\label{sec:gpt}
+The skill is model-neutral Markdown, so we ran version 2.10.1 unchanged on pilot 3's 20 papers
+with two OpenAI models through the Codex command-line tool, at high reasoning effort, with the
+same prompt and blinded text. All 40 reviews finished.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Three models on the same 20 papers. Spearman with the mean human rating [bootstrap 95\%
+CI] and acceptance AUC for the panel rating; NMAE and NME for the ICLR rating. GPT costs are
+estimates from token counts at list prices; the Terra estimate priced cached input as fresh input
+and so overstates its cost.}\label{tab:gpt}
+\begin{tabular}{lcccc}
+\toprule
+Model, high effort & Spearman & AUC & NMAE / NME & Cost per paper\\
+\midrule
+Sonnet & $\mathbf{+0.48}$ [$0.12$, $0.73$] & 0.67 & 0.090 / $+0.010$ & \$1.97\\
+GPT-6.1 Sol & $+0.02$ [$-0.38$, $0.45$] & 0.47 & 0.126 / $-0.020$ & $\approx$\$1.39\\
+GPT-6.1 Terra & $-0.01$ [$-0.43$, $0.43$] & 0.40 & 0.133 / $-0.070$ & $\approx$\$4.55\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Neither GPT model ranks the papers (Table~\ref{tab:gpt}), and no stage of the pipeline helps: the
+reviewers' and the EIC's pool positions are just as flat. Both do worse than a constant guess on
+NMAE (0.085). The failure is the same for both: Sol gives the three papers with the highest human
+mean (6.0) 3.4, 2.8 and 2.8 on the 1--6 scale, and the two with the lowest 3.2 each. Terra is also
+harsher, with six papers at ICLR~2 where Sonnet has none. The models agree with each other more
+than with the humans: the panel ratings correlate at 0.71 (Sol--Terra), 0.60 (Sol--Sonnet) and
+0.65 (Terra--Sonnet). With 20 papers the intervals overlap, so this is evidence that the result
+depends on the model, not a ranking of the three.
+
 \section{Evaluation III: weaknesses compared with the human reviews}\label{sec:overlap}
 Scores say nothing about \emph{which} weaknesses a review raises. On the 86 papers of the full
 evaluation (Sonnet, high effort, skill 2.10.1) we compared the weakness sections of the AI panel
@@ -849,7 +882,7 @@ not use it.
 \begin{itemize}
 \item \textbf{Sample size.} The full evaluation has 86 papers; its Spearman interval is still
 $0.27$--$0.64$, and the issue-overlap study and the 2.11 comparison use the 20-paper pilot only.
-Haiku was tested on the pilot only.
+Haiku and the two GPT-6.1 models were tested on the pilot's 20 papers only.
 \item \textbf{One venue and one year.} Calibration covers ICLR 2026 only. Other venues use
 assumed or secondary scales.
 \item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers

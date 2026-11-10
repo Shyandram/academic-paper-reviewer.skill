@@ -1,0 +1,541 @@
+{
+ "schema": "PaperFigurePlan@2",
+ "figure_id": "apr_workflow",
+ "figure_type": "architecture",
+ "communication_goal": "Show the full-mode review: two preparation steps feed a packet to five independent reviewers; their reports pass a literature check and a report check before the Editor-in-Chief, who decides; a script turns scores into venue forms; the Gap Scout is optional and outside the review.",
+ "hero_mechanism": "eic",
+ "sources": [
+  {
+   "id": "src_skill",
+   "kind": "user_spec",
+   "role": "method",
+   "locator": {
+    "uri": "inputs/SKILL.md",
+    "span": "Full Mode Workflow; Post-Review Analysis; Hard Rule 9"
+   },
+   "sha256": "a7da431878f73cac1f9884f1936e78b3904588739f1ff104c19cd84d35bbd27a",
+   "provenance_status": "ordinary",
+   "integrity": "clean"
+  }
+ ],
+ "graph": {
+  "nodes": [
+   {
+    "id": "paper",
+    "label": "Manuscript",
+    "type": "input",
+    "role": "input",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "field",
+    "label": "Field analysis",
+    "type": "module",
+    "role": "prep",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "scan",
+    "label": "Integrity scan",
+    "type": "module",
+    "role": "prep",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "packet",
+    "label": "Reviewer packet",
+    "type": "data",
+    "role": "prep",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "r1",
+    "label": "Methodology",
+    "type": "module",
+    "role": "reviewer",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "r2",
+    "label": "Domain",
+    "type": "module",
+    "role": "reviewer",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "r3",
+    "label": "Perspective",
+    "type": "module",
+    "role": "reviewer",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "r4",
+    "label": "Generalist",
+    "type": "module",
+    "role": "reviewer",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "da",
+    "label": "Devil's Advocate",
+    "type": "module",
+    "role": "reviewer",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "lit",
+    "label": "Literature check",
+    "type": "module",
+    "role": "check",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "chk",
+    "label": "Report check",
+    "type": "module",
+    "role": "check",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "eic",
+    "label": "Editor-in-Chief",
+    "type": "module",
+    "role": "editor",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "agg",
+    "label": "Score script",
+    "type": "module",
+    "role": "script",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "dec",
+    "label": "Decision letter",
+    "type": "output",
+    "role": "output",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "venue",
+    "label": "Venue forms",
+    "type": "output",
+    "role": "output",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "gap",
+    "label": "Gap Scout",
+    "type": "module",
+    "role": "optional",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   },
+   {
+    "id": "gapout",
+    "label": "Concern checklist",
+    "type": "output",
+    "role": "optional",
+    "scope": "both",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "status": "stated",
+    "uncertainty": null
+   }
+  ],
+  "edges": [
+   {
+    "id": "e_pf",
+    "from": "paper",
+    "to": "field",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the manuscript is analysed for field, venue and reviewer configuration",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_ps",
+    "from": "paper",
+    "to": "scan",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the manuscript text is scanned for reviewer-directed text",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_fp",
+    "from": "field",
+    "to": "packet",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "configuration card and factual paper memory",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_sp",
+    "from": "scan",
+    "to": "packet",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "redacted reviewers' copy",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_pr1",
+    "from": "packet",
+    "to": "r1",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "each reviewer gets the packet and its own role file, not others' reports",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_pr2",
+    "from": "packet",
+    "to": "r2",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "each reviewer gets the packet and its own role file, not others' reports",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_pr3",
+    "from": "packet",
+    "to": "r3",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "each reviewer gets the packet and its own role file, not others' reports",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_pr4",
+    "from": "packet",
+    "to": "r4",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "each reviewer gets the packet and its own role file, not others' reports",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_pda",
+    "from": "packet",
+    "to": "da",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "each reviewer gets the packet and its own role file, not others' reports",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_r1l",
+    "from": "r1",
+    "to": "lit",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the drafted report goes to the literature check",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_r2l",
+    "from": "r2",
+    "to": "lit",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the drafted report goes to the literature check",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_r3l",
+    "from": "r3",
+    "to": "lit",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the drafted report goes to the literature check",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_r4l",
+    "from": "r4",
+    "to": "lit",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the drafted report goes to the literature check",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_dal",
+    "from": "da",
+    "to": "lit",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the drafted report goes to the literature check",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_lc",
+    "from": "lit",
+    "to": "chk",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "reports plus literature addendum go to the report check",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_ce",
+    "from": "chk",
+    "to": "eic",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "checked reports reach the EIC in Phase 2",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_se",
+    "from": "scan",
+    "to": "eic",
+    "type": "parameter_control",
+    "scope": "both",
+    "meaning": "integrity findings go to the EIC alone",
+    "evidence_ids": [
+     "src_skill"
+    ],
+    "label": "findings"
+   },
+   {
+    "id": "e_ed",
+    "from": "eic",
+    "to": "dec",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the EIC makes the decision and the revision roadmap",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_ea",
+    "from": "eic",
+    "to": "agg",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "scores and reviewer weights are aggregated by a deterministic script",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_av",
+    "from": "agg",
+    "to": "venue",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "aggregated scores are translated into venue forms",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_pg",
+    "from": "paper",
+    "to": "gap",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "the optional Gap Scout reads only the paper, after the review",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   },
+   {
+    "id": "e_gg",
+    "from": "gap",
+    "to": "gapout",
+    "type": "feature",
+    "scope": "both",
+    "meaning": "it lists concrete concerns as a checklist",
+    "evidence_ids": [
+     "src_skill"
+    ]
+   }
+  ],
+  "groups": [
+   {
+    "id": "g_rev",
+    "label": "Five reviewers",
+    "members": [
+     "r1",
+     "r2",
+     "r3",
+     "r4",
+     "da"
+    ]
+   }
+  ],
+  "shared_weights": []
+ },
+ "required_labels": [],
+ "inferred_details": [
+  "'Reviewer packet' names the bundle Phase 0 hands each reviewer (configuration card, paper memory, redacted copy); SKILL.md describes the contents, not this name."
+ ],
+ "unknown_details": [],
+ "selected_sample_reference_ids": [],
+ "reference_transfer": [],
+ "layout": {
+  "target_width_mm": 162,
+  "aspect_ratio": 2.2,
+  "reading_order": [
+   "paper",
+   "field",
+   "scan",
+   "packet",
+   "r1",
+   "lit",
+   "chk",
+   "eic",
+   "dec",
+   "agg",
+   "venue",
+   "gap"
+  ],
+  "regions": [],
+  "arrow_grammar": {
+   "feature": "solid",
+   "parameter_control": "thin labeled"
+  },
+  "style_roles": {},
+  "caption_only_context": [
+   "Phase numbers",
+   "the EIC weights each review by quality",
+   "11 venues",
+   "the literature check cannot retrieve the paper under review"
+  ]
+ },
+ "forbidden_implications": [
+  "reviewers see each other's reports",
+  "the Gap Scout changes scores or the decision",
+  "the scan changes scores"
+ ],
+ "generation_prompt": "Left-to-right editorial pipeline diagram.",
+ "provenance": {
+  "status": "ordinary",
+  "excluded_from_clean_aggregate": false,
+  "input_hashes": {
+   "inputs/SKILL.md": "a7da431878f73cac1f9884f1936e78b3904588739f1ff104c19cd84d35bbd27a"
+  },
+  "parent_artifact_hashes": {},
+  "source_coverage": [],
+  "recorded_at": "2026-11-10T16:22:54+00:00"
+ }
+}

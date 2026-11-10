@@ -1,0 +1,58 @@
+{
+ "schema": "StageReview@2",
+ "figure_id": "apr_workflow",
+ "gate": "G1",
+ "revision": 1,
+ "reviewer_mode": "same_context",
+ "rubric_version": "paper-figure/SupervisorRubric@2",
+ "artifact_hashes": {
+  "plan.json": "f30d6f2f126053c04b0e2354c12f4e2a134a19fa923a05837d25561a7f26bf01"
+ },
+ "plan_sha256": "f30d6f2f126053c04b0e2354c12f4e2a134a19fa923a05837d25561a7f26bf01",
+ "dimensions": [
+  {
+   "name": "topology_or_argument",
+   "weight": 1,
+   "score": 5,
+   "evidence": [
+    "order Phase 0 -> Phase 1 -> 1.5 -> 1.6 -> Phase 2 follows 'Order: Phase 1 -> Phase 1.5 -> Phase 1.6 -> Phase 2' in SKILL.md"
+   ],
+   "artifact_uri": "plan.json"
+  },
+  {
+   "name": "object_edge_semantics",
+   "weight": 1,
+   "score": 4,
+   "evidence": [
+    "findings go to the EIC alone (Hard Rule 9); reviewers read the redacted copy and paper memory; 'Reviewer packet' is an inferred name, recorded in inferred_details"
+   ],
+   "artifact_uri": "plan.json"
+  },
+  {
+   "name": "training_inference_scope",
+   "weight": 1,
+   "score": 5,
+   "evidence": [
+    "no training/inference split exists; every object is scope both and no such claim is made"
+   ],
+   "artifact_uri": "plan.json"
+  },
+  {
+   "name": "claim_scope",
+   "weight": 1,
+   "score": 5,
+   "evidence": [
+    "the Gap Scout is outside the review band and has no edge into the review, matching 'never changes a report, a score ... or the decision'"
+   ],
+   "artifact_uri": "plan.json"
+  }
+ ],
+ "weighted_score_100": 95.0,
+ "coverage": 1.0,
+ "hard_blockers": [],
+ "defects": [],
+ "decision": "pass",
+ "limitations": [
+  "same_context review by the generating session; not an independent reviewer"
+ ]
+}

@@ -1,0 +1,75 @@
+{
+ "schema": "RenderManifest@2",
+ "figure_id": "apr_workflow",
+ "plan_sha256": "f30d6f2f126053c04b0e2354c12f4e2a134a19fa923a05837d25561a7f26bf01",
+ "spec_sha256": "db9e9af1af3bc99fe3e53ad91f1d4bf3304694d940280b4555130b5bf426db69",
+ "repair_count": 1,
+ "deliver_status": "complete",
+ "backends": [
+  {
+   "backend": "drawio",
+   "tool": "paper-figure/scripts/render_drawio_preview.py",
+   "tool_version": "sha256:32449890003850a52cf3761180d8ff600fdac223f869d4cf4eee27a8c2e4ed8c",
+   "backend_status": "completed",
+   "editable_objects": true,
+   "preview_status": "verified",
+   "native_export_status": "verified",
+   "preview_renderer": "drawio-desktop 32.4.1",
+   "approximation": null,
+   "outputs": [
+    {
+     "uri": "figure.r01.drawio",
+     "kind": "editable_xml",
+     "sha256": "c1953c7cfee6aa53f5b608bf99e69556c6bc816664657714646db60a7833e0b6",
+     "verification": "unverified"
+    },
+    {
+     "uri": "figure.r01.pdf",
+     "kind": "pdf",
+     "sha256": "bd94590cf0c586fadd89d26c7b1262948278da43808bab6a1690389358c60651",
+     "verification": "verified"
+    },
+    {
+     "uri": "figure.r01.png",
+     "kind": "raster",
+     "sha256": "0530015583994eb622fd56ec8065b3ade0200bd391a0fd3fafa59d18437aa9b9",
+     "verification": "verified"
+    },
+    {
+     "uri": "figure.r01.svg",
+     "kind": "svg",
+     "sha256": "12f792a07c97ec0fa1b76aa55a0753ce432fde33dea8c051a34c4632587316b2",
+     "verification": "verified"
+    }
+   ],
+   "limitations": [
+    "editable_objects reflects the .drawio input; prove object mapping with validate_artifact.py figure.drawio --plan plan.json",
+    "png export shows the first page only; export each page separately for multi-page files",
+    "svg export shows the first page only; export each page separately for multi-page files",
+    "native export ran through /home/user/figcase/drawio-wrap.sh (root container: --no-sandbox, xvfb)",
+    "r00 (sized for 170 mm) and its reviews are kept in ../out_r00_prior; this plan is sized for the 162 mm report text width",
+    "a second round (r02, wider output blocks) was compiled and exported but rejected at lint and visual check (Decision letter 1.6 units from its border) before review; kept in ../out_r02_rejected"
+   ]
+  }
+ ],
+ "review_hashes": {
+  "reviews/G0.r01.json": "19eec63317a33eaafcba27d9935089da34fed5fc8f4a5d0b0360b5c75ae48eba",
+  "reviews/G1.r01.json": "48e8d4c5ff91aa15c6c55e724de1a93c101d10188f29188285e83252b25086e9",
+  "reviews/G2.r01.json": "0e75aebd9db4afe924b52e7739248eadf9d5216847e2764cb6ae11f2d5f4ccc4",
+  "reviews/G3.r01.json": "f0677eef5ca4ccb19d6b2c7bb5dfa1e3cd65171113cf140bac6c644b9f98f28d",
+  "reviews/G4.r01.json": "fb68359b19c22a08611973514a87757b8cdbf60d3284460da5f06e770be0ff54"
+ },
+ "provenance": {
+  "status": "ordinary",
+  "excluded_from_clean_aggregate": false,
+  "input_hashes": {
+   "inputs/SKILL.md": "a7da431878f73cac1f9884f1936e78b3904588739f1ff104c19cd84d35bbd27a"
+  },
+  "parent_artifact_hashes": {
+   "plan.json": "f30d6f2f126053c04b0e2354c12f4e2a134a19fa923a05837d25561a7f26bf01",
+   "spec.r01.json": "db9e9af1af3bc99fe3e53ad91f1d4bf3304694d940280b4555130b5bf426db69"
+  },
+  "source_coverage": [],
+  "recorded_at": "2026-11-10T16:22:54+00:00"
+ }
+}

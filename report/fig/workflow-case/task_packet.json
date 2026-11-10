@@ -1,0 +1,43 @@
+{
+ "schema": "PaperFigureTask@2",
+ "run_id": "apr-workflow-01",
+ "input_mode": "user_architecture",
+ "figure_type": "architecture",
+ "requested_backends": [
+  "drawio"
+ ],
+ "plan_only": false,
+ "sources": [
+  {
+   "id": "src_skill",
+   "kind": "user_spec",
+   "role": "method",
+   "locator": {
+    "uri": "inputs/SKILL.md",
+    "span": "Full Mode Workflow; Post-Review Analysis; Hard Rule 9"
+   },
+   "sha256": "a7da431878f73cac1f9884f1936e78b3904588739f1ff104c19cd84d35bbd27a",
+   "provenance_status": "ordinary",
+   "integrity": "clean"
+  }
+ ],
+ "reference_policy": {
+  "sample_ids": [],
+  "style_selection": "confirmed",
+  "style_profile": "paper-clean"
+ },
+ "output_dir": "out",
+ "review": {
+  "reviewer_mode": "same_context",
+  "repair_limit": 2,
+  "prompt_review": "waived"
+ },
+ "test_policy": {
+  "held_out": false,
+  "excluded_sources": [
+   "previous Figure 1 of the technical report"
+  ],
+  "allow_supplemental": false
+ },
+ "notes": "no skill-journal writes"
+}

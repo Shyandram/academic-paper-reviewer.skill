@@ -1,0 +1,74 @@
+{
+ "schema": "StageReview@2",
+ "figure_id": "apr_workflow",
+ "gate": "G4",
+ "revision": 1,
+ "reviewer_mode": "same_context",
+ "rubric_version": "paper-figure/SupervisorRubric@2",
+ "artifact_hashes": {
+  "figure.r01.pdf": "bd94590cf0c586fadd89d26c7b1262948278da43808bab6a1690389358c60651",
+  "figure.r01.drawio": "c1953c7cfee6aa53f5b608bf99e69556c6bc816664657714646db60a7833e0b6",
+  "figure.r01.png": "0530015583994eb622fd56ec8065b3ade0200bd391a0fd3fafa59d18437aa9b9",
+  "figure.r01.svg": "12f792a07c97ec0fa1b76aa55a0753ce432fde33dea8c051a34c4632587316b2",
+  "plan.json": "f30d6f2f126053c04b0e2354c12f4e2a134a19fa923a05837d25561a7f26bf01"
+ },
+ "plan_sha256": "f30d6f2f126053c04b0e2354c12f4e2a134a19fa923a05837d25561a7f26bf01",
+ "dimensions": [
+  {
+   "name": "actual_scientific_fidelity",
+   "weight": 1,
+   "score": 5,
+   "evidence": [
+    "viewed figure.r01.pdf at 300 dpi: every arrow ends on its plan target; findings arrow reaches only the EIC"
+   ],
+   "artifact_uri": "figure.r01.pdf"
+  },
+  {
+   "name": "publication_size_readability",
+   "weight": 1,
+   "score": 4,
+   "evidence": [
+    "min 7.20 pt at 162 mm (lint --pdf); 32 words; Venue forms text 4.4 units from its border; the tall Literature check block leaves empty space"
+   ],
+   "artifact_uri": "figure.r01.pdf"
+  },
+  {
+   "name": "routing_roles",
+   "weight": 1,
+   "score": 5,
+   "evidence": [
+    "no crossings or overlaps; typed arrows: solid flow, thin labelled vermilion control arrow"
+   ],
+   "artifact_uri": "figure.r01.pdf"
+  },
+  {
+   "name": "evidence_visual_integrity",
+   "weight": 1,
+   "score": 5,
+   "evidence": [
+    "no data, photos or plots are drawn"
+   ],
+   "artifact_uri": "figure.r01.pdf"
+  },
+  {
+   "name": "export_fidelity",
+   "weight": 1,
+   "score": 5,
+   "evidence": [
+    "native draw.io 32.4.1 export; PDF fonts embedded (Liberation Sans); PNG and SVG from the same file"
+   ],
+   "artifact_uri": "figure.r01.pdf"
+  }
+ ],
+ "weighted_score_100": 96.0,
+ "coverage": 1.0,
+ "hard_blockers": [],
+ "defects": [],
+ "decision": "pass",
+ "limitations": [
+  "same_context review by the generating session; not an independent reviewer",
+  "native exporter run through a host shim (xvfb-run, --no-sandbox) because the container runs as root",
+  "r00 was sized for 170 mm; at the report text width (162 mm) its band title printed at 6.86 pt; r01 recompiles the plan at 162 mm",
+  "r02 (wider output blocks) regressed: Decision letter came within 1.6 units of its border; with the repair budget spent, r01 is delivered"
+ ]
+}
