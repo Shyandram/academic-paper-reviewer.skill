@@ -85,7 +85,9 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 
 **Case for acceptance:** [the strongest one, in one sentence: what the field gains from this paper]
 **Case for rejection:** [the strongest one, in one sentence: a named prior work it barely improves on, or a defect that undercuts the contribution]
-**Pool position:** better than about [P]% of submissions to [venue] (accepted share ≈ [rate]%). Deciding evidence: [which case outweighs, and why]
+**Contribution position:** [C] (primary claim [Cx]: [new / partly new / incremental / known], because [closest work and what differs]; band from `references/quality_rubrics.md`)
+**Evidence adjustment:** [E, 0 or negative] ([which central claim the evidence weakens or loses; routine gaps at most −5 in total])
+**Pool position:** better than about [P = C + E]% of submissions to [venue] (accepted share ≈ [rate]%). Deciding evidence: [which case outweighs, and why]
 
 | Dimension | Score | Descriptor | Rationale |
 |-----------|-------|------------|-----------|

@@ -60,6 +60,9 @@ Subcommands (standard library only):
       most), warnings, and the paper-level reading: one established claim is a
       claim-level finding (a MAJOR weakness, not CRITICAL), not a reason to call the
       paper known; every central claim incremental is a typical-rejection signal.
+      The claim marked "primary" (the one the paper leads with) sets the contribution
+      band: the pool-position range if the claims hold (high 60-90, medium 45-69,
+      incremental 30-54, known 15-40).
 
 Common option: --ledger search_ledger.jsonl (default: next to the fingerprint).
 
@@ -632,6 +635,9 @@ ALPHA = 0.5
 LEVEL_VERDICT = {5: "known", 4: "incremental", 3: "medium", 2: "high", 1: "high"}
 FACETS = ("problem", "mechanism", "setting", "finding")
 VERDICT_ORDER = ["high", "medium", "incremental", "known"]
+# Contribution band (2.13): the pool-position range a paper holds if its central claims hold as
+# stated, set by the novelty verdict of its primary claim (references/quality_rubrics.md).
+CONTRIBUTION_BAND = {"high": [60, 90], "medium": [45, 69], "incremental": [30, 54], "known": [15, 40]}
 
 
 def match_level(m, claim_id=None):
@@ -696,6 +702,7 @@ def novelty_profile(profile):
                 warnings.append(f"claim {c.get('id')}: no delta (what this paper adds) for {m.get('title')!r} "
                                 f"at level {m['level']}")
         rows.append({"id": c.get("id"), "dimension": dim, "central": bool(c.get("central", True)),
+                     "primary": bool(c.get("primary", False)),
                      "coverage": round(a, 3), "novelty": round(1 - a, 3), "verdict": verdict,
                      "top_prior": top and {k: top.get(k) for k in ("title", "url", "level", "cited_by_paper",
                                                                     "shared", "delta")
@@ -711,6 +718,20 @@ def novelty_profile(profile):
                 score[m["title"]] = score.get(m["title"], 0) + (m["level"] - 1) / 4
     attribution = max(score, key=score.get) if score else None
     central = [r for r in rows if r["central"]] or rows
+    primaries = [r for r in rows if r["primary"]]
+    if len(primaries) > 1:
+        raise ValueError("mark one primary claim (the contribution the paper leads with), not "
+                         f"{len(primaries)}: {[r['id'] for r in primaries]}")
+    if primaries and not primaries[0]["central"]:
+        raise ValueError(f"claim {primaries[0]['id']}: the primary claim must be central")
+    primary = None
+    if primaries:
+        r = primaries[0]
+        v = r["verdict"] if r["verdict"] in CONTRIBUTION_BAND else "medium"  # "no close prior work": at most medium
+        primary = {"id": r["id"], "verdict": r["verdict"], "contribution_band": CONTRIBUTION_BAND[v]}
+    elif rows:
+        warnings.append("no primary claim marked: set \"primary\": true on the central claim the paper leads "
+                        "with (title, abstract, first listed contribution)")
     known = [r for r in central if r["verdict"] == "known"]
     same_uncited = (len(known) == len(central) and len({r["top_prior"]["title"] for r in known}) == 1
                     and not any(r["top_prior"].get("cited_by_paper") for r in known))
@@ -728,13 +749,14 @@ def novelty_profile(profile):
     else:
         reading = "no central claim fully covered by prior work"
     return {"claims": rows, "paper_novelty": None if paper is None else round(paper, 3),
-            "attribution": attribution, "paper_reading": reading,
+            "attribution": attribution, "paper_reading": reading, "primary": primary,
             "note": ("paper_novelty describes what this search found, not the paper: a claim with no prior "
                      "match counts as uncovered, and the search covers arXiv only. Use the per-claim "
                      "profile, not the single number, for the review."),
             "scale": "1 unrelated, 2 shared topic, 3 partial, 4 strong (minor details missing), 5 full coverage; "
                      "with shared facets (problem, mechanism, setting, finding): 1 + the number shared, and "
                      "problem + mechanism shared is at least incremental",
+            "contribution_bands": CONTRIBUTION_BAND,
             "warnings": warnings,
             "weights": DIMENSIONS}
 

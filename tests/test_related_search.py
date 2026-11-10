@@ -190,7 +190,7 @@ class NoveltyProfileTests(unittest.TestCase):
 
     def test_shared_facets_set_the_level(self):
         m = {"title": "A", "label": self.P, "shared": ["setting", "finding"], "delta": "new task"}
-        out = rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "matches": [m]}]})
+        out = rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "primary": True, "matches": [m]}]})
         c = out["claims"][0]
         self.assertEqual((c["top_prior"]["level"], c["verdict"]), (3, "medium"))
         self.assertEqual(c["top_prior"]["shared"], ["setting", "finding"])
@@ -223,9 +223,37 @@ class NoveltyProfileTests(unittest.TestCase):
         prof = {"claims": [{"id": "C1", "dimension": "method", "matches": [
             {"title": "A", "label": self.P, "level": 3},
             {"title": "B", "label": self.P, "level": 2}]}]}
-        w = rs.novelty_profile(prof)["warnings"]
+        w = [x for x in rs.novelty_profile(prof)["warnings"] if "delta" in x]
         self.assertEqual(len(w), 1)
         self.assertIn("'A'", w[0])
+
+    def test_primary_claim_sets_the_contribution_band(self):
+        def prof(primary_shared):
+            return {"claims": [
+                {"id": "C1", "dimension": "method", "central": True, "primary": True, "matches": [
+                    {"title": "A", "label": self.P, "shared": primary_shared, "delta": "d"}]},
+                {"id": "C2", "dimension": "result", "central": True, "matches": [
+                    {"title": "B", "label": self.P, "shared": ["problem"], "delta": "d"}]}]}
+        out = rs.novelty_profile(prof(["problem", "mechanism"]))
+        self.assertEqual(out["primary"], {"id": "C1", "verdict": "incremental", "contribution_band": [30, 54]})
+        self.assertEqual(rs.novelty_profile(prof(["problem"]))["primary"]["contribution_band"], [60, 90])
+        self.assertFalse([w for w in out["warnings"] if "primary" in w])
+
+    def test_primary_with_no_prior_match_is_at_most_medium(self):
+        out = rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "primary": True, "matches": []}]})
+        self.assertEqual(out["primary"]["contribution_band"], [45, 69])
+
+    def test_primary_is_checked(self):
+        two = {"claims": [{"id": "C1", "dimension": "method", "primary": True, "matches": []},
+                          {"id": "C2", "dimension": "method", "primary": True, "matches": []}]}
+        with self.assertRaises(ValueError):
+            rs.novelty_profile(two)
+        side = {"claims": [{"id": "C1", "dimension": "method", "central": False, "primary": True, "matches": []}]}
+        with self.assertRaises(ValueError):
+            rs.novelty_profile(side)
+        none = rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "matches": []}]})
+        self.assertIsNone(none["primary"])
+        self.assertTrue([w for w in none["warnings"] if "primary" in w])
 
     def test_bad_level_or_dimension_is_rejected(self):
         with self.assertRaises(ValueError):

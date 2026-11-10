@@ -7,6 +7,7 @@ Pilots for the paperreview.ai-style evaluation (`evals/iclr_calibration.py`,
 `evals/iclr2026_codex_sol_pilot3.json` (GPT-6.1 Sol vs Sonnet and Terra, same 20 papers),
 `evals/iclr2026_issue_overlap_gpt.json` (issue overlap of the three models, same 20 papers),
 `evals/iclr2026_sol_diagnosis.json` (why Sol does not rank them; `evals/sol_diagnosis.py`).
+`evals/iclr2026_terra213_validation_r*.json` (skill 2.13 validation rounds, 3 papers each; `evals/validation_compare.py`).
 Review text and manuscripts are not committed.
 
 ## Setup
@@ -303,7 +304,41 @@ correct and missed by the humans. The result says Sol, prompted this way at `hig
 weighs evidence differently from ICLR reviewers. Candidate fixes, not yet tested: require a
 named closest prior work (or an explicit "none found") behind every novelty concern; grade a
 verified error as fatal or repairable before it moves the score; rerun Sol at a higher reasoning
-effort.
+effort. Skill 2.13 implements the first two; its validation follows.
+
+### Skill 2.13 validation (GPT-6.1 Terra, `high`, 3 papers per round)
+
+This stage runs at most 3 papers per experiment, with a per-paper API cap enforced by
+`evals/codex_budget_guard.py`. The three papers are pilot 3's KtocialdxS (human mean 2.67; Terra 2.10.1
+lenient), Lvkbe0CgmZ (5.0; harsh on proof errors) and euMVC1DO4k (6.0; control). Three papers say whether
+the new instructions are followed and which way the scores move, not whether ranking improves.
+
+**Round 1** (skill 2.13 as first committed; `evals/iclr2026_terra213_validation_r1.json`):
+
+| Paper | Human mean | Reviewer pool, 2.10.1 → 2.13 | EIC pool, 2.10.1 → 2.13 | Central-claim verdicts (2.13 profile) | paper_novelty |
+|-------|-----------:|------------------------------|-------------------------|----------------------------------------|--------------:|
+| euMVC1DO4k | 6.0 | 60.6 → 56.4 | 59 → 55 | high, incremental, medium | 0.59 |
+| Lvkbe0CgmZ | 5.0 | 32.6 → 40.6 | 25 → 36 | medium, medium, medium | 0.50 |
+| KtocialdxS | 2.67 | 57.4 → 56.2 | 55 → 55 | incremental, incremental, medium | 0.38 |
+
+- The new instructions were followed: every prior match carried shared facets and a delta, the reports
+  wrote both cases before the pool position, the errors carried repair tests, and novelty concerns
+  reached the top concerns (KtocialdxS, euMVC1DO4k).
+- The theory paper rose by 11 EIC points, as the repair test intends. The lenient case did not move.
+- The claim-level profile ordered the three papers as the humans did (paper_novelty 0.59 > 0.50 > 0.38),
+  but the pool positions did not use it: the lowest- and highest-rated papers both got an EIC pool of 55,
+  and each report's deciding evidence was a routine evidence gap (no matched-quality or matched-cost
+  comparison), which accepted papers often share.
+- Cost at Terra's listed prices ($1 / $0.05 cached / $5 per 1M tokens): $0.39–0.51 per paper, against
+  $0.35–0.44 for the same papers under 2.10.1. Earlier estimates in this report priced cached input as
+  fresh and overstate Terra's cost about ninefold.
+- Not fixed: the evaluation prompt still forbids `integrity_scan.py`, which the skill requires (all three
+  runs say so in their notes), kept for comparability with the 2.10.1 runs.
+
+**Change after round 1:** the pool position becomes a contribution position, banded by the novelty of the
+primary claim (the one the paper leads with), plus an evidence adjustment in which routine gaps take at
+most −5 in total (`CHANGELOG.md`, 2.13). Had C1, the first listed claim, been marked primary in round 1, the bands would have been
+high, medium and incremental, in the human order; whether the panel follows the bands is what round 2 tests.
 
 ## Error on the ICLR scale (NMAE / NME)
 
