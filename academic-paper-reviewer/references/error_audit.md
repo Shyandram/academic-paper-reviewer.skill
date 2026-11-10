@@ -69,9 +69,9 @@ A missing item is an error (E8) only if a claim depends on it. Otherwise it is a
 
 Each error goes into the reviewer's **Error Log** (in the report's Weaknesses section or an appendix to it):
 
-| ID | Category | Location | Verbatim quote (≤ 25 words) | Why it is an error | How verified | Confidence | Severity | Fix |
-|----|----------|----------|-----------------------------|--------------------|--------------|------------|----------|-----|
-| ERR-1 | E1 | Table 2 vs. §4.2 | "improves mAP by 3.1" | Table 2 gives 47.9 − 45.6 = 2.3 | Recomputed | High | MAJOR | Correct the text or the table |
+| ID | Category | Location | Verbatim quote (≤ 25 words) | Why it is an error | How verified | Confidence | Minimal repair → claim survives? | Severity | Fix |
+|----|----------|----------|-----------------------------|--------------------|--------------|------------|----------------------------------|----------|-----|
+| ERR-1 | E1 | Table 2 vs. §4.2 | "improves mAP by 3.1" | Table 2 gives 47.9 − 45.6 = 2.3 | Recomputed | High | Correct the number → intact (gain still holds), but the headline number changes | MAJOR | Correct the text or the table |
 
 Precision rules (false alarms cost the authors' and the editor's time, and erode trust):
 - **No quote and no location, no error.** If you cannot point to the text, it goes under Questions.
@@ -85,7 +85,13 @@ Precision rules (false alarms cost the authors' and the editor's time, and erode
 
 ## 6. Severity and the decision
 
-- An error is CRITICAL only under the strict DA-CRITICAL criteria (`agents/devils_advocate_reviewer_agent.md`): it invalidates a main claim, or it is leakage, fabrication or an ethical violation.
-- An error that changes a headline number but not the conclusion is MAJOR. So is a wrong derivation step with the result intact, and a missing disclosure that a claim depends on.
+**Repair test.** For every error you would rate MAJOR or CRITICAL, add two fields to its Error Log entry before rating it: the **minimal repair** (what would change: an added assumption, a corrected constant, a restricted statement, a rerun, a new experiment) and whether the affected claim **survives** that repair: *intact*, *weakened* (holds in a narrower form) or *lost*. Severity follows the answer:
+
+- **Lost**, or leakage, fabrication or an ethical violation: CRITICAL candidate, under the strict DA-CRITICAL criteria (`agents/devils_advocate_reviewer_agent.md`).
+- **Weakened**, or a headline number changes but not the conclusion, or a missing disclosure a claim depends on: MAJOR.
+- **Intact** after a local fix (a wrong derivation step with the result intact, a typo in a bound, a missing regularity condition the authors can add): MAJOR only if the repair needs new work (a new proof step, a rerun), otherwise MINOR.
 - Everything else is MINOR.
-- The EIC verifies every MAJOR and CRITICAL error at its location in Phase 2 before it counts.
+
+**Counting and scoring.** Errors in one proof, derivation or experiment chain are **one issue**, rated by its worst consequence. The number of errors never sets a score. A repairable gap in a proof is common in accepted theory papers: unless the claim is lost or weakened, it lowers Technical Rigor by at most one pool band, and it does not move the pool position on its own. Ask the calibration question: *would an accepted paper at this venue plausibly carry this gap to the camera-ready version?*
+
+The EIC verifies every MAJOR and CRITICAL error at its location in Phase 2, including the repair test, before it counts.

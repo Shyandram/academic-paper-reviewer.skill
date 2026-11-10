@@ -159,7 +159,7 @@ class NoveltyProfileTests(unittest.TestCase):
             {"id": "C2", "dimension": "method", "matches": [{"title": "B", "label": self.P, "level": 3}]}]}
         out = rs.novelty_profile(prof)
         self.assertEqual([c["verdict"] for c in out["claims"]], ["known", "medium"])
-        self.assertIn("MAJOR at most", out["paper_reading"])
+        self.assertIn("MAJOR weakness and not a CRITICAL one", out["paper_reading"])
         self.assertEqual(out["attribution"], "A")
 
     def test_all_central_claims_by_same_uncited_prior_is_criterion7_candidate(self):
@@ -187,6 +187,45 @@ class NoveltyProfileTests(unittest.TestCase):
         c = rs.novelty_profile(prof)["claims"][0]
         self.assertIn("at most medium", c["verdict"])
         self.assertEqual(c["worth_discussing"], ["New"])
+
+    def test_shared_facets_set_the_level(self):
+        m = {"title": "A", "label": self.P, "shared": ["setting", "finding"], "delta": "new task"}
+        out = rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "matches": [m]}]})
+        c = out["claims"][0]
+        self.assertEqual((c["top_prior"]["level"], c["verdict"]), (3, "medium"))
+        self.assertEqual(c["top_prior"]["shared"], ["setting", "finding"])
+        self.assertEqual(out["warnings"], [])
+        self.assertNotIn("level", m)                       # the input is not modified
+
+    def test_problem_and_mechanism_shared_is_at_least_incremental(self):
+        m = {"title": "A", "label": self.P, "shared": ["problem", "mechanism"], "delta": "new dataset"}
+        out = rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "matches": [m]}]})
+        self.assertEqual(out["claims"][0]["verdict"], "incremental")      # level 3, raised by the facets
+        self.assertIn("incremental over prior work", out["paper_reading"])
+
+    def test_incremental_floor_wins_over_a_higher_level_without_it(self):
+        a = {"title": "A", "label": self.P, "shared": ["problem", "mechanism"], "delta": "d"}
+        b = {"title": "B", "label": self.P, "shared": ["problem", "setting"], "delta": "d"}
+        c = rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "matches": [b, a]}]})["claims"][0]
+        self.assertEqual((c["verdict"], c["top_prior"]["title"]), ("incremental", "A"))
+
+    def test_shared_facets_are_checked(self):
+        bad = [{"shared": ["novelty"]}, {"shared": ["problem", "problem"]}, {"shared": "problem"},
+               {"shared": ["problem"], "level": 4}]
+        for extra in bad:
+            m = dict({"title": "A", "label": self.P}, **extra)
+            with self.assertRaises(ValueError, msg=extra):
+                rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "matches": [m]}]})
+        ok = {"title": "A", "label": self.P, "shared": ["problem"], "level": 2}
+        rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method", "matches": [ok]}]})
+
+    def test_missing_delta_at_level_3_or_more_warns(self):
+        prof = {"claims": [{"id": "C1", "dimension": "method", "matches": [
+            {"title": "A", "label": self.P, "level": 3},
+            {"title": "B", "label": self.P, "level": 2}]}]}
+        w = rs.novelty_profile(prof)["warnings"]
+        self.assertEqual(len(w), 1)
+        self.assertIn("'A'", w[0])
 
     def test_bad_level_or_dimension_is_rejected(self):
         with self.assertRaises(ValueError):

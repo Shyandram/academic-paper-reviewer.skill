@@ -57,6 +57,30 @@ Check command success, preserve warnings, and apply the reported decision ceilin
 in the synthesis. If execution is unavailable, state that arithmetic was manual.
 The bundled example is a tooling smoke test, never evidence about a real paper.
 
+## Judgment and persistence
+
+These notes target GPT models, which follow instructions literally and tend to stop at
+what they can verify; they apply to any host.
+
+- **Reasoning effort.** Run full reviews at `high` reasoning effort or above (`xhigh`
+  when the host offers it). On the ICLR 2026 pilot, a GPT run at `high` used about a
+  third of the reasoning tokens Sonnet used and spent the time on searches instead.
+- **Precedence when rules seem to pull apart.** Errors need proof (Hard Rule 10);
+  judgments need a stated basis (Hard Rule 11). "Never fabricate references" means
+  name a prior work only from the search results or from knowledge you mark `[verify]`;
+  it does not mean leave a grounded novelty concern unnamed or turn it into a question.
+  "MAJOR, not CRITICAL" limits how far a finding can go, not whether it is written.
+- **Commit to a value.** For every rating (a prior work's shared facets, an error's
+  severity, a dimension score, the pool position), choose the value the evidence favours
+  and give your confidence. Use "unclear" only when you name the missing information.
+  The middle of a scale is a judgment, not a default.
+- **Search until the closest work is found.** For each central claim whose best prior
+  match is at level 3 or below, run the mechanism query before concluding
+  (`references/literature_search.md`, within the 12-query budget).
+- **Complete every phase.** Finish all five reports, the literature addendum, the
+  synthesis and the EIC decision in one run. Keep every finding that changed a score
+  under Weaknesses; audit tables may hold the details.
+
 ## Artifacts
 
 Use a new writable directory such as `review-output/<paper-id>/` in the working

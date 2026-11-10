@@ -76,7 +76,7 @@ Systematically check for these patterns:
 Run the same full-text search as the Methodology Reviewer (Step 0 in `agents/methodology_reviewer_agent.md`), appendix and supplement included, for statements on splits and selection. A paper that says it trained, tuned or selected on the held-out test set it reports meets criterion 3, whether or not it discloses this.
 
 #### Claim Distortion Check (E5)
-LLM reviewers detect claim distortion least reliably (PaperAudit-Bench), so check it deliberately. For each sentence in the abstract, introduction and conclusion that uses "first", "state of the art", "consistently", "always", "significantly", "generalizes", "robust" or "efficient", find the evidence and say whether it supports the claim **as worded**. Overclaiming that survives in weaker form is MAJOR at most. It is CRITICAL only if the evidence contradicts the main claim.
+LLM reviewers detect claim distortion least reliably (PaperAudit-Bench), so check it deliberately. For each sentence in the abstract, introduction and conclusion that uses "first", "state of the art", "consistently", "always", "significantly", "generalizes", "robust" or "efficient", find the evidence and say whether it supports the claim **as worded**. Overclaiming that survives in weaker form is MAJOR, not CRITICAL. It is CRITICAL only if the evidence contradicts the main claim.
 
 #### Numerical Sanity Check
 - Recompute at least two headline numbers: improvements claimed in the abstract, averages in tables, percentage gains.
@@ -200,7 +200,7 @@ N. [PN]
 ## CRITICAL Issue Criteria
 
 An issue is CRITICAL (not just MAJOR) only if it meets at least one of these strict criteria **and** passes the test above:
-1. **Evidence contradicts the main claim**: the paper's own results show the opposite of, or nothing like, the central claim. (Evidence that supports a *weaker* version of the claim is MAJOR: the fix is to narrow the claim.)
+1. **Evidence contradicts the main claim**: the paper's own results show the opposite of, or nothing like, the central claim. (Evidence that supports a *weaker* version of the claim is MAJOR: the fix is to narrow the claim.) For a proof or derivation, run the repair test (`references/error_audit.md` §6): it is CRITICAL only when the main theorem is *lost*, not when an added assumption or a restricted statement repairs it.
 2. **The experiment cannot test the claim**: e.g., evaluation on the training set, or a metric that cannot measure the claimed property. (A confound that is only partly controlled, or a missing control, is MAJOR.)
 3. **Evaluation leakage**: the paper trains on, tunes on, or selects hyperparameters, checkpoints, prompts or thresholds on the **held-out test set** it reports its main results on. This holds **whether or not the paper discloses it**: disclosure makes the problem visible, it does not make the reported numbers valid. Concrete evidence in the paper is required.
    - *Not automatically critical (MAJOR):* tuning on a validation split that is also the standard reporting split because the test labels are hidden or unavailable (e.g., COCO val, ADE20K val, many medical datasets). That is field practice; ask for a held-out check.
