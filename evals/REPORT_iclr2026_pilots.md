@@ -212,6 +212,44 @@ rejected (43) 0.49 [0.45, 0.54]; 0.80 — withdrawn (17) 0.48 [0.39, 0.58]; 0.76
 (3) 0.42. On accepted papers the humans raise fewer issues (11.0 per paper) and fewer of the
 AI's issues match theirs (0.19 vs 0.29 on rejected papers).
 
+**Does the EIC's priority list match the humans' priorities?** Each final report ends with
+the EIC's five top concerns. One Sonnet annotator per paper (`evals/gap_match_prompt.md`) saw
+the human main issues and, mixed at random without sources, the five top concerns and the
+panel's main issues, and matched each human issue to the items that raise the same specific
+point (`issue_overlap.py match-prepare` / `match-score`; scoring of the importance tiers in
+`evals/iclr2026_issue_overlap_full.json`, `top_concerns`). The re-judged panel hits agree with
+the original annotation on 85% of human issues (0.47 vs 0.46).
+
+| | Top concern | Panel main issue |
+|---|---|---|
+| Items (86 papers) | 430 | 1751 |
+| Matches a human main issue | **0.34** [0.30, 0.39] | 0.26 [0.24, 0.28] |
+| … a consensus issue (2+ humans) | **0.16** [0.13, 0.19] | 0.10 [0.08, 0.11] |
+| … an issue behind a reject vote | 0.29 [0.25, 0.33] | 0.22 [0.19, 0.24] |
+| Matches or is related to a human issue | 0.65 [0.61, 0.69] | 0.55 [0.52, 0.57] |
+
+| Human issues the panel raised | Issues | Also among the EIC's top 5 |
+|---|---|---|
+| Raised by 2+ humans | 161 | **0.45** [0.38, 0.53] |
+| Raised by one human | 305 | 0.30 [0.25, 0.36] |
+| Behind a reject vote | 384 | 0.37 [0.32, 0.42] |
+| Accept votes only | 82 | 0.29 [0.21, 0.38] |
+| A reviewer's lead point | 284 | 0.38 [0.33, 0.43] |
+| One human, accept votes only, not a lead point | 29 | 0.17 [0.06, 0.31] |
+
+- **Partly.** A top concern is 1.3× as likely as an average panel issue to match a human issue
+  and 1.6× as likely to match a consensus issue, and the EIC promotes consensus issues the panel
+  found more often than single-reviewer ones (0.45 vs 0.30). The prioritization is aligned with
+  the humans', but weakly.
+- **Most human priorities are not in the top 5.** The five concerns match 34% of the consensus
+  issues (0.74 for the whole panel) and 17% of all human issues; with "related" counted, 56% and
+  38%. Each concern bundles several points into one line, which the strict "same specific
+  point" criterion often rejects.
+- **No order within the five.** Concern #1 matches a human issue 0.37 of the time, #5 0.29, with
+  no trend in between (0.30, 0.35, 0.41): the list is a set, not a ranking.
+- Two-thirds of the top concerns match no human issue exactly. They are not necessarily wrong,
+  but they are what an author reads first.
+
 **What the panel misses (1018 human main issues, 86 papers).** Status: hit 456, related 460,
 missed 101, minor only 1. Labels for the 66 new papers by one Sonnet labeler per five papers
 (`evals/issue_miss_prompt.md`, as in the pilot); the pilot's labels are reused for its 20.
