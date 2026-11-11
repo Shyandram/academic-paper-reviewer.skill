@@ -1146,12 +1146,20 @@ reviewers); the reviews were read with score lines hidden.
 
 ### Decision for the next version
 
-Measured by agreement with human reviewers, on scores and on issues, the five-reviewer panel
-with an EIC does not beat one plain review by the same model, at about ten times the cost. The
-next version is therefore aimed at what the control does not do: checks with a verifiable
-answer (table arithmetic, text against tables, tables against each other, selection on the
-test set), evaluated with seeded defects rather than with overlap, and a smaller panel. Score
-calibration and repeated runs are not pursued: neither changes the review.
+Taken together the skill helps where the plain review is weakest:
+
+- **Scores that separate papers.** 13% of paper pairs tie against 66%; pairs ordered correctly
+  68% against 62%; some order remains inside the 69 papers the control rates alike.
+- **Errors that need cross-checking.** 15 of 15 planted defects against 12 of 15.
+- **Scores that react to them.** With the defects planted the skill's EIC pool position fell on
+  all three papers (by 7–10 points); the control's rating stayed at 4.
+
+On agreement with human reviewers (ranking, AUC, error, hit rate, precision) the two are equal,
+and that measure counts only what humans wrote; the skill costs about ten times more. The gains
+rest on one run per paper and, for the defects, on three papers. The next version builds on
+them: more checks with a verifiable answer (table arithmetic, text against tables, tables
+against each other, selection on the test set), evaluated with seeded defects, at lower cost.
+Score calibration and repeated runs are not pursued: neither changes the review.
 
 ## Reading
 
