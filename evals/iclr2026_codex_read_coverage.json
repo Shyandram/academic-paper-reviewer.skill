@@ -1,0 +1,261 @@
+{
+ "note": "Share of the paper's text lines (>= 25 chars) in a model-visible tool output, replaying Codex's 10,000-token middle truncation (approx. 40,000 chars). evals/codex_read_coverage.py.",
+ "runs": {
+  "results_sol": {
+   "n": 20,
+   "median_seen_by_model": 0.998,
+   "min_seen_by_model": 0.914,
+   "papers_below_90pct": 0,
+   "per_paper": {
+    "0xObmDmsKY": {
+     "lines": 691,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 1
+    },
+    "8xcmfwomnI": {
+     "lines": 1581,
+     "seen_in_log": 0.994,
+     "seen_by_model": 0.994,
+     "truncated_paper_reads": 2
+    },
+    "9R2iUHhVfr": {
+     "lines": 682,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 2
+    },
+    "9jcB40wjk3": {
+     "lines": 968,
+     "seen_in_log": 0.995,
+     "seen_by_model": 0.995,
+     "truncated_paper_reads": 3
+    },
+    "AIKURJjxXT": {
+     "lines": 534,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 2
+    },
+    "BxeJLOrKDF": {
+     "lines": 636,
+     "seen_in_log": 0.998,
+     "seen_by_model": 0.998,
+     "truncated_paper_reads": 1
+    },
+    "E5mL07Fbq8": {
+     "lines": 463,
+     "seen_in_log": 0.996,
+     "seen_by_model": 0.996,
+     "truncated_paper_reads": 1
+    },
+    "Jw7khYzYzl": {
+     "lines": 3365,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.997,
+     "truncated_paper_reads": 5
+    },
+    "KtocialdxS": {
+     "lines": 661,
+     "seen_in_log": 0.995,
+     "seen_by_model": 0.995,
+     "truncated_paper_reads": 0
+    },
+    "Lvkbe0CgmZ": {
+     "lines": 681,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 1
+    },
+    "PJdMrK79Mo": {
+     "lines": 1045,
+     "seen_in_log": 0.994,
+     "seen_by_model": 0.994,
+     "truncated_paper_reads": 1
+    },
+    "Z6z4AnXGhw": {
+     "lines": 713,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 2
+    },
+    "be4ey66fhk": {
+     "lines": 985,
+     "seen_in_log": 0.994,
+     "seen_by_model": 0.994,
+     "truncated_paper_reads": 1
+    },
+    "euMVC1DO4k": {
+     "lines": 774,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 1
+    },
+    "g4HpTtgsn2": {
+     "lines": 531,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 1
+    },
+    "gUw8n109ki": {
+     "lines": 947,
+     "seen_in_log": 0.998,
+     "seen_by_model": 0.998,
+     "truncated_paper_reads": 1
+    },
+    "kwro5432AI": {
+     "lines": 648,
+     "seen_in_log": 0.991,
+     "seen_by_model": 0.914,
+     "truncated_paper_reads": 2
+    },
+    "qfW4IrUuig": {
+     "lines": 763,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.959,
+     "truncated_paper_reads": 2
+    },
+    "rubeJmT1XM": {
+     "lines": 929,
+     "seen_in_log": 0.998,
+     "seen_by_model": 0.998,
+     "truncated_paper_reads": 1
+    },
+    "tlYSbw5GXY": {
+     "lines": 711,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 1
+    }
+   }
+  },
+  "results_terra": {
+   "n": 20,
+   "median_seen_by_model": 0.998,
+   "min_seen_by_model": 0.648,
+   "papers_below_90pct": 2,
+   "per_paper": {
+    "0xObmDmsKY": {
+     "lines": 691,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 0
+    },
+    "8xcmfwomnI": {
+     "lines": 1581,
+     "seen_in_log": 0.994,
+     "seen_by_model": 0.994,
+     "truncated_paper_reads": 1
+    },
+    "9R2iUHhVfr": {
+     "lines": 682,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 2
+    },
+    "9jcB40wjk3": {
+     "lines": 968,
+     "seen_in_log": 0.995,
+     "seen_by_model": 0.995,
+     "truncated_paper_reads": 4
+    },
+    "AIKURJjxXT": {
+     "lines": 534,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 1
+    },
+    "BxeJLOrKDF": {
+     "lines": 636,
+     "seen_in_log": 0.998,
+     "seen_by_model": 0.998,
+     "truncated_paper_reads": 0
+    },
+    "E5mL07Fbq8": {
+     "lines": 463,
+     "seen_in_log": 0.996,
+     "seen_by_model": 0.996,
+     "truncated_paper_reads": 2
+    },
+    "Jw7khYzYzl": {
+     "lines": 3365,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.648,
+     "truncated_paper_reads": 4
+    },
+    "KtocialdxS": {
+     "lines": 661,
+     "seen_in_log": 0.995,
+     "seen_by_model": 0.995,
+     "truncated_paper_reads": 1
+    },
+    "Lvkbe0CgmZ": {
+     "lines": 681,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 1
+    },
+    "PJdMrK79Mo": {
+     "lines": 1045,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 2
+    },
+    "Z6z4AnXGhw": {
+     "lines": 713,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 1
+    },
+    "be4ey66fhk": {
+     "lines": 985,
+     "seen_in_log": 0.994,
+     "seen_by_model": 0.994,
+     "truncated_paper_reads": 1
+    },
+    "euMVC1DO4k": {
+     "lines": 774,
+     "seen_in_log": 1.0,
+     "seen_by_model": 0.842,
+     "truncated_paper_reads": 1
+    },
+    "g4HpTtgsn2": {
+     "lines": 531,
+     "seen_in_log": 1.0,
+     "seen_by_model": 1.0,
+     "truncated_paper_reads": 1
+    },
+    "gUw8n109ki": {
+     "lines": 947,
+     "seen_in_log": 0.998,
+     "seen_by_model": 0.998,
+     "truncated_paper_reads": 1
+    },
+    "kwro5432AI": {
+     "lines": 648,
+     "seen_in_log": 0.991,
+     "seen_by_model": 0.991,
+     "truncated_paper_reads": 1
+    },
+    "qfW4IrUuig": {
+     "lines": 763,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 1
+    },
+    "rubeJmT1XM": {
+     "lines": 929,
+     "seen_in_log": 0.998,
+     "seen_by_model": 0.998,
+     "truncated_paper_reads": 1
+    },
+    "tlYSbw5GXY": {
+     "lines": 711,
+     "seen_in_log": 0.999,
+     "seen_by_model": 0.999,
+     "truncated_paper_reads": 3
+    }
+   }
+  }
+ }
+}
