@@ -219,6 +219,25 @@ sections are about half as long, because it puts more findings in separate audit
 
 ### Why Sol does not rank the papers
 
+**Reading this section (added after the 2.13 validation).** "Does not rank the papers" describes GPT-6.1 Sol
+run once per paper through this skill and the Codex CLI, on 20 papers. It is not evidence that Sol is a weaker
+reviewer, and several facts point away from that reading:
+- **Sol and Terra agree with each other** (reviewer-pool Spearman +0.81) more than either agrees with Sonnet
+  (+0.61, +0.60). Terra is the cheaper model; a capability gap would not make the two rank alike. The shared
+  pattern belongs to the GPT models under this skill and harness.
+- **Truncation is ruled out.** Codex passes GPT-6.x at most about 10,000 tokens of each command output, cutting
+  the middle. Replaying that cut, Sol saw a median 99.8% of each paper's text lines (minimum 91%) and the whole
+  of the skill files it was told to read; Terra saw at least 99% of 18 of the 20 papers
+  (`evals/codex_read_coverage.py`, `evals/iclr2026_codex_read_coverage.json`).
+- **The signal is there and the aggregation loses it.** The mean of Sol's Novelty and Significance scores
+  follows the human mean at +0.27 (95% CI −0.19 to +0.62; Terra +0.29, Sonnet +0.57), but Sol's pool position
+  follows its Technical Rigor (+0.94) and ends at −0.07. Read literally, the skill's pool-position rule lists
+  mostly evidence gaps as rejection signals, and that rule was written and calibrated on Sonnet runs.
+- **Not checked:** whether `high` reasoning effort took effect in the Codex session (Sol's default is `low`;
+  9.3k reasoning tokens over about 80 commands is little). The workflow now records the session's effort in
+  `run.json` (`effort_in_session`). The target is also noisy: one human against another is +0.14 on the 86
+  papers, and each model ran once per paper.
+
 Sol was expected to land near Sonnet: it reads the whole paper, searches more, and writes
 reviews of the same length. It does not. Numbers in `evals/iclr2026_sol_diagnosis.json`
 (`evals/sol_diagnosis.py`, from the per-paper results; numbers and paper IDs only).

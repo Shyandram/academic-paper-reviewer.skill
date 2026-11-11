@@ -323,6 +323,16 @@ jobs:
                           pass
           if total and total["input_tokens"] >= use["input_tokens"]:
               use = total
+          # The reasoning effort the session actually ran at (turn_context), to check the -c setting took.
+          efforts = set()
+          for f in glob.glob(os.path.join(sess, "**", "*.jsonl"), recursive=True):
+              for line in open(f, errors="replace"):
+                  if '"turn_context"' in line:
+                      try:
+                          pl = json.loads(line).get("payload") or {}
+                          efforts.add(str(pl.get("effort") or pl.get("reasoning_effort")))
+                      except ValueError:
+                          pass
           p = {k: float(os.environ[k]) for k in ("PRICE_IN", "PRICE_CACHED", "PRICE_OUT")}
           fresh = use["input_tokens"] - use["cached_input_tokens"]
           cost = (fresh * p["PRICE_IN"] + use["cached_input_tokens"] * p["PRICE_CACHED"]
@@ -333,7 +343,8 @@ jobs:
                  "num_turns": turns, "failed_turns": failed,
                  "duration_ms": (int(time.time()) - start) * 1000,
                  "total_cost_usd": round(cost, 4), "cost_is_estimate": True,
-                 "prices_per_mtok": p, "budget_usd": float(os.environ["BUDGET"]),
+                 "prices_per_mtok": p, "effort_in_session": sorted(efforts),
+                 "budget_usd": float(os.environ["BUDGET"]),
                  "budget_stop": (open(os.path.join(res, "budget_stop.txt")).read().split() or [None])[0]
                  if os.path.exists(os.path.join(res, "budget_stop.txt")) else None,
                  "is_error": err is not None or not done, "error": err}
