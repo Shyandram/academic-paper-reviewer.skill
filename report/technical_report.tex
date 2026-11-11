@@ -373,6 +373,13 @@ the panel rating, with intervals that include zero.
 against $3.89$: the order is right, but the gap is $0.35$ points instead of $1.39$.
 \item \textbf{Withdrawn papers help.} Without them Spearman drops to $0.40$; part of the signal is
 spotting clearly weak submissions.
+\item \textbf{No reweighting or rescaling of the panel's numbers does better.} Chosen on the 45
+train papers and checked on the 41 test papers, the best alternative is the mean Novelty score
+($+0.53$ on all papers, $+0.51$ on test), but its gain over the panel rating, $+0.06$ [$-0.10$,
+$+0.22$] on test, is within noise. Clarity, Reproducibility and Ethics barely rank the papers
+($+0.15$ to $+0.25$). A linear stretch of the panel rating fitted on train has slope 0.79, not
+above 1, and lowers the test NMAE only from 0.086 to 0.081: at this correlation the best
+predictor is more compressed, not less. What is left to improve is in the review content.
 \end{itemize}
 The reviewer's workspace contained no human scores for the 66 new papers; the
 workflow now also removes all evaluation data from it before each review.
@@ -621,16 +628,20 @@ One human's issues, by 1 / 3 / 5 AI reviewers & 0.21 / 0.42 / 0.52 & & 0.20 / 0.
 \begin{table}[h]
 \centering
 \small
-\caption{Per-role contribution, 86 papers (means per paper).}\label{tab:roles}
-\begin{tabular}{lcccc}
+\caption{Per-role contribution, 86 papers (means per paper). The last two columns are the
+panel of the other four: its hit rate (full panel 0.46) and the Spearman of its mean Overall with
+the mean human rating (full panel $+0.47$; every difference has a 95\% CI that includes zero).}\label{tab:roles}
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{lcccccc}
 \toprule
-Role & Issues & Raised by no other role & Human issues hit & Hit by no other role\\
+Role & Issues & Raised by & Human issues & Hit by no & \multicolumn{2}{c}{Without it}\\
+ & & no other role & hit & other role & hit rate & Spearman\\
 \midrule
-R1 Methodology & 9.9 & 0.25 & 0.22 & 0.02\\
-R2 Domain & 5.4 & 0.51 & 0.18 & 0.08\\
-R3 Perspective & 5.2 & 0.58 & 0.15 & 0.06\\
-R4 Generalist & 4.8 & 0.21 & 0.14 & 0.02\\
-Devil's Advocate & 8.9 & 0.07 & 0.21 & 0.01\\
+R1 Methodology & 9.9 & 0.25 & 0.22 & 0.02 & 0.44 & $+0.48$\\
+R2 Domain & 5.4 & 0.51 & 0.18 & \textbf{0.08} & \textbf{0.38} & $+0.45$\\
+R3 Perspective & 5.2 & 0.58 & 0.15 & \textbf{0.06} & \textbf{0.40} & $+0.46$\\
+R4 Generalist & 4.8 & 0.21 & 0.14 & 0.02 & 0.44 & $+0.46$\\
+Devil's Advocate & 8.9 & 0.07 & 0.21 & 0.01 & 0.45 & $+0.48$\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -639,6 +650,24 @@ Devil's Advocate & 8.9 & 0.07 & 0.21 & 0.01\\
 \item \textbf{Redundancy comes from two roles.} The five-reviewer panel repeats itself more than
 a human panel, but at equal size (R1--R4) its overlap matches the humans' (Jaccard 0.09 vs 0.11).
 The Devil's Advocate raises 93\% of its issues together with another role, and R4 79\%.
+Two thirds of the Devil's Advocate's issues are also R1's (and 61\% of R1's are also the
+Devil's Advocate's), and half of R4's are also R1's or the Devil's Advocate's; every pair among
+R1, R2 and R3 shares at most a fifth. The prompts explain it: the Devil's Advocate runs ``the
+same full-text search as the Methodology Reviewer'', recomputes the headline numbers R1's error
+audit recomputes, and checks baselines, alternative explanations and overclaims that R1's
+fairness, validity and claim-to-evidence steps already cover.
+\item \textbf{R2 and R3 carry what is unique.} They rarely repeat the others, and removing either
+costs the most hits (0.46 to 0.38 and 0.40); removing R1, R4 or the Devil's Advocate costs at most
+0.02. No single role changes the ranking distinguishably (0.45--0.48).
+\item \textbf{The Devil's Advocate's value is in the decision, not the issue list.} Only 0.6\%
+of the human issues are hit by it alone, and its own issues match a human issue 4\% of the time.
+Its CRITICAL findings cap the decision: it raised one on 15 of the 86 papers, the EIC upheld 12,
+and on 2 papers the cap lowered the decision below the starting point, both toward the humans
+(a rejected and a withdrawn paper). Whether its repeated checks catch defects that R1 misses
+cannot be measured against human reviews, since a defect no human raised does not count; a
+seeded-defect check with planted, known defects is prepared for that. No role is removed or
+trimmed on this evidence; a narrower Devil's Advocate would first have to show, on the same
+seeds, that it loses nothing.
 \item \textbf{The panel finds what humans agree on.} It raises 46\% of the humans' main issues and
 74\% of those two or more humans share. Three AI reviewers anticipate a given human's issues as
 well as the other humans do (0.42 vs 0.41). Coverage grows with panel size (0.18, 0.30, 0.37,

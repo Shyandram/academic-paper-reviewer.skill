@@ -655,6 +655,7 @@ table.mini b{color:var(--olive-ink)}
     <ul class="take">
       <li><span class="tk no">!</span><span><b>Model matters</b>: Haiku and two GPT-6.1 models showed little or no agreement with the humans on 20 papers. <a href="#models">See the model comparison</a>.</span></li>
       <li><span class="tk no">!</span><span><b>Picks accepted papers only as well as one human</b>: AUC 0.64 for both on the same papers, where 0.5 is a coin flip.</span></li>
+      <li><span class="tk no">!</span><span><b>Reweighting the scores does not help</b>: no other combination of the panel's own numbers ranks better beyond noise (best: the Novelty score, +0.06 [−0.10, +0.22] on held-out papers), and stretching the scores to undo the bunching does not lower the error. What is left to improve is in the review itself.</span></li>
     </ul>
     <div class="callout small" role="note">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
@@ -731,12 +732,15 @@ table.mini b{color:var(--olive-ink)}
     </ul>
     <details class="more"><summary>More findings</summary>
     <ul class="take">
+      <li><span class="tk ok">✓</span><span><b>Two reviewers carry what is unique</b>: the Domain and Perspective reviewers rarely repeat the others, and the panel without either finds 0.38 or 0.40 of the human issues instead of 0.46. Without any one of the other three it still finds 0.44&ndash;0.45.</span></li>
+      <li><span class="tk no">!</span><span><b>The Devil's Advocate mostly repeats the Methodology reviewer</b>: two thirds of its issues are also R1's, and only 0.6% of the human issues are found by it alone. Its weight is in the decision: its critical findings capped 2 of 86 decisions, both toward the humans. Whether its second pass catches defects R1 misses needs planted defects, not human reviews, so no role is cut yet.</span></li>
       <li><span class="tk no">!</span><span><b>Its top five are only partly the humans' top</b>: a top concern matches a human issue more often than an average panel issue (34% vs 26%), but the five hold only a third of the consensus issues the whole panel finds.</span></li>
     </ul>
     </details>
     <p class="" style="font-size:.82rem;color:var(--muted);margin:12px 0 0">Caveats: LLM annotators; importance is inferred from the human reviews (how many raised it, their vote, its place in the review); humans saw the figures, the AI read the text; agreeing with humans is not the same as being right.</p>
     <div class="btn-row">
       <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#full-evaluation-86-papers-skill-2101">Issue study</a>
+      <a class="btn sm" href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#what-each-reviewer-adds-role-importance">Role study</a>
       <a class="btn sm" href="report/technical_report.pdf">Technical report (PDF)</a>
     </div>
       </div>
@@ -779,6 +783,20 @@ table.mini b{color:var(--olive-ink)}
           <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.25</span><span>0.5</span></div><div></div></div>
         </div>
         <span class="hint">Of the consensus issues the panel found, 45% reach the top five (single-reviewer issues: 30%). The order within the five carries no signal.</span>
+      </div>
+      <div class="chart-card glass" data-seg-label="By reviewer">
+        <h3>What does each reviewer add?</h3>
+        <p>Share of the human main issues that only this reviewer raised, 86 papers. Higher means the panel would lose more without it.</p>
+        <!-- values from evals/offline_signals.py roles (REPORT, "What each reviewer adds"), n = 86; scale 0 to 0.1 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">R2 Domain<small>without it: 0.38 of human issues</small></div><div class="track"><i class="fill ai" style="--w:76%"></i></div><div class="val">0.076</div></div>
+          <div class="row hl"><div class="lab">R3 Perspective<small>without it: 0.40</small></div><div class="track"><i class="fill ai" style="--w:56%"></i></div><div class="val">0.056</div></div>
+          <div class="row"><div class="lab">R1 Methodology<small>without it: 0.44</small></div><div class="track"><i class="fill weak" style="--w:24%"></i></div><div class="val">0.024</div></div>
+          <div class="row"><div class="lab">R4 Generalist<small>without it: 0.44</small></div><div class="track"><i class="fill weak" style="--w:22%"></i></div><div class="val">0.022</div></div>
+          <div class="row"><div class="lab">Devil's Advocate<small>without it: 0.45</small></div><div class="track"><i class="fill weak" style="--w:6%"></i></div><div class="val">0.006</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.05</span><span>0.1</span></div><div></div></div>
+        </div>
+        <span class="hint">Full panel: 0.46. Two thirds of the Devil's Advocate's issues are also the Methodology reviewer's. Without any one reviewer, ranking stays at 0.45&ndash;0.48.</span>
       </div>
     </div>
       </div>
