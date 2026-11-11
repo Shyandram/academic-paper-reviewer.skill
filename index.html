@@ -519,11 +519,12 @@ table.mini b{color:var(--olive-ink)}
     <li><a href="#issues"><span class="lab"><small>04</small>Concerns vs humans</span></a></li>
     <li><a href="#misses"><span class="lab"><small>05</small>What it misses</span></a></li>
     <li><a href="#models"><span class="lab"><small>06</small>Which model</span></a></li>
-    <li><a href="#compare"><span class="lab"><small>07</small>How it compares</span></a></li>
-    <li><a href="#different"><span class="lab"><small>08</small>What's different</span></a></li>
-    <li><a href="#modes"><span class="lab"><small>09</small>Modes &amp; venues</span></a></li>
-    <li><a href="#install"><span class="lab"><small>10</small>Install</span></a></li>
-    <li><a href="#responsible"><span class="lab"><small>11</small>Responsible use</span></a></li>
+    <li><a href="#control"><span class="lab"><small>07</small>Without the skill</span></a></li>
+    <li><a href="#compare"><span class="lab"><small>08</small>How it compares</span></a></li>
+    <li><a href="#different"><span class="lab"><small>09</small>What's different</span></a></li>
+    <li><a href="#modes"><span class="lab"><small>10</small>Modes &amp; venues</span></a></li>
+    <li><a href="#install"><span class="lab"><small>11</small>Install</span></a></li>
+    <li><a href="#responsible"><span class="lab"><small>12</small>Responsible use</span></a></li>
   </ol>
 </nav>
 
@@ -960,10 +961,77 @@ table.mini b{color:var(--olive-ink)}
   </div>
 </section>
 
-<!-- 08 · How it compares -->
-<section class="slide" id="compare" aria-labelledby="t-cmp" data-label="How it compares">
+<!-- 07 · Without the skill -->
+<section class="slide" id="control" aria-labelledby="t-control" data-label="Without the skill">
   <div class="wrap">
-    <p class="kicker"><span>07</span>Related work</p>
+    <div class="eval-grid">
+      <div>
+    <div class="eval-head"><p class="kicker"><span>07</span>Control</p><span class="pill">same 86 papers · no skill</span></div>
+    <h2 id="t-control">Does the skill beat the <em>plain model?</em></h2>
+    <p class="sub">Not on agreement with human reviewers. We gave the same model (Sonnet, high effort) the same 86 papers with one sentence, “Review this paper. Target venue: ICLR.”, and no skill. One run per paper.</p>
+    <ul class="take">
+      <li><span class="tk no">!</span><span><b>Scores agree with humans equally well</b>: ranking agreement +0.47 with the skill, +0.45 without; acceptance AUC 0.64 and 0.63. Every difference has a 95% range that includes zero.</span></li>
+      <li><span class="tk no">!</span><span><b>The reviews raise the same share of human concerns</b>: 48% with the skill, 46% without, and the same share of their own points match a human one (27% and 28%).</span></li>
+      <li><span class="tk no">!</span><span><b>The skill costs about ten times more</b>: about $2 and 8–9 minutes per paper against $0.21 and one minute.</span></li>
+      <li><span class="tk ok">✓</span><span><b>The skill found more planted number errors</b>: 15 of 15 planted defects against 12 of 15 on three papers. The plain model missed the three that need cross-checking tables.</span></li>
+    </ul>
+    <p class="foot">The next version is aimed at that last point: checks with a verifiable answer, tested with planted defects, and a smaller panel.</p>
+      </div>
+      <div>
+    <div class="charts" data-seg>
+      <div class="chart-card glass" data-seg-label="Ranking">
+        <h3>Ranking agreement with humans, with and without the skill</h3>
+        <p>Spearman correlation with the mean human score, same 86 papers. 0 = no relation. The line shows the 95% range.</p>
+        <!-- values from evals/iclr2026_bare86.json; scale 0 to 1 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">With the skill<small>mean of five reviewers, about $2 per paper</small></div><div class="track"><i class="fill ai" style="--w:47%"></i><i class="ci" style="left:28%;width:35%"></i><span class="sr-only">95% CI +0.28 to +0.63</span></div><div class="val">+0.47</div></div>
+          <div class="row"><div class="lab">Without the skill<small>one rating, $0.21 per paper</small></div><div class="track"><i class="fill weak" style="--w:45%"></i><i class="ci" style="left:28%;width:32%"></i><span class="sr-only">95% CI +0.28 to +0.60</span></div><div class="val">+0.45</div></div>
+          <div class="row"><div class="lab">Two human reviewers<small>of the same papers</small></div><div class="track"><i class="fill human" style="--w:14%"></i></div><div class="val">+0.14</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
+        </div>
+        <p class="foot">The plain model gives only three ratings: 2, 4 and 6, to 8, 69 and 9 papers. Its agreement comes from those 17 papers: none of the eight rated 2 was accepted, five of the nine rated 6 were. The skill's mean of five reviewers is continuous and still orders the 69 papers in the middle a little (+0.27).</p>
+      </div>
+      <div class="chart-card glass" data-seg-label="Concerns found">
+        <h3>How many human concerns does each raise?</h3>
+        <p>Share of the 1,018 main concerns of the human reviewers that the review also raises, same 86 papers, judged blind by one annotator per paper.</p>
+        <!-- values from evals/iclr2026_bare86.json (issue_match); scale 0 to 1 -->
+        <div class="chart">
+          <div class="row hl"><div class="lab">With the skill<small>five reports, about 11,000 words</small></div><div class="track"><i class="fill ai" style="--w:48%"></i><i class="ci" style="left:45%;width:7%"></i><span class="sr-only">95% CI 0.45 to 0.52</span></div><div class="val">0.48</div></div>
+          <div class="row"><div class="lab">Without the skill<small>one review, about 1,500 words</small></div><div class="track"><i class="fill weak" style="--w:46%"></i><i class="ci" style="left:42%;width:8%"></i><span class="sr-only">95% CI 0.42 to 0.50</span></div><div class="val">0.46</div></div>
+          <div class="axis" aria-hidden="true"><div></div><div><span>0</span><span>0.5</span><span>1</span></div><div></div></div>
+        </div>
+        <p class="foot">This counts only concerns the humans wrote. It does not judge the skill's other output: the error log, severity grades, revision roadmap and literature check.</p>
+      </div>
+      <div class="chart-card glass" data-seg-label="Side by side">
+        <h3>With and without the skill</h3>
+        <p>Same model, effort and 86 papers. Planted defects: three papers.</p>
+        <div class="scroll"><table class="mini">
+          <thead><tr><th></th><th>With the skill</th><th>Without</th></tr></thead>
+          <tbody>
+          <tr><th>Ranking agreement with humans</th><td>+0.47</td><td>+0.45</td></tr>
+          <tr><th>Acceptance AUC</th><td>0.64</td><td>0.63</td></tr>
+          <tr><th>Score error (NMAE, lower is better)</th><td>0.084</td><td>0.085</td></tr>
+          <tr><th>Paper pairs given the same score</th><td><b>13%</b></td><td>66%</td></tr>
+          <tr><th>Human concerns raised</th><td>48%</td><td>46%</td></tr>
+          <tr><th>Its points that a human also raised</th><td>27%</td><td>28%</td></tr>
+          <tr><th>Planted defects found (15)</th><td><b>15</b></td><td>12</td></tr>
+          <tr><th>… of the 7 number errors</th><td><b>7</b></td><td>4</td></tr>
+          <tr><th>Planted instruction to reviewers</th><td>flagged, ignored</td><td>flagged, ignored</td></tr>
+          <tr><th>Cost per paper</th><td>≈ $2</td><td><b>$0.21</b></td></tr>
+          <tr><th>Minutes per paper</th><td>8–9</td><td><b>1</b></td></tr>
+          </tbody></table></div>
+        <p class="foot">Bold marks a clear difference. Three papers of planted defects show a direction, not a rate. <a href="https://github.com/Shyandram/academic-paper-reviewer.skill/blob/claude/next-independent-check/evals/REPORT_iclr2026_pilots.md#control-the-same-model-without-the-skill-86-papers">Full comparison</a>.</p>
+      </div>
+    </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 · How it compares -->
+<section class="slide alt" id="compare" aria-labelledby="t-cmp" data-label="How it compares">
+  <div class="wrap">
+    <p class="kicker"><span>08</span>Related work</p>
     <h2 id="t-cmp" class="">How it <em>compares</em></h2>
     <p class="sub">Most AI reviewers fine-tune an open model on past conference reviews. This skill instead runs a strong general model through a structured panel, so it needs no training data.</p>
     <div class="cmp-grid">
@@ -976,17 +1044,17 @@ table.mini b{color:var(--olive-ink)}
         <li><b><a href="https://arxiv.org/abs/2411.00816">CycleReviewer</a> · 8B–123B</b><span>Simulates several reviewers and a senior reviewer, then averages. Spearman 0.27–0.28 on ICLR 2025.</span></li>
         <li><b><a href="https://arxiv.org/abs/2412.11948">OpenReviewer</a> · 8B</b><span>Fine-tuned on about 79k expert reviews; less lenient than general models.</span></li>
         <li><b><a href="https://arxiv.org/abs/2407.12857">SEA-E</a> · 7B</b><span>Fine-tuned on standardized reviews, with a check that the review matches the paper.</span></li>
-        <li class="me"><b>This skill</b><span>Spearman 0.47 on 86 ICLR 2026 papers. Different papers and sizes, so not directly comparable; a same-paper comparison is planned.</span></li>
+        <li class="me"><b>This skill</b><span>Spearman 0.47 on 86 ICLR 2026 papers. Different papers and sizes, so not directly comparable. On the same 86 papers the plain model without the skill scores 0.45.</span></li>
       </ul>
     </div>
   </div>
 </section>
 
 
-<!-- 08 · What's different -->
-<section class="slide alt" id="different" aria-labelledby="t-diff" data-label="What's different">
+<!-- 09 · What's different -->
+<section class="slide" id="different" aria-labelledby="t-diff" data-label="What's different">
   <div class="wrap">
-    <p class="kicker"><span>08</span>Design principles</p>
+    <p class="kicker"><span>09</span>Design principles</p>
     <h2 id="t-diff">What makes it <em>different</em></h2>
     <p class="sub">Nine safeguards against the usual failures of human and AI reviewing.</p>
     <div class="bento">
@@ -1003,10 +1071,10 @@ table.mini b{color:var(--olive-ink)}
   </div>
 </section>
 
-<!-- 09 · Modes & venues -->
-<section class="slide" id="modes" aria-labelledby="t-modes" data-label="Modes & venues">
+<!-- 10 · Modes & venues -->
+<section class="slide alt" id="modes" aria-labelledby="t-modes" data-label="Modes & venues">
   <div class="wrap">
-    <p class="kicker"><span>09</span>Modes &amp; venues</p>
+    <p class="kicker"><span>10</span>Modes &amp; venues</p>
     <h2 id="t-modes">Six <em>modes</em></h2>
     <p class="sub">Say it naturally; the skill picks the mode.</p>
     <div class="svc">
@@ -1033,10 +1101,10 @@ table.mini b{color:var(--olive-ink)}
   </div>
 </section>
 
-<!-- 10 · Install -->
-<section class="slide alt" id="install" aria-labelledby="t-install" data-label="Install">
+<!-- 11 · Install -->
+<section class="slide" id="install" aria-labelledby="t-install" data-label="Install">
   <div class="wrap">
-    <p class="kicker"><span>10</span>Get started</p>
+    <p class="kicker"><span>11</span>Get started</p>
     <div class="install-grid">
       <div class="lead">
         <h2 id="t-install">Start a review in <em>minutes.</em></h2>
@@ -1091,10 +1159,10 @@ python3 tools/install_codex_skill.py --skills-dir ~/.agents/skills   # personal<
   </div>
 </section>
 
-<!-- 11 · Responsible use -->
-<section class="slide" id="responsible" aria-labelledby="t-resp" data-label="Responsible use">
+<!-- 12 · Responsible use -->
+<section class="slide alt" id="responsible" aria-labelledby="t-resp" data-label="Responsible use">
   <div class="wrap">
-    <p class="kicker"><span>11</span>Before you use it</p>
+    <p class="kicker"><span>12</span>Before you use it</p>
     <h2 id="t-resp">Responsible <em>use</em></h2>
     <div class="resp-grid">
       <div class="resp"><span class="ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></span><h3>Made for authors</h3><p>Stress-test your own drafts, learn to review, or give feedback with the authors' consent.</p></div>

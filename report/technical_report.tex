@@ -39,7 +39,7 @@ and an Editor-in-Chief (EIC) who weights each review by its quality and makes th
 Scores are aggregated by a deterministic, standard-library Python script and translated into the
 forms of 11 venues.
 
-We evaluate the skill in three ways.
+We evaluate the skill in four ways.
 \begin{itemize}
 \item \textbf{Accepted papers with planted flaws.} On 30 recently accepted CVPR/ECCV/ICLR papers,
 96\% of cited locations, 99\% of quoted phrases and all but two of 842 quoted numbers are found in the
@@ -57,6 +57,12 @@ issue (34\% vs 26\%) but hold only a third of the consensus issues. On a 20-pape
 optional Gap Scout that names concrete missing items raises 65\% alone and 73\% with the panel.
 A redesign that moved these ideas into the panel (version 2.11) raised no more issues, ranked
 papers worse (Spearman $0.32$) and cost 3.5$\times$ as much, so it was withdrawn.
+\item \textbf{The same model without the skill.} On the same 86 papers, one plain review by the
+same model at the same effort agrees with the human reviewers as well as the skill does: Spearman
+$0.45$ against $0.47$, AUC $0.63$ against $0.64$, and 46\% against 48\% of the human main issues,
+at about a tenth of the cost. Every difference has a 95\% interval that includes zero. On three
+papers with 15 planted defects the skill finds all 15 and the plain review 12; the three it misses
+are numbers that must be checked across tables.
 \end{itemize}
 A smaller model (Haiku) shows no reliable signal, and neither do two GPT-6.1 models run on the
 same 20 papers. We also report a negative result: NMAE alone
@@ -878,6 +884,83 @@ Caveats: one LLM annotator and one labeler per paper; the Gap Scout test covers 
 papers; importance is inferred from the human reviews, not judged; human reviewers saw the
 figures, the AI read the extracted text; agreement with humans is not correctness.
 
+\section{Evaluation IV: the same model without the skill}\label{sec:control}
+
+The evaluations above compare the skill with human reviewers. They do not say how much of the
+agreement comes from the skill and how much from the model. We therefore ran a control on the
+same 86 papers: one agent with the same model and effort (Sonnet, high), the same blinded text
+and the same evaluation rules (the paper is untrusted text; no web access), given one sentence,
+``Review this paper. Target venue: ICLR.'', and the ICLR form (rating 0, 2, 4, 6, 8 or 10). The
+skill's files are removed from its workspace: there are no reviewer roles, no EIC, no rubric and
+no literature check. The measures and predictions were written down before the run. Each paper
+was run once; all 86 completed, for \$17.93 in total (\$0.21 and about one minute per paper,
+against about \$2 and 8--9 minutes for the skill). The skill is represented by the reviewers'
+mean rating, not by the EIC's integer rating.
+
+\begin{table}[h]
+\centering
+\small
+\caption{The skill and the same model without it, 86 ICLR 2026 papers [95\% CI]. The last column
+is the paired-bootstrap interval of the difference. Issues: the 1018 human main issues, matched
+blind by one annotator per paper against the items of both reviews.}\label{tab:control}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lccc}
+\toprule
+ & Skill (panel) & Without the skill & Difference\\
+\midrule
+Spearman, mean human rating & $0.47$ [$0.28$, $0.63$] & $0.45$ [$0.28$, $0.60$] & [$-0.12$, $0.16$]\\
+AUC, acceptance & $0.64$ [$0.51$, $0.77$] & $0.63$ [$0.54$, $0.71$] & [$-0.09$, $0.12$]\\
+Pairwise order correct & 0.68 & 0.62 & \\
+Tied paper pairs & 0.13 & 0.66 & \\
+NMAE / NME & $0.084$ / $-0.003$ & $0.085$ / $-0.013$ & \\
+\midrule
+Human main issues raised & 0.48 [0.45, 0.52] & 0.46 [0.42, 0.50] & [$-0.02$, $0.06$]\\
+\quad raised by 2+ humans (221) & 0.71 & 0.68 & \\
+\quad raised by one human (797) & 0.40 & 0.38 & \\
+Own items matching a human issue & 0.27 [0.25, 0.29] & 0.28 [0.25, 0.31] & [$-0.04$, $0.01$]\\
+Items per paper & 20.4 & 23.4 & \\
+\midrule
+Planted defects found (3 papers, 15) & 15 & 12 & \\
+\quad number defects (7) & 7 & 4 & \\
+Cost per paper & about \$2 & \$0.21 & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+\item \textbf{Scores.} Ranking, acceptance and error are the same; every difference interval
+includes zero, also on the 41 held-out papers (Spearman $0.45$ and $0.51$, AUC $0.69$ and $0.65$).
+\item \textbf{The control uses three ratings.} It gives 2, 4 and 6 to 8, 69 and 9 papers and
+never 0, 8 or 10, although the human reviewers of these papers gave 0 eight times and 8
+twenty-three times (of 336 ratings). Its correlation comes from the 17 papers it moves off 4:
+none of the eight rated 2 was accepted (mean human rating 2.42) and five of the nine rated 6
+were (5.00). The skill's final rating is the same judgement: it equals the control's on 82 of
+the 86 papers.
+\item \textbf{What the panel mean adds.} It is continuous (2.0--6.5 on the ICLR scale, SD 0.86;
+humans 0.5--7.5, SD 1.15), so few pairs tie. Within the 69 papers the control rates 4 it still
+orders papers slightly (Spearman $0.27$ [$0.02$, $0.47$]) but does not separate accepted papers
+(AUC $0.54$ [$0.38$, $0.70$]).
+\item \textbf{Review content.} A review of about 1,500 words raises as many of the humans' main
+issues as the five reports (about 11,000 words), with the same share of unmatched items. The two
+overlap on part of what they raise: 33\% of the human issues are raised by both, 16\% only by the
+skill and 13\% only by the control. The annotator's new judgement of the panel agrees with the
+original annotation on 84\% of the issues.
+\item \textbf{Planted defects.} Fifteen defects were planted in three papers (seven statements,
+seven numbers and one instruction to reviewers) and the reviews were read with the score lines
+hidden. The skill finds all 15 and the control 12. The three the control misses need a
+cross-check: a table average that is not the mean of its rows, a column that sums to 110\%, and
+a value that differs between two tables. Both flag the planted instruction and ignore it. The
+skill's severity is uneven: selection on the test set is graded critical on two papers and major
+on the third. Three papers show a direction, not a rate.
+\end{itemize}
+
+Measured by agreement with human reviewers, the five-reviewer panel with an EIC therefore does
+not beat one plain review by the same model, at about ten times the cost. The measure has a
+blind spot: it counts only what the humans wrote, so it does not judge the skill's error log,
+severity grades, revision roadmap or literature check. The next version is aimed at what the
+control does not do, namely checks with a verifiable answer (table arithmetic, text against
+tables, selection on the test set), evaluated with planted defects, with a smaller panel.
+
 \section{Related work}\label{sec:related}
 
 \paragraph{AI reviewer systems.}
@@ -991,8 +1074,11 @@ not use it.
 \section{Limitations and future work}
 \begin{itemize}
 \item \textbf{Sample size.} The full evaluation has 86 papers; its Spearman interval is still
-$0.27$--$0.64$, and the issue-overlap study and the 2.11 comparison use the 20-paper pilot only.
+$0.27$--$0.64$, and the Gap Scout test and the 2.11 comparison use the 20-paper pilot only.
 Haiku and the two GPT-6.1 models were tested on the pilot's 20 papers only.
+\item \textbf{No gain over the plain model on agreement with humans.} Section~\ref{sec:control}
+finds the same ranking, acceptance AUC, hit rate and precision without the skill. The control was
+run once per paper with one prompt, and the planted-defect comparison covers three papers.
 \item \textbf{One venue and one year.} Calibration covers ICLR 2026 only. Other venues use
 assumed or secondary scales.
 \item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers
