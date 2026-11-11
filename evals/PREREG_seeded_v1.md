@@ -38,7 +38,7 @@ on the same seeds.
 
 - **Run:** GPT-6.1 Terra, `high` effort, Codex CLI 0.167.0, one run per paper,
   `max_parallel` 1 (arXiv rate limits), 1 USD cap per paper (3 USD total at most), the skill
-  at the launch commit (recorded with the result; 2.16, whose review rules are those of 2.10.1,
+  at the launch commit (recorded with the result; its review rules are those of 2.10.1,
   the version of the reference runs). The eval prompt now allows the skill's
   offline `scripts/integrity_scan.py` (it was not allowed before this check).
 - **Reference runs (no cost):** the earlier Terra `high` runs of the same three papers on the
@@ -88,3 +88,10 @@ One model and one run; real papers carry their own defects, which are not scored
 adjudicator wrote the seeds. The spec is public in this repository: the eval prompt forbids web
 access other than the skill's arXiv search, and the run's command log will be checked for any
 access to this repository.
+
+## Status (added 2026-11-11, after launch)
+
+Run 43067473290 was cancelled by the maintainer's decision to stop using the OpenAI API
+unless necessary: the prepare job checked and applied all 15 seeds; the E5mL07Fbq8 review had
+run in Codex for about two minutes (cost not recorded, under its 1 USD cap) and the other two had
+not started, so no review was produced and nothing above was measured. The design stands for a later run with another runner.

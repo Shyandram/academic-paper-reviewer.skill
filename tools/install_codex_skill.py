@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE = ROOT / "cvml-paper-reviewer"
+SOURCE = ROOT / "academic-paper-reviewer"
 
 
 def install(skills_dir):

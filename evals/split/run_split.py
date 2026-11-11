@@ -71,7 +71,7 @@ def paths(root, pid):
     res = root / "evals" / "work" / "results" / pid
     return {
         "root": root,
-        "skill": root / "cvml-paper-reviewer",
+        "skill": root / "academic-paper-reviewer",
         "paper": root / "evals" / "work" / "papers" / pid / "blinded.txt",
         "res": res,
         "p0": res / "phase0",

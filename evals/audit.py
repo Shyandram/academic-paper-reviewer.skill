@@ -170,7 +170,7 @@ def audit_paper(p, check_refs):
     # runs made with different skill versions are comparable.
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "agg", ROOT.parent / "cvml-paper-reviewer" / "scripts" / "aggregate_scores.py")
+        "agg", ROOT.parent / "academic-paper-reviewer" / "scripts" / "aggregate_scores.py")
     aggmod = importlib.util.module_from_spec(spec); spec.loader.exec_module(aggmod)
     try:
         raw_scores = {k: v for k, v in scores.items() if k != "da_critical"}

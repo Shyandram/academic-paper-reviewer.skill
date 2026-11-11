@@ -1,4 +1,4 @@
-"""Offline tests for cvml-paper-reviewer/scripts/integrity_scan.py.
+"""Offline tests for academic-paper-reviewer/scripts/integrity_scan.py.
 
 Run: python3 -m unittest discover -s tests
 """
@@ -7,7 +7,7 @@ import importlib.util
 import unittest
 from pathlib import Path
 
-SKILL = Path(__file__).resolve().parent.parent / "cvml-paper-reviewer"
+SKILL = Path(__file__).resolve().parent.parent / "academic-paper-reviewer"
 spec = importlib.util.spec_from_file_location("scan", SKILL / "scripts" / "integrity_scan.py")
 scan = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(scan)

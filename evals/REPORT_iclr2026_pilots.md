@@ -470,7 +470,7 @@ range, smaller than the run-to-run variation seen between rounds 3 and 4. Six pa
 of this size either way; what they show is that 2.13 does not yet give Terra the separation it lacked.
 Total cost of the 2.13 validation, failed attempts included: about $9.
 
-**Decision:** 2.13 is withdrawn; 2.16 returns the review rules to 2.10.1 and keeps the arXiv retries and the evaluation tooling.
+**Decision:** 2.13 is withdrawn, never released; the review rules return to 2.10.1, keeping the arXiv retries and the evaluation tooling (CHANGELOG, Unreleased).
 
 ## Error on the ICLR scale (NMAE / NME)
 

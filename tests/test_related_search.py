@@ -1,4 +1,4 @@
-"""Offline tests for cvml-paper-reviewer/scripts/related_search.py (no network).
+"""Offline tests for academic-paper-reviewer/scripts/related_search.py (no network).
 
 Run: python3 -m unittest discover -s tests
 """
@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-SKILL = Path(__file__).resolve().parent.parent / "cvml-paper-reviewer"
+SKILL = Path(__file__).resolve().parent.parent / "academic-paper-reviewer"
 spec = importlib.util.spec_from_file_location("rs", SKILL / "scripts" / "related_search.py")
 rs = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rs)

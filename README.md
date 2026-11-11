@@ -1,4 +1,4 @@
-# CV/ML Paper Reviewer for Codex and Claude
+# Academic Paper Reviewer for Codex and Claude
 
 A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process: five reviewers with separate roles, then an Editor-in-Chief who acts as area chair. The EIC reads every review, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision. Scores are aggregated reproducibly as two lists (the reviewers' official scores and the EIC's internal weighted assessment), and the skill turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
 
@@ -11,7 +11,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 separate repor
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
 
-**Project page:** <https://shyandram.github.io/cvml-paper-reviewer.skill/> · **Current version:** 2.16 ([changelog](CHANGELOG.md)) · Adapted from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) ([origin](#origin-and-license))
+**Project page:** <https://shyandram.github.io/cvml-paper-reviewer.skill/> · **Current version:** 2.10.1 ([changelog](CHANGELOG.md)) · Adapted from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) ([origin](#origin-and-license))
 
 ---
 
@@ -44,9 +44,7 @@ What sets it apart:
 
 ## Installation
 
-The packaged skill is the file `cvml-paper-reviewer.skill`, a zip archive that contains the `cvml-paper-reviewer/` folder.
-
-> **Renamed in 2.14.** Up to 2.13 the skill was called `academic-paper-reviewer`, the same name as the upstream skill it was adapted from (see [Origin and license](#origin-and-license)). If you installed it under the old name, delete that folder or link (for example `~/.claude/skills/academic-paper-reviewer` or `.agents/skills/academic-paper-reviewer`) before installing `cvml-paper-reviewer`, so the two do not both load.
+The packaged skill is the file `academic-paper-reviewer.skill`, a zip archive that contains the `academic-paper-reviewer/` folder.
 
 ### Codex (CLI, IDE, and cloud tasks)
 
@@ -56,7 +54,7 @@ From the repository root, install a project-local skill:
 python3 tools/install_codex_skill.py
 ```
 
-This creates `.agents/skills/cvml-paper-reviewer`, a relative symlink to the
+This creates `.agents/skills/academic-paper-reviewer`, a relative symlink to the
 source. It is repeatable and refuses to replace existing files or another skill.
 Keep this checkout in place while using the link. For a personal installation:
 
@@ -65,23 +63,23 @@ python3 tools/install_codex_skill.py --skills-dir ~/.agents/skills
 ```
 
 Start a new Codex session in this repository and invoke
-`$cvml-paper-reviewer Review /absolute/path/paper.pdf for CVPR`.
+`$academic-paper-reviewer Review /absolute/path/paper.pdf for CVPR`.
 Discovery depends on the host; installing during a session may require a new
 session. If the host does not discover local skills, ask Codex to read
-`cvml-paper-reviewer/SKILL.md` and follow it directly. Cloud tasks can use
+`academic-paper-reviewer/SKILL.md` and follow it directly. Cloud tasks can use
 this fallback immediately. No API key or running server is required.
 
 PDF text extraction and page rendering are optional capabilities (for example,
 Poppler's `pdftotext` and `pdftoppm`); see
-[Codex runtime guidance](cvml-paper-reviewer/references/codex_runtime.md).
+[Codex runtime guidance](academic-paper-reviewer/references/codex_runtime.md).
 Five role-based passes work without subagents; parallel execution is used only
 when supported and permitted by the host.
 
 ### Claude apps (claude.ai web / desktop)
 
-1. Download `cvml-paper-reviewer.skill` from this repository.
+1. Download `academic-paper-reviewer.skill` from this repository.
 2. In Claude, open **Settings → Capabilities** and make sure code execution / skills are enabled.
-3. Under **Skills**, choose **Upload skill** and select the `.skill` file. If the uploader asks for a `.zip`, rename the file to `cvml-paper-reviewer.zip`; it is the same format.
+3. Under **Skills**, choose **Upload skill** and select the `.skill` file. If the uploader asks for a `.zip`, rename the file to `academic-paper-reviewer.zip`; it is the same format.
 4. Start a new chat and say *"Review this paper"* with a PDF attached.
 
 *Menu names change over time. If you can't find them, see Anthropic's help center article on using Skills in Claude.*
@@ -93,27 +91,27 @@ Personal install (available in every project):
 ```bash
 git clone https://github.com/shyandram/cvml-paper-reviewer.skill.git
 mkdir -p ~/.claude/skills
-cp -r cvml-paper-reviewer.skill/cvml-paper-reviewer ~/.claude/skills/
+cp -r cvml-paper-reviewer.skill/academic-paper-reviewer ~/.claude/skills/
 ```
 
 Project install (shared with your collaborators through the repo):
 
 ```bash
 mkdir -p .claude/skills
-cp -r /path/to/cvml-paper-reviewer.skill/cvml-paper-reviewer .claude/skills/
+cp -r /path/to/cvml-paper-reviewer.skill/academic-paper-reviewer .claude/skills/
 ```
 
 Or unzip the packaged file directly:
 
 ```bash
-unzip cvml-paper-reviewer.skill -d ~/.claude/skills/
+unzip academic-paper-reviewer.skill -d ~/.claude/skills/
 ```
 
 Claude Code discovers skills at startup. Restart the session, then ask *"review paper.pdf"*. In Claude Code the five reviewers can run as parallel subagents, so no reviewer sees another's report. Separate contexts are not independent judges: all five use the same model, so their errors can be correlated.
 
 ### Claude API (Agent Skills)
 
-Upload the `cvml-paper-reviewer/` folder through the Skills API and attach the skill to requests that use the code-execution tool. See Anthropic's Agent Skills documentation for the current endpoints and beta headers.
+Upload the `academic-paper-reviewer/` folder through the Skills API and attach the skill to requests that use the code-execution tool. See Anthropic's Agent Skills documentation for the current endpoints and beta headers.
 
 ### Requirements
 
@@ -156,10 +154,10 @@ Venue forms change every year. Check `references/venue_profiles.md` and the venu
 ### Scoring by hand or in CI
 
 ```bash
-python3 cvml-paper-reviewer/scripts/aggregate_scores.py cvml-paper-reviewer/scripts/example_scores.json
-python3 cvml-paper-reviewer/scripts/aggregate_scores.py scores.json --json
-python3 cvml-paper-reviewer/scripts/aggregate_scores.py scores.json --venue cvpr --venue tmlr
-python3 cvml-paper-reviewer/scripts/aggregate_scores.py scores.json --all-venues
+python3 academic-paper-reviewer/scripts/aggregate_scores.py academic-paper-reviewer/scripts/example_scores.json
+python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --json
+python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --venue cvpr --venue tmlr
+python3 academic-paper-reviewer/scripts/aggregate_scores.py scores.json --all-venues
 ```
 
 ---
@@ -198,8 +196,8 @@ Then push `evals/iclr_run.json` on a branch listed in the workflow's `push` trig
 ## Repository Layout
 
 ```
-cvml-paper-reviewer.skill          ← packaged skill (zip), the file you install
-cvml-paper-reviewer/               ← skill source
+academic-paper-reviewer.skill          ← packaged skill (zip), the file you install
+academic-paper-reviewer/               ← skill source
 ├── SKILL.md                           ← entry point: modes, workflow, hard rules
 ├── agents/                            ← one file per role
 │   ├── field_analyst_agent.md         (Phase 0: panel configuration)
@@ -231,10 +229,10 @@ tests/                                 ← unit tests for the scoring script and
 ```bash
 python3 -m unittest discover -s tests     # test the scoring script and evaluation tools
 python3 tools/build_skill.py --check      # validate frontmatter, file references, script
-python3 tools/build_skill.py              # validate and rebuild cvml-paper-reviewer.skill
+python3 tools/build_skill.py              # validate and rebuild academic-paper-reviewer.skill
 ```
 
-Edit files under `cvml-paper-reviewer/`, then rebuild. Commit the source and the rebuilt `.skill` together. The build is deterministic, so an unchanged source gives a byte-identical archive.
+Edit files under `academic-paper-reviewer/`, then rebuild. Commit the source and the rebuilt `.skill` together. The build is deterministic, so an unchanged source gives a byte-identical archive.
 
 ## Responsible Use
 
