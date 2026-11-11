@@ -5,6 +5,7 @@
     python3 -I evals/offline_signals.py calibration  # does a linear stretch of the panel rating help
     python3 -I evals/offline_signals.py precision    # which AI issues match a human main issue
     python3 -I evals/offline_signals.py roles        # what each reviewer adds, and the panel without it
+    python3 -I evals/offline_signals.py specificity  # how concrete each weakness item is, skill vs plain
 
 Reads evals/work/ (gitignored): full_metrics/{sample.jsonl,splits.json},
 results_full/ and results_pilot3/ (scores.json, summary.json), and issue_overlap/all86/
@@ -268,14 +269,76 @@ def cmd_roles(_):
     print(json.dumps(out, indent=1))
 
 
+def cmd_specificity(_):
+    """Share of weakness items that carry a location, a number, a quote, a fix or a named
+    method/work: the skill's five reports against the plain review (results_bare86/). Keyword
+    rules on the text, no model calls; a proxy for how actionable a point is, not its accuracy."""
+    import re
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import issue_overlap as io_
+    head = re.compile(r"^(?:\*\*)?(?:W?\d+[.):]|[-*\u2022]|#{3,5})\s+")
+    subb = re.compile(r"^\s{2,}(?:[-*\u2022]|\d+[.)]|\([a-z0-9]+\))\s+")
+
+    def items(w):
+        out = []
+        for ln in w.splitlines():
+            if not ln.strip() or ln.strip().startswith("|"):
+                continue
+            if head.match(ln) or subb.match(ln) or not out:
+                out.append(ln.strip())
+            else:
+                out[-1] += " " + ln.strip()
+        return [re.sub(r"\s+", " ", i) for i in out if len(i) > 30]
+
+    rules = {
+        "location": re.compile(r"(\u00a7\s?\d|\bSec(tion)?\.?\s?\d|\bTable\s?\d|\bTab\.\s?\d|\bFig(ure)?\.?\s?\d|"
+                               r"\bEq(uation)?s?\.?\s?\(?\d|\bAlg(orithm)?\.?\s?\d|\bApp(endix)?\.?\s?[A-Z0-9]|"
+                               r"\bline\s\d|\bp\.\s?\d)", re.I),
+        "number": re.compile(r"\d+\.\d+|\d+(\.\d+)?\s?%"),
+        "quote": re.compile(r"[\"\u201c][^\"\u201d]{12,}[\"\u201d]"),
+        "fix": re.compile(r"\b(should|please|add|report|provide|include|compare (with|against)|run|"
+                          r"clarify|suggested fix|fix:|would (help|strengthen))\b", re.I),
+        "named_work": re.compile(r"\b[A-Z][a-zA-Z]+ et al\.|\(\d{4}\)|\[\d+\]|\b[A-Z][A-Za-z]*[A-Z][A-Za-z0-9-]+\b"),
+    }
+    skill, plain = [], []
+    for d in ("results_full", "results_pilot3"):
+        for n in sorted(os.listdir(os.path.join(W, d))):
+            reps = io_.ai_reports(os.path.join(W, d, n))
+            for r, t in (reps or {}).items():
+                skill.append((n, items(io_.weaknesses(t, r))))
+    for n in sorted(os.listdir(os.path.join(W, "results_bare86"))):
+        t = open(os.path.join(W, "results_bare86", n, "review.md"), encoding="utf-8").read()
+        plain.append((n, items(io_.section(t, "Weaknesses"))))
+
+    def prof(rows, reps=2000):
+        papers = collections.defaultdict(list)
+        for n, its in rows:
+            papers[n] += its
+        ids = sorted(papers)
+        out = {"papers": len(ids), "items": sum(len(v) for v in papers.values()),
+               "median_words": st.median(len(x.split()) for v in papers.values() for x in v)}
+        rnd = random.Random(0)
+        for k, rx in rules.items():
+            def share(s, rx=rx):
+                xs = [x for p in s for x in papers[p]]
+                return sum(bool(rx.search(x)) for x in xs) / len(xs)
+            bs = sorted(share([rnd.choice(ids) for _ in ids]) for _ in range(reps))
+            out[k] = {"share": round(share(ids), 3),
+                      "ci95": [round(bs[int(.025 * reps)], 3), round(bs[int(.975 * reps) - 1], 3)]}
+        return out
+    print(json.dumps({"skill_five_reports": prof(skill), "plain_review": prof(plain),
+                      "note": "keyword rules on each weakness item; the plain review puts suggestions "
+                              "in its Questions section, which is not counted"}, indent=1))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for n in ("ranking", "calibration", "precision", "roles"):
+    for n in ("ranking", "calibration", "precision", "roles", "specificity"):
         sub.add_parser(n)
     a = ap.parse_args()
     {"ranking": cmd_ranking, "calibration": cmd_calibration, "precision": cmd_precision,
-     "roles": cmd_roles}[a.cmd](a)
+     "roles": cmd_roles, "specificity": cmd_specificity}[a.cmd](a)
 
 
 if __name__ == "__main__":

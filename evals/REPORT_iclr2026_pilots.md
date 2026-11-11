@@ -1121,6 +1121,32 @@ Of the human issues, 33% are raised by both, 16% only by the skill, 13% only by 
   issues humans wrote: it says nothing about whether the skill's other output (error log,
   severity, roadmap, literature check) is correct or useful.
 
+### How concrete each point is: skill and control (86 papers)
+
+`python3 -I evals/offline_signals.py specificity`; numbers in `evals/iclr2026_specificity.json`.
+The overlap above asks whether a human issue was raised, not whether the point is stated so
+that an author can find and fix it. Each weakness item of both reviews (3,054 from the skill's
+five reports, 2,357 from the control) was checked with keyword rules for what it carries.
+Shares over items, bootstrap 95% CI over papers; no model calls.
+
+| A weakness item that… | Skill, five reports | Without the skill |
+|---|---|---|
+| names a location (§, Table, Fig., Eq., appendix) | **0.60** [0.58, 0.62] | 0.26 [0.23, 0.30] |
+| cites a number from the paper | **0.42** [0.40, 0.45] | 0.25 [0.22, 0.28] |
+| quotes the paper | **0.48** [0.46, 0.50] | 0.33 [0.30, 0.36] |
+| states what to do (a fix, a missing experiment) | **0.54** [0.53, 0.56] | 0.06 [0.05, 0.07] |
+| names a specific method or prior work | **0.66** [0.64, 0.69] | 0.48 [0.44, 0.51] |
+| words (median) | 49 | 27 |
+
+- **The skill's points are more concrete on every count.** More than twice as many point to a
+  place in the paper, and they back the point with the paper's own numbers and words. The seeded
+  papers show the same: on a planted wrong average the skill recomputes it from the rows of
+  another table (2.5 against the stated 1.5) and names both tables; the control does not flag it.
+- **Caveats.** Keyword rules show that a point carries evidence, not that the evidence is right.
+  The control follows the ICLR form and puts its requests in the Questions section, which is not
+  counted, so the "states what to do" row overstates the gap. A blind pairwise judgement of the
+  issues both reviews raise (same issue, two wordings) is the proper test; it has not been run.
+
 ### Seeded defects: skill and control (3 papers)
 
 `evals/PREREG_seeded_v1.md`, amendments 2 and 3; results in `evals/iclr2026_seeded_v1_result.json`.
@@ -1148,16 +1174,20 @@ reviewers); the reviews were read with score lines hidden.
 
 Taken together the skill helps where the plain review is weakest:
 
+- **Points an author can act on.** 60% of its weakness items name a place in the paper (control
+  26%), 42% cite the paper's numbers (25%) and 54% say what to do (6%, before the control's
+  Questions section).
 - **Scores that separate papers.** 13% of paper pairs tie against 66%; pairs ordered correctly
   68% against 62%; some order remains inside the 69 papers the control rates alike.
 - **Errors that need cross-checking.** 15 of 15 planted defects against 12 of 15.
 - **Scores that react to them.** With the defects planted the skill's EIC pool position fell on
   all three papers (by 7–10 points); the control's rating stayed at 4.
 
-On agreement with human reviewers (ranking, AUC, error, hit rate, precision) the two are equal,
-and that measure counts only what humans wrote; the skill costs about ten times more. The gains
+On agreement with human reviewers (ranking, AUC, error, hit rate, precision) the two are equal:
+both raise the same human issues, and the skill states them more concretely. That measure counts
+only what humans wrote; the skill costs about ten times more. The gains
 rest on one run per paper and, for the defects, on three papers. The next version builds on
-them: more checks with a verifiable answer (table arithmetic, text against tables, tables
+them: every weakness tied to a location, evidence and a fix, more checks with a verifiable answer (table arithmetic, text against tables, tables
 against each other, selection on the test set), evaluated with seeded defects, at lower cost.
 Score calibration and repeated runs are not pursued: neither changes the review.
 

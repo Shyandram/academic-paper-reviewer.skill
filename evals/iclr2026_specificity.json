@@ -1,0 +1,83 @@
+{
+ "skill_five_reports": {
+  "papers": 86,
+  "items": 3054,
+  "median_words": 49.0,
+  "location": {
+   "share": 0.597,
+   "ci95": [
+    0.581,
+    0.616
+   ]
+  },
+  "number": {
+   "share": 0.423,
+   "ci95": [
+    0.4,
+    0.445
+   ]
+  },
+  "quote": {
+   "share": 0.481,
+   "ci95": [
+    0.463,
+    0.501
+   ]
+  },
+  "fix": {
+   "share": 0.543,
+   "ci95": [
+    0.528,
+    0.557
+   ]
+  },
+  "named_work": {
+   "share": 0.661,
+   "ci95": [
+    0.635,
+    0.686
+   ]
+  }
+ },
+ "plain_review": {
+  "papers": 86,
+  "items": 2357,
+  "median_words": 27,
+  "location": {
+   "share": 0.263,
+   "ci95": [
+    0.233,
+    0.296
+   ]
+  },
+  "number": {
+   "share": 0.249,
+   "ci95": [
+    0.221,
+    0.276
+   ]
+  },
+  "quote": {
+   "share": 0.329,
+   "ci95": [
+    0.303,
+    0.358
+   ]
+  },
+  "fix": {
+   "share": 0.06,
+   "ci95": [
+    0.049,
+    0.074
+   ]
+  },
+  "named_work": {
+   "share": 0.475,
+   "ci95": [
+    0.442,
+    0.509
+   ]
+  }
+ },
+ "note": "keyword rules on each weakness item; the plain review puts suggestions in its Questions section, which is not counted"
+}
