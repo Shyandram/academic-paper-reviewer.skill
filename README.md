@@ -11,7 +11,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 separate repor
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
 
-**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.16 ([changelog](CHANGELOG.md)) · Adapted from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) ([origin](#origin-and-license))
+**Project page:** <https://shyandram.github.io/cvml-paper-reviewer.skill/> · **Current version:** 2.16 ([changelog](CHANGELOG.md)) · Adapted from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) ([origin](#origin-and-license))
 
 ---
 
@@ -91,16 +91,16 @@ when supported and permitted by the host.
 Personal install (available in every project):
 
 ```bash
-git clone https://github.com/shyandram/academic-paper-reviewer.skill.git
+git clone https://github.com/shyandram/cvml-paper-reviewer.skill.git
 mkdir -p ~/.claude/skills
-cp -r academic-paper-reviewer.skill/cvml-paper-reviewer ~/.claude/skills/
+cp -r cvml-paper-reviewer.skill/cvml-paper-reviewer ~/.claude/skills/
 ```
 
 Project install (shared with your collaborators through the repo):
 
 ```bash
 mkdir -p .claude/skills
-cp -r /path/to/academic-paper-reviewer.skill/cvml-paper-reviewer .claude/skills/
+cp -r /path/to/cvml-paper-reviewer.skill/cvml-paper-reviewer .claude/skills/
 ```
 
 Or unzip the packaged file directly:
