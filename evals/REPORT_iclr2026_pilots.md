@@ -406,6 +406,14 @@ incremental and the band caps it at 54. The three papers now sit within about 46
 run-to-run variation. The three papers were also used to tune the changes; the next check needs papers the
 changes were not tuned on. Total cost of the four rounds at Terra's listed prices: about $5.70.
 
+**Held-out check, attempt 1** (`evals/iclr2026_terra213_heldout_attempt1.json`): skill as of round 4 on three
+papers not used for tuning (of pilot 3's other 17, sorted by human mean: the highest, kwro5432AI 6.0; the
+median, 0xObmDmsKY 4.0; the lowest, AIKURJjxXT 2.5). Not a valid test: the arXiv API answered HTTP 429/406 to
+all three jobs, so no literature check, novelty profile or contribution band ran (the reports say so). Their
+reviewer pool means, 53.2, 49.8 and 53.4, are in no order. Cost $1.16. `related_search.py` now spaces and
+backs off its arXiv requests, and the workflow waits for arXiv before any model call; attempt 2 reruns the
+same papers.
+
 ## Error on the ICLR scale (NMAE / NME)
 
 CSPaper-style errors against the mean human rating on the ICLR 2026 scale (0–10):

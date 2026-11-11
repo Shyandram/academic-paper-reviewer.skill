@@ -189,6 +189,17 @@ jobs:
           cp evals/codex_budget_guard.py "$RUNNER_TEMP/"  # runs outside the reviewer's workspace
           find evals -mindepth 1 -maxdepth 1 ! -name split ! -name work ! -name review_prompt.md -exec rm -rf {} +
           ls evals
+      - name: arXiv reachable (the literature check needs it)
+        # A review whose literature check cannot reach arXiv does not test the skill and still
+        # costs a full run; wait up to about 15 minutes, then fail before any model call.
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' -A academic-paper-reviewer-related-search/1.0 \
+              "https://export.arxiv.org/api/query?search_query=all:transformer&max_results=1" || echo 000)
+            [ "$code" = 200 ] && { echo "arXiv API: HTTP 200"; exit 0; }
+            echo "arXiv API: HTTP $code; waiting"; sleep 45
+          done
+          echo "arXiv API unavailable; not starting the review"; exit 1
       - run: npm install -g @anthropic-ai/claude-code
         if: needs.config.outputs.runner == 'claude'
       # Pinned: the version rounds 1-2 of the 2.13 validation ran on. An unpinned install once

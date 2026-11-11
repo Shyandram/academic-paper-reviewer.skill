@@ -262,6 +262,28 @@ class NoveltyProfileTests(unittest.TestCase):
             rs.novelty_profile({"claims": [{"id": "C1", "dimension": "method",
                                             "matches": [{"title": "A", "label": self.P, "level": 7}]}]})
 
+class ArxivRetryTests(unittest.TestCase):
+    def test_retry_after_is_honoured_and_capped(self):
+        class E(Exception):
+            def __init__(self, ra):
+                self.headers = {"Retry-After": ra}
+        self.assertEqual(rs.retry_wait(E("42"), 0), 42.0)
+        self.assertEqual(rs.retry_wait(E("9999"), 0), 300.0)
+        self.assertEqual(rs.retry_wait(E("soon"), 1), rs.ARXIV_BACKOFF[1])
+        self.assertEqual(rs.retry_wait(OSError("reset"), 9), rs.ARXIV_BACKOFF[-1])
+
+    def test_gives_up_after_the_backoff(self):
+        from unittest import mock
+        calls = []
+        def fail(*a, **k):
+            calls.append(1)
+            raise OSError("HTTP Error 429")
+        with mock.patch.object(rs.urllib.request, "urlopen", fail), mock.patch.object(rs.time, "sleep"):
+            with self.assertRaises(SystemExit):
+                rs.arxiv_query("all:x", 1)
+        self.assertEqual(len(calls), len(rs.ARXIV_BACKOFF) + 1)
+
+
 if __name__ == "__main__":
     unittest.main()
 

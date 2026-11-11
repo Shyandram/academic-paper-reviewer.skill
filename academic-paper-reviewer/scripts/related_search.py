@@ -370,19 +370,39 @@ def similarity_report(paper_text, kept, top=3):
 
 # ---------------------------------------------------------------- arXiv
 
+ARXIV_UA = "academic-paper-reviewer-related-search/1.0"
+ARXIV_SPACING = 3.1           # arXiv asks for at most one request every 3 seconds
+ARXIV_BACKOFF = (10, 30, 60, 120)
+_last_call = [0.0]
+
+
+def retry_wait(err, attempt):
+    """Seconds to wait before the next try: the server's Retry-After (at most 300) or the backoff."""
+    ra = getattr(err, "headers", None) and err.headers.get("Retry-After")
+    try:
+        return min(max(float(ra), 1.0), 300.0)
+    except (TypeError, ValueError):
+        return ARXIV_BACKOFF[min(attempt, len(ARXIV_BACKOFF) - 1)]
+
+
 def arxiv_query(search_query, max_results):
     url = ARXIV_API + "?" + urllib.parse.urlencode(
         {"search_query": search_query, "max_results": max_results,
          "sortBy": "relevance", "sortOrder": "descending"})
-    for attempt in range(4):
+    req = urllib.request.Request(url, headers={"User-Agent": ARXIV_UA})
+    for attempt in range(len(ARXIV_BACKOFF) + 1):
+        time.sleep(max(0.0, _last_call[0] + ARXIV_SPACING - time.time()))
+        _last_call[0] = time.time()
         try:
-            with urllib.request.urlopen(url, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=60) as r:
                 root = ET.fromstring(r.read())
             break
-        except Exception as e:   # network problems or rate limiting
-            if attempt == 3:
+        except Exception as e:   # network problems or rate limiting (429 / 503)
+            if attempt == len(ARXIV_BACKOFF):
                 sys.exit(f"error: arXiv API unreachable ({e}); fall back to [verify]")
-            time.sleep(5 * 2 ** attempt)
+            wait = retry_wait(e, attempt)
+            print(f"arXiv: {e}; retrying in {wait:.0f} s", file=sys.stderr)
+            time.sleep(wait)
     hits = []
     for e in root.findall("a:entry", NS):
         ident = e.findtext("a:id", "", NS)
