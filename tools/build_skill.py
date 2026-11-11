@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the skill source and package it as academic-paper-reviewer.skill.
+"""Validate the skill source and package it as cvml-paper-reviewer.skill.
 
     python3 tools/build_skill.py            # validate + build
     python3 tools/build_skill.py --check    # validate only
@@ -23,7 +23,7 @@ import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SKILL_NAME = "academic-paper-reviewer"
+SKILL_NAME = "cvml-paper-reviewer"
 SRC = ROOT / SKILL_NAME
 OUT = ROOT / f"{SKILL_NAME}.skill"
 FIXED_TIME = (2026, 1, 1, 0, 0, 0)

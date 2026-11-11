@@ -2,7 +2,7 @@
 
 This repository develops a Markdown skill for Codex and Claude, plus Python
 standard-library tools. Read `README.md` before changing installation behavior.
-Edit skill sources under `academic-paper-reviewer/`; rebuild the tracked archive
+Edit skill sources under `cvml-paper-reviewer/`; rebuild the tracked archive
 with `python3 tools/build_skill.py` when sources change. Do not hand-edit the ZIP.
 
 Validate changes from the repository root:

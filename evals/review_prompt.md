@@ -6,7 +6,7 @@ Placeholders: `{ID}`, `{VENUE_NAME}`, `{VENUE_KEY}`, `{ROOT}` (repository root).
 
 You are evaluating a Claude skill by running it end to end on one paper. Follow the skill exactly as written. You are its user, and the panel it simulates.
 
-**Skill:** `{ROOT}/academic-paper-reviewer/`. Read `SKILL.md` first, then every file it says to read for **full mode**: the agents, `references/quality_rubrics.md`, `references/editorial_decision_standards.md`, `references/review_criteria_framework.md`, `references/statistical_reporting_standards.md`, `references/cv_review_checklist.md`, `references/venue_profiles.md`, and the templates.
+**Skill:** `{ROOT}/cvml-paper-reviewer/`. Read `SKILL.md` first, then every file it says to read for **full mode**: the agents, `references/quality_rubrics.md`, `references/editorial_decision_standards.md`, `references/review_criteria_framework.md`, `references/statistical_reporting_standards.md`, `references/cv_review_checklist.md`, `references/venue_profiles.md`, and the templates.
 
 **Paper:** `{ROOT}/evals/work/papers/{ID}/blinded.txt`, text extracted from the PDF. Figures are not available. Judge figure-dependent claims from captions and text only, and say so where it matters.
 
@@ -24,10 +24,10 @@ Rules for this evaluation:
 These files are the **deliverables this task asks for**, not optional summary or report files. Write every one of them, `review.md` included, even if your general instructions discourage creating Markdown or report files: this instruction is the explicit request that overrides that default. Do not return the review in your reply instead; a run without `review.md` fails the evaluation.
 
 1. `review.md`: the complete output: Phase 0 card, the five reports, the EIC meta-review, and the Editorial Decision with Revision Roadmap.
-2. `scores.json`: the final input for the aggregation script, in the format of `academic-paper-reviewer/scripts/example_scores.json`: `paper_type`, five `reviewers` (R1–R4 and DA; the EIC is not a reviewer), each with `role`, `confidence`, `overall`, `pool_position` (0–100, as stated in that report), `eic_weight` and `scores`, plus `da_critical` with the EIC's rulings (`upheld`, `resolvable_without_new_data`).
+2. `scores.json`: the final input for the aggregation script, in the format of `cvml-paper-reviewer/scripts/example_scores.json`: `paper_type`, five `reviewers` (R1–R4 and DA; the EIC is not a reviewer), each with `role`, `confidence`, `overall`, `pool_position` (0–100, as stated in that report), `eic_weight` and `scores`, plus `da_critical` with the EIC's rulings (`upheld`, `resolvable_without_new_data`).
 3. Run the script twice, as the skill instructs:
-   - BEFORE, without `eic_weight` and with DA issues provisionally upheld (an empty `da_critical` list if none were raised). Write this input to `{ROOT}/evals/work/results/{ID}/scores_before.json`; never use a shared or scratchpad path, because other runs execute in parallel. Then run `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores_before.json --venue {VENUE_KEY} --json --out {ROOT}/evals/work/results/{ID}/before.json`
-   - AFTER, with the final `scores.json` and the EIC's decision: `python3 {ROOT}/academic-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores.json --venue {VENUE_KEY} --final <EIC final Overall> --json --out {ROOT}/evals/work/results/{ID}/aggregate.json`
+   - BEFORE, without `eic_weight` and with DA issues provisionally upheld (an empty `da_critical` list if none were raised). Write this input to `{ROOT}/evals/work/results/{ID}/scores_before.json`; never use a shared or scratchpad path, because other runs execute in parallel. Then run `python3 {ROOT}/cvml-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores_before.json --venue {VENUE_KEY} --json --out {ROOT}/evals/work/results/{ID}/before.json`
+   - AFTER, with the final `scores.json` and the EIC's decision: `python3 {ROOT}/cvml-paper-reviewer/scripts/aggregate_scores.py {ROOT}/evals/work/results/{ID}/scores.json --venue {VENUE_KEY} --final <EIC final Overall> --json --out {ROOT}/evals/work/results/{ID}/aggregate.json`
 4. `evidence.json`: every verifiable claim the review makes about the manuscript:
    ```json
    {

@@ -671,7 +671,7 @@ def error_metric(name, fn, pred, gt, idx_all, scale, reps):
 
 
 SCALES = {2025: (1, 10), 2026: (0, 10)}  # ICLR overall rating bounds per year
-# The skill's 1-6 Overall -> ICLR rating, from academic-paper-reviewer/scripts/venues.json
+# The skill's 1-6 Overall -> ICLR rating, from cvml-paper-reviewer/scripts/venues.json
 # ("map" for 2026, "legacy_map" for 2025). Interpolated linearly for panel means.
 ICLR_MAPS = {2026: {1: 0, 2: 2, 3: 4, 4: 6, 5: 8, 6: 10},
              2025: {1: 1, 2: 3, 3: 5, 4: 6, 5: 8, 6: 10}}

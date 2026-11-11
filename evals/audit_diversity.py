@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 WORK = ROOT / "work" / "results"
 spec = importlib.util.spec_from_file_location(
-    "rs", ROOT.parent / "academic-paper-reviewer" / "scripts" / "related_search.py")
+    "rs", ROOT.parent / "cvml-paper-reviewer" / "scripts" / "related_search.py")
 rs = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(rs)
 

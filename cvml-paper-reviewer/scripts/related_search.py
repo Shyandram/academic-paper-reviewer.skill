@@ -370,7 +370,7 @@ def similarity_report(paper_text, kept, top=3):
 
 # ---------------------------------------------------------------- arXiv
 
-ARXIV_UA = "academic-paper-reviewer-related-search/1.0"
+ARXIV_UA = "cvml-paper-reviewer-related-search/1.0"
 ARXIV_SPACING = 3.1           # arXiv asks for at most one request every 3 seconds
 ARXIV_BACKOFF = (10, 30, 60, 120)
 _last_call = [0.0]

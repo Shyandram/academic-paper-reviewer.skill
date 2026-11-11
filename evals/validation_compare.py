@@ -17,7 +17,7 @@ import statistics as st
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "academic-paper-reviewer", "scripts"))
+sys.path.insert(0, os.path.join(HERE, "..", "cvml-paper-reviewer", "scripts"))
 import related_search as rs  # noqa: E402
 
 

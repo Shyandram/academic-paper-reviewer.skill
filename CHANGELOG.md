@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.14
+
+Renamed from `academic-paper-reviewer` to `cvml-paper-reviewer`. The old name was the same as the skill this one was adapted from (`academic-paper-reviewer` in academic-research-skills by Cheng-I Wu, CC BY-NC 4.0), so installing both made their folders and invocation names collide. No change to the review itself.
+
+- **Renamed:** the skill folder, the `name` in `SKILL.md` (heading "CV/ML Paper Reviewer"), the packaged file (`cvml-paper-reviewer.skill`), the Codex link created by `tools/install_codex_skill.py`, and the paths in the evaluation scripts, tests and review prompt. The arXiv User-Agent of `scripts/related_search.py` and the workflow's arXiv check follow the new name.
+- **Origin:** `README.md` (Origin and license), `NOTICE.md` in the skill folder and the 1.4 entry below credit the upstream skill.
+- **Upgrade:** delete an installation under the old name before installing the new one. The GitHub repository and project page keep their addresses.
+
 ## 2.13
 
 Novelty and severity calibration. (Numbered 2.13 because "2.12" was the working name of what shipped as 2.10.1; first committed as 2.10.2.) On pilot 3's 20 ICLR 2026 papers, GPT-6.1 Sol (2.10.1, `high`) did not rank the papers (panel-rating Spearman +0.02 against Sonnet's +0.48; paired difference 0.46 [0.08, 0.81]). Its scores followed Technical Rigor rather than Novelty; it was lenient on weak papers whose problem was novelty (none of its top concerns named a prior work; 83% of its claims topped out at the middle level 3 of the prior-work scale) and harsh on a theory paper with repairable proof errors. Read literally, 2.10.1 held errors and novelty to different standards: suspicions go under Questions, novelty findings are "MAJOR at most", and the EIC departs only for a "verified" issue. 2.13 removes that asymmetry. It adds no role, phase or agent call. Design and sources: `docs/design_2.13.md`; diagnosis: `evals/REPORT_iclr2026_pilots.md`, "Why Sol does not rank the papers". Validated with GPT-6.1 Terra (`high`) on 3 papers over four rounds and on 3 held-out papers: it corrected the two targeted failures on the tuned papers, but on the six papers it ranks no better than 2.10.1 (reviewer-pool Spearman +0.32 vs +0.38) and compresses the pool positions into 8 points (2.10.1: 28); see `evals/REPORT_iclr2026_pilots.md`, "Skill 2.13 validation".

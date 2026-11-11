@@ -8,7 +8,7 @@ Acceptance comes from the authors' arXiv comment ("Accepted to CVPR 2026",
 Each paper is assigned to exactly one topic (the first matching rule, applied
 to title + abstract), and each venue gets one paper per topic, so every venue
 covers the same set of distinct topics. These topics mirror the task families
-in academic-paper-reviewer/references/cv_review_checklist.md.
+in cvml-paper-reviewer/references/cv_review_checklist.md.
 
     python3 evals/sample_papers.py --seed 7 > evals/manifest.json
 """

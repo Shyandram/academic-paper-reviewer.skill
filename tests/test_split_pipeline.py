@@ -25,7 +25,7 @@ def run(argv):
 class SplitPipeline(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
-        shutil.copytree(REPO / "academic-paper-reviewer", self.tmp / "academic-paper-reviewer")
+        shutil.copytree(REPO / "cvml-paper-reviewer", self.tmp / "cvml-paper-reviewer")
         shutil.copytree(REPO / "evals" / "split", self.tmp / "evals" / "split")
         paper = self.tmp / "evals" / "work" / "papers" / PID
         paper.mkdir(parents=True)
