@@ -936,6 +936,67 @@ Sonnet high, `evals/split/` (one fresh context per phase), run as in-session sub
 context). The independent check (a fresh-context Phase 1.5/1.6 after the reviewers) is planned
 for the next skill version, to be evaluated against 2.10.
 
+## Offline checks for the next version (no new runs)
+
+The 86-paper 2.10.1 run (Sonnet, `high`) re-read with no model call, to see what can be gained
+without new reviews (`evals/offline_signals.py ranking | calibration | precision`). Candidates
+are picked on the 45 train papers and checked on the 41 test papers; CIs are paired bootstraps
+over papers.
+
+**Ranking: no other aggregation of the panel's own numbers is better.** Spearman with the mean
+human rating (train / test / all):
+
+| Signal | Train | Test | All |
+|---|---|---|---|
+| Panel rating (mean Overall, the current score) | +0.54 | +0.45 | +0.47 |
+| Mean Novelty dimension (best on train) | +0.58 | +0.51 | **+0.53** |
+| Domain Reviewer's pool position | +0.55 | +0.47 | +0.50 |
+| Median pool position | +0.56 | +0.45 | +0.49 |
+| Mean of all 7 dimensions | +0.52 | +0.38 | +0.44 |
+| Clarity / Reproducibility / Ethics dimension | +0.24 / +0.11 / +0.08 | +0.25 / +0.26 / +0.26 | +0.25 / +0.20 / +0.15 |
+
+Novelty minus panel rating: +0.06 [−0.10, +0.22] on test, +0.06 [−0.05, +0.16] on all papers.
+The Novelty dimension alone ranks a little better than the Overall rating, but the difference is
+within noise; the three presentation and compliance dimensions carry almost no ranking signal yet
+hold 30% of the empirical-paper composite weight (the composite is reported, not used for the
+decision).
+
+**Calibration: stretching the scores does not help.** A linear map of the panel rating fitted on
+train has slope 0.79 (below 1: with a correlation near 0.5 the best predictor is even more
+compressed than the panel), and lowers the test NMAE only from 0.086 to 0.081 (constant 0.090).
+The compression noted under "Full evaluation" (spread 0.86 vs the humans' 1.15) costs ranking
+resolution, not average error; it is not fixed by rescaling.
+
+**Which AI issues match a human main issue** (2081 merged AI issues, minor points included;
+match / match or related):
+
+| AI issue | n | Match | Match or related |
+|---|---|---|---|
+| All | 2081 | 0.23 | 0.58 |
+| A main point of some reviewer | 1751 | 0.26 | 0.64 |
+| Only ever a minor point | 330 | 0.06 | 0.25 |
+| Raised by 1 / 2 / 3 / 4+ AI reviewers | 999 / 749 / 289 / 44 | 0.20 / 0.20 / 0.34 / 0.45 | 0.57 / 0.57 / 0.65 / 0.64 |
+| Raised only by R1 (Methodology) | 234 | 0.13 | 0.51 |
+| … only by R2 (Domain) | 268 | 0.31 | 0.71 |
+| … only by R3 (Perspective) | 279 | 0.21 | 0.56 |
+| … only by R4 (Generalist) | 126 | 0.23 | 0.58 |
+| … only by the Devil's Advocate | 92 | 0.04 | 0.27 |
+
+- Agreement with humans is not correctness: an issue no human raised can still be right (the
+  humans saw the same paper and missed things too). These numbers say which AI issues look like
+  what ICLR reviewers write, not which are true.
+- Issues three or more AI reviewers raise match humans about 1.7× as often as single-reviewer
+  ones; minor-only points rarely do.
+- The Devil's Advocate's own issues almost never match (4%), and the Methodology Reviewer's
+  rarely (13%). Whether they are real defects humans missed or noise cannot be told from human
+  agreement; the seeded-defect check (`evals/PREREG_seeded_v1.md`) measures that directly.
+
+**Reading.** The scores are near what this data can show: the panel already ranks above
+one-human agreement, and no reweighting or rescaling of its numbers is distinguishable from it.
+The room left is in the review content: specificity (44% of the human issues missed are ones the
+panel raised only as a category, see "What the panel misses"), and whether the issues only the
+AI raises are real. Both need new reviews to evaluate.
+
 ## Reading
 
 - Haiku has no signal: all scores sit near the acceptance bar (EIC pool position 38–50) whatever the paper.
