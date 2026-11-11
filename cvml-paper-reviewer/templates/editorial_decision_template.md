@@ -206,12 +206,16 @@ Editor-in-Chief (meta-reviewer)
 
 ## Revision Response Checklist
 
+Criteria were committed before the revision was read; statuses were set from the manuscript before the response letter was read.
+
 ### Priority 1 — Required Revisions
 
-| # | Original Comment | Status | Location | Quality Assessment |
-|---|-----------------|--------|----------|-------------------|
-| R1 | [Original text] | [FULLY_ADDRESSED / PARTIALLY_ADDRESSED / NOT_ADDRESSED / MADE_WORSE] | [Section X.X] | [Assessment detail] |
-| R2 | [Original text] | [Status] | [Location] | [Assessment] |
+| # | Original Comment | Fixed when (committed first) | Status | Location | Quality Assessment |
+|---|-----------------|------------------------------|--------|----------|-------------------|
+| R1 | [Original text] | [Concrete change that resolves it] | [FULLY_ADDRESSED / PARTIALLY_ADDRESSED / NOT_ADDRESSED / MADE_WORSE] | [Section X.X] | [Assessment detail] |
+| R2 | [Original text] | [Criterion] | [Status] | [Location] | [Assessment] |
+
+Criteria replaced during the check (if any): [item, old criterion → new criterion, reason]
 
 ### Priority 2 — Suggested Revisions
 
@@ -232,13 +236,17 @@ Editor-in-Chief (meta-reviewer)
 |--------------------------|---------------------|----------|------|
 | [e.g., "Added a matched-backbone comparison"] | [Yes / No / Partially] | [Table X] | [..] |
 
+Statuses changed after reading the letter: [item, old → new status, the evidence (location or source); "none" if none]
+
 ---
 
 ## New Issues Discovered During Revision
 
-| # | Type | Location | Description | Severity |
-|---|------|----------|-------------|----------|
-| NEW-1 | [Inconsistency/Error/Gap] | [Section X.X] | [Description] | [CRITICAL/MAJOR/MINOR] |
+| # | Type | Origin | Location | Description | Severity |
+|---|------|--------|----------|-------------|----------|
+| NEW-1 | [Inconsistency/Error/Gap] | [Introduced by the revision / Missed in round 1] | [Section X.X] | [Description] | [CRITICAL/MAJOR/MINOR] |
+
+Issues missed in round 1 are recommendations and do not lower the decision unless CRITICAL.
 
 ---
 

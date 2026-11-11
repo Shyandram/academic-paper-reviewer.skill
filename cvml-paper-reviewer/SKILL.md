@@ -2,11 +2,11 @@
 name: cvml-paper-reviewer
 description: "Multi-perspective peer review of academic papers (strongest in computer vision, deep learning and ML) with five configured reviewers (Methodology, Domain, Perspective, Generalist, Devil's Advocate) and an Editor-in-Chief meta-reviewer who weights them and decides; optional post-review Gap Scout checklist. Modes: full review with editorial decision and revision roadmap, quick and submission-readiness checks, methodology-focus audit, Socratic guided review, rebuttal drafting, and re-review of revised manuscripts. Use when the user wants to review, critique or score a paper, simulate referee reports, check whether a paper is ready for CVPR, ICCV, ECCV, NeurIPS, ICLR, ICML, AAAI, ACM MM, TMLR, TPAMI or TIP, compare venues, audit experiments or statistics, write a rebuttal or response to reviewers, or verify that revisions address earlier comments. Triggers: review my paper, peer review, referee report, is my paper ready, which venue, rebuttal, respond to reviewers, check my experiments, re-review."
 metadata:
-  version: "2.14"
+  version: "2.15"
   last_updated: "2026-11-11"
 ---
 
-# CV/ML Paper Reviewer v2.14
+# CV/ML Paper Reviewer v2.15
 
 Simulates a complete conference or journal peer review. The skill identifies the paper's field, configures five reviewers who look at the paper from non-overlapping angles (methodology, domain positioning, cross-disciplinary impact, venue fit and presentation, and adversarial challenge to the core claim). An Editor-in-Chief then acts as area chair: it reads all five reports, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision, reporting two score lists: the reviewers' official raw scores (what authors see, never modified) and the EIC's internal weighted assessment, which can be higher or lower. The decision starts from the EIC-weighted mean of the reviewers' recommendations. The result is an Editorial Decision and a prioritized Revision Roadmap. It also drafts rebuttals and verifies revisions. After the review, one optional analysis, off by default, can be run on request: a list of concrete concerns reviewers are likely to raise (Gap Scout). It is not part of the review and never changes it.
 
@@ -56,7 +56,7 @@ Review this paper: [paste text, attach PDF, or give a path / arXiv ID]
 
 Default output (`full` mode):
 1. Paper analysis and Reviewer Configuration Card (Phase 0)
-2. Five independent review reports (Phase 1)
+2. Five separate review reports (Phase 1)
 3. EIC meta-review: verification of decisive points, reviewer weights, official scores and the EIC's internal weighted assessment and the final decision (Phase 2)
 4. Editorial Decision Letter, consensus map and Revision Roadmap (Phase 2)
 5. Optional Socratic revision coaching (Phase 2.5)
@@ -112,7 +112,7 @@ Phase 0 also produces the **paper memory** (`references/error_audit.md`, Section
 
 When network access is available, Phase 0 also writes the **fingerprint** for the literature check (`scripts/related_search.py fingerprint`): title, method names, identifiers, distinctive phrases and cutoff date. It is used only to exclude the paper from searches.
 
-### Phase 1: Independent Multi-Perspective Review
+### Phase 1: Separate Multi-Perspective Review
 
 | Reviewer | Agent file | Focus | Primary scoring responsibility |
 |----------|-----------|-------|------------------|
@@ -122,7 +122,7 @@ When network access is available, Phase 0 also writes the **fingerprint** for th
 | Reviewer 4 (Generalist) | `agents/generalist_reviewer_agent.md` | Contribution clarity, venue fit, presentation, balanced overall judgment | Clarity & Presentation |
 | Devil's Advocate | `agents/devils_advocate_reviewer_agent.md` | Strongest counter-argument, logic, overclaiming | CRITICAL/MAJOR/MINOR issue list |
 
-**Execution and independence.** Use parallel reviewers only when the host permits delegation and the tools are available. Give each reviewer the manuscript, its own role file, the template, and the relevant references, without other reviewers' reports. Otherwise perform five separate role-based passes and disclose that they share one model context; do not claim independent agents ran. Each pass examines the manuscript from its own angle. Preserve genuine agreement; merge overlap in Phase 2. Missing delegation never blocks a full review.
+**Execution and separation.** Use parallel reviewers only when the host permits delegation and the tools are available. Give each reviewer the manuscript, its own role file, the template, and the relevant references, without other reviewers' reports. Otherwise perform five separate role-based passes and disclose that they share one model context; do not claim independent agents ran. Even separate subagents share one model, so describe them as separate reviewers, never as independent judges whose agreement confirms a point. Each pass examines the manuscript from its own angle. Preserve genuine agreement; merge overlap in Phase 2. Missing delegation never blocks a full review.
 
 Each report uses `templates/peer_review_report_template.md`, except the Devil's Advocate, whose format is defined in its agent file. Before scoring, read `references/quality_rubrics.md`. For CV/ML papers, the Methodology and Domain reviewers also read `references/cv_review_checklist.md`.
 
@@ -216,7 +216,9 @@ For a journal revision, use `templates/revision_response_template.md` (Reviewer 
 Inputs: the original Revision Roadmap (or the original reviews), the revised manuscript, and optionally the response letter. Follow the re-review section of `agents/eic_agent.md`:
 
 - Statuses: `FULLY_ADDRESSED` / `PARTIALLY_ADDRESSED` / `NOT_ADDRESSED` / `MADE_WORSE`
+- Order: commit a "Fixed when" criterion for each Priority 1 item before reading the revision, judge each item on the revised manuscript before reading the response letter, then read the letter. A status changes after the letter only for evidence (a location in the paper or a verifiable source), never for confidence or repetition.
 - Accept requires every Priority 1 item to be FULLY_ADDRESSED, a response to at least 80% of Priority 2 items, and no new CRITICAL issue.
+- New issues are labelled "introduced by the revision" or "missed in round 1". Issues missed in round 1 are recommendations and do not lower the decision, unless CRITICAL.
 - Check claims in the response letter against the manuscript. An author's statement that something was changed is not evidence that it was.
 - Output: the Verification Review Report in `templates/editorial_decision_template.md`.
 

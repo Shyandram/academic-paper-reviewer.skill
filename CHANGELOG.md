@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.15
+
+Re-review that the response letter cannot steer, and no claim that the five reviewers are independent judges. Both adapted from the upstream academic-research-skills reviewer (its re-review gates and its note that role separation is not independence). Prompt changes only; full-mode scoring is unchanged. Re-review mode has not yet been evaluated.
+
+- **Re-review in three steps** (`agents/eic_agent.md`, `SKILL.md`, re-review template): (1) before reading the revision, commit a "Fixed when" criterion for each Priority 1 item (a short one for Priority 2); (2) set each status from the revised manuscript before reading the response letter; (3) then read the letter, check its claims against the manuscript, and change a status only for evidence (a location in the paper or a verifiable source), not for confidence, length or repetition. A criterion that proves unworkable is replaced visibly, with the reason, never loosened silently. An argued rebuttal counts as FULLY_ADDRESSED only if it meets the committed criterion on evidence.
+- **Goalpost guard:** each new issue in a re-review is labelled "introduced by the revision" or "missed in round 1". Issues missed in round 1 are recommendations and do not lower the decision unless CRITICAL, in which case the report says round 1 missed them.
+- **Separate, not independent** (`SKILL.md`, `README.md`): the five reviewers are separate roles, and even separate subagents share one model, so their agreement is not described as independent confirmation. On the 86 ICLR 2026 papers the AI reviewers R1–R4 overlap a little less than human reviewers do (pairwise Jaccard 0.088 [0.079, 0.098] vs 0.109 [0.092, 0.127], `evals/iclr2026_issue_overlap_full.json`), but their errors can still be correlated.
+
 ## 2.14
 
 Renamed from `academic-paper-reviewer` to `cvml-paper-reviewer`. The old name was the same as the skill this one was adapted from (`academic-paper-reviewer` in academic-research-skills by Cheng-I Wu, CC BY-NC 4.0), so installing both made their folders and invocation names collide. No change to the review itself.

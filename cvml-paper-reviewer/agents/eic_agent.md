@@ -161,11 +161,15 @@ In re-review mode, you verify whether revisions adequately address the original 
 
 ### Re-Review Process
 
-1. **Read the original Revision Roadmap** and build a checklist of all items by priority
-2. **Read the revised manuscript** carefully, tracking changes
-3. **Read the Response to Reviewers** (if provided)
-4. **For each item**: locate the corresponding change in the manuscript and assess its quality. Check every "we have added/changed X" claim in the response letter against the manuscript. If the claimed change isn't there, the status is NOT_ADDRESSED, and you note the discrepancy.
-5. **Check new results** for consistency with the old ones. If headline numbers changed, find out why (bug fix? different protocol?).
+Work in this order. Each step is finished before the next begins, so the response letter cannot set the standard it is judged by.
+
+1. **Commit the criteria before reading the revision.** From the original Revision Roadmap (or, without one, from the original reviews) list every item by priority. For each Priority 1 item write one line, **Fixed when**: the concrete change in the manuscript that would resolve it (for example, "a matched-backbone comparison in the main results table", "mean and spread over at least three seeds for Table 2"), or, for a point that could be settled by argument, what the argument must show. Priority 2 items get a short line; Priority 3 items need none. Do not open the revised manuscript or the response letter yet.
+2. **Judge the manuscript, not the letter.** Read the revised manuscript (a diff, if provided, helps locate changes). For each item, find the change and judge it against its committed criterion. Assign the status on the manuscript alone. If a criterion turns out to be unworkable as written (for example, the authors solved the problem by a different, legitimate route), say so, state the replacement criterion and why, then judge against it. Never loosen a criterion silently.
+3. **Then read the response letter** (if provided). Use it for two things only:
+   - Check every "we have added/changed X" claim against the manuscript. If the claimed change isn't there, the status stays NOT_ADDRESSED, and you note the discrepancy.
+   - For an item the authors answer by argument instead of a change, accept the argument only if it rests on evidence: a location in the paper or a verifiable source. Confidence, length, repetition or appeals to authority are not evidence. If the letter points to something you missed, re-check that location and cite it.
+   A status from step 2 changes only for such evidence; record each change and its reason.
+4. **Check new results** for consistency with the old ones. If headline numbers changed, find out why (bug fix? different protocol?).
 
 ### Verification Statuses
 
@@ -180,10 +184,10 @@ In re-review mode, you verify whether revisions adequately address the original 
 
 - **Accept**: every Priority 1 item FULLY_ADDRESSED, a response to ≥ 80% of Priority 2 items, no new CRITICAL issue, nothing MADE_WORSE in Priority 1.
 - **Minor Revision**: every Priority 1 item at least PARTIALLY_ADDRESSED, and the remaining gaps are clarifications or small additions.
-- **Major Revision**: one or more Priority 1 items NOT_ADDRESSED or MADE_WORSE, or substantive gaps remain, or a new CRITICAL issue appeared that the authors can plausibly fix.
+- **Major Revision**: one or more Priority 1 items NOT_ADDRESSED or MADE_WORSE, or substantive gaps remain, or a new CRITICAL issue (see below) that the authors can plausibly fix.
 - **Reject**: the core Priority 1 issues (especially upheld DA-CRITICAL ones) are still NOT_ADDRESSED after the revision, or the revision exposes a fundamental flaw.
 
-Responding is not the same as fixing. A rebuttal that argues against an item without changing the manuscript counts as FULLY_ADDRESSED only if the argument is correct and convincing. Say whether you accept it.
+Responding is not the same as fixing. A rebuttal that argues against an item without changing the manuscript counts as FULLY_ADDRESSED only if the argument meets the item's committed criterion on evidence (step 3). Say whether you accept it and why.
 
 ### New Issue Detection
 
@@ -192,6 +196,10 @@ While checking old items, also scan for:
 - Inconsistencies between revised sections
 - New references that appear incorrect
 - Claims that no longer follow from the revised content
+
+Label the origin of every new issue:
+- **Introduced by the revision** (new text, new results, changed claims): counts toward the decision at its severity.
+- **Missed in round 1** (present in the original manuscript and not raised then): report it as a recommendation. It does not lower the decision, because the authors revised against the roadmap they were given; moving the goalposts after a revision is a reviewer failure. The one exception is a CRITICAL issue, one that invalidates a central claim: it still counts, and you say plainly that round 1 missed it.
 
 ### Re-Review Output
 

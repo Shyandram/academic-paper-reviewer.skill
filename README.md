@@ -1,17 +1,17 @@
 # CV/ML Paper Reviewer for Codex and Claude
 
-A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process: five independent reviewers, then an Editor-in-Chief who acts as area chair. The EIC reads every review, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision. Scores are aggregated reproducibly as two lists (the reviewers' official scores and the EIC's internal weighted assessment), and the skill turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
+A multi-perspective peer-review skill for Codex and Claude, tuned for **computer vision, deep learning and ML** papers but usable in any field. It simulates a full editorial process: five reviewers with separate roles, then an Editor-in-Chief who acts as area chair. The EIC reads every review, checks the decisive points against the paper, weights each reviewer by the quality of their review, and makes the final decision. Scores are aggregated reproducibly as two lists (the reviewers' official scores and the EIC's internal weighted assessment), and the skill turns the result into a prioritized revision plan, a rebuttal draft, or a verification of your revisions.
 
 ```
 You:    Review this paper for CVPR: [attach PDF]
-Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent reports
+Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 separate reports
         → EIC meta-review: reviewer weights, official scores and the EIC's internal weighted assessment, final decision
         → Editorial decision letter, consensus map, Revision Roadmap
 ```
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
 
-**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.14 ([changelog](CHANGELOG.md)) · Adapted from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) ([origin](#origin-and-license))
+**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.15 ([changelog](CHANGELOG.md)) · Adapted from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) ([origin](#origin-and-license))
 
 ---
 
@@ -109,7 +109,7 @@ Or unzip the packaged file directly:
 unzip cvml-paper-reviewer.skill -d ~/.claude/skills/
 ```
 
-Claude Code discovers skills at startup. Restart the session, then ask *"review paper.pdf"*. In Claude Code the five reviewers can run as parallel subagents, which keeps them independent.
+Claude Code discovers skills at startup. Restart the session, then ask *"review paper.pdf"*. In Claude Code the five reviewers can run as parallel subagents, so no reviewer sees another's report. Separate contexts are not independent judges: all five use the same model, so their errors can be correlated.
 
 ### Claude API (Agent Skills)
 
