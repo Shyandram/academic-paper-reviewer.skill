@@ -82,6 +82,7 @@ jobs:
       price_in: ${{ steps.c.outputs.price_in }}
       price_cached: ${{ steps.c.outputs.price_cached }}
       price_out: ${{ steps.c.outputs.price_out }}
+      seeds: ${{ steps.c.outputs.seeds }}
     steps:
       - uses: actions/checkout@v4
       - id: c
@@ -94,7 +95,7 @@ jobs:
                  "max_parallel": "2", "mode": "review", "runs": "",
                  "budget": "3", "pick": "order", "only": "", "effort": "",
                  "pipeline": "single", "auth": "api", "runner": "claude",
-                 "price_in": "0", "price_cached": "0", "price_out": "0"}
+                 "price_in": "0", "price_cached": "0", "price_out": "0", "seeds": ""}
           given = json.loads(os.environ.get("INPUTS") or "null") or {}
           if not given and os.path.exists("evals/iclr_run.json"):
               given = json.load(open("evals/iclr_run.json"))
@@ -119,6 +120,11 @@ jobs:
           assert cfg["pipeline"] in ("single", "split", "check")
           assert cfg["auth"] in ("api", "subscription")
           assert cfg["effort"] in ("", "minimal", "low", "medium", "high", "xhigh", "max")
+          # Seeded-defect run: a committed spec under evals/seeds/; its papers must be exactly "only".
+          assert re.fullmatch(r"(evals/seeds/[A-Za-z0-9_.-]+\.json)?", cfg["seeds"])
+          if cfg["seeds"]:
+              spec = json.load(open(cfg["seeds"]))
+              assert sorted(spec["papers"]) == sorted(cfg["only"].split(",")), "seeds must cover exactly the 'only' papers"
           # Current stage: at most 3 papers per experiment, and a capped spend per paper.
           MAX_PAPERS = 3
           n = len(cfg["only"].split(",")) if cfg["only"] else int(cfg["limit"])
@@ -157,6 +163,13 @@ jobs:
             $( [ -f evals/iclr2026_reviewed.json ] && echo --reviewed evals/iclr2026_reviewed.json ) \
             $( [ -f evals/iclr2026_prefer.json ] && echo --prefer evals/iclr2026_prefer.json )
           python3 -c "import json,sys;n=len(json.load(open('ids.json')));sys.exit(f'{n} papers; this stage allows 3' if n>3 else 0)"
+          SEEDS="${{ needs.config.outputs.seeds }}"
+          if [ -n "$SEEDS" ]; then
+            # Plant the seeded defects before shipping; fails here (no model call) if an anchor
+            # does not resolve on this runner's text. The spec itself is never shipped.
+            python3 -I evals/seed_defects.py check "$SEEDS" evals/work/papers
+            python3 -I evals/seed_defects.py apply "$SEEDS" evals/work/papers
+          fi
           echo "ids=$(cat ids.json 2>/dev/null || echo '[]')" >> "$GITHUB_OUTPUT"
           # Ship the blinded text only: no sample, no PDFs, no arXiv metadata.
           mkdir -p ship
