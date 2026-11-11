@@ -63,7 +63,9 @@ them (13\% of paper pairs tie against 66\%; pairs ordered correctly 68\% against
 papers with 15 planted defects the skill finds all 15 and the plain review 12 (it misses the
 numbers that must be checked across tables), and only the skill's score falls. Agreement with the
 human reviewers is the same (Spearman $0.47$ and $0.45$, AUC $0.64$ and $0.63$, 48\% and 46\% of
-the human main issues); the skill costs about ten times more.
+the human main issues), but the skill states the issues more concretely: 60\% of its weakness
+points name a place in the paper and 54\% say what to fix, against 26\% and 6\%. The skill costs
+about ten times more.
 \end{itemize}
 A smaller model (Haiku) shows no reliable signal, and neither do two GPT-6.1 models run on the
 same 20 papers. We also report a negative result: NMAE alone
@@ -925,6 +927,14 @@ Planted defects found (3 papers, 15) & 15 & 12 & \\
 \quad number defects (7) & 7 & 4 & \\
 Score change with the defects planted & $-7$ to $-10$ of 100 & none & \\
 Cost per paper & about \$2 & \$0.21 & \\
+\midrule
+\multicolumn{4}{l}{\emph{Weakness points carrying} (3054 and 2357 points, keyword rules)}\\
+\quad a location (\S, table, figure, equation) & 0.60 [0.58, 0.62] & 0.26 [0.23, 0.30] & \\
+\quad a number from the paper & 0.42 [0.40, 0.45] & 0.25 [0.22, 0.28] & \\
+\quad a quotation of the paper & 0.48 [0.46, 0.50] & 0.33 [0.30, 0.36] & \\
+\quad a fix or missing experiment & 0.54 [0.53, 0.56] & 0.06 [0.05, 0.07] & \\
+\quad a named method or prior work & 0.66 [0.64, 0.69] & 0.48 [0.44, 0.51] & \\
+Words per point (median) & 49 & 27 & \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -947,6 +957,16 @@ issues as the five reports (about 11,000 words), with the same share of unmatche
 overlap on part of what they raise: 33\% of the human issues are raised by both, 16\% only by the
 skill and 13\% only by the control. The annotator's new judgement of the panel agrees with the
 original annotation on 84\% of the issues.
+\item \textbf{How concrete the points are.} The overlap asks whether an issue is raised, not
+whether an author can find and fix it. Keyword rules over every weakness point
+(\texttt{offline\_signals.py specificity}) show the skill's points carry more on each count: a
+location in the paper (60\% against 26\%), the paper's own numbers (42\% against 25\%) and words
+(48\% against 33\%), a fix or missing experiment (54\% against 6\%) and a named method or prior
+work (66\% against 48\%). On a planted wrong average the skill recomputes it from the rows of another
+table (2.5 against the stated 1.5) and names both tables; the control does not flag it. The rules
+show that a point carries evidence, not that it is right, and the control's requests sit in its
+Questions section, which is not counted, so the fix row overstates the gap. A blind pairwise
+judgement of the issues both raise is the proper test and has not been run.
 \item \textbf{Planted defects.} Fifteen defects were planted in three papers (seven statements,
 seven numbers and one instruction to reviewers) and the reviews were read with the score lines
 hidden. The skill finds all 15 and the control 12. The three the control misses need a
@@ -958,12 +978,15 @@ on the third. With the defects planted the skill's EIC pool position falls on al
 each show a direction, not a rate.
 \end{itemize}
 
-Taken together, the skill helps where the plain review is weakest. Its scores separate papers
+Taken together, the skill helps where the plain review is weakest. It raises the same human
+issues but states them so that an author can act: tied to a place in the paper, backed by the
+paper's numbers and with a fix. Its scores separate papers
 that the plain model rates alike, it catches errors that need cross-checking, and its score moves
 when such errors are present. On agreement with human reviewers the two are equal, and that
 measure counts only what the humans wrote: it does not judge the skill's error log, severity
 grades, revision roadmap or literature check. The skill's cost is about ten times higher. The
-next version builds on the measured gains: more checks with a verifiable answer (table
+next version builds on the measured gains: every weakness tied to a location, evidence and a
+fix, more checks with a verifiable answer (table
 arithmetic, text against tables, selection on the test set), evaluated with planted defects, at
 lower cost.
 
@@ -1084,8 +1107,9 @@ $0.27$--$0.64$, and the Gap Scout test and the 2.11 comparison use the 20-paper 
 Haiku and the two GPT-6.1 models were tested on the pilot's 20 papers only.
 \item \textbf{Gains over the plain model rest on little data.} Section~\ref{sec:control} finds
 the same ranking, acceptance AUC, hit rate and precision without the skill; the skill's gains
-(score resolution, planted defects found, scores that react to them) are measured on one run per
-paper, and the planted-defect comparison covers three papers.
+(concrete points, score resolution, planted defects found, scores that react to them) are
+measured on one run per paper; concreteness is counted with keyword rules, not judged, and the
+planted-defect comparison covers three papers.
 \item \textbf{One venue and one year.} Calibration covers ICLR 2026 only. Other venues use
 assumed or secondary scales.
 \item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers
