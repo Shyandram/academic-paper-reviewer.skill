@@ -1,0 +1,111 @@
+{
+ "label": "2.13 held-out check, attempt 3 (kwro5432AI alone) vs Terra 2.10.1; GPT-6.1 Terra high",
+ "n": 1,
+ "prices_per_mtok": [
+  1.0,
+  0.05,
+  5.0
+ ],
+ "order_by_human": [
+  "kwro5432AI"
+ ],
+ "order_by_new_eic_pool": [
+  "kwro5432AI"
+ ],
+ "order_by_old_eic_pool": [
+  "kwro5432AI"
+ ],
+ "order_by_new_reviewer_pool": [
+  "kwro5432AI"
+ ],
+ "order_by_old_reviewer_pool": [
+  "kwro5432AI"
+ ],
+ "papers": [
+  {
+   "paper_id": "kwro5432AI",
+   "mean_human": 6.0,
+   "new": {
+    "reviewer_pools": [
+     53,
+     51,
+     55,
+     53,
+     48
+    ],
+    "reviewer_pool_mean": 52,
+    "official_rating": 2.8,
+    "eic_pool": 52,
+    "final_overall": 3,
+    "novelty": {
+     "verdicts": [
+      "medium",
+      "medium",
+      "medium"
+     ],
+     "paper_novelty": 0.547,
+     "primary": {
+      "id": "C1",
+      "verdict": "medium",
+      "contribution_band": [
+       45,
+       69
+      ]
+     }
+    },
+    "markers": {
+     "contribution_position": 6,
+     "evidence_adjustment": 6,
+     "case_for_acceptance": 6,
+     "repair_test": 2
+    },
+    "tokens": {
+     "input_tokens": 3155693,
+     "cached_input_tokens": 3011969,
+     "output_tokens": 26683,
+     "reasoning_output_tokens": 5769
+    },
+    "cost_usd": 0.43,
+    "minutes": 6.2,
+    "budget_stop": null
+   },
+   "old": {
+    "reviewer_pools": [
+     52,
+     54,
+     67,
+     57,
+     48
+    ],
+    "reviewer_pool_mean": 55.6,
+    "official_rating": 3.2,
+    "eic_pool": 54,
+    "final_overall": 3,
+    "novelty": {
+     "verdicts": [
+      "medium",
+      "medium",
+      "high"
+     ],
+     "paper_novelty": 0.607,
+     "primary": null
+    },
+    "markers": {
+     "contribution_position": 0,
+     "evidence_adjustment": 0,
+     "case_for_acceptance": 1,
+     "repair_test": 0
+    },
+    "tokens": {
+     "input_tokens": 3904585,
+     "cached_input_tokens": 3767145,
+     "output_tokens": 25342,
+     "reasoning_output_tokens": 5373
+    },
+    "cost_usd": 0.45,
+    "minutes": 7.1,
+    "budget_stop": null
+   }
+  }
+ ]
+}

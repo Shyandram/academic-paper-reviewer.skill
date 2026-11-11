@@ -432,6 +432,25 @@ same papers.
 - The budget guard's soft stop fired once (0xObmDmsKY at $0.71, after arXiv retries lengthened the run); the
   wrap-up completed every deliverable, at $0.78 in total.
 
+**Held-out check, attempt 3** (`evals/iclr2026_terra213_heldout_attempt3.json`): kwro5432AI alone, with a full
+literature check (primary C1, medium band 45–69). Reviewer pools 53, 51, 55, 53, 48 (mean 52.0, 2.10.1: 55.6);
+EIC pool 52 (2.10.1: 54); $0.43.
+
+**Where 2.13 stands.** Held-out order by reviewer pool: kwro5432AI 52.0 > AIKURJjxXT 49.6 > 0xObmDmsKY 44.4
+(human: 6.0 > 4.0 > 2.5), Spearman +0.5; 2.10.1 had the three in order (+1.0) by small margins. Pooling the
+six papers (round 4 for the tuned three, the held-out runs for the others):
+
+| | Spearman, reviewer pool vs human | Spearman, EIC pool vs human | Range of reviewer pool means |
+|---|---:|---:|---:|
+| Terra, 2.10.1 | +0.38 | +0.38 | 28 points (32.6–60.6) |
+| Terra, 2.13 | +0.32 | +0.37 | 8 points (44.4–52.4) |
+
+2.13 corrected the two targeted failures on the papers it was tuned on (the lenient case down 10 points, the
+theory paper up 20), but on six papers it ranks no better than 2.10.1 and compresses the panel into an 8-point
+range, smaller than the run-to-run variation seen between rounds 3 and 4. Six papers cannot show a difference
+of this size either way; what they show is that 2.13 does not yet give Terra the separation it lacked.
+Total cost of the 2.13 validation, failed attempts included: about $9.
+
 ## Error on the ICLR scale (NMAE / NME)
 
 CSPaper-style errors against the mean human rating on the ICLR 2026 scale (0–10):
