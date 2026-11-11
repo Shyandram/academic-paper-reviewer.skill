@@ -414,6 +414,24 @@ reviewer pool means, 53.2, 49.8 and 53.4, are in no order. Cost $1.16. `related_
 backs off its arXiv requests, and the workflow waits for arXiv before any model call; attempt 2 reruns the
 same papers.
 
+**Held-out check, attempt 2** (`evals/iclr2026_terra213_heldout_attempt2.json`, compared with Terra 2.10.1):
+
+| Paper | Human mean | Reviewer pools | Reviewer pool mean, 2.10.1 → 2.13 | EIC pool, 2.10.1 → 2.13 | Primary | Cost | Literature check |
+|-------|-----------:|----------------|-----------------------------------|-------------------------|---------|-----:|------------------|
+| kwro5432AI | 6.0 | 50, 51, 65, 56, 50 | 55.6 → 54.4 | 54 → 51 | (none) | $0.42 | failed: arXiv 429 on the first query |
+| 0xObmDmsKY | 4.0 | 43, 44, 48, 46, 41 | 53.2 → 44.4 | 50 → 44 | C1, medium (45–69) | $0.78 | 12 queries (after retries) |
+| AIKURJjxXT | 2.5 | 48, 50, 53, 50, 47 | 52.4 → 49.6 | 49 → 50 | C1, medium (45–69) | $0.45 | 12 queries (after retries) |
+
+- Only two papers had a literature check: with three jobs querying arXiv at once, kwro5432AI's job still got
+  HTTP 429 after the full backoff.
+- On the two valid papers the order is inverted: the human-median paper (4.0) fell to 44, below the paper the
+  humans rated lowest (2.5, at 50). Under 2.10.1 the three were in the human order, by small margins
+  (55.6 > 53.2 > 52.4).
+- The EIC followed the panel median in all three; for 0xObmDmsKY it kept a median one point below the band, as
+  the rule allows when the reviewers' adjustments follow the repair test.
+- The budget guard's soft stop fired once (0xObmDmsKY at $0.71, after arXiv retries lengthened the run); the
+  wrap-up completed every deliverable, at $0.78 in total.
+
 ## Error on the ICLR scale (NMAE / NME)
 
 CSPaper-style errors against the mean human rating on the ICLR 2026 scale (0–10):
