@@ -116,3 +116,14 @@ The maintainer approved running the check with Sonnet instead. Everything above 
 - **Skill:** the review rules of 2.10.1; the branch also carries the unreleased re-review steps and
   the "separate, not independent" wording, which full mode does not use beyond that wording.
 - Predictions, measures, the hit rule and the 3-seed threshold are unchanged.
+
+## Amendment 2 (2026-11-11, before any Sonnet review finished)
+
+The in-session subagent run of Amendment 1 was stopped a few minutes after it started, before it
+wrote a review, when the maintainer allowed the Claude API. The check runs instead on the same
+workflow and harness as the Sonnet reference runs: `iclr-calibration.yml`, runner `claude`
+(Claude Code CLI, `claude -p`), `claude-sonnet-5-5`, `high` effort, single context, one job at a
+time, per-paper cap 3 USD (`--max-budget-usd`). The prepare job checks and applies the seeds and
+the review job deletes `evals/` before the review, as designed above, so the workspace isolation
+and the transcript check of Amendment 1 are not needed. The reference runs, predictions, measures,
+hit rule and threshold of Amendment 1 stand.
