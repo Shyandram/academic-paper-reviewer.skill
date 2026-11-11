@@ -10,6 +10,8 @@ name: ICLR calibration (paperreview.ai protocol)
 # pipeline "split" (evals/split/) runs each phase in a fresh context instead:
 # Phase 0, five parallel reviewers, the literature and report check, then the EIC.
 # pipeline "check" (skill 2.10.1) runs the review in one context, as "single" does.
+# pipeline "bare" is the control: the same model, effort and paper with evals/bare_prompt.md and
+# no skill (the review job deletes everything but the paper and that prompt before it runs).
 # Both then run the optional post-review Gap Scout in a fresh context that cannot read or
 # change the review.
 # budget is then the cap per phase. auth "subscription" uses CLAUDE_CODE_OAUTH_TOKEN.
@@ -117,7 +119,8 @@ jobs:
           assert cfg["runner"] == "claude" or cfg["pipeline"] == "single"
           assert all(re.fullmatch(r"[0-9]+(\.[0-9]+)?", cfg[k])
                      for k in ("price_in", "price_cached", "price_out"))
-          assert cfg["pipeline"] in ("single", "split", "check")
+          assert cfg["pipeline"] in ("single", "split", "check", "bare")
+          assert cfg["pipeline"] != "bare" or cfg["runner"] == "claude"
           assert cfg["auth"] in ("api", "subscription")
           assert cfg["effort"] in ("", "minimal", "low", "medium", "high", "xhigh", "max")
           # Seeded-defect run: a committed spec under evals/seeds/; its papers must be exactly "only".
@@ -185,7 +188,7 @@ jobs:
     needs: [config, prepare]
     if: needs.prepare.outputs.ids != '[]'
     runs-on: ubuntu-latest
-    timeout-minutes: ${{ needs.config.outputs.pipeline == 'single' && needs.config.outputs.runner == 'claude' && 90 || 180 }}
+    timeout-minutes: ${{ (needs.config.outputs.pipeline == 'single' || needs.config.outputs.pipeline == 'bare') && needs.config.outputs.runner == 'claude' && 90 || 180 }}
     strategy:
       fail-fast: false
       max-parallel: ${{ fromJSON(needs.config.outputs.max_parallel) }}
@@ -200,7 +203,13 @@ jobs:
         # the skill, the prompt and its own paper.
         run: |
           cp evals/codex_budget_guard.py "$RUNNER_TEMP/"  # runs outside the reviewer's workspace
-          find evals -mindepth 1 -maxdepth 1 ! -name split ! -name work ! -name review_prompt.md -exec rm -rf {} +
+          find evals -mindepth 1 -maxdepth 1 ! -name split ! -name work ! -name review_prompt.md ! -name bare_prompt.md -exec rm -rf {} +
+          if [ "${{ needs.config.outputs.pipeline }}" = bare ]; then
+            # The control sees no skill: only the paper and its prompt stay in the workspace.
+            find . -mindepth 1 -maxdepth 1 ! -name evals ! -name .git -exec rm -rf {} +
+            find evals -mindepth 1 -maxdepth 1 ! -name work ! -name bare_prompt.md -exec rm -rf {} +
+            ls -la . evals
+          fi
           ls evals
       - name: arXiv reachable (the literature check needs it)
         # A review whose literature check cannot reach arXiv does not test the skill and still
@@ -220,10 +229,11 @@ jobs:
       - run: npm install -g @openai/codex@0.167.0 && codex --version
         if: needs.config.outputs.runner == 'codex'
       - name: Review (single context)
-        if: needs.config.outputs.pipeline == 'single'
+        if: needs.config.outputs.pipeline == 'single' || needs.config.outputs.pipeline == 'bare'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           ID: ${{ matrix.id }}
+          PIPELINE: ${{ needs.config.outputs.pipeline }}
         run: |
           # Only this paper's text stays in the workspace.
           find evals/work/papers -mindepth 1 -maxdepth 1 ! -name "$ID" -exec rm -rf {} +
@@ -231,15 +241,17 @@ jobs:
           python3 - <<'PY' > prompt.md
           import os
           root, pid = os.getcwd(), os.environ["ID"]
-          t = open("evals/review_prompt.md").read().split("---", 1)[1]
+          bare = os.environ["PIPELINE"] == "bare"
+          t = open("evals/bare_prompt.md" if bare else "evals/review_prompt.md").read().split("---", 1)[1]
           t = (t.replace("{ID}", pid).replace("{ROOT}", root)
                 .replace("{VENUE_NAME}", "ICLR").replace("{VENUE_KEY}", "iclr"))
-          t = t.replace("Full review, skip confirmation.",
+          if not bare:
+            t = t.replace("Full review, skip confirmation.",
                         "Full review, skip confirmation, literature check: strict, "
                         "cutoff date " + os.environ["CUTOFF"] + ".")
-          t = t.replace("or access the web.",
-                        "or access the web, except through the skill's own "
-                        "scripts/related_search.py for the literature check.")
+            t = t.replace("or access the web.",
+                          "or access the web, except through the skill's own "
+                          "scripts/related_search.py for the literature check.")
           print(t)
           PY
           [ "${{ needs.config.outputs.runner }}" = claude ] || exit 0
@@ -366,7 +378,7 @@ jobs:
           PY
           ls -la "$R"
       - name: Review (split or check, evals/split/)
-        if: needs.config.outputs.pipeline != 'single'
+        if: needs.config.outputs.pipeline != 'single' && needs.config.outputs.pipeline != 'bare'
         env:
           ANTHROPIC_API_KEY: ${{ needs.config.outputs.auth == 'api' && secrets.ANTHROPIC_API_KEY || '' }}
           CLAUDE_CODE_OAUTH_TOKEN: ${{ needs.config.outputs.auth == 'subscription' && secrets.CLAUDE_CODE_OAUTH_TOKEN || '' }}
