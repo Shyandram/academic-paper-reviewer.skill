@@ -43,7 +43,7 @@ def paper(d, prices):
     if prof:
         try:
             n = rs.novelty_profile(prof)
-            out["novelty"] = {"verdicts": [c["verdict"] if c["verdict"] in rs.CONTRIBUTION_BAND else "none found"
+            out["novelty"] = {"verdicts": [c["verdict"] if c["verdict"] in getattr(rs, "CONTRIBUTION_BAND", {c["verdict"]: 0}) else "none found"
                                            for c in n["claims"] if c["central"]],
                               "paper_novelty": n["paper_novelty"], "primary": n.get("primary")}
         except ValueError as e:

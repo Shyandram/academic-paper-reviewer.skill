@@ -53,16 +53,10 @@ Subcommands (standard library only):
   novelty      --profile novelty_profile.json [--ledger ...]
       Claim-level novelty profile (after ClaimNov, arXiv 2610.36511). Input: the
       typed claims (problem / method / resource / result) with, for each, the
-      prior works that might cover it, each with the facets it shares with the claim
-      (problem, mechanism, setting, finding; level = 1 + the number shared) or an
-      entailment level 1-5, and a one-line delta. Output: per-claim coverage and
-      verdict, a paper-level novelty score, the attribution (the prior work covering
-      most), warnings, and the paper-level reading: one established claim is a
-      claim-level finding (a MAJOR weakness, not CRITICAL), not a reason to call the
-      paper known; every central claim incremental is a typical-rejection signal.
-      The claim marked "primary" (the one the paper leads with) sets the contribution
-      band: the pool-position range if the claims hold (high 60-90, medium 45-69,
-      incremental 30-54, known 15-40).
+      prior works that might cover it and an entailment level 1-5. Output: per-claim
+      coverage and verdict, a paper-level novelty score, the attribution (the prior
+      work covering most), and the paper-level reading: one established claim is a
+      claim-level finding (MAJOR at most), not a reason to call the paper known.
 
 Common option: --ledger search_ledger.jsonl (default: next to the fingerprint).
 
@@ -646,43 +640,9 @@ def cmd_scout(args):
 # Entailment levels: 1 unrelated, 2 shared topic only, 3 partial coverage with
 # important details differing, 4 strong coverage with minor details missing,
 # 5 full coverage of the claim's substantive content.
-# Facets (2.13, after the Idea Novelty Checker, arXiv 2506.22026): instead of one
-# holistic level, mark which facets the prior work shares with the claim; the level is
-# 1 + the number shared. Sharing both problem and mechanism makes the claim at least
-# incremental, whatever the count.
 DIMENSIONS = {"problem": 0.4, "result": 0.3, "method": 0.2, "resource": 0.1}
 ALPHA = 0.5
 LEVEL_VERDICT = {5: "known", 4: "incremental", 3: "medium", 2: "high", 1: "high"}
-FACETS = ("problem", "mechanism", "setting", "finding")
-VERDICT_ORDER = ["high", "medium", "incremental", "known"]
-# Contribution band (2.13): the pool-position range a paper holds if its central claims hold as
-# stated, set by the novelty verdict of its primary claim (references/quality_rubrics.md).
-CONTRIBUTION_BAND = {"high": [60, 90], "medium": [45, 69], "incremental": [30, 54], "known": [15, 40]}
-
-
-def match_level(m, claim_id=None):
-    """Level of one match: from `shared` facets when given (checked against `level` if both), else `level`."""
-    title = m.get("title")
-    if "shared" in m:
-        shared = m["shared"]
-        if not isinstance(shared, list) or any(f not in FACETS for f in shared) or len(set(shared)) != len(shared):
-            raise ValueError(f"claim {claim_id}: shared must be a list of distinct facets from {list(FACETS)} "
-                             f"for {title!r}")
-        lvl = 1 + len(shared)
-        if m.get("level") is not None and m["level"] != lvl:
-            raise ValueError(f"claim {claim_id}: level {m['level']} disagrees with {len(shared)} shared facets "
-                             f"(level {lvl}) for {title!r}")
-        return lvl
-    if m.get("level") not in (1, 2, 3, 4, 5):
-        raise ValueError(f"claim {claim_id}: level must be 1-5 (or give shared facets) for {title!r}")
-    return m["level"]
-
-
-def match_verdict(m):
-    v = LEVEL_VERDICT[m["level"]]
-    if {"problem", "mechanism"} <= set(m.get("shared") or ()):
-        v = max(v, "incremental", key=VERDICT_ORDER.index)
-    return v
 
 
 def is_prior(label):
@@ -700,33 +660,26 @@ def claim_coverage(levels, alpha=ALPHA):
 
 
 def novelty_profile(profile):
-    claims = [dict(c) for c in profile.get("claims", [])]
-    rows, warnings = [], []
+    claims, rows = profile.get("claims", []), []
     for c in claims:
         dim = c.get("dimension", "method").lower()
         if dim not in DIMENSIONS:
             raise ValueError(f"claim {c.get('id')}: dimension must be one of {sorted(DIMENSIONS)}")
-        matches = [dict(m, level=match_level(m, c.get("id"))) for m in c.get("matches", [])]
-        c["matches"] = matches
-        prior = [m for m in matches if is_prior(m.get("label"))]
-        other = [m for m in matches if not is_prior(m.get("label"))]
+        prior = [m for m in c.get("matches", []) if is_prior(m.get("label"))]
+        other = [m for m in c.get("matches", []) if not is_prior(m.get("label"))]
+        for m in c.get("matches", []):
+            if m.get("level") not in (1, 2, 3, 4, 5):
+                raise ValueError(f"claim {c.get('id')}: level must be 1-5 for {m.get('title')!r}")
         a = claim_coverage([m["level"] for m in prior])
-        top = max(prior, key=lambda m: (VERDICT_ORDER.index(match_verdict(m)), m["level"]), default=None)
+        top = max(prior, key=lambda m: m["level"], default=None)
         if top is None:
             verdict = ("no prior work covers it; later work worth discussing (at most medium)"
                        if any(m["level"] >= 3 for m in other) else "no close prior work found (at most medium)")
         else:
-            verdict = match_verdict(top)
-        for m in prior:
-            if m["level"] >= 3 and not str(m.get("delta") or "").strip():
-                warnings.append(f"claim {c.get('id')}: no delta (what this paper adds) for {m.get('title')!r} "
-                                f"at level {m['level']}")
+            verdict = LEVEL_VERDICT[top["level"]]
         rows.append({"id": c.get("id"), "dimension": dim, "central": bool(c.get("central", True)),
-                     "primary": bool(c.get("primary", False)),
                      "coverage": round(a, 3), "novelty": round(1 - a, 3), "verdict": verdict,
-                     "top_prior": top and {k: top.get(k) for k in ("title", "url", "level", "cited_by_paper",
-                                                                    "shared", "delta")
-                                           if k in top or k not in ("shared", "delta")},
+                     "top_prior": top and {k: top.get(k) for k in ("title", "url", "level", "cited_by_paper")},
                      "worth_discussing": [m.get("title") for m in other if m.get("level", 0) >= 3]})
     total = sum(DIMENSIONS[r["dimension"]] for r in rows)
     paper = 1 - sum(DIMENSIONS[r["dimension"]] * r["coverage"] for r in rows) / total if total else None
@@ -738,20 +691,6 @@ def novelty_profile(profile):
                 score[m["title"]] = score.get(m["title"], 0) + (m["level"] - 1) / 4
     attribution = max(score, key=score.get) if score else None
     central = [r for r in rows if r["central"]] or rows
-    primaries = [r for r in rows if r["primary"]]
-    if len(primaries) > 1:
-        raise ValueError("mark one primary claim (the contribution the paper leads with), not "
-                         f"{len(primaries)}: {[r['id'] for r in primaries]}")
-    if primaries and not primaries[0]["central"]:
-        raise ValueError(f"claim {primaries[0]['id']}: the primary claim must be central")
-    primary = None
-    if primaries:
-        r = primaries[0]
-        v = r["verdict"] if r["verdict"] in CONTRIBUTION_BAND else "medium"  # "no close prior work": at most medium
-        primary = {"id": r["id"], "verdict": r["verdict"], "contribution_band": CONTRIBUTION_BAND[v]}
-    elif rows:
-        warnings.append("no primary claim marked: set \"primary\": true on the claim the Phase 0 paper memory "
-                        "marks primary (the contribution the abstract leads with)")
     known = [r for r in central if r["verdict"] == "known"]
     same_uncited = (len(known) == len(central) and len({r["top_prior"]["title"] for r in known}) == 1
                     and not any(r["top_prior"].get("cited_by_paper") for r in known))
@@ -760,24 +699,16 @@ def novelty_profile(profile):
                    "candidate for DA criterion 7 (known results presented as new); verify full text")
     elif known:
         reading = (f"{len(known)} of {len(central)} central claims established by prior work: a claim-level "
-                   "finding, a MAJOR weakness and not a CRITICAL one (cite, differentiate or drop those "
-                   "claims); the paper is not 'known' as a whole")
-    elif central and all(r["verdict"] in ("incremental", "known") for r in central):
-        reading = ("every central claim is incremental over prior work: the 'gain over the closest prior work "
-                   "is small' signal of a typical rejected submission; write it as a weakness naming the works, "
-                   "unless the deltas show a gain they lack")
+                   "finding, MAJOR at most (cite, differentiate or drop those claims); the paper is not "
+                   "'known' as a whole")
     else:
         reading = "no central claim fully covered by prior work"
     return {"claims": rows, "paper_novelty": None if paper is None else round(paper, 3),
-            "attribution": attribution, "paper_reading": reading, "primary": primary,
+            "attribution": attribution, "paper_reading": reading,
             "note": ("paper_novelty describes what this search found, not the paper: a claim with no prior "
                      "match counts as uncovered, and the search covers arXiv only. Use the per-claim "
                      "profile, not the single number, for the review."),
-            "scale": "1 unrelated, 2 shared topic, 3 partial, 4 strong (minor details missing), 5 full coverage; "
-                     "with shared facets (problem, mechanism, setting, finding): 1 + the number shared, and "
-                     "problem + mechanism shared is at least incremental",
-            "contribution_bands": CONTRIBUTION_BAND,
-            "warnings": warnings,
+            "scale": "1 unrelated, 2 shared topic, 3 partial, 4 strong (minor details missing), 5 full coverage",
             "weights": DIMENSIONS}
 
 

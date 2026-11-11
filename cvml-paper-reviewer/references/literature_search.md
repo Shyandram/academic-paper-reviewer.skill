@@ -75,8 +75,6 @@ python3 scripts/related_search.py coverage --fp fingerprint.json --claims C1,C2,
 
 `coverage` counts results; it cannot judge relevance. After reading the kept abstracts, treat a claim whose kept results are **all off-topic** as a gap too: run one expansion query with broader task words. If that also finds nothing relevant, write "no close prior work found in this search (arXiv only)" for that claim. That is a limit of the search, not evidence of novelty: the claim's verdict is at most *medium*.
 
-**Mechanism query.** For each central claim whose best prior match is at level 3 or below after Round 1, run one more query on its **mechanism** in other words: the generic name of the technique plus the task, not the paper's own terms (`--purpose expansion --tag C1`), within the 12-query budget. The work that makes a claim incremental is often published under a different name; human reviewers name it, and keyword hits on the paper's own vocabulary miss it.
-
 **Other search tools.** Save their results as a JSON list (`title`, `url`, `snippet`, `date`, `authors`) and run `filter --fp fingerprint.json --results hits.json`. **Read only the kept results.**
 
 ### 3. Filtering (automatic)
@@ -108,7 +106,7 @@ Undated results count as concurrent at most. Venue rules agree: e.g., ECCV says 
   python3 scripts/related_search.py verify --fp fingerprint.json --title "<reference title>"
   ```
   Found → give the link. Not found → keep it only if you are confident, marked `[verify]` (it may exist outside arXiv). If `verify` says the title is the reviewed paper itself, drop it.
-- **Novelty claims ("first", "no prior work"):** check them against the kept results and cite what you find. Each contribution claim is typed (problem / method / resource / result) and gets a novelty verdict (high / medium / incremental / known) from the **claim-level profile**: for each candidate prior work the reviewer marks which facets it shares with the claim (problem, mechanism, setting, finding; level = 1 + the number shared, after the Idea Novelty Checker, arXiv 2506.22026) and writes a one-line delta, and `related_search.py novelty` turns the profile into verdicts. Sharing problem and mechanism is at least incremental. "Known" needs a prior paper at level 5 (full coverage). One known claim is a claim-level finding, never a verdict on the whole paper (ClaimNov, arXiv 2610.36511); every central claim incremental is a typical-rejection signal, written as a Weakness naming the works.
+- **Novelty claims ("first", "no prior work"):** check them against the kept results and cite what you find. Each contribution claim is typed (problem / method / resource / result) and gets a novelty verdict (high / medium / incremental / known) from the **claim-level profile**: each candidate prior work is rated 1–5 on how fully it covers the claim, and `related_search.py novelty` turns the profile into verdicts. "Known" needs a prior paper at level 5 (full coverage). One known claim is a claim-level finding, never a verdict on the whole paper (ClaimNov, arXiv 2610.36511).
 - **Baselines:** only **prior** results can be missing required baselines. An under-reported baseline is a MAJOR issue when the settings match; with different settings it is a question for the authors.
 - **Field snapshot:** 150–250 words on the field before the cutoff (paradigm shift, current state of the art, open problems, what counts as significant now). It calibrates Significance and Novelty; it is written from kept results only and never mentions the reviewed paper's reception.
 
@@ -129,7 +127,7 @@ It compares the paper's opening text (abstract, introduction and method; about 2
 
 How the reviewers use the flags:
 - **Closest prior work → novelty.** The Domain Reviewer writes a **novelty delta table** for each one (see `agents/domain_reviewer_agent.md`). A similarity score is a pointer, not a verdict: read the abstract and judge task, mechanism and claims.
-- **High conceptual overlap.** Check whether the task *and* the core mechanism match. If they do, and the paper neither cites nor differentiates that work, it is a candidate DA-CRITICAL issue ("known results presented as new", criterion 7). If the paper cites and differentiates it, the issue is MAJOR, not CRITICAL (insufficient novelty), and it goes under Weaknesses when the delta is thin.
+- **High conceptual overlap.** Check whether the task *and* the core mechanism match. If they do, and the paper neither cites nor differentiates that work, it is a candidate DA-CRITICAL issue ("known results presented as new", criterion 7). If the paper cites and differentiates it, the issue is at most MAJOR (insufficient novelty).
 - **Text overlap → integrity concern.** Report the shared passages factually to the EIC, with the source's title and link and two example sequences, under *Integrity signals* in `SKILL.md`. **Never call it plagiarism.** Correctly quoted and cited text, standard phrasing, and the authors' own earlier work can all explain overlap; the editor decides. Only abstracts are compared, so the absence of a flag is not evidence of originality.
 
 ### 6. Ledger

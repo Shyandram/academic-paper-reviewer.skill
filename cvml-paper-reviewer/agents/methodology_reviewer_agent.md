@@ -21,7 +21,7 @@ Follow `references/error_audit.md`. Start from the paper memory, then:
 3. Check **cross-section consistency** (E6): splits, model sizes, hyperparameters and numbers stated in more than one place.
 4. **Recompute** every headline delta and average you can (E1). With a code tool, check small numeric cases of the key equations (E2).
 
-Keep an **Error Log** (template in `references/error_audit.md`, Section 5) and put it under Weaknesses. Follow the precision rules: no quote and location, no error; low confidence goes under Questions. For each MAJOR or CRITICAL entry, run the **repair test** (Section 6): the minimal repair, and whether the claim survives it (intact / weakened / lost). Severity follows survival; errors in one chain are one issue; the count of errors never sets Technical Rigor.
+Keep an **Error Log** (template in `references/error_audit.md`, Section 5) and put it under Weaknesses. Follow the precision rules: no quote and location, no error; low confidence goes under Questions.
 
 ### Step 1: Claim-to-Evidence Map
 

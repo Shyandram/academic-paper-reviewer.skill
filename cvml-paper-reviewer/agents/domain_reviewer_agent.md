@@ -43,32 +43,25 @@ If a literature check ran, take the **closest prior works** from `related_search
 |----------------------|---------------------------|-----------------------------|---------------------------|---------------------------|
 
 - If a contribution is already done by an uncited prior work (same task **and** same core mechanism), report it to the Devil's Advocate and the EIC as a possible "known results presented as new" issue.
-- If the paper cites the work but differentiates it weakly, that is a Novelty weakness: MAJOR, not CRITICAL. Write it under Weaknesses, naming the work and what it already does (Hard Rule 11); a request to "clarify the difference" is not enough when the table shows the difference is thin.
+- If the paper cites the work but differentiates it weakly, that is a Novelty weakness (MAJOR at most).
 - **Text-overlap flags** go to the EIC as factual integrity concerns, with the source and examples, never as an accusation.
 
 Without a literature check, build the same table from the paper's own related work and your knowledge, marking uncertain entries `[verify]`.
 
 ### Step 4c: Per-Claim Novelty, Baselines and Field Snapshot (literature check only)
 
-**Per-claim novelty (claim-level profile).** Claims, not the whole paper, are the unit of novelty. Even papers experts call highly novel are rarely new in every contribution. In ClaimNov (arXiv 2610.36511), a rule that failed a proposal whenever any central claim was covered rejected 56.8% of ideas the field later published. Judging over the nearest abstracts without a claim profile still false-alarmed on 11.8%. With the claim profile, the rate fell to 1.5%. The error runs the other way too: LLM reviewers praise novelty in strengths but rarely criticize it in weaknesses, where human experts do (arXiv 2502.17086, 8 models, 676 papers). "Incremental over named prior work" is one of the commonest reasons human reviewers give for rejection, so when the profile shows it, say it.
+**Per-claim novelty (claim-level profile).** Claims, not the whole paper, are the unit of novelty. Even papers experts call highly novel are rarely new in every contribution. In ClaimNov (arXiv 2610.36511), a rule that failed a proposal whenever any central claim was covered rejected 56.8% of ideas the field later published. Judging over the nearest abstracts without a claim profile still false-alarmed on 11.8%. With the claim profile, the rate fell to 1.5%.
 
 1. **Type each claim** (C1, C2, … from the Methodology Reviewer's map; usually 2–4) by dimension: **problem** (task or question), **method** (technique), **resource** (dataset, benchmark, tool), or **result** (a finding or number, as an attribute and a value, e.g., "mIoU on ADE20K: 48.1 → 51.3").
-2. **Mark the shared facets of each candidate prior work** from the claim's `--purpose claim` results (same dimension, at most 3–5 per claim, one per paper), from its abstract. Answer four yes/no questions, each on its own: does it share the claim's
-   - **problem**: the same task or goal;
-   - **mechanism**: the same core technique (the step the paper credits for its result);
-   - **setting**: the same data, object or evaluation regime;
-   - **finding**: the same result or conclusion.
+2. **Rate each candidate prior work** from the claim's `--purpose claim` results (same dimension, at most 3–5 per claim, one per paper) on the entailment scale. The question is how fully the prior work covers *this claim*, from its abstract:
+   1 unrelated · 2 shared topic only · 3 partial coverage, important details differ · 4 strong coverage, minor details missing · 5 full coverage of the claim's substance.
+3. Write the profile to `novelty_profile.json` (`{"claims": [{"id", "dimension", "central", "text", "matches": [{"title", "url", "label", "level", "cited_by_paper"}]}]}`) and run `related_search.py novelty --profile novelty_profile.json`. Only **prior** labels set a verdict. Recent preprints, concurrent and newer work are listed as "worth discussing".
 
-   The level is 1 + the number shared (1 unrelated … 5 full coverage); the script computes it. Sharing **problem and mechanism** makes the claim at least *incremental*, whatever else differs. For every match at level 3 or above, write a one-line **delta**: what this paper adds over that work. If you cannot name a facet that differs, the level is 5.
-3. Write the profile to `novelty_profile.json` (`{"claims": [{"id", "dimension", "central", "primary", "text", "matches": [{"title", "url", "label", "shared": ["problem", …], "delta", "cited_by_paper"}]}]}`; a plain `"level": 1–5` is still accepted) and run `related_search.py novelty --profile novelty_profile.json`. Mark `"primary": true` on the claim the paper memory marks primary (Phase 0, the contribution the abstract leads with). Do not choose another claim, for instance the one that fares best or worst in the search. Fix any warning it prints. Only **prior** labels set a verdict. Recent preprints, concurrent and newer work are listed as "worth discussing".
+| Claim | Dimension | Novelty (high / medium / incremental / known) | Top prior work (level, verified link, label, cited?) | Reasoning |
+|-------|-----------|-----------------------------------------------|------------------------------------------------------|-----------|
 
-| Claim | Dimension | Novelty (high / medium / incremental / known) | Top prior work (shared facets, level, verified link, label, cited?) | Delta |
-|-------|-----------|-----------------------------------------------|---------------------------------------------------------------------|-------|
-
-Verdicts follow the highest prior level: 5 known, 4 incremental, 3 medium, 1–2 high; problem and mechanism shared is at least incremental. With no relevant prior work found, write "no close prior work found in N results" (at most medium), not "novel": the search covers arXiv only. Report the script's **paper reading**:
-- **One or more established claims** is a claim-level finding and a MAJOR weakness, not a CRITICAL one: ask the authors to cite, differentiate or drop those claims. It does not make the paper "known".
-- **Every central claim incremental or known** (the script's reading says so) is the "gain over the closest prior work is small" signal of a typical rejected submission (`references/quality_rubrics.md`). Write it as a Weakness naming the works and their shared facets, and score Novelty in the Limited band (30–54) unless a delta shows a gain those works lack.
-- **The primary claim's verdict sets the contribution band** (the script's `primary.contribution_band`; `references/quality_rubrics.md`, "Contribution sets the position"). Restate your contribution position, evidence adjustment and pool position in the addendum. If the band moves your pool position, update your Novelty score, Overall and `pool_position` and say what changed and why.
+Verdicts follow the highest prior level: 5 known, 4 incremental, 3 medium, 1–2 high. With no relevant prior work found, write "no close prior work found in N results" (at most medium), not "novel": the search covers arXiv only. Report the script's **paper reading**:
+- **One or more established claims** is a claim-level finding, MAJOR at most: ask the authors to cite, differentiate or drop those claims. It does not make the paper "known".
 - Only when **every central claim** is fully covered by the **same uncited** prior work is it a candidate for DA criterion 7. Then read beyond that work's abstract (verify) before raising it.
 - **Attribution is separate from the verdict.** Name the prior work closest to the paper as a whole (the top of `similarity` and the script's `attribution`) even when every claim passes, so the authors know what to position against.
 

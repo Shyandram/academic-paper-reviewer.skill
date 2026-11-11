@@ -44,11 +44,11 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 [2–4 sentences.]
 - **Suggested Fix**: [Suggestion.]
 
-[Add more if warranted. Minimum 2 weaknesses. Every weakness MUST have a suggested fix. Order by severity, most severe first. Group typos and formatting into one **Minor** line at the end. Every finding that changed your scores appears here, even when an audit section or appendix holds the details. Novelty and significance concerns are weaknesses too when they lower your assessment: name the prior work and what it shares with the claim (Hard Rule 11).]
+[Add more if warranted. Minimum 2 weaknesses. Every weakness MUST have a suggested fix. Order by severity, most severe first. Group typos and formatting into one **Minor** line at the end.]
 
 ### Error Log (Methodology Reviewer: required; others: for any concrete error they report)
-| ID | Category (E1–E9) | Location | Verbatim quote | Why it is an error | How verified | Confidence | Minimal repair → claim survives? (intact / weakened / lost) | Severity | Fix |
-|----|------------------|----------|----------------|--------------------|--------------|------------|-------------------------------------------------------------|----------|-----|
+| ID | Category (E1–E9) | Location | Verbatim quote | Why it is an error | How verified | Confidence | Severity | Fix |
+|----|------------------|----------|----------------|--------------------|--------------|------------|----------|-----|
 
 [Categories and precision rules: `references/error_audit.md`. Low-confidence items go under Questions.]
 
@@ -83,11 +83,7 @@ Use this template for all reviewers **except** the Devil's Advocate (who has a d
 
 *Use the calibrated rubrics in `references/quality_rubrics.md`. First place the paper in the venue's submission pool (pool position), then, for each dimension, select the descriptor that best matches and assign a score within that band.*
 
-**Case for acceptance:** [the strongest one, in one sentence: what the field gains from this paper]
-**Case for rejection:** [the strongest one, in one sentence: a named prior work it barely improves on, or a defect that undercuts the contribution]
-**Contribution position:** [C] (primary claim [Cx]: [new / partly new / incremental / known], because [closest work and what differs]; band from `references/quality_rubrics.md`)
-**Evidence adjustment:** [E, 0 or negative] ([which central claim the evidence weakens or loses; routine gaps at most −5 in total])
-**Pool position:** better than about [P = C + E]% of submissions to [venue] (accepted share ≈ [rate]%). Deciding evidence: [which case outweighs, and why]
+**Pool position:** better than about [P]% of submissions to [venue] (accepted share ≈ [rate]%). Deciding evidence: [the one or two signals that put it on this side of the bar]
 
 | Dimension | Score | Descriptor | Rationale |
 |-----------|-------|------------|-----------|

@@ -38,7 +38,8 @@ on the same seeds.
 
 - **Run:** GPT-6.1 Terra, `high` effort, Codex CLI 0.167.0, one run per paper,
   `max_parallel` 1 (arXiv rate limits), 1 USD cap per paper (3 USD total at most), the skill
-  at the launch commit (recorded with the result). The eval prompt now allows the skill's
+  at the launch commit (recorded with the result; 2.16, whose review rules are those of 2.10.1,
+  the version of the reference runs). The eval prompt now allows the skill's
   offline `scripts/integrity_scan.py` (it was not allowed before this check).
 - **Reference runs (no cost):** the earlier Terra `high` runs of the same three papers on the
   original text (`results_terra`, skill 2.10.1). Used only for (a) whether an issue matching a

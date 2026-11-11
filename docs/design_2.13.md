@@ -1,6 +1,6 @@
 # Design: skill 2.13, novelty and severity calibration
 
-Status: implemented, not yet evaluated. First committed as 2.10.2; renumbered 2.13 because "2.12" was the working name of what shipped as 2.10.1. Target: GPT-6.1 Sol and Terra (via Codex) without
+Status: withdrawn in 2.16 (see CHANGELOG). implemented, not yet evaluated. First committed as 2.10.2; renumbered 2.13 because "2.12" was the working name of what shipped as 2.10.1. Target: GPT-6.1 Sol and Terra (via Codex) without
 hurting Sonnet.
 
 ## 1. Problem

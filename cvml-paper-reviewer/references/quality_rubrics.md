@@ -28,20 +28,6 @@ How to place the paper:
 - **Base rates are the prior, the evidence decides.** Any single paper can be anywhere. But across the papers you review, about three in four should end up below 62 and about half below 55. Never put a paper at "borderline" because you are unsure. Decide which side the evidence points to and say why.
 - **Signals of a typical rejected submission:** the gain over the closest prior work is small or not shown; baselines are weak, missing or not tuned; the main claim is not tested by the experiments; results come from one small or easy setting; the method is hard to understand from the paper; known ideas are presented as new; or the evaluation protocol is flawed (test-set selection, leakage, unfair comparison).
 - **Signals of an accepted paper:** a clear idea or finding that the field didn't have; evidence that supports the central claim across settings, with strong and fair baselines; insight beyond a leaderboard gain; honest limitations.
-- **Contribution sets the position; evidence decides whether it holds.** Write the strongest case for acceptance and for rejection in one sentence each, then place the paper in two steps and write both numbers:
-  1. **Contribution position C**: where the paper would sit if its central claims held as stated. The **primary claim** sets the band: the contribution the abstract leads with, as marked in the Phase 0 paper memory (`references/error_audit.md`, Section 3). Judge how new it is against the closest work you know or the paper cites, then place C inside the band by how much it matters:
-
-     | Primary claim | Contribution band C |
-     |---------------|---------------------|
-     | New: the closest work shares at most one of its facets (problem, mechanism, setting, finding) | 60–90 |
-     | Partly new: it shares two facets, but not both problem and mechanism | 45–69 |
-     | Incremental: it shares three facets, or its problem **and** its mechanism | 30–54 |
-     | Known: it shares all four (the closest work already has it) | 15–40 |
-
-     A secondary claim moves C within the band, not out of it. With the literature check, the profile's `primary` verdict sets the band (`related_search.py novelty`).
-  2. **Evidence adjustment E**: what the evidence takes away. Apply the repair test (`references/error_audit.md`, Section 6) to each central claim: intact 0; weakened −5 to −15; lost: set C again without that claim. Gaps that most accepted papers share (single runs, one missing baseline, no matched-cost comparison, code not released) take at most −5 in total, however many there are. A missing experiment or comparison weakens a claim only when the paper offers no other evidence for that claim; when other evidence exists, it is one of these gaps.
-
-  Write: "Contribution position C (primary claim Cx: new / partly new / incremental / known, because …). Evidence adjustment E (…). Pool position P = C + E." A defect lowers the position when it undercuts the contribution, not because it can be checked: a repairable proof gap or a mislabelled table weighs less than a central method that a named prior work already has. Hold novelty doubts and verified defects to the same standard (Hard Rule 11 in `SKILL.md`).
 - **Ask both questions** before submitting: *"Would a typical accepted paper at this venue score higher on this dimension?"* and *"Would a typical rejected submission score lower?"* If the answer to one is no, move the score. A weakness that most accepted papers share is not a reason for a sub-60 score; a weakness that most rejected papers share is not offset by polish elsewhere.
 
 **Consistency with your Overall:** if you recommend Overall 4 (Borderline Accept), your dimension scores should mostly sit at 60 or above, and your pool position at 65 or above. If they don't, either the scores or the recommendation are wrong. Fix whichever is wrong.
