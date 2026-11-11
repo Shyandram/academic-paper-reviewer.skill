@@ -11,7 +11,7 @@ Agent:  📋 Paper analysis + 5-reviewer configuration card → 5 independent re
 
 > The output is a **simulation** to help you strengthen a paper. It is not a prediction of any venue's decision.
 
-**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.13 ([changelog](CHANGELOG.md))
+**Project page:** <https://shyandram.github.io/academic-paper-reviewer.skill/> · **Current version:** 2.13 ([changelog](CHANGELOG.md)) · Adapted from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) ([origin](#origin-and-license))
 
 ---
 
@@ -240,6 +240,19 @@ Edit files under `academic-paper-reviewer/`, then rebuild. Commit the source and
 - **If you are an assigned reviewer**, check your venue's policy before putting a confidential submission into any AI tool. Many CV/ML venues restrict or forbid it.
 - Reviewer personas are fictional. Recommended references follow a no-fabrication rule, but **verify every citation** before you use it.
 - Venue rules (page limits, rebuttal formats, score scales) change yearly. `references/venue_profiles.md` is a guide, not a substitute for the current call for papers.
+
+## Origin and license
+
+This skill is adapted from `academic-paper-reviewer` v1.4 (2026-03-08) in
+[academic-research-skills](https://github.com/Imbad0202/academic-research-skills) by Cheng-I Wu,
+licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/). The panel design
+(field analysis, five reviewers including a Devil's Advocate, an editor-in-chief, editorial synthesis)
+and parts of the reviewer prompts, templates and references come from that version; what changed is
+listed in the [changelog](CHANGELOG.md) from 2.0 on (CV/ML venue profiles and scoring, literature
+search and novelty profile, error audit, Gap Scout, rebuttal mode, Codex runtime, and the ICLR
+evaluation). The adapted material stays under CC BY-NC 4.0, including its NonCommercial term. This
+project is not affiliated with or endorsed by the original author. The upstream project has since
+taken a different direction (criterion-bound categorical judgements, no numerical score).
 
 ## Changelog
 

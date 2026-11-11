@@ -254,4 +254,4 @@ Calibration overhaul, driven by an evaluation on recently accepted papers. Versi
 - The duplicate response-letter template inside the editorial decision template; it now points to `templates/revision_response_template.md`.
 
 ## 1.4 (2026-03-16)
-- Initial uploaded version.
+- Initial uploaded version: `academic-paper-reviewer` v1.4 (2026-03-08) from [academic-research-skills](https://github.com/Imbad0202/academic-research-skills) by Cheng-I Wu (CC BY-NC 4.0). Later versions are adaptations of it; see README, "Origin and license".
