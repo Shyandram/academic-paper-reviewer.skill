@@ -1,0 +1,210 @@
+{
+ "spec": "evals/seeds/iclr2026_seeded_v1.json",
+ "prereg": "evals/PREREG_seeded_v1.md",
+ "model": "Sonnet, high effort",
+ "skill": {
+  "run": 43071377259,
+  "E5mL07Fbq8": {
+   "seeds": {
+    "E1": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "E2": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "E3": {
+     "found": true,
+     "max_severity": "CRITICAL",
+     "in_key_concerns": true
+    },
+    "E4": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "E5": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    }
+   },
+   "cost_usd": null
+  },
+  "BxeJLOrKDF": {
+   "seeds": {
+    "B1": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "B2": {
+     "found": true,
+     "max_severity": "CRITICAL",
+     "in_key_concerns": true
+    },
+    "B3": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "B4": {
+     "found": true,
+     "max_severity": "MINOR",
+     "in_key_concerns": false
+    },
+    "B5": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    }
+   },
+   "cost_usd": 1.964
+  },
+  "tlYSbw5GXY": {
+   "seeds": {
+    "T1": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "T2": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "T3": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "T4": {
+     "found": true,
+     "max_severity": "MAJOR",
+     "in_key_concerns": true
+    },
+    "T5": {
+     "found": true
+    }
+   },
+   "cost_usd": 1.914
+  },
+  "found": 15,
+  "eic_pool_original_vs_seeded": {
+   "E5mL07Fbq8": [
+    42,
+    33
+   ],
+   "BxeJLOrKDF": [
+    45,
+    38
+   ],
+   "tlYSbw5GXY": [
+    55,
+    45
+   ]
+  }
+ },
+ "bare": {
+  "run": 43073364860,
+  "E5mL07Fbq8": {
+   "seeds": {
+    "E1": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "E2": {
+     "found": false,
+     "in_top_concerns": false
+    },
+    "E3": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "E4": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "E5": {
+     "found": true,
+     "in_top_concerns": true
+    }
+   },
+   "cost_usd": 0.183
+  },
+  "BxeJLOrKDF": {
+   "seeds": {
+    "B1": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "B2": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "B3": {
+     "found": false,
+     "in_top_concerns": false
+    },
+    "B4": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "B5": {
+     "found": true,
+     "in_top_concerns": true
+    }
+   },
+   "cost_usd": 0.251
+  },
+  "tlYSbw5GXY": {
+   "seeds": {
+    "T1": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "T2": {
+     "found": false,
+     "in_top_concerns": false
+    },
+    "T3": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "T4": {
+     "found": true,
+     "in_top_concerns": true
+    },
+    "T5": {
+     "found": true,
+     "in_top_concerns": false
+    }
+   },
+   "cost_usd": 0.168
+  },
+  "found": 12,
+  "rating_original_vs_seeded": {
+   "E5mL07Fbq8": [
+    4,
+    4
+   ],
+   "BxeJLOrKDF": [
+    4,
+    4
+   ],
+   "tlYSbw5GXY": [
+    4,
+    4
+   ]
+  },
+  "missed": [
+   "E2",
+   "B3",
+   "T2"
+  ]
+ },
+ "note": "E5mL07Fbq8 skill cost not recorded in the adjudication file"
+}

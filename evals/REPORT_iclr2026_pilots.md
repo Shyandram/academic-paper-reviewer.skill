@@ -1047,10 +1047,111 @@ withdrawn). The other 2 of the 4 departures from the starting point had no DA CR
   not cut on this evidence alone.
 - **No role changes the ranking** distinguishably: without any one reviewer, Spearman stays
   within 0.45–0.48.
-- **Decision.** No role is removed or trimmed in the next version on these numbers. A trimmed
+- **Decision (superseded by "Decision for the next version" below).** No role is removed or trimmed in the next version on these numbers. A trimmed
   DA (keeping the core-argument challenge and the CRITICAL cap, dropping the checks R1 repeats)
   is a candidate only if the seeded-defect baseline shows the DA's repeated checks find nothing
   R1 misses; it would then be tested on the same seeds against 2.10.1.
+
+## Control: the same model without the skill (86 papers)
+
+Pre-registered in `evals/PREREG_bare86.md`; numbers in `evals/iclr2026_bare86.json`. The control
+(`evals/bare_prompt.md`, pipeline `bare`) is one agent with the same model and effort (Sonnet,
+high), the same blinded text and the same evaluation rules (untrusted text, no web), asked only
+"Review this paper. Target venue: ICLR." and to fill the ICLR form (rating 0/2/4/6/8/10). No
+skill files are in its workspace: no reviewer roles, no EIC, no rubric, no literature check. One
+run per paper, all 86 completed (run 43075458737), 17.93 USD in total (0.21 per paper, about one
+minute each) against about 2 USD and 8–9 minutes for the skill. For 62 papers the control's text
+is byte-identical to the copy the skill read; 4 differ by 2–160 bytes; 20 could not be compared
+(no copy was kept, or it is not the full text).
+
+**Scores.** The skill is represented by the panel rating (the reviewers' mean Overall), not the
+EIC's integer rating.
+
+| All 86 papers | Skill, panel rating | Without the skill | Skill − control, 95% CI |
+|---|---|---|---|
+| Spearman vs mean human rating | +0.47 [+0.28, +0.63] | +0.45 [+0.28, +0.60] | [−0.12, +0.16] |
+| AUC for acceptance | 0.64 [0.51, 0.77] | 0.63 [0.54, 0.71] | [−0.09, +0.12] |
+| Kendall tau-b | +0.36 | +0.39 | |
+| Pairwise order correct (human-untied pairs) | 0.68 | 0.62 | |
+| Share of tied paper pairs | 0.13 | 0.66 | |
+| NMAE / NME vs mean human rating | 0.084 / −0.003 | 0.085 / −0.013 | |
+
+On the 41 held-out papers: Spearman +0.45 vs +0.51 (difference CI [−0.28, +0.14]), AUC 0.69 vs
+0.65 ([−0.10, +0.18]), NMAE 0.086 vs 0.081. A constant at the median has NMAE 0.089.
+
+- **Ranking, acceptance and error are the same.** Every difference interval includes 0.
+- **The control gives three values.** 2 / 4 / 6 for 8 / 69 / 9 papers; it never gives 0, 8 or 10,
+  although the form allows them and the human reviewers of these papers gave 0 eight times and 8
+  twenty-three times (of 336 ratings). Its correlation comes from the 17 papers it moves off 4:
+  the eight rated 2 were all not accepted (mean human rating 2.42) and five of the nine rated 6
+  were accepted (5.00).
+- **The skill's final rating is the same judgement.** It gives 2 / 4 / 6 for 10 / 67 / 9 papers
+  and equals the control's rating on 82 of 86 papers.
+- **What the panel rating adds is resolution in the middle.** It is continuous (range 2.0–6.5 on
+  the ICLR scale, SD 0.86; humans 0.5–7.5, SD 1.15). Within the 69 papers the control rated 4 it
+  still orders papers a little (Spearman +0.27 [+0.02, +0.47]) but does not separate accepted
+  from not accepted (AUC 0.54 [0.38, 0.70]).
+- **Predictions.** Control Spearman +0.25 to +0.45 and AUC 0.58–0.68: met (+0.45, 0.63). "The
+  difference interval will probably include 0": it does.
+
+**Review content.** The 1,018 human main issues of the 86-paper overlap study were matched
+again, by one Sonnet annotator per paper, against the skill panel's main issues and the
+control's weakness items, mixed in random order without sources (`issue_overlap.py
+match-prepare`, `evals/gap_match_prompt.md`). The annotator's new judgement of the panel agrees
+with the original annotation on 84% of the human issues (hit rate 0.48 now, 0.46 then).
+
+| | Skill panel | Without the skill | Skill − control, 95% CI |
+|---|---|---|---|
+| Human main issues raised (hit rate) | 0.48 [0.45, 0.52] | 0.46 [0.42, 0.50] | [−0.02, +0.06] |
+| … raised by two or more humans (221) | 0.71 | 0.68 | |
+| … raised by one human (797) | 0.40 | 0.38 | |
+| Own items that match a human issue | 0.27 [0.25, 0.29] | 0.28 [0.25, 0.31] | [−0.04, +0.01] |
+| Items per paper | 20.4 | 23.4 | |
+
+Of the human issues, 33% are raised by both, 16% only by the skill, 13% only by the control and
+39% by neither; together they raise 0.61 [0.58, 0.65].
+
+- **Hit rate and precision are the same.** A 1,500-word review from one agent raises as many of
+  the humans' issues, with the same share of unmatched items, as the five reports (about 11,000
+  words).
+- **The two reviews overlap on only half of what they hit.** Each raises human issues the other
+  does not (16% and 13%), so neither covers the other.
+- **Caveats.** The panel's items are issues already merged by the first annotator; the control's
+  are its weakness bullets (finer, which if anything lowers its precision). The measure sees only
+  issues humans wrote: it says nothing about whether the skill's other output (error log,
+  severity, roadmap, literature check) is correct or useful.
+
+### Seeded defects: skill and control (3 papers)
+
+`evals/PREREG_seeded_v1.md`, amendments 2 and 3; results in `evals/iclr2026_seeded_v1_result.json`.
+Fifteen defects planted in three papers (seven statements, seven numbers, one instruction to
+reviewers); the reviews were read with score lines hidden.
+
+| | Skill (run 43071377259) | Without the skill (run 43073364860) |
+|---|---|---|
+| Found | 15 / 15 | 12 / 15 |
+| Statement defects (7) | 7 | 7 |
+| Number defects (7) | 7 | 4 (missed E2, B3, T2) |
+| Planted instruction | flagged, not followed | flagged, not followed |
+| Score, original → seeded | EIC pool 42 → 33, 45 → 38, 55 → 45 | rating 4 → 4 on all three |
+| Cost per paper | 1.91–1.96 USD | 0.17–0.25 USD |
+
+- **The only difference is in numbers that need cross-checking**: a table mean that is not the
+  mean of its rows, a column that sums to 110%, a value that differs between two tables. The
+  skill's R1 error log found all three; the control found none of them.
+- **Severity is uneven in the skill.** Selection on the test set was CRITICAL (DA, upheld) on two
+  papers and MAJOR on the third; a text claim contradicted by its table (B4) was graded MINOR
+  and left out of the key concerns.
+- Three papers, one run each: a direction, not a rate.
+
+### Decision for the next version
+
+Measured by agreement with human reviewers, on scores and on issues, the five-reviewer panel
+with an EIC does not beat one plain review by the same model, at about ten times the cost. The
+next version is therefore aimed at what the control does not do: checks with a verifiable
+answer (table arithmetic, text against tables, tables against each other, selection on the
+test set), evaluated with seeded defects rather than with overlap, and a smaller panel. Score
+calibration and repeated runs are not pursued: neither changes the review.
 
 ## Reading
 

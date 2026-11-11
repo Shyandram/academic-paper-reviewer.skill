@@ -1,0 +1,216 @@
+{
+ "prereg": "evals/PREREG_bare86.md",
+ "run": 43075458737,
+ "prompt": "evals/bare_prompt.md",
+ "model": "Sonnet, high effort",
+ "n": 86,
+ "cost_usd_total": 17.93,
+ "cost_usd_mean": 0.209,
+ "ratings_given": {
+  "2": 8,
+  "4": 69,
+  "6": 9
+ },
+ "skill_final_ratings": {
+  "2": 10,
+  "4": 67,
+  "6": 9
+ },
+ "same_final_rating": 82,
+ "all86": {
+  "skill_panel": {
+   "spearman": 0.47,
+   "ci": [
+    0.28,
+    0.63
+   ],
+   "auc": 0.64,
+   "auc_ci": [
+    0.51,
+    0.77
+   ],
+   "kendall_tau_b": 0.36,
+   "pairwise_acc": 0.68,
+   "tie_rate": 0.13,
+   "nmae": 0.084,
+   "nme": -0.003
+  },
+  "bare": {
+   "spearman": 0.45,
+   "ci": [
+    0.28,
+    0.6
+   ],
+   "auc": 0.63,
+   "auc_ci": [
+    0.54,
+    0.71
+   ],
+   "kendall_tau_b": 0.39,
+   "pairwise_acc": 0.62,
+   "tie_rate": 0.66,
+   "nmae": 0.085,
+   "nme": -0.013
+  },
+  "skill_minus_bare_ci": {
+   "spearman": [
+    -0.12,
+    0.16
+   ],
+   "auc": [
+    -0.09,
+    0.12
+   ]
+  },
+  "nmae_constant_median": 0.089
+ },
+ "test41": {
+  "skill_panel": {
+   "spearman": 0.45,
+   "auc": 0.69,
+   "nmae": 0.086
+  },
+  "bare": {
+   "spearman": 0.51,
+   "auc": 0.65,
+   "nmae": 0.081
+  },
+  "skill_minus_bare_ci": {
+   "spearman": [
+    -0.28,
+    0.14
+   ],
+   "auc": [
+    -0.1,
+    0.18
+   ]
+  }
+ },
+ "within_bare_rating_4": {
+  "n": 69,
+  "skill_panel_spearman": 0.27,
+  "ci": [
+   0.02,
+   0.47
+  ],
+  "skill_panel_auc": 0.54
+ },
+ "bare_by_rating": {
+  "2": {
+   "n": 8,
+   "accepted": 0,
+   "mean_human": 2.42
+  },
+  "4": {
+   "n": 69,
+   "accepted": 18,
+   "mean_human": 4.24
+  },
+  "6": {
+   "n": 9,
+   "accepted": 5,
+   "mean_human": 5.0
+  }
+ },
+ "issue_match": {
+  "method": "issue_overlap.py match-prepare/match-score: the 1018 human main issues of the 86-paper study, skill panel issues and bare weakness items mixed blind, one Sonnet annotator per paper",
+  "hit": {
+   "orig_hit": {
+    "count": 456,
+    "mean": 0.459,
+    "ci95": [
+     0.424,
+     0.495
+    ]
+   },
+   "panel": {
+    "count": 477,
+    "mean": 0.48,
+    "ci95": [
+     0.448,
+     0.515
+    ]
+   },
+   "extra": {
+    "count": 452,
+    "mean": 0.459,
+    "ci95": [
+     0.42,
+     0.5
+    ]
+   },
+   "both": {
+    "count": 610,
+    "mean": 0.613,
+    "ci95": [
+     0.577,
+     0.649
+    ]
+   },
+   "extra_top5": {
+    "count": 144,
+    "mean": 0.15,
+    "ci95": [
+     0.124,
+     0.176
+    ]
+   },
+   "extra_top10": {
+    "count": 230,
+    "mean": 0.234,
+    "ci95": [
+     0.199,
+     0.272
+    ]
+   }
+  },
+  "items_per_paper": {
+   "panel": 20.36,
+   "extra": 23.442
+  },
+  "agreement_with_original_annotation": 0.842,
+  "precision": {
+   "skill_panel": 0.268,
+   "ci_skill": [
+    0.25,
+    0.29
+   ],
+   "bare": 0.283,
+   "ci_bare": [
+    0.25,
+    0.31
+   ],
+   "skill_minus_bare_ci": [
+    -0.04,
+    0.01
+   ]
+  },
+  "hit_skill_minus_bare_ci": [
+   -0.02,
+   0.06
+  ],
+  "human_issues": {
+   "both": 0.326,
+   "skill_only": 0.155,
+   "bare_only": 0.133,
+   "neither": 0.387
+  },
+  "by_human_support": {
+   "two_or_more": {
+    "n": 221,
+    "skill": 0.71,
+    "bare": 0.68
+   },
+   "one": {
+    "n": 797,
+    "skill": 0.4,
+    "bare": 0.38
+   }
+  }
+ },
+ "text_identity": {
+  "identical": 62,
+  "tiny_difference": 4,
+  "not_comparable": 20
+ }
+}
