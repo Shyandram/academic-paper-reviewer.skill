@@ -35,3 +35,7 @@ Secondary:
 - Pick the better of several bare runs, or change the prompt after seeing results.
 - Tune any skill threshold on these results without a held-out check.
 - Let ICLR ground truth reach the reviewer: the prepare job ships `blinded.txt` only, and the review job deletes everything but the paper and the prompt.
+
+## Amendments
+
+1. 2026-11-11, before any review ran: the first launch (run 43074295790) stopped in the prepare job on a leftover 3-paper guard; no model was called. Relaunched unchanged. The scope is also narrowed at the user's direction: the bare run is a reference line only. Secondary measures 3 and 4 (tie rate, Kendall tau-b, issue overlap of the bare reviews) are dropped; only the primary measures are reported.

@@ -100,5 +100,5 @@
  "pipeline": "bare",
  "auth": "api",
  "seeds": "",
- "note": "Bare-model control on the 86-paper set (evals/PREREG_bare86.md): original texts, no skill (evals/bare_prompt.md); Sonnet, high effort; per-paper cap 1 USD"
+ "note": "Bare-model control on the 86-paper set (evals/PREREG_bare86.md): original texts, no skill (evals/bare_prompt.md); Sonnet, high effort; per-paper cap 1 USD; second launch (the first stopped in prepare before any model call)"
 }
