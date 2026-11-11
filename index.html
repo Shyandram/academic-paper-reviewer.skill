@@ -967,15 +967,15 @@ table.mini b{color:var(--olive-ink)}
     <div class="eval-grid">
       <div>
     <div class="eval-head"><p class="kicker"><span>07</span>Control</p><span class="pill">same 86 papers · no skill</span></div>
-    <h2 id="t-control">Does the skill beat the <em>plain model?</em></h2>
-    <p class="sub">Not on agreement with human reviewers. We gave the same model (Sonnet, high effort) the same 86 papers with one sentence, “Review this paper. Target venue: ICLR.”, and no skill. One run per paper.</p>
+    <h2 id="t-control">What does the skill <em>add</em> to the plain model?</h2>
+    <p class="sub">Finer scores, more errors caught, and scores that react to them. We gave the same model (Sonnet, high effort) the same 86 papers with one sentence, “Review this paper. Target venue: ICLR.”, and no skill. One run per paper.</p>
     <ul class="take">
-      <li><span class="tk no">!</span><span><b>Scores agree with humans equally well</b>: ranking agreement +0.47 with the skill, +0.45 without; acceptance AUC 0.64 and 0.63. Every difference has a 95% range that includes zero.</span></li>
-      <li><span class="tk no">!</span><span><b>The reviews raise the same share of human concerns</b>: 48% with the skill, 46% without, and the same share of their own points match a human one (27% and 28%).</span></li>
-      <li><span class="tk no">!</span><span><b>The skill costs about ten times more</b>: about $2 and 8–9 minutes per paper against $0.21 and one minute.</span></li>
-      <li><span class="tk ok">✓</span><span><b>The skill found more planted number errors</b>: 15 of 15 planted defects against 12 of 15 on three papers. The plain model missed the three that need cross-checking tables.</span></li>
+      <li><span class="tk ok">✓</span><span><b>Scores that separate papers</b>: the plain model gives 69 of 86 papers the same rating, so 66% of paper pairs tie; with the skill 13% do, and it orders pairs correctly more often (68% against 62%).</span></li>
+      <li><span class="tk ok">✓</span><span><b>More planted errors caught</b>: 15 of 15 against 12 of 15 on three papers. The plain model missed the three number errors that need cross-checking tables.</span></li>
+      <li><span class="tk ok">✓</span><span><b>Scores that react to the errors</b>: with the defects planted, the skill's score fell on all three papers (by 7 to 10 points of 100); the plain model's rating stayed at 4.</span></li>
+      <li><span class="tk no">!</span><span><b>Agreement with human reviewers is the same</b>: ranking +0.47 and +0.45, acceptance AUC 0.64 and 0.63, human concerns raised 48% and 46%. The skill costs about $2 and 8–9 minutes per paper against $0.21 and one minute.</span></li>
     </ul>
-    <p class="foot">The next version is aimed at that last point: checks with a verifiable answer, tested with planted defects, and a smaller panel.</p>
+    <p class="foot">The next version builds on the first three: more checks with a verifiable answer, tested with planted defects, at lower cost.</p>
       </div>
       <div>
     <div class="charts" data-seg>
@@ -1016,6 +1016,7 @@ table.mini b{color:var(--olive-ink)}
           <tr><th>Its points that a human also raised</th><td>27%</td><td>28%</td></tr>
           <tr><th>Planted defects found (15)</th><td><b>15</b></td><td>12</td></tr>
           <tr><th>… of the 7 number errors</th><td><b>7</b></td><td>4</td></tr>
+          <tr><th>Score change when defects are planted</th><td><b>−7 to −10 of 100</b></td><td>none</td></tr>
           <tr><th>Planted instruction to reviewers</th><td>flagged, ignored</td><td>flagged, ignored</td></tr>
           <tr><th>Cost per paper</th><td>≈ $2</td><td><b>$0.21</b></td></tr>
           <tr><th>Minutes per paper</th><td>8–9</td><td><b>1</b></td></tr>

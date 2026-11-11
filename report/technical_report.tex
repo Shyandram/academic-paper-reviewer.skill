@@ -58,11 +58,12 @@ optional Gap Scout that names concrete missing items raises 65\% alone and 73\% 
 A redesign that moved these ideas into the panel (version 2.11) raised no more issues, ranked
 papers worse (Spearman $0.32$) and cost 3.5$\times$ as much, so it was withdrawn.
 \item \textbf{The same model without the skill.} On the same 86 papers, one plain review by the
-same model at the same effort agrees with the human reviewers as well as the skill does: Spearman
-$0.45$ against $0.47$, AUC $0.63$ against $0.64$, and 46\% against 48\% of the human main issues,
-at about a tenth of the cost. Every difference has a 95\% interval that includes zero. On three
-papers with 15 planted defects the skill finds all 15 and the plain review 12; the three it misses
-are numbers that must be checked across tables.
+same model at the same effort gives 69 papers the same rating; the skill's panel mean separates
+them (13\% of paper pairs tie against 66\%; pairs ordered correctly 68\% against 62\%). On three
+papers with 15 planted defects the skill finds all 15 and the plain review 12 (it misses the
+numbers that must be checked across tables), and only the skill's score falls. Agreement with the
+human reviewers is the same (Spearman $0.47$ and $0.45$, AUC $0.64$ and $0.63$, 48\% and 46\% of
+the human main issues); the skill costs about ten times more.
 \end{itemize}
 A smaller model (Haiku) shows no reliable signal, and neither do two GPT-6.1 models run on the
 same 20 papers. We also report a negative result: NMAE alone
@@ -922,6 +923,7 @@ Items per paper & 20.4 & 23.4 & \\
 \midrule
 Planted defects found (3 papers, 15) & 15 & 12 & \\
 \quad number defects (7) & 7 & 4 & \\
+Score change with the defects planted & $-7$ to $-10$ of 100 & none & \\
 Cost per paper & about \$2 & \$0.21 & \\
 \bottomrule
 \end{tabular}
@@ -951,15 +953,19 @@ hidden. The skill finds all 15 and the control 12. The three the control misses 
 cross-check: a table average that is not the mean of its rows, a column that sums to 110\%, and
 a value that differs between two tables. Both flag the planted instruction and ignore it. The
 skill's severity is uneven: selection on the test set is graded critical on two papers and major
-on the third. Three papers show a direction, not a rate.
+on the third. With the defects planted the skill's EIC pool position falls on all three papers
+(42 to 33, 45 to 38, 55 to 45), while the control's rating stays at 4. Three papers and one run
+each show a direction, not a rate.
 \end{itemize}
 
-Measured by agreement with human reviewers, the five-reviewer panel with an EIC therefore does
-not beat one plain review by the same model, at about ten times the cost. The measure has a
-blind spot: it counts only what the humans wrote, so it does not judge the skill's error log,
-severity grades, revision roadmap or literature check. The next version is aimed at what the
-control does not do, namely checks with a verifiable answer (table arithmetic, text against
-tables, selection on the test set), evaluated with planted defects, with a smaller panel.
+Taken together, the skill helps where the plain review is weakest. Its scores separate papers
+that the plain model rates alike, it catches errors that need cross-checking, and its score moves
+when such errors are present. On agreement with human reviewers the two are equal, and that
+measure counts only what the humans wrote: it does not judge the skill's error log, severity
+grades, revision roadmap or literature check. The skill's cost is about ten times higher. The
+next version builds on the measured gains: more checks with a verifiable answer (table
+arithmetic, text against tables, selection on the test set), evaluated with planted defects, at
+lower cost.
 
 \section{Related work}\label{sec:related}
 
@@ -1076,9 +1082,10 @@ not use it.
 \item \textbf{Sample size.} The full evaluation has 86 papers; its Spearman interval is still
 $0.27$--$0.64$, and the Gap Scout test and the 2.11 comparison use the 20-paper pilot only.
 Haiku and the two GPT-6.1 models were tested on the pilot's 20 papers only.
-\item \textbf{No gain over the plain model on agreement with humans.} Section~\ref{sec:control}
-finds the same ranking, acceptance AUC, hit rate and precision without the skill. The control was
-run once per paper with one prompt, and the planted-defect comparison covers three papers.
+\item \textbf{Gains over the plain model rest on little data.} Section~\ref{sec:control} finds
+the same ranking, acceptance AUC, hit rate and precision without the skill; the skill's gains
+(score resolution, planted defects found, scores that react to them) are measured on one run per
+paper, and the planted-defect comparison covers three papers.
 \item \textbf{One venue and one year.} Calibration covers ICLR 2026 only. Other venues use
 assumed or secondary scales.
 \item \textbf{Memorization.} Strong models recognize some papers. We report recognized papers
