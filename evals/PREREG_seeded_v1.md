@@ -95,3 +95,24 @@ Run 43067473290 was cancelled by the maintainer's decision to stop using the Ope
 unless necessary: the prepare job checked and applied all 15 seeds; the E5mL07Fbq8 review had
 run in Codex for about two minutes (cost not recorded, under its 1 USD cap) and the other two had
 not started, so no review was produced and nothing above was measured. The design stands for a later run with another runner.
+
+## Amendment 1 (2026-11-11, before the Sonnet run)
+
+The maintainer approved running the check with Sonnet instead. Everything above stands except:
+
+- **Runner:** Claude Sonnet at `high` effort as in-session `paper-review-eval` subagents (file and
+  shell tools only), one paper at a time, the single-context prompt `evals/review_prompt.md` with
+  the workflow's substitutions (ICLR, strict literature check, cutoff 2025-09-24, the skill's
+  `related_search.py` as the only web access). No API key and no USD cap; the session's usage pays.
+- **Workspace:** a fresh directory outside the repository holding only the skill (as committed at
+  the launch commit), the prompt and the seeded `blinded.txt` of that paper. A subagent can still
+  read other paths on the machine, so its transcript is checked afterwards for any read of the
+  repository, `evals/seeds/`, this file or the human-score files; a paper whose run read any of them
+  is excluded and reported.
+- **Reference runs:** the Sonnet `high` runs of the same papers on the original text
+  (`results_pilot3`, skill 2.10, whose panel, scoring and decision 2.10.1 keeps). EIC pool position
+  / final Overall: E5mL07Fbq8 42 / 3, BxeJLOrKDF 45 / 3, tlYSbw5GXY 55 / 3; no injection found in
+  tlYSbw5GXY. These replace the Terra reference runs for (a) and (b) above.
+- **Skill:** the review rules of 2.10.1; the branch also carries the unreleased re-review steps and
+  the "separate, not independent" wording, which full mode does not use beyond that wording.
+- Predictions, measures, the hit rule and the 3-seed threshold are unchanged.
