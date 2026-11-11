@@ -997,6 +997,61 @@ The room left is in the review content: specificity (44% of the human issues mis
 panel raised only as a category, see "What the panel misses"), and whether the issues only the
 AI raises are real. Both need new reviews to evaluate.
 
+### What each reviewer adds (role importance)
+
+Same 86 papers, no new runs (`evals/offline_signals.py roles`; the hit rates reproduce the
+per-role numbers under "Issue overlap"). Main issues only. "Only it hits" is the share of the
+human main issues that this reviewer raised and no other did; "without it" is the panel of the
+other four. Ranking is the Spearman of the mean Overall with the mean human rating (full panel
++0.47); every leave-one-out difference has a 95% CI that includes 0.
+
+| Reviewer | Main issues | Raised by it alone | Human issues hit | Only it hits [95% CI] | Hit rate without it (full 0.46) | Ranking without it |
+|---|---|---|---|---|---|---|
+| R1 Methodology | 852 | 0.26 | 0.22 | 0.024 [0.014, 0.035] | 0.44 | +0.48 |
+| R2 Domain | 461 | 0.52 | 0.18 | **0.076** [0.061, 0.092] | **0.38** | +0.45 |
+| R3 Perspective | 447 | 0.58 | 0.15 | **0.056** [0.041, 0.072] | **0.40** | +0.46 |
+| R4 Generalist | 410 | 0.20 | 0.14 | 0.022 [0.014, 0.030] | 0.44 | +0.46 |
+| Devil's Advocate | 769 | **0.07** | 0.21 | **0.006** [0.001, 0.013] | 0.45 | +0.48 |
+
+Overlap between two reviewers (share of the first one's issues the second also raised):
+DA → R1 0.67 and R1 → DA 0.61 (Jaccard 0.47); R4 → R1 0.53, R4 → DA 0.54; R2 → DA 0.33;
+every pair among R1, R2 and R3 is at or below 0.19, and R2–R3 0.10 / 0.10.
+
+Where the prompts overlap (`agents/`):
+- **DA and R1.** The DA's Protocol Sweep is "the same full-text search as the Methodology
+  Reviewer"; its Numerical Sanity Check repeats R1's recomputation (error audit E1) and
+  cross-section consistency (E6); cherry-picking and missing benchmarks repeat R1's baselines
+  step; alternative explanations repeat R1's threats to validity; claim distortion repeats R1's
+  claim-to-evidence map (and R2's "claims calibrated").
+- **DA and R3.** The "So what?" test and stakeholder blind spots overlap R3's practical and
+  broader impact steps. **DA and R2.** Confirmation bias in citations overlaps R2's literature
+  coverage.
+- **R4.** Its prompt leaves methodology to R1, but half of its issues are ones R1 or the DA also
+  raise.
+
+What the DA does that no issue count shows: it challenges the core argument (steelman, strongest
+counter-argument) and its CRITICAL findings cap the decision. It raised a CRITICAL on 15 of the 86
+papers and the EIC upheld 12; on 2 papers that cap lowered the decision below the starting point
+(3.53 → 3 and 2.54 → 2), both papers the humans did not accept (mean human 4.5, rejected; 3.3,
+withdrawn). The other 2 of the 4 departures from the starting point had no DA CRITICAL.
+
+- **R2 and R3 carry most of what is unique**: they rarely repeat the others, and removing either
+  costs the most hits (0.46 → 0.38 and 0.40). This is also why the Perspective Reviewer stays
+  (it was a candidate for removal when the skill was differentiated from its origin).
+- **The DA's issues are almost all duplicates** (7% its own, 0.6% of human issues only it hits);
+  its value, if any, is in the decision cap and in catching what R1 misses on a second pass.
+  Human agreement cannot measure the second: a defect no human raised does not count here. The
+  seeded-defect check measures it, on planted defects with a known answer.
+- **R1 and R4 overlap each other** (R4 → R1 0.53) but R1 still has its own error audit; R4's own
+  hits are few (0.022), and narrowing R4 in 2.11 cut its hit share from 0.14 to 0.04, so R4 is
+  not cut on this evidence alone.
+- **No role changes the ranking** distinguishably: without any one reviewer, Spearman stays
+  within 0.45–0.48.
+- **Decision.** No role is removed or trimmed in the next version on these numbers. A trimmed
+  DA (keeping the core-argument challenge and the CRITICAL cap, dropping the checks R1 repeats)
+  is a candidate only if the seeded-defect baseline shows the DA's repeated checks find nothing
+  R1 misses; it would then be tested on the same seeds against 2.10.1.
+
 ## Reading
 
 - Haiku has no signal: all scores sit near the acceptance bar (EIC pool position 38–50) whatever the paper.

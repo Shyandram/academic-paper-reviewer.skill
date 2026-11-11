@@ -4,6 +4,7 @@
     python3 -I evals/offline_signals.py ranking      # which of the panel's own numbers ranks best
     python3 -I evals/offline_signals.py calibration  # does a linear stretch of the panel rating help
     python3 -I evals/offline_signals.py precision    # which AI issues match a human main issue
+    python3 -I evals/offline_signals.py roles        # what each reviewer adds, and the panel without it
 
 Reads evals/work/ (gitignored): full_metrics/{sample.jsonl,splits.json},
 results_full/ and results_pilot3/ (scores.json, summary.json), and issue_overlap/all86/
@@ -12,10 +13,12 @@ test split; paired bootstrap CIs are over papers. Stdlib only.
 """
 import argparse
 import collections
+import itertools
 import json
 import os
 import random
 import statistics as st
+import sys
 
 W = os.path.join(os.path.dirname(os.path.abspath(__file__)), "work")
 DIMS = ["technical_rigor", "clarity", "novelty", "significance", "experimental_validation",
@@ -186,13 +189,93 @@ def cmd_precision(_):
                       for k, v in sorted(acc.items())}, indent=1))
 
 
+def cmd_roles(_):
+    """What each of the five reviewers adds: its main issues, how many no other reviewer
+    raised, overlap with each other reviewer, the human main issues it hits, those only it
+    hits, and the panel without it (hit rate and ranking). Hit rates are per-paper means, as
+    in issue_overlap.py; overlaps are pooled over papers."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import issue_overlap as io  # noqa: E402
+    from pathlib import Path
+    roles = io.ROLES
+    per = {r: collections.defaultdict(list) for r in roles}
+    full_hit = []
+    n_iss = collections.Counter()
+    alone = collections.Counter()
+    pair = collections.Counter()
+    for d in sorted(Path(f"{W}/issue_overlap/all86").iterdir()):
+        if not (d / "issues.json").exists():
+            continue
+        issues, match, revs, role = io.load_paper(d, "issues.json", major_only=True)
+        H, A = issues["H"], issues["A"]
+        a_by = {i["id"]: i for i in A}
+        lab = {role[x]: x for x in revs["A"]}
+        allA = set(revs["A"])
+
+        def hit_by(h, reviewers):
+            return any(a_by[q]["revs"] & reviewers for q in match.get(h["id"], ()) if q in a_by)
+
+        full_hit.append(io.mean([hit_by(h, allA) for h in H]))
+        for i in A:
+            rs = sorted(role[x] for x in i["revs"])
+            for r in rs:
+                n_iss[r] += 1
+            if len(rs) == 1:
+                alone[rs[0]] += 1
+            for a, b in itertools.combinations(rs, 2):
+                pair[(a, b)] += 1
+        for r in roles:
+            if r not in lab:
+                continue
+            own = {h["id"] for h in H if hit_by(h, {lab[r]})}
+            rest = {h["id"] for h in H if hit_by(h, allA - {lab[r]})}
+            per[r]["hit"].append(len(own) / len(H))
+            per[r]["unique_hit"].append(len(own - rest) / len(H))
+            per[r]["hit_without"].append(len(rest) / len(H))
+    out = {"hit_full_panel": round(io.mean(full_hit), 3), "roles": {}, "pairs": {}}
+    sample, splits, f = load()
+    y = {p: sample[p]["mean_human"] for p in f}
+    ids = sorted(f)
+    full = spearman([f[p][BASE] for p in ids], [y[p] for p in ids])
+    ov = {}
+    for dname in ("results_full", "results_pilot3"):
+        for n in os.listdir(f"{W}/{dname}"):
+            pid = n.split("-", 1)[1]
+            if pid in f:
+                with open(f"{W}/{dname}/{n}/scores.json") as fh:
+                    ov[pid] = {r["role"].split()[0]: r["overall"] for r in json.load(fh)["reviewers"]}
+    out["ranking_full_panel"] = round(full, 3)
+    rnd = random.Random(0)
+    boots = [[rnd.choice(ids) for _ in ids] for _ in range(2000)]
+    for r in roles:
+        without = {p: st.mean(v for k, v in ov[p].items() if k != r) for p in ids}
+        diffs = sorted(spearman([without[p] for p in s], [y[p] for p in s])
+                       - spearman([f[p][BASE] for p in s], [y[p] for p in s]) for s in boots)
+        lo, hi = io.boot(per[r]["unique_hit"])
+        out["roles"][r] = {
+            "main_issues": n_iss[r], "raised_by_it_alone": round(alone[r] / n_iss[r], 3),
+            "hit": round(io.mean(per[r]["hit"]), 3),
+            "unique_hit": round(io.mean(per[r]["unique_hit"]), 3),
+            "unique_hit_ci95": [round(lo, 3), round(hi, 3)],
+            "hit_without_it": round(io.mean(per[r]["hit_without"]), 3),
+            "ranking_without_it": round(spearman([without[p] for p in ids], [y[p] for p in ids]), 3),
+            "ranking_without_minus_full_ci95": [round(diffs[50], 3), round(diffs[1949], 3)]}
+    for a, b in itertools.combinations(roles, 2):
+        s = pair[tuple(sorted((a, b)))]
+        out["pairs"][f"{a}-{b}"] = {"jaccard": round(s / (n_iss[a] + n_iss[b] - s), 3),
+                                    f"{a}_also_by_{b}": round(s / n_iss[a], 2),
+                                    f"{b}_also_by_{a}": round(s / n_iss[b], 2)}
+    print(json.dumps(out, indent=1))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for n in ("ranking", "calibration", "precision"):
+    for n in ("ranking", "calibration", "precision", "roles"):
         sub.add_parser(n)
     a = ap.parse_args()
-    {"ranking": cmd_ranking, "calibration": cmd_calibration, "precision": cmd_precision}[a.cmd](a)
+    {"ranking": cmd_ranking, "calibration": cmd_calibration, "precision": cmd_precision,
+     "roles": cmd_roles}[a.cmd](a)
 
 
 if __name__ == "__main__":
