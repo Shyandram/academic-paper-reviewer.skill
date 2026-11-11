@@ -129,7 +129,8 @@ jobs:
               spec = json.load(open(cfg["seeds"]))
               assert sorted(spec["papers"]) == sorted(cfg["only"].split(",")), "seeds must cover exactly the 'only' papers"
           # Current stage: at most 3 papers per experiment, and a capped spend per paper.
-          MAX_PAPERS = 3
+          # Exception: the bare-model control on the original texts covers the full 86-paper set.
+          MAX_PAPERS = 86 if cfg["pipeline"] == "bare" and not cfg["seeds"] else 3
           n = len(cfg["only"].split(",")) if cfg["only"] else int(cfg["limit"])
           assert cfg["mode"] != "review" or 1 <= n <= MAX_PAPERS, f"{n} papers; this stage allows {MAX_PAPERS}"
           assert 0 < float(cfg["budget"]) <= 3, "per-paper budget must be in (0, 3] USD"
